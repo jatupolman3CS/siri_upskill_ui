@@ -1,0 +1,181 @@
+<div class="max-w-5xl mx-auto space-y-8">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">รายได้และรอบการจ่ายเงิน (Instructor Earnings)</h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">
+        ส่วนแบ่งรายได้ 70% ให้กับผู้สอน · ระบบตัดรอบทุกสิ้นเดือนและโอนเงินภายในวันที่ 5 ของเดือนถัดไป
+      </p>
+    </div>
+  </div>
+
+  <!-- Metric Statistics Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <span class="text-xs font-semibold text-[var(--color-text-muted)]">รายได้สะสมทั้งหมด (Net)</span>
+      <p class="mt-2 text-2xl font-black text-[var(--color-text)]">{{ cumulativeEarnings() | currencyThb }}</p>
+      <p class="mt-1 text-[11px] text-emerald-600 font-medium">โอนเข้าบัญชีเรียบร้อยแล้ว</p>
+    </div>
+
+    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <span class="text-xs font-semibold text-[var(--color-text-muted)]">ยอดโอนรอบล่าสุด (ก.ค. 2026)</span>
+      <p class="mt-2 text-2xl font-black text-emerald-600">{{ latestPayout() | currencyThb }}</p>
+      <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">โอนสำเร็จเมื่อ 05/08/2026</p>
+    </div>
+
+    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <span class="text-xs font-semibold text-[var(--color-text-muted)]">ประมาณการรอบถัดไป (ส.ค. 2026)</span>
+      <p class="mt-2 text-2xl font-black text-[var(--color-primary)]">{{ estimatedNextPayout() | currencyThb }}</p>
+      <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">ยอดคำนวณแบบ Real-time</p>
+    </div>
+  </div>
+
+  <!-- Bank Account Settings Card -->
+  <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+          <ng-icon name="phosphorBank" class="text-xl" />
+        </div>
+        <div>
+          <h2 class="text-sm font-bold text-[var(--color-text)]">บัญชีธนาคารสำหรับรับเงินโอน</h2>
+          <p class="text-xs text-[var(--color-text-muted)]">ข้อมูลนี้ใช้สำหรับโอนส่วนแบ่งรายได้ประจำเดือน</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="showEditBank.set(!showEditBank())"
+        class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+      >
+        <ng-icon name="phosphorPencilSimple" />
+        <span>{{ showEditBank() ? 'ปิด' : 'แก้ไขบัญชี' }}</span>
+      </button>
+    </div>
+
+    @if (!showEditBank()) {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 rounded-xl bg-[var(--color-bg)] p-4 text-xs">
+        <div>
+          <span class="text-[var(--color-text-muted)] block mb-0.5">ธนาคาร</span>
+          <span class="font-bold text-[var(--color-text)]">{{ bankName() }}</span>
+        </div>
+        <div>
+          <span class="text-[var(--color-text-muted)] block mb-0.5">เลขที่บัญชี</span>
+          <span class="font-mono font-bold text-[var(--color-text)]">{{ maskedAccountNumber() }}</span>
+        </div>
+        <div>
+          <span class="text-[var(--color-text-muted)] block mb-0.5">ชื่อบัญชี</span>
+          <span class="font-bold text-[var(--color-text)]">{{ accountHolderName() }}</span>
+        </div>
+      </div>
+    } @else {
+      <div class="rounded-xl bg-[var(--color-bg)] p-4 space-y-4 border border-[var(--color-border)]">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เลือกธนาคาร</label>
+            <select
+              [(ngModel)]="editBankName"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+            >
+              <option value="ธนาคารกสิกรไทย (KBANK)">ธนาคารกสิกรไทย (KBANK)</option>
+              <option value="ธนาคารไทยพาณิชย์ (SCB)">ธนาคารไทยพาณิชย์ (SCB)</option>
+              <option value="ธนาคารกรุงเทพ (BBL)">ธนาคารกรุงเทพ (BBL)</option>
+              <option value="ธนาคารกรุงไทย (KTB)">ธนาคารกรุงไทย (KTB)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เลขที่บัญชี (ตัวเลขเท่านั้น)</label>
+            <input
+              type="text"
+              [(ngModel)]="editAccountNumber"
+              placeholder="0123456789"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ชื่อเจ้าของบัญชี</label>
+            <input
+              type="text"
+              [(ngModel)]="editAccountHolder"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            (click)="showEditBank.set(false)"
+            class="rounded-xl border border-[var(--color-border)] px-4 py-1.5 text-xs font-semibold text-[var(--color-text-muted)]"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            (click)="saveBankAccount()"
+            class="rounded-xl bg-[var(--color-primary)] px-4 py-1.5 text-xs font-bold text-white shadow"
+          >
+            บันทึกข้อมูล
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Payout History Table -->
+  <div class="space-y-4">
+    <h2 class="text-base font-bold text-[var(--color-text)]">ประวัติการรับเงินโอน (Payout History)</h2>
+
+    <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-[var(--color-text)]">
+          <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            <tr>
+              <th class="px-6 py-3">รอบบัญชี</th>
+              <th class="px-6 py-3">ยอดขายรวม (Gross)</th>
+              <th class="px-6 py-3">ภาษี หัก ณ ที่จ่าย (3%)</th>
+              <th class="px-6 py-3">ยอดโอนสุทธิ (Net 70%)</th>
+              <th class="px-6 py-3">สถานะ</th>
+              <th class="px-6 py-3 text-right">เอกสาร</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            @for (item of history(); track item.payoutId) {
+              <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                <td class="px-6 py-4 font-mono font-bold text-xs">
+                  {{ item.batchNumber }}
+                </td>
+                <td class="px-6 py-4 text-xs font-medium">
+                  {{ item.grossAmount | currencyThb }}
+                </td>
+                <td class="px-6 py-4 text-xs text-rose-500 font-medium">
+                  -{{ item.withholdingTaxAmount | currencyThb }}
+                </td>
+                <td class="px-6 py-4 font-bold text-emerald-600">
+                  {{ item.netAmount | currencyThb }}
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600">
+                    <ng-icon name="phosphorCheckCircle" />
+                    <span>โอนเงินแล้ว</span>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+                  >
+                    <ng-icon name="phosphorDownloadSimple" />
+                    <span>ใบหักภาษี 50 ทวิ</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

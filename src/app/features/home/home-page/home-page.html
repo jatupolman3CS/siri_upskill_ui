@@ -1,0 +1,128 @@
+<div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+  <h1 class="text-4xl font-bold text-[var(--color-text)] sm:text-5xl">
+    {{ 'home.hero.heading' | translate }}
+  </h1>
+  <p class="max-w-xl text-lg text-[var(--color-text-muted)]">
+    {{ 'home.hero.subheading' | translate }}
+  </p>
+
+  <div class="mt-2 flex flex-col gap-3 sm:flex-row">
+    <a
+      routerLink="/register"
+      class="inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+        text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)]
+        transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+    >
+      {{ 'home.hero.ctaRegister' | translate }}
+    </a>
+    <a
+      routerLink="/login"
+      class="inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+        text-base font-medium text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-surface)]
+        transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+    >
+      {{ 'home.hero.ctaLogin' | translate }}
+    </a>
+  </div>
+</div>
+
+<!-- Categories -->
+@if (categoriesResource.isLoading()) {
+  <section class="mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.categories.loadingLabel' | translate">
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      @for (placeholder of [0, 1, 2]; track placeholder) {
+        <app-skeleton variant="block" height="8rem" />
+      }
+    </div>
+  </section>
+} @else if (categoriesResource.hasValue() && categoriesResource.value().length > 0) {
+  <section class="mx-auto max-w-6xl px-4 py-12">
+    <h2 class="mb-6 text-2xl font-bold text-[var(--color-text)]">{{ 'home.categories.heading' | translate }}</h2>
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      @for (category of categoriesResource.value(); track category.id) {
+        <a
+          [routerLink]="['/courses']"
+          [queryParams]="{ category: category.slug }"
+          class="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center
+            transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-md)]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" class="h-8 w-8 text-[var(--color-primary)]" />
+          <span class="font-medium text-[var(--color-text)]">{{ categoryName(category) }}</span>
+        </a>
+      }
+    </div>
+  </section>
+}
+
+<!-- Recommended (highest rated) -->
+@if (recommendedResource.isLoading()) {
+  <section class="mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.recommended.loadingLabel' | translate">
+    <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
+      @for (placeholder of [0, 1, 2, 3]; track placeholder) {
+        <div class="flex flex-col gap-3">
+          <app-skeleton variant="block" height="8rem" />
+          <app-skeleton variant="text" [lines]="2" />
+        </div>
+      }
+    </div>
+  </section>
+} @else if (recommendedResource.hasValue() && recommendedResource.value().results.items.length > 0) {
+  <section class="mx-auto max-w-6xl px-4 py-12">
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ 'home.recommended.heading' | translate }}</h2>
+      <a
+        [routerLink]="['/courses']"
+        [queryParams]="{ sort: 'RatingDesc' }"
+        class="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--color-primary)]
+          hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'home.viewAll' | translate }}
+        <ng-icon name="phosphorArrowRight" aria-hidden="true" />
+      </a>
+    </div>
+    <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
+      @for (course of recommendedResource.value().results.items; track course.id) {
+        <app-home-course-card [course]="course" />
+      }
+    </div>
+  </section>
+}
+
+<!-- Newest -->
+@if (newestResource.isLoading()) {
+  <section class="mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.newest.loadingLabel' | translate">
+    <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
+      @for (placeholder of [0, 1, 2, 3]; track placeholder) {
+        <div class="flex flex-col gap-3">
+          <app-skeleton variant="block" height="8rem" />
+          <app-skeleton variant="text" [lines]="2" />
+        </div>
+      }
+    </div>
+  </section>
+} @else if (newestResource.hasValue() && newestResource.value().results.items.length > 0) {
+  <section class="mx-auto max-w-6xl px-4 py-12">
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ 'home.newest.heading' | translate }}</h2>
+      <a
+        [routerLink]="['/courses']"
+        [queryParams]="{ sort: 'Newest' }"
+        class="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--color-primary)]
+          hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'home.viewAll' | translate }}
+        <ng-icon name="phosphorArrowRight" aria-hidden="true" />
+      </a>
+    </div>
+    <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
+      @for (course of newestResource.value().results.items; track course.id) {
+        <app-home-course-card [course]="course" />
+      }
+    </div>
+  </section>
+}

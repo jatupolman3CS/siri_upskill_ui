@@ -1,0 +1,42 @@
+<div class="flex items-center">
+  <a
+    [routerLink]="'/courses'"
+    [queryParams]="{ category: category().slug }"
+    (click)="emitLinkClick()"
+    [style.padding-left.rem]="depth() * 1"
+    class="flex min-h-11 flex-1 items-center gap-2 rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
+      hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    @if (depth() === 0) {
+      <ng-icon [name]="resolveIconName(category().iconKey)" aria-hidden="true" class="text-[var(--color-primary)]" />
+    }
+    {{ categoryName(category()) }}
+  </a>
+
+  @if (category().children.length > 0) {
+    <button
+      type="button"
+      (click)="toggleExpanded()"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-label]="'nav.categoriesToggleLabel' | translate: { category: categoryName(category()) }"
+      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)]
+        text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      <ng-icon
+        name="phosphorCaretDown"
+        aria-hidden="true"
+        class="transition-transform duration-200 ease-out"
+        [class.rotate-180]="expanded()"
+      />
+    </button>
+  }
+</div>
+
+@if (expanded()) {
+  <div class="flex flex-col gap-1">
+    @for (child of category().children; track child.id) {
+      <app-category-accordion-item [category]="child" [depth]="depth() + 1" (linkClick)="emitLinkClick()" />
+    }
+  </div>
+}

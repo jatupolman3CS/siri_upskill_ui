@@ -1,0 +1,28 @@
+<a
+  [routerLink]="['/courses', course().slug]"
+  class="flex h-full flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
+    transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-md)]
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+>
+  <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
+    @if (course().thumbnailUrl) {
+      <!-- fill, not width/height: thumbnail dimensions aren't known ahead of time, only the
+           container's aspect ratio is (frontend.md requires NgOptimizedImage on every image). -->
+      <img [ngSrc]="course().thumbnailUrl!" alt="" fill class="object-cover" />
+    }
+  </div>
+  <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">{{ course().title }}</h3>
+  <p class="text-sm text-[var(--color-text-muted)]">{{ course().instructorDisplayName }}</p>
+  @if (course().ratingCount > 0) {
+    <p class="inline-flex items-center gap-1 text-sm text-[var(--color-text)]">
+      <ng-icon name="phosphorStar" aria-hidden="true" class="text-[var(--color-accent)]" />
+      {{ 'catalog.ratingSummary' | translate: { rating: course().ratingAverage, count: course().ratingCount } }}
+    </p>
+  }
+  <div class="mt-auto flex items-baseline gap-2">
+    <span class="text-lg font-bold text-[var(--color-primary)]">{{ course().price | currencyThb }}</span>
+    @if (course().comparePrice) {
+      <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().comparePrice | currencyThb }}</span>
+    }
+  </div>
+</a>

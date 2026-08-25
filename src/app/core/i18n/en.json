@@ -1,0 +1,427 @@
+{
+  "common": {
+    "appName": "SIRI UpSkill",
+    "loading": "Loading...",
+    "error": "Something went wrong. Please try again."
+  },
+  "nav": {
+    "home": "Home",
+    "mainNavLabel": "Main navigation",
+    "categories": "Categories",
+    "allCourses": "View all courses",
+    "categoriesToggleLabel": "Show {{category}} subcategories",
+    "login": "Log in",
+    "register": "Sign up",
+    "myCourses": "My Courses",
+    "blog": "Blog",
+    "instructor": "Instructor Studio",
+    "devices": "Signed-in devices",
+    "signOut": "Sign out",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "menuTitle": "Navigation menu",
+    "skipToContent": "Skip to main content",
+    "languageThai": "ไทย",
+    "languageEnglish": "English"
+  },
+  "footer": {
+    "tagline": "An online learning platform for building practical, work-ready skills.",
+    "copyright": "© {{year}} SIRI UpSkill. All rights reserved."
+  },
+  "home": {
+    "pageDescription": "SIRI UpSkill is an online learning platform — learn new skills from real instructors.",
+    "hero": {
+      "heading": "Learn new skills. Grow your career.",
+      "subheading": "Quality online courses from real instructors — learn anytime, anywhere.",
+      "ctaRegister": "Get started",
+      "ctaLogin": "Log in"
+    },
+    "viewAll": "View all",
+    "categories": {
+      "heading": "Browse by category",
+      "loadingLabel": "Loading categories"
+    },
+    "recommended": {
+      "heading": "Recommended courses",
+      "loadingLabel": "Loading recommended courses"
+    },
+    "newest": {
+      "heading": "Newest courses",
+      "loadingLabel": "Loading newest courses"
+    }
+  },
+  "catalog": {
+    "pageTitle": "Browse courses | SIRI UpSkill",
+    "pageDescription": "Browse and filter every published course on SIRI UpSkill by category, level, price, and rating.",
+    "heading": "Browse courses",
+    "searchLabel": "Search courses",
+    "searchPlaceholder": "What do you want to learn?",
+    "searchSubmit": "Search",
+    "resultCount": "{{count}} course(s) found",
+    "loadingLabel": "Loading courses",
+    "emptyHeading": "No courses match your filters",
+    "emptyDescription": "Try a different search term, or clear your filters to see every course.",
+    "errorHeading": "Couldn't load courses",
+    "errorDescription": "Something went wrong while loading courses. Please try again.",
+    "retryButton": "Try again",
+    "ratingSummary": "{{rating}} ({{count}} ratings)",
+    "filters": {
+      "categoryHeading": "Category",
+      "levelHeading": "Level",
+      "levelAny": "Any level",
+      "levelBeginner": "Beginner",
+      "levelIntermediate": "Intermediate",
+      "levelAdvanced": "Advanced",
+      "levelAllLevels": "Suitable for every level",
+      "ratingHeading": "Rating",
+      "ratingAny": "Any rating",
+      "ratingAtLeast": "{{rating}}+ stars",
+      "priceHeading": "Price (THB)",
+      "priceMin": "Min",
+      "priceMax": "Max",
+      "priceApply": "Apply",
+      "sortHeading": "Sort by",
+      "sortRelevance": "Relevance",
+      "sortNewest": "Newest",
+      "sortPriceAsc": "Price: low to high",
+      "sortPriceDesc": "Price: high to low",
+      "sortRatingDesc": "Highest rated",
+      "clearAll": "Clear all filters"
+    },
+    "duration": {
+      "hoursAndMinutes": "{{hours}}h {{minutes}}m",
+      "minutesOnly": "{{minutes}}m"
+    },
+    "detail": {
+      "loadingLabel": "Loading course",
+      "notFoundHeading": "Course not found",
+      "notFoundDescription": "This course may have been removed, renamed, or isn't published yet. Try browsing other courses instead.",
+      "backToCatalog": "Browse all courses",
+      "errorHeading": "Couldn't load this course. Please try again.",
+      "retryButton": "Try again",
+      "fallbackDescription": "Learn new skills on SIRI UpSkill",
+      "levelLabel": "Level",
+      "languageLabel": "Language",
+      "languageThai": "Thai",
+      "languageEnglish": "English",
+      "enrollmentCountLabel": "{{count}} student(s) enrolled",
+      "episodeCountLabel": "{{count}} lesson(s)",
+      "outcomesHeading": "What you'll learn",
+      "requirementsHeading": "Requirements",
+      "descriptionHeading": "About this course",
+      "syllabusHeading": "Course content",
+      "sectionEpisodeCount": "{{count}} lesson(s)",
+      "freePreviewBadge": "Free preview",
+      "instructorHeading": "Instructor",
+      "reviewsHeading": "Reviews",
+      "noReviewsYet": "No reviews yet for this course",
+      "buyButton": "Buy this course",
+      "buyComingSoon": "Payment will be available soon",
+      "accessDurationLifetime": "Lifetime access",
+      "accessDurationDays": "{{days}} days of access after purchase"
+    }
+  },
+  "shared": {
+    "modal": {
+      "close": "Close"
+    },
+    "toast": {
+      "dismiss": "Dismiss this notification",
+      "typeSuccess": "Success",
+      "typeError": "Error",
+      "typeInfo": "Notice",
+      "typeWarning": "Warning"
+    },
+    "pagination": {
+      "navLabel": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "goToPage": "Go to page {{page}}"
+    },
+    "breadcrumb": {
+      "navLabel": "Breadcrumb"
+    },
+    "field": {
+      "required": "required"
+    }
+  },
+  "auth": {
+    "validation": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "minLength": "Must be at least {{min}} characters.",
+      "maxLength": "Must be no more than {{max}} characters."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "displayName": "Display name",
+      "passwordHelper": "At least {{min}} characters."
+    },
+    "common": {
+      "errorSummaryHeading": "There's a problem with this form",
+      "successHeading": "Success",
+      "goToLogin": "Go to login"
+    },
+    "register": {
+      "pageTitle": "Sign up",
+      "pageDescription": "Create a SIRI UpSkill account to start learning.",
+      "heading": "Create your account",
+      "subheading": "Learn new skills from real instructors.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "loginPrompt": "Already have an account?",
+      "loginLink": "Log in"
+    },
+    "confirmEmail": {
+      "pageTitle": "Confirm email",
+      "pageDescription": "Confirm your SIRI UpSkill account email address.",
+      "confirming": "Confirming your email…",
+      "missingTokenHeading": "Invalid confirmation link",
+      "missingTokenBody": "This link is missing its confirmation token. Please use the link from your confirmation email, or sign up again.",
+      "backToRegister": "Back to sign up"
+    },
+    "login": {
+      "pageTitle": "Log in",
+      "pageDescription": "Log in to your SIRI UpSkill account.",
+      "heading": "Log in",
+      "subheading": "Welcome back.",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "forgotPasswordLink": "Forgot your password?",
+      "registerPrompt": "Don't have an account?",
+      "registerLink": "Sign up"
+    },
+    "forgotPassword": {
+      "pageTitle": "Forgot password",
+      "pageDescription": "Request a link to reset your SIRI UpSkill password.",
+      "heading": "Forgot your password?",
+      "subheading": "Enter your email and we'll send you a reset link if an account exists.",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "pageTitle": "Reset password",
+      "pageDescription": "Set a new password for your SIRI UpSkill account.",
+      "heading": "Set a new password",
+      "submit": "Set new password",
+      "submitting": "Setting new password…",
+      "missingTokenHeading": "Invalid reset link",
+      "missingTokenBody": "This link is missing its reset token. Please request a new password-reset link.",
+      "requestNewLink": "Request a new link"
+    },
+    "devices": {
+      "pageTitle": "Signed-in devices",
+      "pageDescription": "Manage the devices signed in to your SIRI UpSkill account.",
+      "heading": "Signed-in devices",
+      "subheading": "Devices currently or recently signed in to your account.",
+      "thisDevice": "This device",
+      "revokedLabel": "Signed out",
+      "revokedOnLabel": "Signed out on {{date}}",
+      "lastSeenLabel": "Last active {{date}}",
+      "ipLabel": "IP address",
+      "unknownDevice": "Unknown device",
+      "revokeButton": "Sign out",
+      "revokeOthersButton": "Sign out other devices",
+      "revokeAllButton": "Sign out everywhere",
+      "emptyHeading": "No signed-in devices",
+      "emptyDescription": "You have no active or recently signed-out devices.",
+      "errorHeading": "Couldn't load your devices",
+      "retryButton": "Try again",
+      "confirmRevokeTitle": "Sign out this device?",
+      "confirmRevokeBody": "This will sign out \"{{device}}\". You'll need to log in again on that device.",
+      "confirmRevokeConfirm": "Sign out device",
+      "confirmOthersTitle": "Sign out other devices?",
+      "confirmOthersBody": "This signs out every device except this one. This device stays signed in.",
+      "confirmOthersConfirm": "Sign out other devices",
+      "confirmAllTitle": "Sign out everywhere?",
+      "confirmAllBody": "This signs out every device, including this one. You'll need to log in again here too.",
+      "confirmAllConfirm": "Sign out everywhere",
+      "confirmCancel": "Cancel"
+    }
+  },
+  "checkout": {
+    "pageTitle": "Checkout | SIRI UpSkill",
+    "pageDescription": "Complete your course enrollment with PromptPay QR",
+    "heading": "Checkout",
+    "itemCount": "Checkout · {{count}} course(s)",
+    "paymentMethodHeading": "Payment Method",
+    "methods": {
+      "promptpay": "Thai QR Payment (PromptPay)",
+      "promptpayDesc": "Scan to pay with any banking app. Instant auto-confirmation.",
+      "card": "Credit / Debit Card",
+      "cardDesc": "Visa, Mastercard (Coming soon)",
+      "installment": "0% Installments",
+      "installmentDesc": "0% up to 10 months (Coming soon)",
+      "comingSoon": "Coming soon"
+    },
+    "qr": {
+      "scanPrompt": "Scan with your mobile banking app",
+      "amount": "Total Amount",
+      "refNo": "Ref #{{orderNo}}",
+      "expiresIn": "QR expires in {{minutes}}:{{seconds}}",
+      "autoConfirm": "Automatically confirmed upon payment",
+      "expired": "QR code has expired. Please create a new order.",
+      "waiting": "Waiting for payment confirmation...",
+      "paid": "Payment successful! Redirecting to classroom..."
+    },
+    "etax": {
+      "checkboxLabel": "Request e-Tax invoice — issued automatically upon successful payment",
+      "taxIdLabel": "Tax Identification Number",
+      "taxIdPlaceholder": "0-0000-00000-00-0",
+      "nameLabel": "Individual / Company Name",
+      "namePlaceholder": "Sample Company Co., Ltd.",
+      "pdpaNotice": "Your information is protected under PDPA"
+    },
+    "summary": {
+      "heading": "Order Summary",
+      "promoPlaceholder": "Enter promo code",
+      "applyPromo": "Apply",
+      "promoApplied": "Code {{code}} applied — saved {{discount}}",
+      "promoError": "Invalid or expired promo code",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "total": "Total Amount",
+      "vatIncluded": "Includes 7% VAT",
+      "payButton": "Pay {{amount}}",
+      "processing": "Processing...",
+      "guarantee": "30-day money-back guarantee if the course does not meet expectations"
+    },
+    "error": {
+      "orderNotFound": "Order not found",
+      "createPaymentFailed": "Failed to initiate payment. Please try again.",
+      "retry": "Try again"
+    }
+  },
+  "learn": {
+    "pageTitle": "Classroom | SIRI UpSkill",
+    "pageDescription": "Online learning classroom with automatic progress tracking",
+    "backToCourse": "Back to Course",
+    "progress": "Progress",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "freePreview": "Free Preview",
+    "freePreviewNotice": "You are watching a free preview — enroll now to unlock all lessons.",
+    "buyFullCourse": "Enroll in Course",
+    "curriculumHeading": "Course Curriculum",
+    "episodesCount": "{{count}} lesson(s)",
+    "resumeTitle": "Resume playback?",
+    "resumeBody": "You left off at {{time}}. Would you like to resume from where you stopped?",
+    "resumeButton": "Resume",
+    "startOverButton": "Start Over",
+    "tabs": {
+      "overview": "Overview",
+      "qa": "Q&A Discussion",
+      "resources": "Resources"
+    },
+    "qa": {
+      "heading": "Questions & Discussions for this lesson",
+      "askButton": "Ask a Question",
+      "askPlaceholder": "Type your question here...",
+      "submitQuestion": "Post Question",
+      "noQuestions": "No questions yet for this lesson. Be the first to ask!",
+      "instructorBadge": "Instructor",
+      "upvote": "Helpful",
+      "upvoted": "Upvoted",
+      "reply": "Reply",
+      "delete": "Delete",
+      "report": "Report"
+    },
+    "controls": {
+      "play": "Play",
+      "pause": "Pause",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "fullscreen": "Fullscreen",
+      "speed": "Speed"
+    }
+  },
+  "myCourses": {
+    "pageTitle": "My Courses | SIRI UpSkill",
+    "pageDescription": "All your enrolled courses, learning progress, and certificates",
+    "heading": "My Courses",
+    "subheading": "Pick up right where you left off or review finished courses",
+    "tabs": {
+      "all": "All",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "continueLearning": "Continue",
+    "viewCertificate": "Certificate",
+    "lifetimeAccess": "Lifetime access",
+    "expiresOn": "Expires: {{date}}",
+    "emptyHeading": "You haven't enrolled in any courses yet",
+    "emptyDescription": "Explore our catalog to start learning high-impact tech skills today",
+    "browseCourses": "Explore Courses"
+  },
+  "certificateVerify": {
+    "pageTitle": "Verify Certificate | SIRI UpSkill",
+    "pageDescription": "Online verification system for official SIRI UpSkill certificates",
+    "heading": "Verify Certificate",
+    "subheading": "Validate credential authenticity issued by SIRI UpSkill",
+    "searchPlaceholder": "Enter verification code e.g. CERT-12345",
+    "verifyButton": "Verify",
+    "verifiedHeading": "This certificate is valid and authentic",
+    "verifiedSubheading": "Issued officially by SIRI UpSkill Certificate Authority",
+    "recipient": "Awarded To",
+    "course": "Course",
+    "instructor": "Instructor",
+    "issuedDate": "Issued On",
+    "certNumber": "Certificate No.",
+    "certCode": "Verification Code",
+    "downloadPdf": "Download PDF",
+    "notFoundHeading": "Certificate Not Found",
+    "notFoundDescription": "The provided verification code is invalid or this certificate has been revoked."
+  },
+  "instructor": {
+    "builder": {
+      "pageTitle": "Course Studio Builder | SIRI UpSkill",
+      "pageDescription": "Course creation and curriculum management tool",
+      "backToDashboard": "Back to Dashboard",
+      "defaultCourseTitle": "Course Setup",
+      "savedSuccess": "Saved successfully",
+      "saving": "Saving...",
+      "saveDraft": "Save Draft",
+      "publishCourse": "Publish Course",
+      "confirmPublish": "Confirm course publication",
+      "concurrencyConflict": "This course was modified elsewhere. Please refresh the page before saving again.",
+      "saveFailed": "Failed to save. Please try again.",
+      "tabs": {
+        "basic": "1. Basic Info & Pricing",
+        "curriculum": "2. Curriculum",
+        "publish": "3. Review & Publish"
+      },
+      "basic": {
+        "title": "Course Title *",
+        "titlePlaceholder": "e.g. Full-Stack Web Development with Angular & .NET 10",
+        "subtitle": "Subtitle",
+        "subtitlePlaceholder": "Short catchy summary of your course",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe the content, learning outcomes, and unique advantages of this course...",
+        "price": "Price (THB) *",
+        "comparePrice": "Compare Price (Original)",
+        "level": "Difficulty Level",
+        "levelBeginner": "Beginner",
+        "levelIntermediate": "Intermediate",
+        "levelAdvanced": "Advanced",
+        "levelAllLevels": "All Levels",
+        "thumbnail": "Thumbnail URL",
+        "thumbnailPlaceholder": "https://example.com/cover.jpg"
+      },
+      "curriculum": {
+        "heading": "Manage Sections & Lessons",
+        "addSection": "Add Section",
+        "deleteSection": "Delete Section",
+        "addEpisode": "Add Lesson to this section",
+        "deleteEpisode": "Delete",
+        "freePreview": "Free Preview"
+      },
+      "publish": {
+        "readyHeading": "Your course is ready for publishing!",
+        "readyDescription": "When submitted, your course will be reviewed and published to SIRI UpSkill."
+      }
+    }
+  }
+}

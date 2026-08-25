@@ -1,0 +1,87 @@
+<div class="mx-auto max-w-3xl px-4 py-12 pb-24 space-y-8">
+  @if (order(); as ord) {
+    <!-- Success Banner -->
+    <div class="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center space-y-3">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+        <ng-icon name="phosphorCheckCircle" class="text-4xl" />
+      </div>
+      <h1 class="text-2xl font-black text-[var(--color-text)] sm:text-3xl">
+        ชำระเงินสำเร็จเรียบร้อยแล้ว!
+      </h1>
+      <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
+        ระบบได้ทำการเปิดสิทธิ์เข้าเรียนคอร์สของคุณเรียบร้อยแล้ว คุณสามารถเริ่มเรียนได้ทันที
+      </p>
+
+      <div class="pt-2 flex items-center justify-center gap-2 text-xs font-semibold text-emerald-700">
+        <ng-icon name="phosphorEnvelopeSimple" />
+        <span>เราได้จัดส่งใบเสร็จรับเงิน และ e-Tax invoice ไปยัง {{ ord.customerEmail }} แล้ว</span>
+      </div>
+    </div>
+
+    <!-- Order Summary Box -->
+    <div class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8 space-y-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--color-border)] pb-6">
+        <div>
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">เลขที่คำสั่งซื้อ</span>
+          <p class="text-base font-mono font-bold text-[var(--color-text)]">{{ ord.orderNo }}</p>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">วิธีชำระเงิน</span>
+          <p class="text-xs font-bold text-[var(--color-text)]">{{ ord.paymentMethod }}</p>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">ยอดชำระสุทธิ</span>
+          <p class="text-base font-black text-[var(--color-primary)]">{{ ord.totalAmount | currencyThb }}</p>
+        </div>
+      </div>
+
+      <!-- Purchased Courses Section -->
+      <div class="space-y-4">
+        <h2 class="text-sm font-bold text-[var(--color-text)]">คอร์สเรียนในคำสั่งซื้อนี้</h2>
+
+        <div class="space-y-3">
+          @for (course of ord.purchasedCourses; track course.courseId) {
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-bg)] p-4">
+              <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div class="h-16 w-24 overflow-hidden rounded-xl bg-zinc-900 shrink-0">
+                  <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-xs sm:text-sm font-bold text-[var(--color-text)] line-clamp-1">{{ course.title }}</h3>
+                  <p class="text-xs font-semibold text-[var(--color-primary)] mt-1">{{ course.price | currencyThb }}</p>
+                </div>
+              </div>
+
+              <a
+                [routerLink]="['/learn', course.slug]"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+              >
+                <ng-icon name="phosphorPlayCircle" class="text-base" />
+                <span>เริ่มเรียนทันที</span>
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Actions / Receipts -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[var(--color-border)] pt-6">
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          <ng-icon name="phosphorFilePdf" class="text-base text-rose-500" />
+          <span>ดาวน์โหลดใบเสร็จรับเงิน (PDF)</span>
+        </button>
+
+        <a
+          routerLink="/my-courses"
+          class="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+        >
+          <span>ไปยังหน้าคอร์สของฉัน</span>
+          <ng-icon name="phosphorArrowRight" />
+        </a>
+      </div>
+    </div>
+  }
+</div>

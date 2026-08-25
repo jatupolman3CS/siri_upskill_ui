@@ -1,0 +1,18 @@
+/* SIRI UpSkill typography — IBM Plex Sans Thai, ONE family for Thai + Latin.
+   Hierarchy via weight (700/600 headings, 500 UI, 400 body), never a second family. */
+:root{
+--font-sans:'IBM Plex Sans Thai',system-ui,-apple-system,'Noto Sans Thai','Leelawadee UI',sans-serif;
+/* scale as used in the product (Tailwind sizes) */
+--text-xs:0.75rem;
+--text-sm:0.875rem;
+--text-base:1rem;
+--text-lg:1.125rem;
+--text-xl:1.25rem;
+--text-2xl:1.5rem;
+--text-4xl:2.25rem;
+--text-5xl:3rem;
+--weight-regular:400;
+--weight-medium:500;
+--weight-semibold:600;
+--weight-bold:700;
+}

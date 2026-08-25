@@ -1,0 +1,115 @@
+<div class="max-w-5xl mx-auto space-y-8">
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-extrabold text-[var(--color-text)]">ส่งประกาศถึงผู้เรียน (Course Announcements)</h1>
+    <p class="text-xs text-[var(--color-text-muted)] mt-1">
+      ส่งข่าวสาร แจ้งอัปเดตบทเรียนใหม่ หรือนัดหมายกิจกรรมไปยังผู้เรียนที่ลงทะเบียนในคอร์สของคุณ
+    </p>
+  </div>
+
+  <!-- New Announcement Form -->
+  <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8 space-y-6 shadow-sm">
+    <h2 class="text-sm font-bold text-[var(--color-text)]">เขียนประกาศใหม่</h2>
+
+    <div class="space-y-4">
+      <div>
+        <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เลือกคอร์สเรียน *</label>
+        <select
+          [(ngModel)]="selectedCourseId"
+          class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+        >
+          @for (course of courses(); track course.id) {
+            <option [value]="course.id">
+              {{ course.title }} (ผู้เรียน {{ course.studentsCount }} คน)
+            </option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อประกาศ *</label>
+        <input
+          type="text"
+          [(ngModel)]="announcementTitle"
+          placeholder="เช่น อัปเดตเนื้อหาใหม่ประจำสัปดาห์ / แจ้ง Live Q&A"
+          class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ข้อความประกาศ *</label>
+        <textarea
+          [(ngModel)]="announcementMessage"
+          rows="5"
+          placeholder="พิมพ์ข้อความที่ต้องการแจ้งผู้เรียนที่นี่..."
+          class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        <label class="flex items-center gap-2 text-xs font-medium text-[var(--color-text)] cursor-pointer">
+          <input
+            type="checkbox"
+            [(ngModel)]="sendEmailNotification"
+            class="rounded accent-[var(--color-primary)]"
+          />
+          <span>ส่งอีเมลแจ้งเตือนไปยังผู้เรียนทุกคนในคอร์สนี้ด้วย</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
+      @if (sendSuccess()) {
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+          <ng-icon name="phosphorCheckCircle" />
+          <span>ส่งประกาศถึงผู้เรียนเรียบร้อยแล้ว</span>
+        </span>
+      } @else {
+        <span></span>
+      }
+
+      <button
+        type="button"
+        (click)="sendAnnouncement()"
+        [disabled]="isSending() || !announcementTitle().trim() || !announcementMessage().trim()"
+        class="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+      >
+        <ng-icon name="phosphorPaperPlaneTilt" />
+        <span>{{ isSending() ? 'กำลังส่งประกาศ...' : 'ส่งประกาศทันที' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Past Announcements History -->
+  <div class="space-y-4">
+    <h2 class="text-base font-bold text-[var(--color-text)]">ประวัติประกาศที่ผ่านมา</h2>
+
+    <div class="space-y-3">
+      @for (item of announcements(); track item.id) {
+        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-2 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span class="rounded bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-primary)]">
+              {{ item.courseTitle }}
+            </span>
+            <div class="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+              <span class="flex items-center gap-1">
+                <ng-icon name="phosphorCalendar" />
+                <span>{{ item.sentAtUtc | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </span>
+              <span>·</span>
+              <span class="flex items-center gap-1">
+                <ng-icon name="phosphorUsers" />
+                <span>ผู้รับ {{ item.recipientsCount }} คน</span>
+              </span>
+            </div>
+          </div>
+
+          <h3 class="text-sm font-bold text-[var(--color-text)]">{{ item.title }}</h3>
+          <p class="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+            {{ item.message }}
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

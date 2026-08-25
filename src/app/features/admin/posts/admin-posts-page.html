@@ -1,0 +1,150 @@
+<div class="max-w-6xl mx-auto space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">บทความและข่าวสาร (CMS Blog)</h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">จัดการเนื้อหาบทความเผยแพร่บนหน้าบล็อกสาธารณะ</p>
+    </div>
+
+    <button
+      type="button"
+      (click)="showAddForm.set(!showAddForm())"
+      class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+    >
+      <ng-icon name="phosphorPlus" />
+      <span>เขียนบทความใหม่</span>
+    </button>
+  </div>
+
+  <!-- Add Post Form -->
+  @if (showAddForm()) {
+    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4 shadow-sm">
+      <h2 class="text-sm font-bold text-[var(--color-text)]">เขียนบทความใหม่</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อบทความ *</label>
+          <input
+            type="text"
+            [(ngModel)]="newTitle"
+            placeholder="เช่น 5 เทคนิคการเรียนรู้ Programming ให้เข้าใจเร็ว"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">URL Slug (ภาษาอังกฤษ)</label>
+          <input
+            type="text"
+            [(ngModel)]="newSlug"
+            placeholder="5-tips-learn-programming-fast"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">บทคัดย่อ (Excerpt)</label>
+          <input
+            type="text"
+            [(ngModel)]="newExcerpt"
+            placeholder="สรุปสั้น ๆ สำหรับแสดงในการ์ดหน้ารวมบทความ"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เนื้อหาบทความ (HTML / Text) *</label>
+          <textarea
+            [(ngModel)]="newContent"
+            rows="6"
+            placeholder="พิมพ์เนื้อหาบทความที่นี่..."
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์รูปภาพหน้าปก</label>
+          <input
+            type="text"
+            [(ngModel)]="newCoverUrl"
+            placeholder="https://example.com/cover.jpg"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          (click)="showAddForm.set(false)"
+          class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)]"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          (click)="createPost()"
+          [disabled]="!newTitle().trim()"
+          class="rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-bold text-white shadow disabled:opacity-50"
+        >
+          เผยแพร่บทความ
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Posts List Table -->
+  <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-[var(--color-text)]">
+        <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+          <tr>
+            <th class="px-6 py-3">บทความ</th>
+            <th class="px-6 py-3">URL Slug</th>
+            <th class="px-6 py-3">สถานะ</th>
+            <th class="px-6 py-3">วันที่เผยแพร่</th>
+            <th class="px-6 py-3 text-right">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--color-border)]">
+          @for (post of posts(); track post.id) {
+            <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-16 overflow-hidden rounded-lg bg-zinc-800 shrink-0">
+                    @if (post.coverImageUrl) {
+                      <img [src]="post.coverImageUrl" [alt]="post.title" class="h-full w-full object-cover" />
+                    }
+                  </div>
+                  <span class="font-bold text-[var(--color-text)] truncate max-w-sm block">{{ post.title }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-xs font-mono text-[var(--color-text-muted)]">
+                /blog/{{ post.slug }}
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600">
+                  {{ post.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-xs text-[var(--color-text-muted)]">
+                {{ post.publishedAtUtc | date: 'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="inline-flex items-center gap-2">
+                  <button
+                    type="button"
+                    (click)="deletePost(post.id)"
+                    class="rounded-xl p-2 text-red-500 hover:bg-red-500/10 transition"
+                    title="ลบบทความ"
+                  >
+                    <ng-icon name="phosphorTrash" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

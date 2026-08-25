@@ -1,0 +1,190 @@
+<div class="max-w-6xl mx-auto space-y-8">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">การตลาดและโปรโมชัน (Marketing & Promotions)</h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">
+        จัดการคูปองส่วนลด แคมเปญ Flash Sale และการส่งเสริมการขายทั่วทั้งแพลตฟอร์ม
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="showAddModal.set(true)"
+      class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+    >
+      <ng-icon name="phosphorPlusCircle" class="text-base" />
+      <span>สร้างโค้ดส่วนลดใหม่</span>
+    </button>
+  </div>
+
+  <!-- Campaign Highlight Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="flex items-center justify-between rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6">
+      <div class="space-y-1">
+        <span class="rounded bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-600 uppercase">
+          Flash Sale Campaign
+        </span>
+        <h2 class="text-base font-bold text-[var(--color-text)]">แคมเปญ 9.9 Mid-Year Upskill</h2>
+        <p class="text-xs text-[var(--color-text-muted)]">ลดสูงสุด 40% สำหรับคอร์สหมวด Web & AI</p>
+      </div>
+      <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-bold text-indigo-600">กำลังเปิดใช้งาน</span>
+    </div>
+
+    <div class="flex items-center justify-between rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
+      <div class="space-y-1">
+        <span class="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-600 uppercase">
+          Bundle Deal
+        </span>
+        <h2 class="text-base font-bold text-[var(--color-text)]">แพ็กเกจ Full-Stack Mastery Bundle</h2>
+        <p class="text-xs text-[var(--color-text-muted)]">ซื้อ 2 คอร์สประหยัดทันที 1,000 บาท</p>
+      </div>
+      <span class="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600">กำลังเปิดใช้งาน</span>
+    </div>
+  </div>
+
+  <!-- Promo Codes Table -->
+  <div class="space-y-4">
+    <h2 class="text-base font-bold text-[var(--color-text)]">รายการโค้ดส่วนลด (Promo Codes)</h2>
+
+    <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-[var(--color-text)]">
+          <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            <tr>
+              <th class="px-6 py-3">รหัสโค้ด</th>
+              <th class="px-6 py-3">ส่วนลด</th>
+              <th class="px-6 py-3">ยอดซื้อขั้นต่ำ</th>
+              <th class="px-6 py-3">การใช้งาน (สิทธิ์คงเหลือ)</th>
+              <th class="px-6 py-3">วันหมดอายุ</th>
+              <th class="px-6 py-3">สถานะ</th>
+              <th class="px-6 py-3 text-right">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            @for (promo of promos(); track promo.id) {
+              <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                <td class="px-6 py-4 font-mono font-bold text-xs text-[var(--color-primary)]">
+                  {{ promo.code }}
+                </td>
+                <td class="px-6 py-4 text-xs font-bold text-[var(--color-text)]">
+                  {{ promo.discountType === 'Percentage' ? promo.discountValue + '%' : (promo.discountValue | currencyThb) }}
+                </td>
+                <td class="px-6 py-4 text-xs text-[var(--color-text-muted)]">
+                  {{ promo.minSpendAmount | currencyThb }}
+                </td>
+                <td class="px-6 py-4 text-xs font-medium">
+                  {{ promo.usageCount }} / {{ promo.maxUsageLimit }} ครั้ง
+                </td>
+                <td class="px-6 py-4 text-xs text-[var(--color-text-muted)]">
+                  {{ promo.expiresAtUtc | date: 'dd/MM/yyyy' }}
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold"
+                    [class.bg-emerald-500/10]="promo.isActive"
+                    [class.text-emerald-600]="promo.isActive"
+                    [class.bg-zinc-500/10]="!promo.isActive"
+                    [class.text-zinc-500]="!promo.isActive"
+                  >
+                    {{ promo.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    type="button"
+                    (click)="togglePromoStatus(promo)"
+                    class="rounded-xl border border-[var(--color-border)] px-3 py-1 text-xs font-semibold hover:bg-[var(--color-surface-muted)] transition"
+                  >
+                    {{ promo.isActive ? 'ปิดการใช้งาน' : 'เปิดการใช้งาน' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Promo Modal -->
+  @if (showAddModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="w-full max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4 shadow-xl">
+        <h2 class="text-base font-bold text-[var(--color-text)]">สร้างโค้ดส่วนลดใหม่</h2>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-[var(--color-text)] block mb-1">รหัสโค้ด (เช่น FLASH50)</label>
+            <input
+              type="text"
+              [(ngModel)]="newCode"
+              placeholder="PROMOCODE"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs uppercase text-[var(--color-text)] focus:outline-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="font-bold text-[var(--color-text)] block mb-1">ประเภทส่วนลด</label>
+              <select
+                [(ngModel)]="newDiscountType"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+              >
+                <option value="Percentage">เปอร์เซ็นต์ (%)</option>
+                <option value="FixedAmount">จำนวนเงิน (บาท)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="font-bold text-[var(--color-text)] block mb-1">มูลค่าส่วนลด</label>
+              <input
+                type="number"
+                [(ngModel)]="newDiscountValue"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="font-bold text-[var(--color-text)] block mb-1">ยอดซื้อขั้นต่ำ (บาท)</label>
+              <input
+                type="number"
+                [(ngModel)]="newMinSpend"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="font-bold text-[var(--color-text)] block mb-1">จำกัดสิทธิ์ (ครั้ง)</label>
+              <input
+                type="number"
+                [(ngModel)]="newMaxUsage"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
+          <button
+            type="button"
+            (click)="showAddModal.set(false)"
+            class="rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text-muted)]"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            (click)="createPromo()"
+            [disabled]="!newCode().trim()"
+            class="rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow disabled:opacity-50"
+          >
+            สร้างโค้ดส่วนลด
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

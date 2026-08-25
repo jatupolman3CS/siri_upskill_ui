@@ -1,0 +1,36 @@
+# GitLab CI pipeline (task P0-07) — frontend repo.
+# แยกออกมาจาก .gitlab-ci.yml ของ monorepo ตอนแยก repo (2026-08-25): job "backend" ย้ายไปอยู่ที่
+# siri_upskill_backend แล้ว, job "frontend"/"secret-scan" อยู่ที่นี่ และตัด "cd frontend" ออก
+# เพราะโค้ด frontend อยู่ที่ root ของ repo นี้แล้ว
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+stages:
+  - verify
+
+frontend:
+  stage: verify
+  image: node:22
+  timeout: 30m
+  script:
+    - npm ci
+    - npm run lint
+    - npm run test
+    - npm run build
+    # security.md §5: same high+ gate as the backend repo's NuGet scan.
+    - npm audit --audit-level=high
+
+secret-scan:
+  stage: verify
+  image:
+    name: zricethezav/gitleaks:v8.18.4
+    entrypoint: [""]
+  timeout: 15m
+  variables:
+    # Full clone — a secret committed then deleted is still leaked, so scan every commit.
+    GIT_DEPTH: "0"
+  script:
+    - gitleaks detect --source . --config .gitleaks.toml --no-banner --redact --verbose

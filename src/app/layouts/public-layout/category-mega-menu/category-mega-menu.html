@@ -1,0 +1,87 @@
+<!--
+  tabindex="-1": not a real widget, and not reachable via Tab (Escape works via bubbling from whatever
+  is actually focused inside — the trigger button or a link in the panel) — this exists purely so the
+  template linter's "interactive handler needs a focusable host" rule is satisfied honestly, without
+  mislabeling this wrapper (which holds real interactive content, unlike a true decorative backdrop) as
+  role="presentation" the way MobileNav's own overlay div legitimately is.
+-->
+<div class="relative" tabindex="-1" (keydown.escape)="onEscape()">
+  <button
+    #triggerButton
+    type="button"
+    (click)="toggle()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="panelId"
+    class="flex min-h-11 items-center gap-1.5 rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
+      hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    {{ 'nav.categories' | translate }}
+    <ng-icon
+      name="phosphorCaretDown"
+      aria-hidden="true"
+      class="transition-transform duration-200 ease-out"
+      [class.rotate-180]="open()"
+    />
+  </button>
+
+  @if (open()) {
+    <!-- Sibling of the panel, not its parent — see this component's own doc comment for why that
+         makes an event.target/currentTarget check unnecessary here, unlike MobileNav's overlay.
+         role="presentation" (same as MobileNav's own overlay div): a decorative click-catcher, not a
+         widget, so it is deliberately not a tab stop. -->
+    <div role="presentation" class="fixed inset-0 z-40" (click)="close()"></div>
+
+    <div
+      [id]="panelId"
+      class="app-category-mega-menu-panel absolute left-0 top-full z-50 mt-2 w-max min-w-[36rem] max-w-3xl
+        rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6
+        shadow-[var(--shadow-lg)]"
+    >
+      <div class="grid grid-cols-3 gap-6">
+        @for (category of categories(); track category.id) {
+          <div class="flex flex-col gap-3">
+            <a
+              [routerLink]="'/courses'"
+              [queryParams]="{ category: category.slug }"
+              (click)="close()"
+              class="flex items-center gap-2 rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-text)]
+                hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" class="text-[var(--color-primary)]" />
+              {{ categoryName(category) }}
+            </a>
+
+            @if (category.children.length > 0) {
+              <ul class="flex flex-col gap-2 pl-6">
+                @for (child of category.children; track child.id) {
+                  <li>
+                    <a
+                      [routerLink]="'/courses'"
+                      [queryParams]="{ category: child.slug }"
+                      (click)="close()"
+                      class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm text-[var(--color-text-muted)]
+                        hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                    >
+                      {{ categoryName(child) }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="mt-4 border-t border-[var(--color-border)] pt-4">
+        <a
+          routerLink="/courses"
+          (click)="close()"
+          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-primary)]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          {{ 'nav.allCourses' | translate }}
+        </a>
+      </div>
+    </div>
+  }
+</div>

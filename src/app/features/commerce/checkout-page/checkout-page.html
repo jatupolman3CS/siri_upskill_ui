@@ -1,0 +1,336 @@
+<div class="min-h-screen bg-[var(--color-bg,#F8FAFC)] py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-[var(--color-text,#0F172A)]">
+        {{ 'checkout.heading' | translate }}
+      </h1>
+      @if (order(); as o) {
+        <p class="mt-1 text-sm text-[var(--color-text-muted,#64748B)]">
+          {{ 'checkout.itemCount' | translate: { count: o.items.length } }}
+        </p>
+      }
+    </div>
+
+    @if (isLoadingOrder()) {
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-7 space-y-6">
+          <app-skeleton class="h-64 rounded-xl w-full" />
+          <app-skeleton class="h-32 rounded-xl w-full" />
+        </div>
+        <div class="lg:col-span-5">
+          <app-skeleton class="h-96 rounded-xl w-full" />
+        </div>
+      </div>
+    } @else if (orderError()) {
+      <div class="max-w-md mx-auto my-16 text-center bg-white p-8 rounded-2xl border border-[var(--color-border,#E2E8F0)] shadow-sm">
+        <ng-icon name="phosphorWarningCircle" class="text-4xl text-[var(--color-danger,#EF4444)] mx-auto mb-4" />
+        <h2 class="text-lg font-bold text-[var(--color-text,#0F172A)] mb-2">
+          {{ 'checkout.error.orderNotFound' | translate }}
+        </h2>
+        <p class="text-sm text-[var(--color-text-muted,#64748B)] mb-6">{{ orderError() }}</p>
+        <app-button routerLink="/courses" variant="primary">
+          {{ 'catalog.heading' | translate }}
+        </app-button>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left Column: Payment Methods & QR & e-Tax -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Payment Method Card -->
+          <div class="bg-white border border-[var(--color-border,#E2E8F0)] rounded-2xl p-6 shadow-sm">
+            <h2 class="text-lg font-semibold text-[var(--color-text,#0F172A)] mb-4">
+              {{ 'checkout.paymentMethodHeading' | translate }}
+            </h2>
+
+            <div class="space-y-3">
+              <!-- PromptPay QR (Active) -->
+              <button
+                type="button"
+                (click)="setMethod('PromptPay')"
+                [class.border-[var(--color-primary,#DB2777)]]="selectedMethod() === 'PromptPay'"
+                [class.bg-[var(--color-primary-subtle,#FDF2F8)]]="selectedMethod() === 'PromptPay'"
+                [class.border-[var(--color-border,#E2E8F0)]]="selectedMethod() !== 'PromptPay'"
+                class="w-full text-left p-4 rounded-xl border flex items-center gap-4 transition-all hover:bg-slate-50 cursor-pointer"
+              >
+                <div class="w-5 h-5 rounded-full border-2 border-[var(--color-primary,#DB2777)] flex items-center justify-center flex-none">
+                  @if (selectedMethod() === 'PromptPay') {
+                    <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-primary,#DB2777)]"></div>
+                  }
+                </div>
+                <ng-icon name="phosphorQrCode" class="text-2xl text-[var(--color-primary,#DB2777)] flex-none" />
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-sm text-[var(--color-text,#0F172A)]">
+                    {{ 'checkout.methods.promptpay' | translate }}
+                  </div>
+                  <div class="text-xs text-[var(--color-text-muted,#64748B)] mt-0.5">
+                    {{ 'checkout.methods.promptpayDesc' | translate }}
+                  </div>
+                </div>
+              </button>
+
+              <!-- Credit/Debit Card (Disabled, Coming Soon) -->
+              <div
+                class="w-full p-4 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 opacity-60 flex items-center gap-4 cursor-not-allowed"
+              >
+                <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex-none"></div>
+                <ng-icon name="phosphorCreditCard" class="text-2xl text-slate-400 flex-none" />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-sm text-slate-600">
+                      {{ 'checkout.methods.card' | translate }}
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-200 text-slate-600">
+                      {{ 'checkout.methods.comingSoon' | translate }}
+                    </span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-0.5">
+                    {{ 'checkout.methods.cardDesc' | translate }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Installment (Disabled, Coming Soon) -->
+              <div
+                class="w-full p-4 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 opacity-60 flex items-center gap-4 cursor-not-allowed"
+              >
+                <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex-none"></div>
+                <ng-icon name="phosphorReceipt" class="text-2xl text-slate-400 flex-none" />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-sm text-slate-600">
+                      {{ 'checkout.methods.installment' | translate }}
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-200 text-slate-600">
+                      {{ 'checkout.methods.comingSoon' | translate }}
+                    </span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-0.5">
+                    {{ 'checkout.methods.installmentDesc' | translate }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- QR Code Display Area -->
+            @if (payment(); as p) {
+              <div class="mt-6 pt-6 border-t border-[var(--color-border,#E2E8F0)]">
+                @if (paymentPollStatus() === 'succeeded') {
+                  <div class="p-6 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
+                    <ng-icon name="phosphorCheckCircle" class="text-5xl text-emerald-600 mx-auto" />
+                    <h3 class="text-lg font-bold text-emerald-900">
+                      {{ 'checkout.qr.paid' | translate }}
+                    </h3>
+                  </div>
+                } @else if (paymentPollStatus() === 'expired') {
+                  <div class="p-6 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-3">
+                    <ng-icon name="phosphorWarningCircle" class="text-5xl text-rose-600 mx-auto" />
+                    <h3 class="text-lg font-bold text-rose-900">
+                      {{ 'checkout.qr.expired' | translate }}
+                    </h3>
+                    <app-button variant="primary" size="sm" (click)="initiatePayment()">
+                      {{ 'checkout.error.retry' | translate }}
+                    </app-button>
+                  </div>
+                } @else {
+                  <div class="flex flex-col sm:flex-row items-center gap-6">
+                    <!-- QR Box -->
+                    <div class="w-44 h-44 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 flex flex-col items-center justify-center p-3 shadow-inner flex-none">
+                      @if (p.qrCodeUrl) {
+                        <img [src]="p.qrCodeUrl" alt="PromptPay QR Code" class="w-32 h-32 object-contain" />
+                      } @else {
+                        <ng-icon name="phosphorQrCode" class="text-7xl text-[var(--color-primary,#DB2777)] mb-1" />
+                      }
+                      <span class="text-[11px] font-bold text-[var(--color-text-muted,#64748B)] uppercase tracking-wider">
+                        Thai QR Payment
+                      </span>
+                    </div>
+
+                    <!-- QR Info -->
+                    <div class="space-y-2 text-center sm:text-left">
+                      <div class="font-semibold text-sm text-[var(--color-text,#0F172A)]">
+                        {{ 'checkout.qr.scanPrompt' | translate }}
+                      </div>
+                      <div class="text-xs text-[var(--color-text-muted,#64748B)]">
+                        {{ 'checkout.qr.amount' | translate }}
+                        <span class="font-bold text-base text-[var(--color-primary,#DB2777)] ml-1">
+                          {{ total() | currencyThb }}
+                        </span>
+                        @if (order(); as o) {
+                          <span class="ml-1">· {{ 'checkout.qr.refNo' | translate: { orderNo: o.orderNo } }}</span>
+                        }
+                      </div>
+                      <div class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                        <ng-icon name="phosphorTimer" class="text-sm" />
+                        {{ 'checkout.qr.expiresIn' | translate: { minutes: formattedTimeRemaining().split(':')[0], seconds: formattedTimeRemaining().split(':')[1] } }}
+                      </div>
+                      <div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted,#64748B)] justify-center sm:justify-start">
+                        <ng-icon name="phosphorCheckCircle" class="text-emerald-500" />
+                        {{ 'checkout.qr.autoConfirm' | translate }}
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- e-Tax Invoice Card -->
+          <div class="bg-white border border-[var(--color-border,#E2E8F0)] rounded-2xl p-6 shadow-sm space-y-4">
+            <app-checkbox
+              [label]="'checkout.etax.checkboxLabel' | translate"
+              [ngModel]="etaxChecked()"
+              (ngModelChange)="toggleEtax($event)"
+            />
+
+            @if (etaxChecked()) {
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <app-input
+                  [label]="'checkout.etax.taxIdLabel' | translate"
+                  [placeholder]="'checkout.etax.taxIdPlaceholder' | translate"
+                  [ngModel]="taxId()"
+                  (ngModelChange)="updateTaxId($event)"
+                />
+                <app-input
+                  [label]="'checkout.etax.nameLabel' | translate"
+                  [placeholder]="'checkout.etax.namePlaceholder' | translate"
+                  [ngModel]="taxName()"
+                  (ngModelChange)="updateTaxName($event)"
+                />
+              </div>
+            }
+
+            <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted,#64748B)] pt-2 border-t border-[var(--color-border,#E2E8F0)]">
+              <ng-icon name="phosphorShieldCheck" class="text-base text-emerald-500 flex-none" />
+              <span>{{ 'checkout.etax.pdpaNotice' | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sticky Order Summary -->
+        <div class="lg:col-span-5 bg-white border border-[var(--color-border,#E2E8F0)] rounded-2xl p-6 shadow-sm sticky top-24 space-y-6">
+          <h2 class="text-lg font-semibold text-[var(--color-text,#0F172A)]">
+            {{ 'checkout.summary.heading' | translate }}
+          </h2>
+
+          <!-- Course Items -->
+          @if (order(); as o) {
+            <div class="space-y-4 divide-y divide-[var(--color-border,#E2E8F0)]">
+              @for (item of o.items; track item.id) {
+                <div class="flex gap-4 items-center pt-3 first:pt-0">
+                  <div class="w-16 h-11 rounded-lg bg-slate-100 flex-none flex items-center justify-center text-slate-400">
+                    <ng-icon name="phosphorImage" class="text-xl" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm text-[var(--color-text,#0F172A)] truncate">
+                      {{ item.titleSnapshot }}
+                    </p>
+                    @if (item.instructorName) {
+                      <p class="text-xs text-[var(--color-text-muted,#64748B)]">
+                        {{ item.instructorName }}
+                      </p>
+                    }
+                  </div>
+                  <div class="text-right flex-none">
+                    <span class="font-semibold text-sm text-[var(--color-text,#0F172A)]">
+                      {{ item.lineTotal | currencyThb }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Promo Code Section -->
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input
+                  type="text"
+                  [placeholder]="'checkout.summary.promoPlaceholder' | translate"
+                  [value]="promoCodeInput()"
+                  (input)="updatePromoCode($any($event.target).value)"
+                  class="w-full h-11 px-3 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-[var(--color-bg,#F8FAFC)] text-sm focus:outline-none focus:border-[var(--color-primary,#DB2777)] uppercase"
+                />
+              </div>
+              <app-button
+                variant="secondary"
+                size="md"
+                [disabled]="isApplyingPromo() || !promoCodeInput()"
+                (click)="applyPromoCode()"
+              >
+                {{ 'checkout.summary.applyPromo' | translate }}
+              </app-button>
+            </div>
+
+            @if (appliedPromo(); as p) {
+              <div class="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                <ng-icon name="phosphorCheckCircle" />
+                <span>
+                  {{ 'checkout.summary.promoApplied' | translate: { code: p.code, discount: ((p.discountAmount | currencyThb) ?? '') } }}
+                </span>
+              </div>
+            }
+
+            @if (promoError(); as err) {
+              <div class="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                <ng-icon name="phosphorWarningCircle" />
+                <span>{{ err }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="border-t border-[var(--color-border,#E2E8F0)] pt-4 space-y-2.5 text-sm">
+            <div class="flex justify-between text-[var(--color-text-muted,#64748B)]">
+              <span>{{ 'checkout.summary.subtotal' | translate }}</span>
+              <span>{{ subtotal() | currencyThb }}</span>
+            </div>
+
+            @if (discount() > 0) {
+              <div class="flex justify-between text-emerald-600 font-medium">
+                <span>{{ 'checkout.summary.discount' | translate }}</span>
+                <span>-{{ discount() | currencyThb }}</span>
+              </div>
+            }
+
+            <div class="flex justify-between text-base font-bold text-[var(--color-text,#0F172A)] pt-2 border-t border-[var(--color-border,#E2E8F0)]">
+              <span>{{ 'checkout.summary.total' | translate }}</span>
+              <span class="text-[var(--color-primary,#DB2777)] text-lg">
+                {{ total() | currencyThb }}
+              </span>
+            </div>
+            <p class="text-[11px] text-[var(--color-text-muted,#64748B)] text-right">
+              {{ 'checkout.summary.vatIncluded' | translate }}
+            </p>
+          </div>
+
+          <!-- Action Button -->
+          <div class="pt-2">
+            @if (!payment()) {
+              <app-button
+                variant="primary"
+                size="lg"
+                [fullWidth]="true"
+                [disabled]="isCreatingPayment()"
+                (click)="initiatePayment()"
+              >
+                @if (isCreatingPayment()) {
+                  {{ 'checkout.summary.processing' | translate }}
+                } @else {
+                  {{ 'checkout.summary.payButton' | translate: { amount: ((total() | currencyThb) ?? '') } }}
+                }
+              </app-button>
+            }
+          </div>
+
+          <!-- Guarantee Badge -->
+          <div class="flex items-start gap-2 text-xs text-[var(--color-text-muted,#64748B)] pt-2">
+            <ng-icon name="phosphorShieldCheck" class="text-base text-emerald-500 flex-none mt-0.5" />
+            <span>{{ 'checkout.summary.guarantee' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

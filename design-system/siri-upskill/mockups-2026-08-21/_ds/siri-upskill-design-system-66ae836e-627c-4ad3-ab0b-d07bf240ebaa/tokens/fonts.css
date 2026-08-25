@@ -1,0 +1,5 @@
+/* IBM Plex Sans Thai (weights 400/500/600/700) from Google Fonts — the product loads
+   this same stylesheet via <link> in index.html. No self-hosted binaries exist in the
+   source codebase; if brand font files are provided later, replace this @import with
+   local @font-face rules. */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap');

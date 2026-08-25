@@ -1,0 +1,147 @@
+<div class="mx-auto max-w-6xl px-4 py-8">
+  <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'catalog.heading' | translate }}</h1>
+
+  <form (submit)="$event.preventDefault(); applySearch()" class="mt-4 flex max-w-xl gap-2">
+    <div class="flex-1">
+      <app-input
+        [formControl]="searchControl"
+        type="search"
+        [label]="'catalog.searchLabel' | translate"
+        [placeholder]="'catalog.searchPlaceholder' | translate"
+      />
+    </div>
+    <app-button type="submit" class="mt-6">{{ 'catalog.searchSubmit' | translate }}</app-button>
+  </form>
+
+  <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
+    <!-- Filters sidebar -->
+    <aside class="flex flex-col gap-6">
+      <section>
+        <h2 class="mb-3 text-sm font-semibold text-[var(--color-text)]">{{ 'catalog.filters.categoryHeading' | translate }}</h2>
+        <ul class="flex flex-col gap-1">
+          @for (category of categories(); track category.id) {
+            <li>
+              <button
+                type="button"
+                (click)="toggleCategory(category.slug)"
+                [attr.aria-pressed]="categorySlug() === category.slug"
+                [class]="
+                  categorySlug() === category.slug
+                    ? 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                    : 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                "
+              >
+                {{ categoryName(category) }}
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section>
+        <app-select
+          [formControl]="levelControl"
+          (change)="applyLevelFilter()"
+          [label]="'catalog.filters.levelHeading' | translate"
+          [options]="levelOptions()"
+        />
+      </section>
+
+      <section>
+        <app-select
+          [formControl]="minRatingControl"
+          (change)="applyRatingFilter()"
+          [label]="'catalog.filters.ratingHeading' | translate"
+          [options]="ratingOptions()"
+        />
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-sm font-semibold text-[var(--color-text)]">{{ 'catalog.filters.priceHeading' | translate }}</h2>
+        <form (submit)="$event.preventDefault(); applyPriceFilter()" class="flex items-end gap-2">
+          <app-input [formControl]="minPriceControl" type="number" [label]="'catalog.filters.priceMin' | translate" />
+          <app-input [formControl]="maxPriceControl" type="number" [label]="'catalog.filters.priceMax' | translate" />
+          <app-button type="submit" size="sm" variant="secondary">{{ 'catalog.filters.priceApply' | translate }}</app-button>
+        </form>
+      </section>
+
+      @if (hasActiveFilters()) {
+        <app-button variant="ghost" size="sm" (click)="clearAllFilters()">{{ 'catalog.filters.clearAll' | translate }}</app-button>
+      }
+    </aside>
+
+    <!-- Results -->
+    <div>
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ 'catalog.resultCount' | translate: { count: searchResult().results.totalCount } }}
+        </p>
+        <div class="w-48">
+          <app-select
+            [formControl]="sortControl"
+            (change)="applySortFilter()"
+            [label]="'catalog.filters.sortHeading' | translate"
+            [options]="sortOptions()"
+          />
+        </div>
+      </div>
+
+      @if (courseSearchResource.isLoading()) {
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true" [attr.aria-label]="'catalog.loadingLabel' | translate">
+          @for (placeholder of skeletonCards; track placeholder) {
+            <div class="flex flex-col gap-3">
+              <app-skeleton variant="block" height="10rem" />
+              <app-skeleton variant="text" [lines]="2" />
+              <app-skeleton variant="text" width="40%" />
+            </div>
+          }
+        </div>
+      } @else if (courseSearchResource.error()) {
+        <app-empty-state [heading]="'catalog.errorHeading' | translate" [description]="'catalog.errorDescription' | translate">
+          <app-button emptyStateAction (click)="retrySearch()">{{ 'catalog.retryButton' | translate }}</app-button>
+        </app-empty-state>
+      } @else if (searchResult().results.items.length === 0) {
+        <app-empty-state [heading]="'catalog.emptyHeading' | translate" [description]="'catalog.emptyDescription' | translate">
+          @if (hasActiveFilters()) {
+            <app-button emptyStateAction (click)="clearAllFilters()">{{ 'catalog.filters.clearAll' | translate }}</app-button>
+          }
+        </app-empty-state>
+      } @else {
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          @for (course of searchResult().results.items; track course.id) {
+            <a
+              [routerLink]="['/courses', course.slug]"
+              class="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
+                hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
+                @if (course.thumbnailUrl) {
+                  <!-- fill, not width/height: thumbnail dimensions aren't known ahead of time, only the
+                       container's aspect ratio is (frontend.md requires NgOptimizedImage on every image). -->
+                  <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover" />
+                }
+              </div>
+              <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">{{ course.title }}</h3>
+              <p class="text-sm text-[var(--color-text-muted)]">{{ course.instructorDisplayName }}</p>
+              @if (course.ratingCount > 0) {
+                <p class="text-sm text-[var(--color-text)]">
+                  {{ 'catalog.ratingSummary' | translate: { rating: course.ratingAverage, count: course.ratingCount } }}
+                </p>
+              }
+              <div class="mt-auto flex items-baseline gap-2">
+                <span class="text-lg font-bold text-[var(--color-primary)]">{{ course.price | currencyThb }}</span>
+                @if (course.comparePrice) {
+                  <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course.comparePrice | currencyThb }}</span>
+                }
+              </div>
+            </a>
+          }
+        </div>
+
+        <div class="mt-8">
+          <app-pagination [currentPage]="page()" [totalPages]="searchResult().results.totalPages" (currentPageChange)="onPageChange($event)" />
+        </div>
+      }
+    </div>
+  </div>
+</div>

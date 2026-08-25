@@ -1,0 +1,75 @@
+<div class="max-w-6xl mx-auto space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">รอบการจ่ายเงินผู้สอน (Instructor Payout Batches)</h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">ประมวลผลส่วนแบ่งรายได้ตามรอบบัญชี และทำรายการโอนเงิน</p>
+    </div>
+
+    <button
+      type="button"
+      (click)="generateBatch()"
+      [disabled]="isGenerating()"
+      class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+    >
+      <ng-icon name="phosphorPlus" />
+      <span>{{ isGenerating() ? 'กำลังประมวลผล...' : 'สร้างรอบจ่ายเงินใหม่' }}</span>
+    </button>
+  </div>
+
+  <!-- Batches Table -->
+  <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-[var(--color-text)]">
+        <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+          <tr>
+            <th class="px-6 py-3">เลขที่รอบบัญชี (Batch #)</th>
+            <th class="px-6 py-3">ช่วงเวลา</th>
+            <th class="px-6 py-3">จำนวนผู้สอน</th>
+            <th class="px-6 py-3">ยอดรวมสุทธิ</th>
+            <th class="px-6 py-3">สถานะ</th>
+            <th class="px-6 py-3 text-right">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--color-border)]">
+          @for (batch of batches(); track batch.id) {
+            <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+              <td class="px-6 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
+                {{ batch.batchNumber }}
+              </td>
+              <td class="px-6 py-4 text-xs text-[var(--color-text-muted)]">
+                {{ batch.periodStartUtc | date: 'dd/MM/yyyy' }} - {{ batch.periodEndUtc | date: 'dd/MM/yyyy' }}
+              </td>
+              <td class="px-6 py-4 text-xs font-medium">
+                {{ batch.totalInstructors }} ท่าน
+              </td>
+              <td class="px-6 py-4 font-bold text-[var(--color-primary)]">
+                {{ batch.totalAmount | currencyThb }}
+              </td>
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold"
+                  [class.bg-emerald-500/10]="batch.status === 'Paid'"
+                  [class.text-emerald-600]="batch.status === 'Paid'"
+                  [class.bg-amber-500/10]="batch.status === 'Pending'"
+                  [class.text-amber-600]="batch.status === 'Pending'"
+                >
+                  {{ batch.status === 'Paid' ? 'โอนเงินแล้ว' : 'รอดำเนินการ' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded-lg bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-border)] transition"
+                >
+                  <ng-icon name="phosphorDownloadSimple" />
+                  <span>ส่งออก CSV</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

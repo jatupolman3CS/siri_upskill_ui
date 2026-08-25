@@ -1,0 +1,66 @@
+/* SIRI UpSkill color tokens — pink theme (user request 2026-08-20).
+   Original trust-blue values live in the source codebase tokens.css. */
+:root{
+--color-bg:#ffffff;
+--color-surface:#fdf2f7;
+--color-surface-muted:#fae3ee;
+--color-border:#f3cbdd;
+--color-text:#2a1220;
+--color-text-muted:#75465e;
+--color-text-inverse:#fdf2f7;
+--color-primary:#db2777;
+--color-primary-hover:#be185d;
+--color-primary-foreground:#ffffff;
+--color-accent:#b45309;
+--color-accent-foreground:#ffffff;
+--color-success:#16a34a;
+--color-warning:#d97706;
+--color-danger:#dc2626;
+--color-focus-ring:#db2777;
+/* semantic aliases */
+--surface-card:var(--color-surface);
+--text-body:var(--color-text);
+--text-secondary:var(--color-text-muted);
+}
+/* Dark theme applies via OS preference, or explicitly via <html data-theme="dark">
+   (data-theme="light" forces light regardless of OS). */
+@media (prefers-color-scheme:dark){:root{
+--color-bg:#2c0b1d;
+--color-surface:#3d1129;
+--color-surface-muted:#521a38;
+--color-border:#521a38;
+--color-text:#fdf2f7;
+--color-text-muted:#d9a3bd;
+--color-text-inverse:#2c0b1d;
+--color-primary-hover:#f472b6;
+--color-accent:#fbbf24;
+--color-accent-foreground:#1c1917;
+--color-focus-ring:#f472b6;
+}}
+:root[data-theme=dark]{
+--color-bg:#2c0b1d;
+--color-surface:#3d1129;
+--color-surface-muted:#521a38;
+--color-border:#521a38;
+--color-text:#fdf2f7;
+--color-text-muted:#d9a3bd;
+--color-text-inverse:#2c0b1d;
+--color-primary-hover:#f472b6;
+--color-accent:#fbbf24;
+--color-accent-foreground:#1c1917;
+--color-focus-ring:#f472b6;
+}
+/* Explicit light choice must beat the OS media query */
+:root[data-theme=light]{
+--color-bg:#ffffff;
+--color-surface:#fdf2f7;
+--color-surface-muted:#fae3ee;
+--color-border:#f3cbdd;
+--color-text:#2a1220;
+--color-text-muted:#75465e;
+--color-text-inverse:#fdf2f7;
+--color-primary-hover:#be185d;
+--color-accent:#b45309;
+--color-accent-foreground:#ffffff;
+--color-focus-ring:#db2777;
+}
