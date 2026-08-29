@@ -1,7 +1,4 @@
-# SiriUpSkill frontend
-# Angular 22 SSR application; serving is done by the generated Node Express server,
-# not by nginx static files.
-
+# Build stage
 FROM node:22-alpine AS build
 WORKDIR /app
 
@@ -11,16 +8,24 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine AS runtime
-WORKDIR /app
+# Normalize Angular output path across builder versions
+RUN if [ -d "dist/siri_upskill_ui/browser" ]; then \
+        cp -r dist/siri_upskill_ui/browser /tmp/webroot; \
+    elif [ -d "dist/siri_upskill_ui" ]; then \
+        cp -r dist/siri_upskill_ui /tmp/webroot; \
+    else \
+        echo "Angular build output not found"; \
+        ls -la dist; \
+        exit 1; \
+    fi
 
-ENV NODE_ENV=production \
-    PORT=9005
+# Runtime stage
+FROM nginx:1.27-alpine AS runtime
+WORKDIR /usr/share/nginx/html
 
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
+RUN rm -rf ./*
+COPY nginx.web.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /tmp/webroot/ /usr/share/nginx/html/
 
 EXPOSE 9005
-
-CMD ["node", "dist/frontend/server/server.mjs"]
+CMD ["nginx", "-g", "daemon off;"]
