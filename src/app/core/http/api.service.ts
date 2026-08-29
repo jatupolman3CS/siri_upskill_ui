@@ -43,8 +43,11 @@ function toHttpParams(params?: ApiQueryParams): HttpParams {
 export class ApiService {
   protected readonly http = inject(HttpClient);
 
-  // TODO: source from a proper environment/config token once the backend
-  // base URL (and any per-env overrides for staging/prod) is decided.
+  /**
+   * Paths stay relative here on purpose: `apiBaseUrlInterceptor` rewrites `/api/...` onto
+   * `environment.apiUrl` at request time, so the deploy-time host lives in `src/environments/`
+   * and not in this class (nor in the feature services that build their own `/api/...` paths).
+   */
   protected readonly apiBaseUrl = '/api';
 
   protected get<T>(path: string, params?: ApiQueryParams): Observable<T> {

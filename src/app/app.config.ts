@@ -6,6 +6,7 @@ import { provideClientHydration } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
+import { apiBaseUrlInterceptor } from './core/http/api-base-url.interceptor';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
 import { mockDataInterceptor } from './core/http/mock-data.interceptor';
@@ -17,6 +18,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, mockDataInterceptor, errorInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([apiBaseUrlInterceptor, authInterceptor, mockDataInterceptor, errorInterceptor])),
   ],
 };
