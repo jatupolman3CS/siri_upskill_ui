@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,14 +21,17 @@ import {
 import { PendingCourseReviewSummary } from './data/admin-moderation-api.models';
 import { AdminModerationApiService } from './data/admin-moderation-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-course-moderation-page',
-  imports: [CommonModule, FormsModule, RouterLink, NgIcon, CurrencyThbPipe],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, CurrencyThbPipe, TranslatePipe, Spinner],
   templateUrl: './admin-course-moderation-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    CurrencyPipe,
     provideIcons({
       phosphorCheckCircle,
       phosphorXCircle,

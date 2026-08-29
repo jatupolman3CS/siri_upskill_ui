@@ -1,0 +1,40 @@
+<div class="attachments-container">
+  <h3>{{ 'learn.resources.heading' | translate }}</h3>
+
+  @if (isLoading()) {
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>กำลังโหลดเอกสารแนบ...</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && attachments().length === 0) {
+    <div class="empty-box">
+      <span class="icon">📎</span>
+      <p>{{ 'learn.resources.empty' | translate }}</p>
+    </div>
+  }
+
+  @if (!isLoading() && attachments().length > 0) {
+    <div class="attachments-list">
+      @for (item of attachments(); track item.id) {
+        <div class="attachment-item">
+          <div class="item-info">
+            <span class="file-icon">📄</span>
+            <div class="file-details">
+              <span class="file-name">{{ item.fileName }}</span>
+              <span class="file-size">{{ formatBytes(item.sizeBytes) }}</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline" (click)="download(item)">
+            ⬇️ {{ 'learn.resources.download' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

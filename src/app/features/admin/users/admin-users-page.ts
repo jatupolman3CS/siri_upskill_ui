@@ -16,7 +16,9 @@ import {
   phosphorPencilSimple,
   phosphorShieldCheck,
   phosphorShieldWarning,
+  phosphorUser,
   phosphorUserPlus,
+  phosphorUsers,
   phosphorXCircle,
 } from '@ng-icons/phosphor-icons/regular';
 
@@ -26,16 +28,19 @@ import {
 } from './data/admin-users-api.models';
 import { AdminUsersApiService } from './data/admin-users-api.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-users-page',
-  imports: [CommonModule, FormsModule, NgIcon],
+  imports: [CommonModule, FormsModule, NgIcon, Spinner],
   templateUrl: './admin-users-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     provideIcons({
-      phosphorMagnifyingGlass,
+      phosphorUsers,
+      phosphorUser,
       phosphorUserPlus,
+      phosphorMagnifyingGlass,
       phosphorShieldCheck,
       phosphorShieldWarning,
       phosphorLockKey,
@@ -61,6 +66,13 @@ export class AdminUsersPage implements OnInit {
   protected readonly totalUsers = signal(0);
   protected readonly auditLogs = signal<AdminAuditLogSummary[]>([]);
   protected readonly totalAuditLogs = signal(0);
+
+  // Invite Modal State
+  protected readonly showInviteModal = signal(false);
+  protected readonly inviteEmail = signal('');
+  protected readonly inviteDisplayName = signal('');
+  protected readonly inviteRole = signal('Learner');
+  protected readonly isSubmittingInvite = signal(false);
 
   // Edit Role Modal State
   protected readonly editingUser = signal<AdminUserSummary | null>(null);
@@ -130,6 +142,46 @@ export class AdminUsersPage implements OnInit {
 
   protected onSearch(): void {
     this.loadUsers();
+  }
+
+  protected openInviteModal(): void {
+    this.inviteEmail.set('');
+    this.inviteDisplayName.set('');
+    this.inviteRole.set('Learner');
+    this.showInviteModal.set(true);
+  }
+
+  protected closeInviteModal(): void {
+    this.showInviteModal.set(false);
+  }
+
+  protected submitInvite(): void {
+    const email = this.inviteEmail().trim();
+    const displayName = this.inviteDisplayName().trim();
+    const role = this.inviteRole();
+
+    if (!email || !displayName) return;
+
+    this.isSubmittingInvite.set(true);
+    this.adminUsersApi
+      .inviteUser({
+        email,
+        displayName,
+        role,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isSubmittingInvite.set(false);
+          this.closeInviteModal();
+          this.showMessage('success', `เชิญผู้ใช้ ${res.email} เข้าสู่ระบบเรียบร้อยแล้ว`);
+          this.loadUsers();
+          this.loadAuditLogs();
+        },
+        error: (err) => {
+          this.isSubmittingInvite.set(false);
+          this.showMessage('error', err?.error?.detail || 'เกิดข้อผิดพลาดในการเชิญผู้ใช้');
+        },
+      });
   }
 
   protected openEditRoleModal(user: AdminUserSummary): void {

@@ -36,6 +36,7 @@ import { Button } from '../../../shared/button/button';
 import { Checkbox } from '../../../shared/checkbox/checkbox';
 import { InputField } from '../../../shared/input/input';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
+import { Spinner } from '../../../shared/spinner/spinner';
 import {
   OrderDetailResponse,
   PaymentMethod,
@@ -61,6 +62,7 @@ export type CheckoutStep = 'selection' | 'qr_display' | 'success' | 'expired';
     Checkbox,
     InputField,
     Skeleton,
+    Spinner,
   ],
   templateUrl: './checkout-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -106,6 +108,13 @@ export class CheckoutPage {
   // QR display & countdown
   public readonly qrTimeRemainingSeconds = signal<number>(900); // 15 minutes default
   public readonly paymentPollStatus = signal<'idle' | 'polling' | 'succeeded' | 'expired' | 'error'>('idle');
+
+  public readonly currentStep = computed<CheckoutStep>(() => {
+    if (this.paymentPollStatus() === 'succeeded') return 'success';
+    if (this.paymentPollStatus() === 'expired') return 'expired';
+    if (this.payment()) return 'qr_display';
+    return 'selection';
+  });
 
   // e-Tax toggle & inputs
   public readonly etaxChecked = signal<boolean>(false);
@@ -164,34 +173,9 @@ export class CheckoutPage {
     if (id) {
       this.loadOrder(id);
     } else {
-      // Create mock or fallback order for demonstration / direct navigation
-      this.order.set({
-        id: 'sample-order-id',
-        orderNo: 'SU-88214',
-        subtotalAmount: 3880,
-        discountAmount: 0,
-        taxAmount: 253.83,
-        totalAmount: 3880,
-        currency: 'THB',
-        status: 'Pending',
-        items: [
-          {
-            id: 'item-1',
-            titleSnapshot: 'Digital Marketing ครบวงจร',
-            instructorName: 'คุณนภา วงศ์สว่าง',
-            unitPrice: 1890,
-            lineTotal: 1890,
-          },
-          {
-            id: 'item-2',
-            titleSnapshot: 'สร้าง Mobile App ด้วย Flutter',
-            instructorName: 'อ.สมชาย ใจดี',
-            unitPrice: 1990,
-            lineTotal: 1990,
-          },
-        ],
-      });
       this.isLoadingOrder.set(false);
+      this.orderError.set('ไม่พบคำสั่งซื้อ กรุณาสร้างคำสั่งซื้อจากตะกร้าสินค้า');
+      this.router.navigate(['/cart']);
     }
 
     this.destroyRef.onDestroy(() => {

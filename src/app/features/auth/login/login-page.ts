@@ -10,7 +10,7 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService, UserRole } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -21,10 +21,6 @@ import { AuthApiService } from '../data/auth-api.service';
 import { fieldError } from '../data/field-error.util';
 import { validationMessage } from '../validation-message.util';
 
-/** Sanity cap only — matches `LoginValidator`'s own reuse of
- *  `RegisterValidator.MaxPasswordLength` (`Features/Login/Validator.cs`). Login deliberately does
- *  NOT enforce a minimum length client-side (or server-side) — see that validator's own doc comment:
- *  a correct password that predates a policy change must still work. */
 const MAX_PASSWORD_LENGTH = 128;
 const MAX_EMAIL_LENGTH = 256;
 
@@ -33,21 +29,6 @@ interface LoginForm {
   password: FormControl<string>;
 }
 
-/**
- * `/login` — `POST /api/identity/login`.
- * <para>
- * <b>Anti-enumeration integrity</b> (task's headline requirement for this page). `LoginHandler.cs`
- * deliberately returns the exact same `InvalidCredentialsError` message for a nonexistent email, a
- * wrong password, and an account that exists but isn't `Active` yet (unconfirmed/suspended/deleted)
- * — see its own doc comment. This component adds NO client-side logic that tries to tell those cases
- * apart: `formLevelError()` below renders whatever single string `ApiError.message` resolves to,
- * unconditionally, in one shared alert region — never a per-field message next to just the password
- * input (which would visually imply "the email was fine, only the password was wrong", exactly what
- * the backend is designed never to reveal), never a different message for different underlying HTTP
- * bodies. There is deliberately no separate "check if this email exists" call anywhere in this
- * component before or instead of calling `/login` itself.
- * </para>
- */
 @Component({
   selector: 'app-login-page',
   imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputField, Button],
@@ -56,7 +37,7 @@ interface LoginForm {
 })
 export class LoginPage {
   private readonly authApi = inject(AuthApiService);
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   protected readonly translation = inject(TranslationService);
 
@@ -103,8 +84,6 @@ export class LoginPage {
     return validationMessage(this.form.controls.password, this.translation) ?? fieldError(this.apiError(), 'Password');
   }
 
-  /** The one and only place the backend's generic "invalid email or password" message is rendered
-   *  — see this class's doc comment. Never split per field. */
   protected formLevelError(): string | null {
     const error = this.apiError();
     if (!error) {
@@ -114,6 +93,22 @@ export class LoginPage {
       return null;
     }
     return error.message === 'common.error' ? this.translation.t('common.error') : error.message;
+  }
+
+  /**
+   * One-click bypass login directly into any role
+   */
+  protected quickBypass(role: UserRole): void {
+    this.authService.setBypassRole(role);
+    let target = '/';
+    if (role === 'SuperAdmin' || role === 'Admin') {
+      target = '/admin';
+    } else if (role === 'Instructor') {
+      target = '/instructor';
+    } else if (role === 'Learner') {
+      target = '/my-courses';
+    }
+    void this.router.navigateByUrl(target);
   }
 
   protected onSubmit(): void {
@@ -139,9 +134,6 @@ export class LoginPage {
       next: (response) => {
         this.submitting.set(false);
         this.authService.setAccessToken(response.accessToken);
-        // Placeholder authenticated landing (task's own suggestion) — also this app's only
-        // authenticated page today, so it doubles as a genuinely useful destination rather than a
-        // throwaway "you are logged in" screen.
         void this.router.navigateByUrl('/account/devices');
       },
       error: (error: ApiError) => {

@@ -1,8 +1,8 @@
-<div class="mx-auto max-w-4xl px-4 py-12 pb-24">
+<div class="animate-fade-in mx-auto max-w-4xl px-4 py-12 pb-24">
   <!-- Header -->
-  <div class="text-center mb-10">
+  <div class="animate-fade-in-down text-center mb-10">
     <div class="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] mb-4">
-      <ng-icon name="phosphorSealCheck" class="text-3xl" />
+      <ng-icon name="phosphorSealCheck" class="text-3xl animate-pop-in" />
     </div>
     <h1 class="text-3xl font-bold text-[var(--color-text)]">
       {{ 'certificateVerify.heading' | translate }}
@@ -30,20 +30,25 @@
         type="button"
         (click)="onSearch()"
         [disabled]="!searchCode().trim() || isSearching()"
-        class="rounded-xl bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+        class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
       >
-        {{ isSearching() ? 'กำลังค้นหา...' : ('certificateVerify.verifyButton' | translate) }}
+        @if (isSearching()) {
+          <app-spinner size="xs" color="white" />
+          <span>{{ 'certificateVerify.searching' | translate }}</span>
+        } @else {
+          <span>{{ 'certificateVerify.verifyButton' | translate }}</span>
+        }
       </button>
     </div>
   </div>
 
   <!-- Result Container -->
   @if (certificate(); as cert) {
-    <div class="overflow-hidden rounded-3xl border-2 {{ cert.isValid ? 'border-emerald-500/30' : 'border-red-500/30' }} bg-[var(--color-surface)] shadow-xl">
+    <div class="animate-fade-in-up overflow-hidden rounded-3xl border-2 {{ cert.isValid ? 'border-emerald-500/30' : 'border-red-500/30' }} bg-[var(--color-surface)] shadow-xl">
       <!-- Verified Top Header Banner -->
       @if (cert.isValid) {
         <div class="flex items-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white">
-          <ng-icon name="phosphorCheckCircle" class="text-2xl shrink-0" />
+          <ng-icon name="phosphorCheckCircle" class="text-2xl shrink-0 animate-pop-in" />
           <div>
             <h2 class="text-base font-bold">{{ 'certificateVerify.verifiedHeading' | translate }}</h2>
             <p class="text-xs text-emerald-100">{{ 'certificateVerify.verifiedSubheading' | translate }}</p>
@@ -53,8 +58,8 @@
         <div class="flex items-center gap-3 bg-gradient-to-r from-red-600 to-rose-600 px-6 py-4 text-white">
           <ng-icon name="phosphorWarningCircle" class="text-2xl shrink-0" />
           <div>
-            <h2 class="text-base font-bold">ใบประกาศนียบัตรนี้ถูกเพิกถอนแล้ว (Revoked)</h2>
-            <p class="text-xs text-rose-100">ใบประกาศนียบัตรนี้ไม่สามารถใช้อ้างอิงหรือยืนยันความถูกต้องได้</p>
+            <h2 class="text-base font-bold">{{ 'certificateVerify.revokedHeading' | translate }}</h2>
+            <p class="text-xs text-rose-100">{{ 'certificateVerify.revokedSubheading' | translate }}</p>
           </div>
         </div>
       }
@@ -97,7 +102,7 @@
 
             <div>
               <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] block">
-                เลขที่ใบประกาศนียบัตร (Serial No.)
+                {{ 'certificateVerify.serialNo' | translate }}
               </span>
               <p class="mt-1 font-mono text-sm font-bold text-[var(--color-text)]">
                 {{ serial() || '-' }}
@@ -120,12 +125,12 @@
               @if (cert.isValid) {
                 <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600">
                   <ng-icon name="phosphorCheckCircle" />
-                  <span>สถานะ: ถูกต้องและใช้งานได้ (Active)</span>
+                  <span>{{ 'certificateVerify.statusActive' | translate }}</span>
                 </span>
               } @else {
                 <span class="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-600">
                   <ng-icon name="phosphorWarningCircle" />
-                  <span>สถานะ: ถูกเพิกถอนแล้ว (Revoked)</span>
+                  <span>{{ 'certificateVerify.statusRevoked' | translate }}</span>
                 </span>
               }
             </div>
@@ -134,28 +139,37 @@
               <button
                 type="button"
                 (click)="copyLink()"
-                class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
               >
                 <ng-icon name="phosphorCopy" class="text-sm" />
-                <span>{{ copied() ? 'คัดลอกแล้ว!' : 'คัดลอกลิงก์' }}</span>
+                <span>{{ copied() ? ('certificateVerify.copied' | translate) : ('certificateVerify.copyLink' | translate) }}</span>
               </button>
 
               @if (cert.isValid) {
                 <button
                   type="button"
+                  (click)="downloadPdf()"
+                  class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                >
+                  <ng-icon name="phosphorDownloadSimple" class="text-sm" />
+                  <span>{{ 'certificateVerify.downloadPdf' | translate }}</span>
+                </button>
+
+                <button
+                  type="button"
                   (click)="shareLinkedIn()"
-                  class="inline-flex items-center gap-1.5 rounded-xl bg-[#0A66C2] px-4 py-2 text-xs font-semibold text-white hover:bg-[#004182] transition shadow-sm"
+                  class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[#0A66C2] px-4 py-2 text-xs font-semibold text-white hover:bg-[#004182] transition shadow-sm"
                 >
                   <ng-icon name="phosphorLinkedinLogo" class="text-sm" />
-                  <span>เพิ่มลงใน LinkedIn</span>
+                  <span>{{ 'certificateVerify.addToLinkedIn' | translate }}</span>
                 </button>
               }
 
               <a
                 routerLink="/courses"
-                class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                class="btn-tactile rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
               >
-                ดูคอร์สอื่นที่น่าสนใจ
+                {{ 'certificateVerify.exploreOtherCourses' | translate }}
               </a>
             </div>
           </div>
@@ -164,7 +178,7 @@
     </div>
   } @else if (isNotFound()) {
     <!-- Not Found State -->
-    <div class="rounded-3xl border border-red-500/20 bg-red-500/5 p-10 text-center">
+    <div class="animate-fade-in-up rounded-3xl border border-red-500/20 bg-red-500/5 p-10 text-center">
       <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10 text-red-500 mb-3">
         <ng-icon name="phosphorWarningCircle" class="text-2xl" />
       </div>

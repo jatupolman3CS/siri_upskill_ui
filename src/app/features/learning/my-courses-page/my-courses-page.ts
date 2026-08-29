@@ -135,4 +135,26 @@ export class MyCoursesPage implements OnInit {
       },
     });
   }
+
+  protected downloadCertificate(enrollmentId: string): void {
+    this.learningApi.getCertificateByEnrollment(enrollmentId).subscribe({
+      next: (cert) => {
+        this.learningApi.downloadCertificatePdf(cert.id).subscribe({
+          next: (blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Certificate-${cert.serialNo}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+          },
+          error: () => {
+            window.open(`/certificates/verify/${cert.verifyCode}`, '_blank');
+          },
+        });
+      },
+      error: () => {},
+    });
+  }
 }
+

@@ -1,0 +1,139 @@
+<div class="assignment-container">
+  @if (state() === 'loading') {
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>กำลังโหลดการบ้าน...</p>
+    </div>
+  }
+
+  @if (state() === 'no-assignment') {
+    <div class="empty-box">
+      <span class="icon">📁</span>
+      <p>{{ 'learn.assignment.noAssignment' | translate }}</p>
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <div class="error-box">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" class="btn btn-secondary" (click)="loadAssignment()">ลองใหม่</button>
+    </div>
+  }
+
+  @if (state() === 'ready' && assignment(); as a) {
+    <div class="assignment-card">
+      <div class="assignment-badge">Assignment</div>
+      <h3>{{ a.title }}</h3>
+
+      <div class="assignment-meta">
+        <span>⏱️ {{ 'learn.assignment.dueDays' | translate: { days: a.dueDays } }}</span>
+        <span>📦 {{ 'learn.assignment.maxFileSize' | translate: { size: a.maxFileSizeMb } }}</span>
+        <span>📄 {{ 'learn.assignment.allowedExtensions' | translate: { exts: a.allowedExtensions } }}</span>
+      </div>
+
+      <div class="instructions-section">
+        <h4>{{ 'learn.assignment.instructions' | translate }}</h4>
+        <p class="instructions-text">{{ a.instructions }}</p>
+      </div>
+
+      @if (submission(); as sub) {
+        <div class="submission-status-card" [class.graded]="sub.status === 'Graded' || sub.status === 2" [class.rejected]="sub.status === 'Rejected' || sub.status === 3">
+          <div class="status-header">
+            <h4>{{ 'learn.assignment.yourSubmission' | translate }}</h4>
+            <span class="status-pill">
+              @if (sub.status === 'Submitted' || sub.status === 1) {
+                {{ 'learn.assignment.statusSubmitted' | translate }}
+              } @else if (sub.status === 'Graded' || sub.status === 2) {
+                {{ 'learn.assignment.statusGraded' | translate }}
+              } @else if (sub.status === 'Rejected' || sub.status === 3) {
+                {{ 'learn.assignment.statusRejected' | translate }}
+              }
+            </span>
+          </div>
+
+          <div class="sub-detail">
+            <p><strong>ลิงก์ไฟล์:</strong> {{ sub.storageKey }}</p>
+            @if (sub.note) {
+              <p><strong>บันทึก:</strong> {{ sub.note }}</p>
+            }
+            <p class="sub-date">ส่งเมื่อ: {{ sub.submittedAtUtc | date:'short' }}</p>
+          </div>
+
+          @if (sub.status === 'Graded' || sub.status === 2) {
+            <div class="grade-box">
+              <div class="grade-score">{{ 'learn.assignment.score' | translate: { score: sub.score ?? 0 } }}</div>
+              @if (sub.feedback) {
+                <div class="feedback-text">
+                  <strong>{{ 'learn.assignment.feedback' | translate }}</strong>
+                  <p>{{ sub.feedback }}</p>
+                </div>
+              }
+            </div>
+          }
+
+          @if (sub.status === 'Rejected' || sub.status === 3) {
+            <div class="rejected-box">
+              @if (sub.feedback) {
+                <div class="feedback-text">
+                  <strong>{{ 'learn.assignment.feedback' | translate }}</strong>
+                  <p>{{ sub.feedback }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (!submission() || submission()?.status === 'Rejected' || submission()?.status === 3) {
+        <form class="submit-form" (ngSubmit)="submitAssignment()">
+          <h4>{{ (submission() ? 'learn.assignment.resubmitButton' : 'learn.assignment.submitButton') | translate }}</h4>
+
+          @if (successMessage()) {
+            <div class="alert alert-success">{{ successMessage() }}</div>
+          }
+
+          @if (errorMessage()) {
+            <div class="alert alert-danger">{{ errorMessage() }}</div>
+          }
+
+          <div class="form-group">
+            <label for="storageKey">{{ 'learn.assignment.fileUrlLabel' | translate }} *</label>
+            <input
+              type="text"
+              id="storageKey"
+              name="storageKey"
+              class="form-control"
+              [ngModel]="storageKey()"
+              (ngModelChange)="storageKey.set($event)"
+              placeholder="{{ 'learn.assignment.fileUrlPlaceholder' | translate }}"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="note">{{ 'learn.assignment.noteLabel' | translate }}</label>
+            <textarea
+              id="note"
+              name="note"
+              class="form-control"
+              rows="3"
+              [ngModel]="note()"
+              (ngModelChange)="note.set($event)"
+              placeholder="{{ 'learn.assignment.notePlaceholder' | translate }}"
+            ></textarea>
+          </div>
+
+          <div class="submit-action">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="isSubmitting()"
+            >
+              {{ (isSubmitting() ? 'learn.assignment.submitting' : 'learn.assignment.submitButton') | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+</div>

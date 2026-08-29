@@ -2,15 +2,18 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorList } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHeart, phosphorList, phosphorShoppingCart } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { CartStore } from '../../../features/commerce/cart/cart-store.service';
+import { WishlistStore } from '../../../features/catalog/data/wishlist.store';
 import { CategoryApiService } from '../../../features/catalog/data/category-api.service';
 import { CategoryTreeNode } from '../../../features/catalog/data/category-api.models';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { Locale, TranslationService } from '../../../core/i18n/translation.service';
 import { CategoryMegaMenu } from '../category-mega-menu/category-mega-menu';
 import { MobileNav } from '../mobile-nav/mobile-nav';
+import { NotificationBellComponent } from '../../../features/notification/notification-bell/notification-bell.component';
 
 /**
  * Sticky site header for `PublicLayout` (P0-33) — wordmark, desktop nav,
@@ -35,13 +38,15 @@ import { MobileNav } from '../mobile-nav/mobile-nav';
  */
 @Component({
   selector: 'app-site-header',
-  imports: [RouterLink, RouterLinkActive, TranslatePipe, NgIcon, MobileNav, CategoryMegaMenu],
+  imports: [RouterLink, RouterLinkActive, TranslatePipe, NgIcon, MobileNav, CategoryMegaMenu, NotificationBellComponent],
   templateUrl: './site-header.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons({ phosphorList })],
+  providers: [provideIcons({ phosphorList, phosphorShoppingCart, phosphorHeart })],
 })
 export class SiteHeader {
   protected readonly authService = inject(AuthService);
+  protected readonly cartStore = inject(CartStore);
+  protected readonly wishlistStore = inject(WishlistStore);
   protected readonly translation = inject(TranslationService);
   private readonly router = inject(Router);
   private readonly categoryApi = inject(CategoryApiService);

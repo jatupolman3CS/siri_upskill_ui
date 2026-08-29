@@ -1,21 +1,18 @@
-<div class="mx-auto max-w-6xl px-4 py-8">
-  <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'catalog.heading' | translate }}</h1>
+<div class="animate-fade-in mx-auto max-w-6xl px-4 py-8">
+  <h1 class="animate-fade-in-down text-2xl font-bold text-[var(--color-text)]">{{ 'catalog.heading' | translate }}</h1>
 
-  <form (submit)="$event.preventDefault(); applySearch()" class="mt-4 flex max-w-xl gap-2">
-    <div class="flex-1">
-      <app-input
-        [formControl]="searchControl"
-        type="search"
-        [label]="'catalog.searchLabel' | translate"
-        [placeholder]="'catalog.searchPlaceholder' | translate"
-      />
-    </div>
-    <app-button type="submit" class="mt-6">{{ 'catalog.searchSubmit' | translate }}</app-button>
-  </form>
+  <div class="animate-fade-in-up stagger-1 mt-4 max-w-xl">
+    <app-search-autocomplete
+      [initialQuery]="searchText()"
+      [placeholder]="'catalog.searchPlaceholder' | translate"
+      (searchSubmit)="onSearchSubmit($event)"
+      (queryChange)="searchControl.setValue($event)"
+    />
+  </div>
 
   <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
     <!-- Filters sidebar -->
-    <aside class="flex flex-col gap-6">
+    <aside class="animate-fade-in-up stagger-2 flex flex-col gap-6">
       <section>
         <h2 class="mb-3 text-sm font-semibold text-[var(--color-text)]">{{ 'catalog.filters.categoryHeading' | translate }}</h2>
         <ul class="flex flex-col gap-1">
@@ -27,8 +24,8 @@
                 [attr.aria-pressed]="categorySlug() === category.slug"
                 [class]="
                   categorySlug() === category.slug
-                    ? 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
-                    : 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                    ? 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary)] bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                    : 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
                 "
               >
                 {{ categoryName(category) }}
@@ -46,6 +43,31 @@
           [options]="levelOptions()"
         />
       </section>
+
+      @if (instructorFacets().length > 0) {
+        <section>
+          <h2 class="mb-3 text-sm font-semibold text-[var(--color-text)]">{{ 'catalog.filters.instructorHeading' | translate }}</h2>
+          <ul class="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+            @for (inst of instructorFacets(); track inst.instructorId) {
+              <li>
+                <button
+                  type="button"
+                  (click)="toggleInstructor(inst.instructorId)"
+                  [attr.aria-pressed]="instructorId() === inst.instructorId"
+                  [class]="
+                    instructorId() === inst.instructorId
+                      ? 'flex min-h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary)] bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                      : 'flex min-h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                  "
+                >
+                  <span class="truncate">{{ inst.displayName }}</span>
+                  <span class="text-xs text-[var(--color-text-muted)]">({{ inst.count }})</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
 
       <section>
         <app-select
@@ -71,7 +93,7 @@
     </aside>
 
     <!-- Results -->
-    <div>
+    <div class="animate-fade-in-up stagger-3">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-[var(--color-text-muted)]">
           {{ 'catalog.resultCount' | translate: { count: searchResult().results.totalCount } }}
@@ -111,17 +133,17 @@
           @for (course of searchResult().results.items; track course.id) {
             <a
               [routerLink]="['/courses', course.slug]"
-              class="flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
-                hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              class="card-hover group flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
                 @if (course.thumbnailUrl) {
                   <!-- fill, not width/height: thumbnail dimensions aren't known ahead of time, only the
                        container's aspect ratio is (frontend.md requires NgOptimizedImage on every image). -->
-                  <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover" />
+                  <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105" />
                 }
               </div>
-              <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">{{ course.title }}</h3>
+              <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">{{ course.title }}</h3>
               <p class="text-sm text-[var(--color-text-muted)]">{{ course.instructorDisplayName }}</p>
               @if (course.ratingCount > 0) {
                 <p class="text-sm text-[var(--color-text)]">

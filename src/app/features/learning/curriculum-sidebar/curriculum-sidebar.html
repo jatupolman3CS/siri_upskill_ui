@@ -53,11 +53,12 @@
               <button
                 type="button"
                 (click)="onEpisodeClick(episode.id, episode.isFreePreview)"
-                [disabled]="!isEnrolled && !episode.isFreePreview"
-                class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus:outline-none"
+                [class.opacity-60]="!isEnrolled && !episode.isFreePreview"
                 [class.bg-[var(--color-primary)]/10]="episode.id === activeEpisodeId"
                 [class.border-l-4]="episode.id === activeEpisodeId"
                 [class.border-[var(--color-primary)]]="episode.id === activeEpisodeId"
+                [attr.title]="!isEnrolled && !episode.isFreePreview ? 'บทเรียนนี้ต้องสมัครเรียนเพื่อเข้าชม' : episode.title"
               >
                 <!-- Status Icon -->
                 <div class="shrink-0 text-base">

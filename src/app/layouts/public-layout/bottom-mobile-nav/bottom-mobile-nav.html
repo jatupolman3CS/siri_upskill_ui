@@ -1,0 +1,47 @@
+<nav
+  aria-label="Mobile Bottom Navigation"
+  class="fixed bottom-0 left-0 right-0 z-40 block lg:hidden border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur shadow-lg pb-safe"
+>
+  <div class="grid h-14 grid-cols-4 items-center">
+    <!-- Home -->
+    <a
+      routerLink="/"
+      routerLinkActive="text-[var(--color-primary)]"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+    >
+      <ng-icon name="phosphorHouse" class="text-xl" />
+      <span>{{ 'nav.home' | translate }}</span>
+    </a>
+
+    <!-- Browse / Search -->
+    <a
+      routerLink="/courses"
+      routerLinkActive="text-[var(--color-primary)]"
+      class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+    >
+      <ng-icon name="phosphorMagnifyingGlass" class="text-xl" />
+      <span>{{ 'catalog.heading' | translate }}</span>
+    </a>
+
+    <!-- My Courses (Learn) -->
+    <a
+      routerLink="/my-courses"
+      routerLinkActive="text-[var(--color-primary)]"
+      class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+    >
+      <ng-icon name="phosphorGraduationCap" class="text-xl" />
+      <span>{{ 'nav.myCourses' | translate }}</span>
+    </a>
+
+    <!-- Account / Orders -->
+    <a
+      [routerLink]="auth.isAuthenticated() ? '/account/orders' : '/login'"
+      routerLinkActive="text-[var(--color-primary)]"
+      class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+    >
+      <ng-icon name="phosphorReceipt" class="text-xl" />
+      <span>{{ (auth.isAuthenticated() ? 'nav.orders' : 'nav.login') | translate }}</span>
+    </a>
+  </div>
+</nav>

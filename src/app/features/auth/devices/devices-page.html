@@ -1,5 +1,5 @@
-<div class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-12">
-  <header>
+<div class="animate-fade-in mx-auto flex max-w-2xl flex-col gap-6 px-4 py-12">
+  <header class="animate-fade-in-down">
     <h1 class="text-2xl font-semibold text-[var(--color-text)]">{{ 'auth.devices.heading' | translate }}</h1>
     <p class="mt-1 text-[var(--color-text-muted)]">{{ 'auth.devices.subheading' | translate }}</p>
   </header>
@@ -14,7 +14,7 @@
     }
     @case ('error') {
       <section
-        class="rounded-[var(--radius-lg)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-6 text-center"
+        class="animate-pop-in rounded-[var(--radius-lg)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-6 text-center shadow-sm"
         role="alert"
       >
         <p class="font-semibold text-[var(--color-text)]">{{ 'auth.devices.errorHeading' | translate }}</p>
@@ -31,7 +31,7 @@
           [description]="'auth.devices.emptyDescription' | translate"
         />
       } @else {
-        <div class="flex flex-wrap gap-3">
+        <div class="animate-fade-in-up stagger-1 flex flex-wrap gap-3">
           <app-button variant="secondary" size="sm" [disabled]="actionInFlight()" (click)="revokeOthersModalOpen.set(true)">
             {{ 'auth.devices.revokeOthersButton' | translate }}
           </app-button>
@@ -40,10 +40,10 @@
           </app-button>
         </div>
 
-        <ul class="flex flex-col gap-3">
+        <ul class="animate-fade-in-up stagger-2 flex flex-col gap-3">
           @for (session of sessions(); track session.sessionId) {
             <li
-              class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:flex-row sm:items-center sm:justify-between"
+              class="card-hover flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:flex-row sm:items-center sm:justify-between shadow-xs transition"
             >
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">

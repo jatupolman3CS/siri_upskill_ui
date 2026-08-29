@@ -1,0 +1,301 @@
+<div class="animate-fade-in mx-auto max-w-3xl px-4 py-10 pb-24 sm:px-6">
+  <!-- Page Header -->
+  <div class="animate-fade-in-down mb-8 text-center">
+    <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
+      เริ่มต้นเป็นผู้สอนกับ SIRI UpSkill Studio
+    </h1>
+    <p class="mt-2 text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
+      แบ่งปันความรู้ ทักษะ และประสบการณ์ของคุณ สร้างรายได้และเข้าถึงผู้เรียนทั่วประเทศ
+    </p>
+  </div>
+
+  @if (submitError(); as err) {
+    <div class="animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs text-rose-700">
+      <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5" />
+      <div>
+        <p class="font-bold">เกิดข้อผิดพลาด</p>
+        <p class="mt-0.5">{{ err }}</p>
+      </div>
+    </div>
+  }
+
+  @if (existingProfile(); as profile) {
+    @if (profile.status === 'Approved') {
+      <div class="animate-fade-in-up rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center space-y-4">
+        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+          <ng-icon name="phosphorCheckCircle" class="text-4xl animate-bounce-subtle" />
+        </div>
+        <h2 class="text-xl font-bold text-[var(--color-text)]">คุณเป็นผู้สอนของ SIRI UpSkill แล้ว</h2>
+        <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
+          บัญชีของคุณได้รับการอนุมัติเรียบร้อยแล้ว คุณสามารถสร้างคอร์สเรียนและจัดการรายได้ใน Studio ได้ทันที
+        </p>
+        <div class="pt-2">
+          <a
+            routerLink="/instructor"
+            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+          >
+            <span>ไปยังแดชบอร์ดผู้สอน</span>
+            <ng-icon name="phosphorArrowRight" />
+          </a>
+        </div>
+      </div>
+    } @else if (profile.status === 'Pending' || submitSuccess()) {
+      <div class="animate-fade-in-up rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 text-center space-y-4">
+        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-500/20">
+          <ng-icon name="phosphorClock" class="text-4xl animate-spin-fast" />
+        </div>
+        <h2 class="text-xl font-bold text-[var(--color-text)]">ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ</h2>
+        <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
+          ทีมงาน SIRI UpSkill กำลังตรวจสอบข้อมูลและจะแจ้งผลการอนุมัติทางอีเมลภายใน 1-2 วันทำการ
+        </p>
+        <div class="pt-2">
+          <a
+            routerLink="/courses"
+            class="btn-tactile inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary)] hover:underline"
+          >
+            <span>กลับไปยังหน้าหลัก</span>
+            <ng-icon name="phosphorArrowRight" />
+          </a>
+        </div>
+      </div>
+    }
+  } @else {
+    <!-- Step Indicator -->
+    <div class="animate-fade-in-up stagger-1 mb-8 flex items-center justify-center gap-3">
+      <div class="flex items-center gap-2">
+        <span
+          class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
+          [class.bg-[var(--color-primary)]]="currentStep() >= 1"
+          [class.text-white]="currentStep() >= 1"
+          [class.bg-[var(--color-surface-muted)]]="currentStep() < 1"
+        >
+          1
+        </span>
+        <span class="text-xs font-semibold text-[var(--color-text)]">ข้อมูลผู้สอน</span>
+      </div>
+      <div class="h-0.5 w-8 bg-[var(--color-border)]"></div>
+      <div class="flex items-center gap-2">
+        <span
+          class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
+          [class.bg-[var(--color-primary)]]="currentStep() >= 2"
+          [class.text-white]="currentStep() >= 2"
+          [class.bg-[var(--color-surface-muted)]]="currentStep() < 2"
+        >
+          2
+        </span>
+        <span class="text-xs font-semibold text-[var(--color-text)]">ข้อมูลบัญชีรับเงิน</span>
+      </div>
+      <div class="h-0.5 w-8 bg-[var(--color-border)]"></div>
+      <div class="flex items-center gap-2">
+        <span
+          class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
+          [class.bg-[var(--color-primary)]]="currentStep() >= 3"
+          [class.text-white]="currentStep() >= 3"
+          [class.bg-[var(--color-surface-muted)]]="currentStep() < 3"
+        >
+          3
+        </span>
+        <span class="text-xs font-semibold text-[var(--color-text)]">ยืนยันเงื่อนไข</span>
+      </div>
+    </div>
+
+    <!-- Onboarding Step Card -->
+    <div class="animate-fade-in-up stagger-2 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8 shadow-sm space-y-6">
+      <!-- Step 1: Profile Info -->
+      @if (currentStep() === 1) {
+        <div class="space-y-4">
+          <div class="border-b border-[var(--color-border)] pb-4">
+            <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 1: ข้อมูลผู้สอนและประวัติย่อ</h2>
+            <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
+              ข้อมูลนี้จะแสดงในหน้ารายละเอียดคอร์สและหน้าโปรไฟล์ผู้สอนของคุณ
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label for="displayName" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                ชื่อ-นามสกุล / นามปากกาที่ใช้สอน <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                [(ngModel)]="displayName"
+                placeholder="เช่น ดร. อานนท์ พัฒนากุล"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              />
+            </div>
+
+            <div>
+              <label for="headline" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                ตำแหน่ง / หัวข้อย่อ (Headline)
+              </label>
+              <input
+                id="headline"
+                type="text"
+                [(ngModel)]="headline"
+                placeholder="เช่น Senior Cloud Architect & Tech Lead"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              />
+            </div>
+
+            <div>
+              <label for="bio" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                ประวัติย่อ ประสบการณ์ทำงาน หรือความเชี่ยวชาญ <span class="text-rose-500">*</span>
+              </label>
+              <textarea
+                id="bio"
+                [(ngModel)]="bio"
+                rows="4"
+                placeholder="บอกเล่าประสบการณ์ ความเชี่ยวชาญ และเป้าหมายในการสอนของคุณ..."
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Step 2: Payout Account -->
+      @if (currentStep() === 2) {
+        <div class="space-y-4">
+          <div class="border-b border-[var(--color-border)] pb-4">
+            <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 2: บัญชีธนาคารสำหรับรับเงินส่วนแบ่ง</h2>
+            <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
+              ระบบจะโอนเงินส่วนแบ่งคอร์สเรียนเข้าบัญชีนี้ทุกวันที่ 1 และ 16 ของเดือน
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label for="bankName" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                ธนาคาร <span class="text-rose-500">*</span>
+              </label>
+              <select
+                id="bankName"
+                [(ngModel)]="bankName"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              >
+                @for (b of bankOptions; track b) {
+                  <option [value]="b">{{ b }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label for="accountNumber" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                เลขที่บัญชีธนาคาร <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="accountNumber"
+                type="text"
+                [(ngModel)]="accountNumber"
+                placeholder="เช่น 123-4-56789-0"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              />
+            </div>
+
+            <div>
+              <label for="accountHolder" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                ชื่อเจ้าของบัญชี (ตรงกับบัตรประชาชน) <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="accountHolder"
+                type="text"
+                [(ngModel)]="accountHolderName"
+                placeholder="เช่น ดร. อานนท์ พัฒนากุล"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              />
+            </div>
+
+            <div>
+              <label for="promptpay" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
+                หมายเลขพร้อมเพย์ (ไม่บังคับ)
+              </label>
+              <input
+                id="promptpay"
+                type="text"
+                [(ngModel)]="promptPayId"
+                placeholder="เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชน"
+                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+              />
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Step 3: Terms & Agreement -->
+      @if (currentStep() === 3) {
+        <div class="space-y-4">
+          <div class="border-b border-[var(--color-border)] pb-4">
+            <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 3: เงื่อนไขและข้อตกลงส่วนแบ่งรายได้</h2>
+            <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
+              กรุณาตรวจสอบข้อตกลงในการเป็นผู้สอนบนแพลตฟอร์ม SIRI UpSkill
+            </p>
+          </div>
+
+          <div class="rounded-2xl bg-[var(--color-bg)] p-4 text-xs text-[var(--color-text-muted)] space-y-2 border border-[var(--color-border)]">
+            <div class="flex items-center gap-2 font-bold text-[var(--color-text)]">
+              <ng-icon name="phosphorShieldCheck" class="text-emerald-600 text-base" />
+              <span>ส่วนแบ่งรายได้มาตรฐาน 70% สำหรับผู้สอน (Revenue Share)</span>
+            </div>
+            <p>1. ผู้สอนจะได้รับส่วนแบ่งรายได้สุทธิ 70% จากยอดจำหน่ายคอร์สเรียนหลังหักค่าธรรมเนียมระบบและภาษี</p>
+            <p>2. การจ่ายเงินรอบปกติจะหักภาษี ณ ที่จ่าย 3% ตามกฎหมายไทย และออกหนังสือรับรอง 50 ทวิ ให้ทุกสิ้นปี</p>
+            <p>3. คอร์สเรียนจะต้องเป็นเนื้อหาที่เป็นลิขสิทธิ์ของผู้สอนเองและไม่ละเมิดทรัพย์สินทางปัญญาของบุคคลอื่น</p>
+          </div>
+
+          <label class="flex items-start gap-3 cursor-pointer pt-2">
+            <input
+              type="checkbox"
+              [(ngModel)]="agreedToTerms"
+              class="mt-1 h-4 w-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+            />
+            <span class="text-xs text-[var(--color-text)]">
+              ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด เงื่อนไขการเป็นผู้สอน และนโยบายความเป็นส่วนตัวของ SIRI UpSkill
+            </span>
+          </label>
+        </div>
+      }
+
+      <!-- Footer Action Buttons -->
+      <div class="flex items-center justify-between border-t border-[var(--color-border)] pt-6">
+        @if (currentStep() > 1) {
+          <button
+            type="button"
+            (click)="prevStep()"
+            class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+          >
+            <ng-icon name="phosphorArrowLeft" />
+            <span>ย้อนกลับ</span>
+          </button>
+        } @else {
+          <div></div>
+        }
+
+        @if (currentStep() < 3) {
+          <button
+            type="button"
+            (click)="nextStep()"
+            class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+          >
+            <span>ถัดไป</span>
+            <ng-icon name="phosphorArrowRight" />
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="submitApplication()"
+            [disabled]="!agreedToTerms || isSubmitting()"
+            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+          >
+            @if (isSubmitting()) {
+              <app-spinner size="xs" color="white" />
+              <span>กำลังส่งใบสมัคร...</span>
+            } @else {
+              <ng-icon name="phosphorCheckCircle" class="text-base" />
+              <span>ส่งใบสมัครเป็นผู้สอน</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

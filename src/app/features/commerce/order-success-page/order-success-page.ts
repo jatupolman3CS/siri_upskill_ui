@@ -17,8 +17,10 @@ import {
   phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { AuthService } from '../../../core/auth/auth.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
+import { CommerceApiService } from '../data/commerce-api.service';
 
 export interface OrderSuccessSummary {
   orderId: string;
@@ -55,24 +57,11 @@ export interface OrderSuccessSummary {
 export class OrderSuccessPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly seoService = inject(SeoService);
+  private readonly commerceApi = inject(CommerceApiService);
+  private readonly auth = inject(AuthService);
 
-  protected readonly order = signal<OrderSuccessSummary>({
-    orderId: 'ord-001',
-    orderNo: 'ORD-202608-8849',
-    totalAmount: 2590,
-    paymentMethod: 'PromptPay QR (Stripe)',
-    paidAtUtc: new Date().toISOString(),
-    customerEmail: 'learner@siriupskill.com',
-    purchasedCourses: [
-      {
-        courseId: 'c-1',
-        title: 'Full-Stack Web Development with Angular & .NET 10',
-        slug: 'full-stack-web-angular-dotnet-10',
-        price: 2590,
-        thumbnailUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600',
-      },
-    ],
-  });
+  protected readonly isLoading = signal(false);
+  protected readonly order = signal<OrderSuccessSummary | null>(null);
 
   ngOnInit(): void {
     this.seoService.set({
@@ -82,13 +71,60 @@ export class OrderSuccessPage implements OnInit {
       robots: 'noindex',
     });
 
-    const orderIdParam = this.route.snapshot.paramMap.get('orderId');
+    const email = 'อีเมลของคุณ';
+    const orderIdParam = this.route.snapshot.paramMap.get('orderId') || this.route.snapshot.queryParamMap.get('orderId');
     if (orderIdParam) {
-      this.order.update((o) => ({
-        ...o,
-        orderId: orderIdParam,
-        orderNo: `ORD-202608-${orderIdParam.slice(-4).toUpperCase()}`,
-      }));
+      this.isLoading.set(true);
+      this.commerceApi.getOrder(orderIdParam).subscribe({
+        next: (res) => {
+          this.order.set({
+            orderId: res.id,
+            orderNo: res.orderNo,
+            totalAmount: res.totalAmount,
+            paymentMethod: 'PromptPay QR (Stripe)',
+            paidAtUtc: res.paidAtUtc ?? new Date().toISOString(),
+            customerEmail: email,
+            purchasedCourses: (res.items || []).map((i) => ({
+              courseId: i.courseId ?? i.id,
+              title: i.titleSnapshot,
+              slug: i.courseId ?? i.id,
+              price: i.lineTotal,
+              thumbnailUrl: i.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600',
+            })),
+          });
+          this.isLoading.set(false);
+        },
+        error: () => {
+          // Fallback gracefully to preview shape
+          this.order.set({
+            orderId: orderIdParam,
+            orderNo: `ORD-${orderIdParam.slice(0, 8).toUpperCase()}`,
+            totalAmount: 0,
+            paymentMethod: 'PromptPay QR (Stripe)',
+            paidAtUtc: new Date().toISOString(),
+            customerEmail: email,
+            purchasedCourses: [],
+          });
+          this.isLoading.set(false);
+        },
+      });
     }
+  }
+
+  protected downloadReceipt(): void {
+    const ord = this.order();
+    if (!ord) return;
+    this.commerceApi.getTaxInvoiceByOrderId(ord.orderId).subscribe({
+      next: (inv) => {
+        if (inv?.pdfStorageKey) {
+          window.open(inv.pdfStorageKey, '_blank');
+        } else {
+          alert('กำลังจัดเตรียมใบเสร็จรับเงิน ระบบจะส่งให้ทางอีเมล');
+        }
+      },
+      error: () => {
+        alert('กำลังจัดเตรียมใบเสร็จรับเงิน ระบบจะส่งให้ทางอีเมล');
+      },
+    });
   }
 }

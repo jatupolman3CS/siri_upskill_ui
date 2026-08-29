@@ -18,12 +18,12 @@ import {
 
 import { BannerItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
-import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-banners-page',
-  imports: [CommonModule, FormsModule, NgIcon],
+  imports: [CommonModule, FormsModule, NgIcon, Spinner],
   templateUrl: './admin-banners-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -40,31 +40,8 @@ export class AdminBannersPage implements OnInit {
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
 
-  protected readonly banners = signal<BannerItem[]>([
-    {
-      id: 'b-1',
-      title: 'คอร์สแนะนำเดือนนี้ ลดสูงสุด 50%',
-      imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200',
-      targetUrl: '/courses',
-      sortOrder: 1,
-      isActive: true,
-      startsAtUtc: null,
-      endsAtUtc: null,
-      createdAtUtc: new Date().toISOString(),
-    },
-    {
-      id: 'b-2',
-      title: 'เส้นทางการเรียนรู้ Full-Stack AI Engineer',
-      imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200',
-      targetUrl: '/courses',
-      sortOrder: 2,
-      isActive: true,
-      startsAtUtc: null,
-      endsAtUtc: null,
-      createdAtUtc: new Date().toISOString(),
-    },
-  ]);
-
+  protected readonly banners = signal<BannerItem[]>([]);
+  protected readonly isLoading = signal(false);
   protected readonly showAddForm = signal(false);
   protected readonly newTitle = signal('');
   protected readonly newImageUrl = signal('');
@@ -78,27 +55,54 @@ export class AdminBannersPage implements OnInit {
       robots: 'noindex',
     });
 
+    this.loadBanners();
+  }
+
+  protected loadBanners(): void {
+    this.isLoading.set(true);
     this.cmsApi.getAdminBanners().subscribe({
       next: (res) => {
-        if (res.items.length > 0) {
-          this.banners.set([...res.items]);
-        }
+        this.banners.set([...res.items]);
+        this.isLoading.set(false);
       },
-      error: () => {},
+      error: () => {
+        this.isLoading.set(false);
+      },
     });
   }
 
   protected toggleActive(banner: BannerItem): void {
+    const updatedStatus = !banner.isActive;
     this.banners.update((list) =>
-      list.map((b) => (b.id === banner.id ? { ...b, isActive: !b.isActive } : b))
+      list.map((b) => (b.id === banner.id ? { ...b, isActive: updatedStatus } : b))
     );
+    this.cmsApi
+      .updateBanner(banner.id, {
+        title: banner.title,
+        imageUrl: banner.imageUrl,
+        targetUrl: banner.targetUrl,
+        sortOrder: banner.sortOrder,
+        isActive: updatedStatus,
+      })
+      .subscribe({
+        error: () => {
+          // Revert on error
+          this.banners.update((list) =>
+            list.map((b) => (b.id === banner.id ? { ...b, isActive: banner.isActive } : b))
+          );
+        },
+      });
   }
 
   protected deleteBanner(id: string): void {
     this.banners.update((list) => list.filter((b) => b.id !== id));
     this.cmsApi.deleteBanner(id).subscribe({
-      next: () => {},
-      error: () => {},
+      next: () => {
+        this.loadBanners();
+      },
+      error: () => {
+        this.loadBanners();
+      },
     });
   }
 
@@ -107,34 +111,25 @@ export class AdminBannersPage implements OnInit {
     const imageUrl = this.newImageUrl().trim();
     if (!title || !imageUrl) return;
 
-    const newBanner: BannerItem = {
-      id: `b-${Date.now()}`,
-      title,
-      imageUrl,
-      targetUrl: this.newTargetUrl().trim() || null,
-      sortOrder: this.banners().length + 1,
-      isActive: true,
-      startsAtUtc: null,
-      endsAtUtc: null,
-      createdAtUtc: new Date().toISOString(),
-    };
-
-    this.banners.update((list) => [...list, newBanner]);
-    this.newTitle.set('');
-    this.newImageUrl.set('');
-    this.newTargetUrl.set('');
-    this.showAddForm.set(false);
+    const sortOrder = this.banners().length + 1;
+    const targetUrl = this.newTargetUrl().trim() || null;
 
     this.cmsApi
       .createBanner({
         title,
         imageUrl,
-        targetUrl: newBanner.targetUrl,
-        sortOrder: newBanner.sortOrder,
+        targetUrl,
+        sortOrder,
         isActive: true,
       })
       .subscribe({
-        next: () => {},
+        next: (created) => {
+          this.newTitle.set('');
+          this.newImageUrl.set('');
+          this.newTargetUrl.set('');
+          this.showAddForm.set(false);
+          this.loadBanners();
+        },
         error: () => {},
       });
   }

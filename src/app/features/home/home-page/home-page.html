@@ -1,16 +1,16 @@
-<div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-  <h1 class="text-4xl font-bold text-[var(--color-text)] sm:text-5xl">
+<div class="animate-fade-in flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+  <h1 class="animate-fade-in-down text-4xl font-bold text-[var(--color-text)] sm:text-5xl">
     {{ 'home.hero.heading' | translate }}
   </h1>
-  <p class="max-w-xl text-lg text-[var(--color-text-muted)]">
+  <p class="animate-fade-in-up stagger-1 max-w-xl text-lg text-[var(--color-text-muted)]">
     {{ 'home.hero.subheading' | translate }}
   </p>
 
-  <div class="mt-2 flex flex-col gap-3 sm:flex-row">
+  <div class="animate-fade-in-up stagger-2 mt-2 flex flex-col gap-3 sm:flex-row">
     <a
       routerLink="/register"
-      class="inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
-        text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)]
+      class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+        text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
         transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
         focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
@@ -19,7 +19,7 @@
     </a>
     <a
       routerLink="/login"
-      class="inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+      class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
         text-base font-medium text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-surface)]
         transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
@@ -30,9 +30,85 @@
   </div>
 </div>
 
+<!-- Continue Learning Card (For Authenticated Learners) -->
+@if (recentEnrollmentResource.value(); as enroll) {
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-3" aria-label="Continue Learning">
+    <div class="card-hover flex flex-col sm:flex-row items-center justify-between gap-4 rounded-[var(--radius-xl)] border border-[var(--color-primary)]/30 bg-gradient-to-r from-[var(--color-primary)]/10 via-[var(--color-surface)] to-[var(--color-surface)] p-5 shadow-sm">
+      <div class="flex items-center gap-4 w-full sm:w-auto">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-md">
+          <ng-icon name="phosphorPlayCircle" class="text-2xl" />
+        </div>
+        <div class="min-w-0 flex-1">
+          <span class="text-xs font-bold text-[var(--color-primary)] uppercase tracking-wider block mb-0.5">
+            เรียนต่อจากจุดเดิม
+          </span>
+          <h2 class="text-base font-bold text-[var(--color-text)] truncate">
+            {{ enroll.courseTitle || 'คอร์สเรียนของคุณ' }}
+          </h2>
+          <div class="mt-1.5 flex items-center gap-3">
+            <div class="h-2 w-32 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+              <div
+                class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
+                [style.width.%]="enroll.progressPercentage"
+              ></div>
+            </div>
+            <span class="text-xs font-semibold text-[var(--color-text-muted)]">
+              ความคืบหน้า {{ enroll.progressPercentage }}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <a
+        [routerLink]="['/learn', enroll.courseSlug || enroll.courseId]"
+        class="btn-tactile inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+      >
+        <span>เข้าสู่บทเรียน</span>
+        <ng-icon name="phosphorArrowRight" />
+      </a>
+    </div>
+  </section>
+}
+
+<!-- Flash Sale Countdown Banner -->
+@if (activeFlashSale(); as sale) {
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-2" aria-label="Flash Sale Promotion">
+    <app-flash-sale-banner
+      [title]="sale.title"
+      [endDate]="sale.endsAtUtc"
+      targetUrl="/courses"
+    />
+  </section>
+}
+
+<!-- Promotional Banners (CMS) -->
+@if (bannersResource.hasValue() && bannersResource.value().length > 0) {
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-6" aria-label="Promotional Banners">
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      @for (banner of bannersResource.value(); track banner.id) {
+        <a
+          [routerLink]="banner.targetUrl || '/courses'"
+          class="card-hover group relative overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm block aspect-[21/9]"
+        >
+          <img
+            [src]="banner.imageUrl"
+            [alt]="banner.title"
+            class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          />
+          @if (banner.title) {
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6">
+              <h3 class="text-base sm:text-lg font-extrabold text-white drop-shadow-sm">{{ banner.title }}</h3>
+            </div>
+          }
+        </a>
+      }
+    </div>
+  </section>
+}
+
 <!-- Categories -->
 @if (categoriesResource.isLoading()) {
-  <section class="mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.categories.loadingLabel' | translate">
+  <section class="animate-fade-in mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.categories.loadingLabel' | translate">
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
       @for (placeholder of [0, 1, 2]; track placeholder) {
         <app-skeleton variant="block" height="8rem" />
@@ -40,18 +116,17 @@
     </div>
   </section>
 } @else if (categoriesResource.hasValue() && categoriesResource.value().length > 0) {
-  <section class="mx-auto max-w-6xl px-4 py-12">
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-12">
     <h2 class="mb-6 text-2xl font-bold text-[var(--color-text)]">{{ 'home.categories.heading' | translate }}</h2>
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
       @for (category of categoriesResource.value(); track category.id) {
         <a
           [routerLink]="['/courses']"
           [queryParams]="{ category: category.slug }"
-          class="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center
-            transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-md)]
+          class="card-hover flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
-          <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" class="h-8 w-8 text-[var(--color-primary)]" />
+          <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" class="h-8 w-8 text-[var(--color-primary)] transition-transform duration-200 group-hover:scale-110" />
           <span class="font-medium text-[var(--color-text)]">{{ categoryName(category) }}</span>
         </a>
       }
@@ -61,7 +136,7 @@
 
 <!-- Recommended (highest rated) -->
 @if (recommendedResource.isLoading()) {
-  <section class="mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.recommended.loadingLabel' | translate">
+  <section class="animate-fade-in mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.recommended.loadingLabel' | translate">
     <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
       @for (placeholder of [0, 1, 2, 3]; track placeholder) {
         <div class="flex flex-col gap-3">
@@ -72,7 +147,7 @@
     </div>
   </section>
 } @else if (recommendedResource.hasValue() && recommendedResource.value().results.items.length > 0) {
-  <section class="mx-auto max-w-6xl px-4 py-12">
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-12">
     <div class="mb-6 flex items-center justify-between gap-4">
       <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ 'home.recommended.heading' | translate }}</h2>
       <a
@@ -87,7 +162,10 @@
     </div>
     <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
       @for (course of recommendedResource.value().results.items; track course.id) {
-        <app-home-course-card [course]="course" />
+        <app-home-course-card
+          [course]="course"
+          [salePrice]="flashSalePriceMap().get(course.id)"
+        />
       }
     </div>
   </section>
@@ -95,7 +173,7 @@
 
 <!-- Newest -->
 @if (newestResource.isLoading()) {
-  <section class="mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.newest.loadingLabel' | translate">
+  <section class="animate-fade-in mx-auto max-w-6xl px-4 py-12" aria-busy="true" [attr.aria-label]="'home.newest.loadingLabel' | translate">
     <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
       @for (placeholder of [0, 1, 2, 3]; track placeholder) {
         <div class="flex flex-col gap-3">
@@ -106,7 +184,7 @@
     </div>
   </section>
 } @else if (newestResource.hasValue() && newestResource.value().results.items.length > 0) {
-  <section class="mx-auto max-w-6xl px-4 py-12">
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-12">
     <div class="mb-6 flex items-center justify-between gap-4">
       <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ 'home.newest.heading' | translate }}</h2>
       <a
@@ -121,7 +199,10 @@
     </div>
     <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
       @for (course of newestResource.value().results.items; track course.id) {
-        <app-home-course-card [course]="course" />
+        <app-home-course-card
+          [course]="course"
+          [salePrice]="flashSalePriceMap().get(course.id)"
+        />
       }
     </div>
   </section>

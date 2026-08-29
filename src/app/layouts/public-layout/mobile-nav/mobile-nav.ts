@@ -3,9 +3,10 @@ import { isPlatformBrowser } from '@angular/common';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorX } from '@ng-icons/phosphor-icons/regular';
+import { phosphorShoppingCart, phosphorX } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { CartStore } from '../../../features/commerce/cart/cart-store.service';
 import { CategoryTreeNode } from '../../../features/catalog/data/category-api.models';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { Locale, TranslationService } from '../../../core/i18n/translation.service';
@@ -32,7 +33,7 @@ import { CategoryAccordionItem } from './category-accordion-item/category-accord
   templateUrl: './mobile-nav.html',
   styleUrl: './mobile-nav.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons({ phosphorX })],
+  providers: [provideIcons({ phosphorX, phosphorShoppingCart })],
 })
 export class MobileNav {
   /** Two-way: `SiteHeader` owns the source of truth, this component only ever sets it to `false`. */
@@ -43,6 +44,7 @@ export class MobileNav {
   readonly categories = input.required<readonly CategoryTreeNode[]>();
 
   protected readonly authService = inject(AuthService);
+  protected readonly cartStore = inject(CartStore);
   protected readonly translation = inject(TranslationService);
   private readonly router = inject(Router);
 

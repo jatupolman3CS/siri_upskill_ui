@@ -1,0 +1,121 @@
+<div class="animate-fade-in mx-auto max-w-4xl px-4 py-12 space-y-8">
+  <header class="animate-fade-in-down space-y-2 text-center max-w-2xl mx-auto">
+    <h1 class="text-3xl font-black tracking-tight text-[var(--color-text)]">
+      {{ 'contact.title' | translate }}
+    </h1>
+    <p class="text-xs sm:text-sm text-[var(--color-text-muted)]">
+      {{ 'contact.subtitle' | translate }}
+    </p>
+  </header>
+
+  <div class="animate-fade-in-up stagger-1 grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Contact Info Cards -->
+    <div class="space-y-4">
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-3 shadow-xs">
+        <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'contact.channels' | translate }}</h2>
+        <div class="space-y-2 text-xs text-[var(--color-text-muted)]">
+          <p>📧 <strong>{{ 'contact.supportEmail' | translate }}</strong> <a href="mailto:support@siriupskill.com" class="text-[var(--color-primary)] underline">support&#64;siriupskill.com</a></p>
+          <p>🛡️ <strong>{{ 'contact.dpoEmail' | translate }}</strong> <a href="mailto:dpo@siriupskill.com" class="text-[var(--color-primary)] underline">dpo&#64;siriupskill.com</a></p>
+          <p>💼 <strong>{{ 'contact.businessEmail' | translate }}</strong> <a href="mailto:business@siriupskill.com" class="text-[var(--color-primary)] underline">business&#64;siriupskill.com</a></p>
+        </div>
+      </div>
+
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-2 shadow-xs">
+        <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'contact.officeHours' | translate }}</h2>
+        <p class="text-xs text-[var(--color-text-muted)]">
+          วันจันทร์ - ศุกร์: 09:00 - 18:00 น. (เวลาประเทศไทย UTC+7)<br>
+          หยุดวันเสาร์-อาทิตย์ และวันหยุดนักขัตฤกษ์
+        </p>
+      </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4 shadow-xs">
+      <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'contact.sendMessage' | translate }}</h2>
+
+      @if (submitted()) {
+        <div class="animate-pop-in p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs space-y-1">
+          <p class="font-bold">{{ 'contact.successTitle' | translate }}</p>
+          <p>{{ 'contact.successDesc' | translate: { email: email } }}</p>
+        </div>
+      } @else {
+        @if (errorMessage()) {
+          <div class="animate-pop-in p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <form (ngSubmit)="sendMessage()" class="space-y-3 text-xs">
+          <!-- Honeypot Bot Field (Hidden from real users) -->
+          <div class="hidden" aria-hidden="true">
+            <input
+              type="text"
+              name="botField"
+              [(ngModel)]="botField"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label for="contact-name" class="block font-semibold text-[var(--color-text)]">{{ 'contact.nameLabel' | translate }}</label>
+            <input
+              type="text"
+              id="contact-name"
+              [(ngModel)]="name"
+              name="name"
+              required
+              class="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label for="contact-email" class="block font-semibold text-[var(--color-text)]">{{ 'contact.emailLabel' | translate }}</label>
+            <input
+              type="email"
+              id="contact-email"
+              [(ngModel)]="email"
+              name="email"
+              required
+              class="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label for="contact-subject" class="block font-semibold text-[var(--color-text)]">{{ 'contact.subjectLabel' | translate }}</label>
+            <input
+              type="text"
+              id="contact-subject"
+              [(ngModel)]="subject"
+              name="subject"
+              class="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label for="contact-message" class="block font-semibold text-[var(--color-text)]">{{ 'contact.messageLabel' | translate }}</label>
+            <textarea
+              id="contact-message"
+              [(ngModel)]="message"
+              name="message"
+              rows="4"
+              required
+              class="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-focus-ring)]"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="isSubmitting()"
+            class="btn-tactile inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-[var(--color-primary)] text-[var(--color-primary-foreground)] font-bold hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition"
+          >
+            @if (isSubmitting()) {
+              <app-spinner size="xs" color="white" />
+            }
+            <span>{{ isSubmitting() ? ('contact.submitting' | translate) : ('contact.btnSubmit' | translate) }}</span>
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</div>

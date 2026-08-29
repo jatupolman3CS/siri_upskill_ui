@@ -54,6 +54,9 @@ export class InstructorEarningsPage implements OnInit {
   protected readonly editBankName = signal('ธนาคารกสิกรไทย (KBANK)');
   protected readonly editAccountNumber = signal('');
   protected readonly editAccountHolder = signal('ดร. อานนท์ พัฒนากุล');
+  protected readonly isSavingBank = signal(false);
+  protected readonly saveBankError = signal<string | null>(null);
+  protected readonly saveBankSuccess = signal(false);
 
   protected readonly history = signal<PayoutHistoryItem[]>([
     {
@@ -110,13 +113,52 @@ export class InstructorEarningsPage implements OnInit {
     });
   }
 
+  protected openEditBank(): void {
+    this.saveBankError.set(null);
+    this.editBankName.set(this.bankName());
+    this.editAccountHolder.set(this.accountHolderName());
+    this.editAccountNumber.set('');
+    this.showEditBank.set(true);
+  }
+
   protected saveBankAccount(): void {
     const rawNumber = this.editAccountNumber().trim();
-    if (rawNumber.length >= 4) {
-      this.maskedAccountNumber.set(`***-*-*${rawNumber.slice(-4)}`);
+    const bankName = this.editBankName().trim();
+    const holder = this.editAccountHolder().trim();
+
+    if (!bankName || !rawNumber || !holder) {
+      this.saveBankError.set('กรุณากรอกข้อมูลบัญชีธนาคารให้ครบถ้วน');
+      return;
     }
-    this.bankName.set(this.editBankName());
-    this.accountHolderName.set(this.editAccountHolder());
-    this.showEditBank.set(false);
+
+    if (rawNumber.length < 8) {
+      this.saveBankError.set('เลขที่บัญชีต้องมีอย่างน้อย 8 หลัก');
+      return;
+    }
+
+    this.isSavingBank.set(true);
+    this.saveBankError.set(null);
+
+    this.payoutApi
+      .upsertPayoutAccount({
+        bankName,
+        accountNumber: rawNumber,
+        accountHolderName: holder,
+      })
+      .subscribe({
+        next: (acc) => {
+          this.isSavingBank.set(false);
+          this.bankName.set(acc.bankCode || bankName);
+          this.maskedAccountNumber.set(acc.bankAccountNumberMasked || `***-*-*${rawNumber.slice(-4)}`);
+          this.accountHolderName.set(acc.accountHolderName || holder);
+          this.showEditBank.set(false);
+          this.saveBankSuccess.set(true);
+          setTimeout(() => this.saveBankSuccess.set(false), 3000);
+        },
+        error: (err) => {
+          this.isSavingBank.set(false);
+          this.saveBankError.set(err?.error?.detail || err?.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลบัญชี');
+        },
+      });
   }
 }

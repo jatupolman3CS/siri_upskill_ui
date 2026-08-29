@@ -25,4 +25,8 @@ export class AdminModerationApiService {
   rejectCourse(courseId: string, request: RejectCourseRequest): Observable<RejectCourseResponse> {
     return this.http.post<RejectCourseResponse>(`/api/catalog/admin/courses/${courseId}/reject`, request);
   }
+
+  unpublishCourse(courseId: string, request: { reason: string }): Observable<unknown> {
+    return this.http.post(`/api/catalog/admin/courses/${courseId}/unpublish`, request);
+  }
 }

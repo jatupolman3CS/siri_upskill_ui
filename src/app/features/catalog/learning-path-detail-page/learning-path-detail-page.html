@@ -1,0 +1,109 @@
+<div class="animate-fade-in mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-8">
+  <!-- Back Link -->
+  <div>
+    <a
+      routerLink="/learning-paths"
+      class="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary)] hover:underline"
+    >
+      <ng-icon name="phosphorArrowLeft" />
+      <span>{{ 'learningPaths.backToAll' | translate }}</span>
+    </a>
+  </div>
+
+  @if (isLoading()) {
+    <div class="animate-fade-in space-y-6">
+      <app-skeleton variant="block" height="12rem" />
+      <div class="space-y-4">
+        <app-skeleton variant="block" height="5rem" />
+        <app-skeleton variant="block" height="5rem" />
+        <app-skeleton variant="block" height="5rem" />
+      </div>
+    </div>
+  } @else if (error() || !path()) {
+    <div class="animate-fade-in rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center text-xs text-[var(--color-text-muted)] space-y-4 shadow-sm">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500">
+        <ng-icon name="phosphorWarningCircle" class="text-3xl" />
+      </div>
+      <h2 class="text-base font-bold text-[var(--color-text)]">{{ error() || ('learningPaths.notFoundTitle' | translate) }}</h2>
+      <p>{{ 'learningPaths.notFoundDesc' | translate }}</p>
+      <div>
+        <a
+          routerLink="/learning-paths"
+          class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition"
+        >
+          <span>{{ 'learningPaths.exploreOtherPaths' | translate }}</span>
+        </a>
+      </div>
+    </div>
+  } @else {
+    @if (path(); as p) {
+      <!-- Path Header Banner -->
+      <div class="animate-fade-in-down relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-zinc-950 p-8 sm:p-10 text-white shadow-xl space-y-6">
+        <div class="relative z-10 space-y-4">
+          <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold backdrop-blur-md text-emerald-300">
+            <ng-icon name="phosphorBookOpen" class="text-sm" />
+            <span>{{ 'learningPaths.recommendedCurriculum' | translate: { count: p.courses.length } }}</span>
+          </div>
+
+          <h1 class="text-2xl font-black sm:text-3xl lg:text-4xl text-white">
+            {{ p.title }}
+          </h1>
+
+          <p class="text-xs sm:text-sm text-zinc-300 max-w-2xl leading-relaxed">
+            {{ p.description || ('learningPaths.defaultDescription' | translate) }}
+          </p>
+        </div>
+
+        <div class="relative z-10 flex flex-wrap items-center gap-3 pt-2">
+          @if (p.courses.length > 0) {
+            <a
+              [routerLink]="['/courses', p.courses[0].slug]"
+              class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:bg-[var(--color-primary-hover)] transition"
+            >
+              <ng-icon name="phosphorPlayCircle" class="text-base" />
+              <span>{{ 'learningPaths.startFirstCourse' | translate: { title: p.courses[0].title } }}</span>
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Curriculum Timeline Section -->
+      <div class="animate-fade-in-up stagger-1 space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-[var(--color-text)]">{{ 'learningPaths.curriculumRoadmap' | translate }}</h2>
+          <span class="text-xs text-[var(--color-text-muted)] font-semibold">{{ 'learningPaths.orderRecommended' | translate }}</span>
+        </div>
+
+        <div class="space-y-4">
+          @for (course of p.courses; track course.id; let idx = $index) {
+            <div class="card-hover flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+              <div class="flex items-center gap-4">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary)]/10 font-mono text-sm font-black text-[var(--color-primary)]">
+                  0{{ idx + 1 }}
+                </div>
+                <div>
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                    {{ 'learningPaths.step' | translate: { step: idx + 1 } }}
+                  </span>
+                  <h3 class="text-sm font-bold text-[var(--color-text)] mt-0.5">
+                    {{ course.title }}
+                  </h3>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 self-end sm:self-center">
+                <a
+                  [routerLink]="['/courses', course.slug]"
+                  class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-white transition shadow-xs"
+                >
+                  <span>{{ 'learningPaths.viewCourse' | translate }}</span>
+                  <ng-icon name="phosphorArrowRight" />
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

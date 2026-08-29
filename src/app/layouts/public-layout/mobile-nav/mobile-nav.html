@@ -59,6 +59,24 @@
           {{ 'nav.blog' | translate }}
         </a>
 
+        <a
+          routerLink="/cart"
+          routerLinkActive="text-[var(--color-primary)]"
+          (click)="requestClose()"
+          class="flex min-h-11 items-center justify-between rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
+            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          <div class="flex items-center gap-2.5">
+            <ng-icon name="phosphorShoppingCart" class="text-lg" />
+            <span>{{ 'nav.cart' | translate }}</span>
+          </div>
+          @if (cartStore.itemCount() > 0) {
+            <span class="rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-xs font-bold text-[var(--color-primary-foreground)]">
+              {{ cartStore.itemCount() }}
+            </span>
+          }
+        </a>
+
         @if (categories().length > 0) {
           <div class="flex flex-col gap-1 border-t border-[var(--color-border)] pt-2">
             @for (category of categories(); track category.id) {
@@ -83,6 +101,22 @@
               hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           >
             {{ 'nav.instructor' | translate }}
+          </a>
+          <a
+            routerLink="/admin"
+            (click)="requestClose()"
+            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-bold text-rose-600 dark:text-rose-400
+              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            ผู้ดูแลระบบ (Admin CMS)
+          </a>
+          <a
+            routerLink="/account/orders"
+            (click)="requestClose()"
+            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
+              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            {{ 'nav.orders' | translate }}
           </a>
           <a
             routerLink="/account/devices"

@@ -1,12 +1,14 @@
 export interface RevenueSplitItem {
   readonly id: string;
-  readonly orderId: string;
+  readonly orderId?: string;
   readonly orderItemId: string;
   readonly instructorId: string;
   readonly grossAmount: number;
   readonly platformFeeAmount: number;
   readonly paymentFeeAmount: number;
   readonly instructorAmount: number;
+  readonly revenueSharePercent?: number;
+  readonly periodKey?: string;
   readonly status: string;
   readonly createdAtUtc: string;
 }
@@ -20,21 +22,30 @@ export interface InstructorPayoutAccount {
   readonly isVerified: boolean;
 }
 
+export interface PayoutBatchItemDetail {
+  readonly id: string;
+  readonly instructorId: string;
+  readonly amount: number;
+  readonly withholdingTaxPercent: number;
+  readonly withholdingTaxAmount: number;
+  readonly netAmount: number;
+  readonly status: string;
+  readonly transferRef?: string | null;
+}
+
 export interface PayoutBatchItem {
   readonly id: string;
-  readonly batchNumber: string;
-  readonly periodStartUtc: string;
-  readonly periodEndUtc: string;
+  readonly periodKey: string;
   readonly totalAmount: number;
-  readonly totalInstructors: number;
   readonly status: string;
-  readonly executedAtUtc?: string | null;
   readonly createdAtUtc: string;
+  readonly executedAtUtc?: string | null;
+  readonly executedByUserId?: string | null;
+  readonly items?: readonly PayoutBatchItemDetail[];
 }
 
 export interface CreatePayoutBatchRequest {
-  readonly periodStartUtc: string;
-  readonly periodEndUtc: string;
+  readonly periodKey: string;
 }
 
 export interface PayoutHistoryItem {
@@ -55,3 +66,18 @@ export interface InstructorEarningsSummary {
   readonly history: readonly PayoutHistoryItem[];
 }
 
+export interface BatchExportResponse {
+  readonly batchId: string;
+  readonly periodKey: string;
+  readonly totalAmount: number;
+  readonly totalItems: number;
+  readonly exportedAtUtc: string;
+  readonly transferRecords: readonly {
+    readonly instructorId: string;
+    readonly accountName: string;
+    readonly bankCode: string;
+    readonly bankAccountNumber: string;
+    readonly netAmount: number;
+    readonly transferRef: string;
+  }[];
+}

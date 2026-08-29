@@ -5,6 +5,8 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { ConsentBanner } from '../../shared/consent-banner/consent-banner';
+import { BottomMobileNav } from './bottom-mobile-nav/bottom-mobile-nav';
 import { SiteFooter } from './site-footer/site-footer';
 import { SiteHeader } from './site-header/site-header';
 
@@ -17,7 +19,7 @@ import { SiteHeader } from './site-header/site-header';
  */
 @Component({
   selector: 'app-public-layout',
-  imports: [RouterOutlet, TranslatePipe, SiteHeader, SiteFooter],
+  imports: [RouterOutlet, TranslatePipe, SiteHeader, SiteFooter, ConsentBanner, BottomMobileNav],
   templateUrl: './public-layout.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -8,12 +8,8 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
+import { mockDataInterceptor } from './core/http/mock-data.interceptor';
 
-// Required for any `DatePipe` use with the `'th-TH'` locale (P0-35's DevicesPage formats
-// UTC session timestamps as `th-TH` / `Asia/Bangkok`, per frontend.md's date-formatting rule) —
-// Angular throws NG0701 ("Missing locale data") for a locale it hasn't been given data for.
-// Pure data registration, no `window`/`document` access, so it is safe to run at module load on
-// both the server and browser entry points (both import this file).
 registerLocaleData(localeTh);
 
 export const appConfig: ApplicationConfig = {
@@ -21,6 +17,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, mockDataInterceptor, errorInterceptor])),
   ],
 };

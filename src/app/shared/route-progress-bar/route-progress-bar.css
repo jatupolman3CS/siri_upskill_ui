@@ -1,0 +1,10 @@
+﻿.animate-progress-indeterminate {
+  animation: app-progress-indeterminate 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-progress-indeterminate {
+    animation: none;
+    opacity: 0.8;
+  }
+}

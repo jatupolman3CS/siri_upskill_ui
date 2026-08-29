@@ -32,6 +32,9 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 //   it to /login every time anyway — see that guard's own doc comment).
 export const serverRoutes: ServerRoute[] = [
   { path: 'account/devices', renderMode: RenderMode.Client },
+  { path: 'account/privacy', renderMode: RenderMode.Client },
+  { path: 'account/orders', renderMode: RenderMode.Client },
+  { path: 'cart', renderMode: RenderMode.Client },
   { path: 'checkout', renderMode: RenderMode.Client },
   { path: 'checkout/:orderId', renderMode: RenderMode.Client },
   { path: 'my-courses', renderMode: RenderMode.Client },

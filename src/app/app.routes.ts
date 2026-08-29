@@ -29,6 +29,22 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/catalog/course-detail-page/course-detail-page').then((m) => m.CourseDetailPage),
       },
+      {
+        path: 'learning-paths',
+        loadComponent: () =>
+          import('./features/catalog/learning-paths-page/learning-paths-page').then((m) => m.LearningPathsPage),
+      },
+      {
+        path: 'learning-paths/:slug',
+        loadComponent: () =>
+          import('./features/catalog/learning-path-detail-page/learning-path-detail-page').then((m) => m.LearningPathDetailPage),
+      },
+      {
+        path: 'wishlist',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/catalog/wishlist-page/wishlist-page').then((m) => m.WishlistPage),
+      },
       // Auth pages (P0-35) — unauthenticated flows against the real Identity API. See
       // app.routes.server.ts for each route's SSR/CSR rendering decision and why.
       {
@@ -56,12 +72,50 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/reset-password/reset-password-page').then((m) => m.ResetPasswordPage),
       },
+      // Legal & Information pages (P7-09)
+      {
+        path: 'terms',
+        loadComponent: () =>
+          import('./features/legal/terms-page/terms-page').then((m) => m.TermsPage),
+      },
+      {
+        path: 'privacy',
+        loadComponent: () =>
+          import('./features/legal/privacy-page/privacy-page').then((m) => m.PrivacyPage),
+      },
+      {
+        path: 'refund-policy',
+        loadComponent: () =>
+          import('./features/legal/refund-policy-page/refund-policy-page').then((m) => m.RefundPolicyPage),
+      },
+      {
+        path: 'faq',
+        loadComponent: () =>
+          import('./features/legal/faq-page/faq-page').then((m) => m.FaqPage),
+      },
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./features/legal/contact-page/contact-page').then((m) => m.ContactPage),
+      },
       // Authenticated (authGuard)
       {
         path: 'account/devices',
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/auth/devices/devices-page').then((m) => m.DevicesPage),
+      },
+      {
+        path: 'account/privacy',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/auth/account-privacy/account-privacy-page').then((m) => m.AccountPrivacyPage),
+      },
+      // Cart (P3-20) — Cart page with local storage persistence
+      {
+        path: 'cart',
+        loadComponent: () =>
+          import('./features/commerce/cart/cart-page.component').then((m) => m.CartPageComponent),
       },
       // Checkout (P3-21) — Authenticated checkout & PromptPay QR page
       {
@@ -87,6 +141,18 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/commerce/checkout-page/checkout-page').then((m) => m.CheckoutPage),
+      },
+      // Order History (P3-23) — Authenticated order history, receipts, and refund requests
+      {
+        path: 'account/orders',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/commerce/order-history-page/order-history-page').then((m) => m.OrderHistoryPage),
+      },
+      {
+        path: 'orders',
+        redirectTo: 'account/orders',
+        pathMatch: 'full',
       },
       // My Courses (P3-24) — Authenticated enrolled courses dashboard
       {
@@ -180,6 +246,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/instructor/earnings/instructor-earnings-page').then((m) => m.InstructorEarningsPage),
       },
+      {
+        path: 'onboarding',
+        loadComponent: () =>
+          import('./features/instructor/onboarding/instructor-onboarding-page').then((m) => m.InstructorOnboardingPage),
+      },
     ],
   },
   // Admin CMS & Ops (P6-20 .. P6-23) — CSR + authGuard
@@ -215,6 +286,11 @@ export const routes: Routes = [
           import('./features/admin/banners/admin-banners-page').then((m) => m.AdminBannersPage),
       },
       {
+        path: 'menus',
+        loadComponent: () =>
+          import('./features/admin/menus/admin-menus-page').then((m) => m.AdminMenusPage),
+      },
+      {
         path: 'posts',
         loadComponent: () =>
           import('./features/admin/posts/admin-posts-page').then((m) => m.AdminPostsPage),
@@ -224,6 +300,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/payouts/admin-payouts-page').then((m) => m.AdminPayoutsPage),
       },
+      {
+        path: 'payments',
+        loadComponent: () =>
+          import('./features/admin/payments/admin-payments-page').then((m) => m.AdminPaymentsPage),
+      },
+      {
+        path: 'contact-messages',
+        loadComponent: () =>
+          import('./features/admin/contact-messages/admin-contact-messages-page').then((m) => m.AdminContactMessagesPage),
+      },
     ],
+  },
+  // Catch-all wildcard route
+  {
+    path: '**',
+    redirectTo: '',
   },
 ];

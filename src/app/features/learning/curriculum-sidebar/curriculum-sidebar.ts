@@ -40,6 +40,7 @@ export class CurriculumSidebar {
   @Input() isEnrolled = false;
 
   @Output() readonly selectEpisode = new EventEmitter<string>();
+  @Output() readonly lockedEpisodeClicked = new EventEmitter<string>();
 
   private readonly expandedSections = signal<Set<string>>(new Set());
 
@@ -69,6 +70,8 @@ export class CurriculumSidebar {
   protected onEpisodeClick(episodeId: string, isFreePreview: boolean): void {
     if (this.isEnrolled || isFreePreview) {
       this.selectEpisode.emit(episodeId);
+    } else {
+      this.lockedEpisodeClicked.emit(episodeId);
     }
   }
 }

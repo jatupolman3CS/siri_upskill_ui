@@ -15,6 +15,7 @@ export type CourseSearchSort = 'Relevance' | 'Newest' | 'PriceAsc' | 'PriceDesc'
 export interface SearchCoursesQuery {
   readonly q?: string;
   readonly categoryId?: string;
+  readonly instructorId?: string;
   readonly level?: CourseLevel;
   readonly minPrice?: number;
   readonly maxPrice?: number;
@@ -44,6 +45,7 @@ export interface CourseSearchResultItem {
   readonly instructorId: string;
   readonly instructorDisplayName: string;
   readonly categoryId: string;
+  readonly isWishlisted?: boolean;
 }
 
 /** Mirrors `CategoryFacet`. */
@@ -58,12 +60,20 @@ export interface LevelFacet {
   readonly count: number;
 }
 
+/** Mirrors `InstructorFacet` (task P1-10). */
+export interface InstructorFacet {
+  readonly instructorId: string;
+  readonly displayName: string;
+  readonly count: number;
+}
+
 /** Mirrors `CourseSearchFacets` — see that C# record's own doc comment: computed against the
  * search-matched + Published set BEFORE this request's own category/level/price/rating filters, not
  * "current filters minus this facet's own dimension". */
 export interface CourseSearchFacets {
   readonly categories: readonly CategoryFacet[];
   readonly levels: readonly LevelFacet[];
+  readonly instructors?: readonly InstructorFacet[];
 }
 
 /** Mirrors `SearchCoursesResponse`. */
@@ -125,6 +135,7 @@ export interface CourseDetailResponse {
   readonly outcomes: readonly string[];
   readonly requirements: readonly string[];
   readonly sections: readonly CourseDetailSection[];
+  readonly isWishlisted?: boolean;
 }
 
 /** Mirrors `Siri.Modules.Catalog.Domain.CourseStatus`. */
@@ -300,5 +311,59 @@ export interface CreateCourseResponse {
   readonly price: number;
   readonly currency: string;
   readonly status: CourseStatus;
+}
+
+export interface InstructorCourseSummary {
+  readonly id: string;
+  readonly slug: string;
+  readonly title: string;
+  readonly thumbnailUrl: string | null;
+  readonly price: number;
+  readonly status: CourseStatus;
+  readonly createdAtUtc: string;
+}
+
+export interface WishlistCourseItemResponse {
+  readonly courseId: string;
+  readonly slug: string;
+  readonly title: string;
+  readonly subtitle: string | null;
+  readonly thumbnailUrl: string | null;
+  readonly price: number;
+  readonly comparePrice: number | null;
+  readonly currency: string;
+  readonly instructorName: string;
+  readonly ratingAverage: number;
+  readonly ratingCount: number;
+  readonly wishlistedAtUtc: string;
+}
+
+export interface RatingDistributionResponse {
+  readonly star5: number;
+  readonly star4: number;
+  readonly star3: number;
+  readonly star2: number;
+  readonly star1: number;
+}
+
+export interface CourseReviewItemResponse {
+  readonly id: string;
+  readonly courseId: string;
+  readonly userId: string;
+  readonly userName: string;
+  readonly rating: number;
+  readonly comment: string | null;
+  readonly createdAtUtc: string;
+}
+
+export interface CourseReviewSummaryResponse {
+  readonly averageRating: number;
+  readonly ratingCount: number;
+  readonly distribution?: RatingDistributionResponse;
+  readonly items: readonly CourseReviewItemResponse[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly totalPages: number;
 }
 

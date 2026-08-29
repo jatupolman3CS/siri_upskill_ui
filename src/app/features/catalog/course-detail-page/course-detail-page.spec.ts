@@ -1,15 +1,20 @@
 import { DOCUMENT } from '@angular/common';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
+import { CartStore } from '../../commerce/cart/cart-store.service';
 import { CategoryTreeNode } from '../data/category-api.models';
 import { CourseDetailResponse } from '../data/course-api.models';
 import { CourseDetailPage } from './course-detail-page';
+
+@Component({ template: '' })
+class DummyCartComponent {}
 
 const CATEGORIES: readonly CategoryTreeNode[] = [
   {
@@ -73,12 +78,13 @@ describe('CourseDetailPage', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
-        provideRouter([{ path: 'courses/:slug', component: CourseDetailPage }]),
-        // withFetch() — matches app.config.ts's real HTTP client setup (provideHttpClient(withFetch(),
-        // ...)), not just provideHttpClient()'s plain XHR default, so this suite exercises the same
-        // backend production actually uses.
+        provideRouter([
+          { path: 'courses/:slug', component: CourseDetailPage },
+          { path: 'cart', component: DummyCartComponent },
+        ]),
         provideHttpClient(withFetch()),
         provideHttpClientTesting(),
       ],
@@ -90,8 +96,6 @@ describe('CourseDetailPage', () => {
 
   afterEach(() => httpMock.verify());
 
-  // Same two-step settle as CoursesPage's own spec (see that file's doc comment for why both steps
-  // are needed) — this page's rxResource usage has the identical ActivatedRoute-reactive shape.
   async function settle(): Promise<void> {
     harness.detectChanges();
     TestBed.flushEffects();
@@ -105,14 +109,26 @@ describe('CourseDetailPage', () => {
     return component;
   }
 
-  function flushCourse(response: CourseDetailResponse | null, slug = 'python-for-beginners', status = 200): Promise<void> {
+  function flushReviews(reviews: any = { ratingAverage: 0, ratingCount: 0, distribution: { star5: 0, star4: 0, star3: 0, star2: 0, star1: 0 }, items: [], totalCount: 0, page: 1, pageSize: 20 }, courseId = 'course-1'): Promise<void> {
+    const reqs = httpMock.match((r) => r.url === `/api/catalog/courses/${courseId}/reviews`);
+    for (const rReq of reqs) {
+      rReq.flush(reviews);
+    }
+    return settle();
+  }
+
+  async function flushCourse(response: CourseDetailResponse | null, slug = 'python-for-beginners', status = 200): Promise<void> {
     const req = httpMock.expectOne((r) => r.url === `/api/catalog/courses/${slug}`);
     if (status === 200) {
       req.flush(response);
+      await settle();
+      if (response) {
+        await flushReviews(undefined, response.id);
+      }
     } else {
       req.flush({ title: 'Not Found', detail: 'ไม่พบคอร์สนี้' }, { status, statusText: 'Error' });
+      await settle();
     }
-    return settle();
   }
 
   function flushCategories(categories: readonly CategoryTreeNode[] = []): Promise<void> {
@@ -248,16 +264,25 @@ describe('CourseDetailPage', () => {
     expect(setupRow?.textContent).not.toContain('Free preview');
   });
 
-  it('disables the buy button everywhere it appears (no checkout exists yet)', async () => {
+  it('enables buy now and add to cart buttons, adding course to cart on click', async () => {
     await navigate('/courses/python-for-beginners');
     await flushCourse(COURSE);
     await flushCategories();
+
+    const cartStore = TestBed.inject(CartStore);
+    cartStore.clearCart();
+    expect(cartStore.items().length).toBe(0);
 
     const buyButtons = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).filter((b) =>
       b.textContent?.includes('Buy this course'),
     ) as HTMLButtonElement[];
     expect(buyButtons.length).toBeGreaterThan(0);
-    expect(buyButtons.every((b) => b.disabled)).toBe(true);
+    expect(buyButtons.every((b) => !b.disabled)).toBe(true);
+
+    buyButtons[0].click();
+    await settle();
+
+    expect(cartStore.items().some((i) => i.courseId === 'course-1')).toBe(true);
   });
 
   it('shows "no reviews yet" when ratingCount is 0', async () => {

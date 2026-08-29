@@ -18,24 +18,15 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { SeoService } from '../../../core/seo/seo.service';
+import {
+  InstructorAnalyticsService,
+  InstructorCourseOption,
+  InstructorDropOffStat,
+  InstructorStudentProgress,
+} from './instructor-analytics.service';
 
-export interface DropOffData {
-  episodeNumber: number;
-  title: string;
-  viewersCount: number;
-  completionRate: number;
-}
-
-export interface StudentProgressItem {
-  id: string;
-  name: string;
-  email: string;
-  courseTitle: string;
-  progressPercent: number;
-  completedEpisodes: number;
-  totalEpisodes: number;
-  lastActiveAtUtc: string;
-}
+export type DropOffData = InstructorDropOffStat;
+export type StudentProgressItem = InstructorStudentProgress;
 
 @Component({
   selector: 'app-instructor-analytics-page',
@@ -55,55 +46,19 @@ export interface StudentProgressItem {
 })
 export class InstructorAnalyticsPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly analyticsService = inject(InstructorAnalyticsService);
 
   protected readonly selectedTimeRange = signal<'7d' | '30d' | '90d'>('30d');
   protected readonly selectedCourse = signal('all');
+  protected readonly isLoading = signal(false);
 
-  protected readonly totalViews = signal(14820);
-  protected readonly totalWatchMinutes = signal(95400);
-  protected readonly avgCompletionRate = signal(78.5);
+  protected readonly totalViews = signal(0);
+  protected readonly totalWatchMinutes = signal(0);
+  protected readonly avgCompletionRate = signal(0);
 
-  protected readonly dropOffStats = signal<DropOffData[]>([
-    { episodeNumber: 1, title: 'บทที่ 1: บทนำและการติดตั้งสภาพแวดล้อม', viewersCount: 420, completionRate: 98 },
-    { episodeNumber: 2, title: 'บทที่ 2: สถาปัตยกรรม Clean Architecture', viewersCount: 405, completionRate: 92 },
-    { episodeNumber: 3, title: 'บทที่ 3: Domain Entities & Invariants', viewersCount: 388, completionRate: 88 },
-    { episodeNumber: 4, title: 'บทที่ 4: EF Core & Interceptors', viewersCount: 365, completionRate: 82 },
-    { episodeNumber: 5, title: 'บทที่ 5: CQRS & MediatR vs Services', viewersCount: 340, completionRate: 76 },
-    { episodeNumber: 6, title: 'บทที่ 6: Real-time Video DRM & Player', viewersCount: 322, completionRate: 74 },
-  ]);
-
-  protected readonly students = signal<StudentProgressItem[]>([
-    {
-      id: 'st-1',
-      name: 'กิตติศักดิ์ พรหมมินทร์',
-      email: 'kittisak.p@example.com',
-      courseTitle: 'Full-Stack Web Development with Angular & .NET 10',
-      progressPercent: 100,
-      completedEpisodes: 24,
-      totalEpisodes: 24,
-      lastActiveAtUtc: '2026-08-21T04:10:00Z',
-    },
-    {
-      id: 'st-2',
-      name: 'ชลธิชา อภิสิทธิ์',
-      email: 'chonticha.a@example.com',
-      courseTitle: 'Full-Stack Web Development with Angular & .NET 10',
-      progressPercent: 75,
-      completedEpisodes: 18,
-      totalEpisodes: 24,
-      lastActiveAtUtc: '2026-08-20T17:30:00Z',
-    },
-    {
-      id: 'st-3',
-      name: 'ปิยะวัฒน์ เจริญสุข',
-      email: 'piyawat.c@example.com',
-      courseTitle: 'Building Production AI Agents with Semantic Kernel',
-      progressPercent: 45,
-      completedEpisodes: 7,
-      totalEpisodes: 16,
-      lastActiveAtUtc: '2026-08-19T11:20:00Z',
-    },
-  ]);
+  protected readonly dropOffStats = signal<DropOffData[]>([]);
+  protected readonly students = signal<StudentProgressItem[]>([]);
+  protected readonly courses = signal<InstructorCourseOption[]>([]);
 
   ngOnInit(): void {
     this.seoService.set({
@@ -112,6 +67,38 @@ export class InstructorAnalyticsPage implements OnInit {
       path: '/instructor/analytics',
       robots: 'noindex',
     });
+
+    this.loadAnalytics();
+  }
+
+  protected setTimeRange(range: '7d' | '30d' | '90d'): void {
+    this.selectedTimeRange.set(range);
+    this.loadAnalytics();
+  }
+
+  protected setCourse(courseId: string): void {
+    this.selectedCourse.set(courseId);
+    this.loadAnalytics();
+  }
+
+  private loadAnalytics(): void {
+    this.isLoading.set(true);
+    this.analyticsService
+      .getSummary(this.selectedTimeRange(), this.selectedCourse())
+      .subscribe({
+        next: (data) => {
+          this.totalViews.set(data.totalViews);
+          this.totalWatchMinutes.set(data.totalWatchMinutes);
+          this.avgCompletionRate.set(data.avgCompletionRate);
+          this.dropOffStats.set([...data.dropOffStats]);
+          this.students.set([...data.students]);
+          this.courses.set([...data.courses]);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 
   protected exportCsv(): void {

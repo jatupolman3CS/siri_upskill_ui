@@ -24,6 +24,8 @@ export interface OrderDetailResponse {
   readonly currency: string;
   readonly status: OrderStatus;
   readonly items: readonly OrderItemDto[];
+  readonly createdAtUtc?: string;
+  readonly paidAtUtc?: string;
   readonly expiresAtUtc?: string;
 }
 
@@ -63,4 +65,65 @@ export interface PromoCodeValidationResponse {
   readonly discountAmount: number;
   readonly totalAmount: number;
   readonly errorMessage?: string;
+}
+
+export type TaxInvoiceStatus = 'Issued' | 'Voided';
+
+export interface TaxInvoiceResponse {
+  readonly id: string;
+  readonly orderId: string;
+  readonly buyerName: string;
+  readonly invoiceNo: string;
+  readonly issuedAtUtc: string;
+  readonly pdfStorageKey?: string;
+  readonly status: TaxInvoiceStatus;
+}
+
+export interface RequestRefundCommand {
+  readonly paymentId: string;
+  readonly reason: string;
+}
+
+export type RefundStatus = 'Pending' | 'Approved' | 'Rejected' | 'Processing' | 'Succeeded' | 'Failed';
+
+export interface RefundResponse {
+  readonly id: string;
+  readonly paymentId: string;
+  readonly amount: number;
+  readonly reason: string;
+  readonly status: RefundStatus;
+  readonly requestedAtUtc: string;
+  readonly decidedAtUtc?: string;
+  readonly decisionNotes?: string;
+}
+
+export interface BundleItemResponse {
+  readonly courseId: string;
+}
+
+export interface BundleResponse {
+  readonly id: string;
+  readonly slug: string;
+  readonly title: string;
+  readonly description: string | null;
+  readonly price: number;
+  readonly isActive: boolean;
+  readonly startsAtUtc: string | null;
+  readonly endsAtUtc: string | null;
+  readonly items: readonly BundleItemResponse[];
+}
+
+export interface FlashSaleItemResponse {
+  readonly id: string;
+  readonly courseId: string;
+  readonly salePrice: number;
+}
+
+export interface FlashSaleResponse {
+  readonly id: string;
+  readonly title: string;
+  readonly startsAtUtc: string;
+  readonly endsAtUtc: string;
+  readonly isActive: boolean;
+  readonly items: readonly FlashSaleItemResponse[];
 }

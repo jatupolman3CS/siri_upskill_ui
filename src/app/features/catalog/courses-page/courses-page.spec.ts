@@ -50,12 +50,16 @@ const ONE_COURSE_RESPONSE: SearchCoursesResponse = {
     pageSize: 20,
     totalPages: 1,
   },
-  facets: { categories: [{ categoryId: 'cat-programming', count: 1 }], levels: [{ level: 'Beginner', count: 1 }] },
+  facets: {
+    categories: [{ categoryId: 'cat-programming', count: 1 }],
+    levels: [{ level: 'Beginner', count: 1 }],
+    instructors: [{ instructorId: 'instructor-1', displayName: 'ธนกฤต ศรีสุวรรณ', count: 1 }],
+  },
 };
 
 const EMPTY_RESPONSE: SearchCoursesResponse = {
   results: { items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0 },
-  facets: { categories: [], levels: [] },
+  facets: { categories: [], levels: [], instructors: [] },
 };
 
 describe('CoursesPage', () => {
@@ -265,5 +269,29 @@ describe('CoursesPage', () => {
     await settle();
 
     expect(harness.routeNativeElement?.textContent).toContain('No courses match your filters');
+  });
+
+  it('renders instructor facet and filters by instructorId when clicked', async () => {
+    await navigate('/courses');
+    await flushCategories([]);
+    await flushSearch(ONE_COURSE_RESPONSE);
+
+    expect(harness.routeNativeElement?.textContent).toContain('ธนกฤต ศรีสุวรรณ');
+
+    const instructorButton = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
+      (b) => b.textContent?.includes('ธนกฤต ศรีสุวรรณ'),
+    ) as HTMLButtonElement;
+    expect(instructorButton).toBeTruthy();
+
+    instructorButton.click();
+    await macrotaskTick();
+    await settle();
+
+    expect(router.url).toContain('instructorId=instructor-1');
+
+    const searchRequest = httpMock.expectOne((req) => req.url === '/api/catalog/courses/search');
+    expect(searchRequest.request.params.get('instructorId')).toBe('instructor-1');
+    searchRequest.flush(ONE_COURSE_RESPONSE);
+    await settle();
   });
 });

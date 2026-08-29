@@ -16,8 +16,10 @@ import {
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { CourseApiService } from '../../catalog/data/course-api.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { NotificationApiService } from '../../notification/data/notification-api.service';
+import { Spinner } from '../../../shared/spinner/spinner';
 
 export interface AnnouncementHistoryItem {
   id: string;
@@ -31,7 +33,7 @@ export interface AnnouncementHistoryItem {
 
 @Component({
   selector: 'app-instructor-announcements-page',
-  imports: [CommonModule, FormsModule, NgIcon],
+  imports: [CommonModule, FormsModule, NgIcon, Spinner],
   templateUrl: './instructor-announcements-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -46,14 +48,13 @@ export interface AnnouncementHistoryItem {
 })
 export class InstructorAnnouncementsPage implements OnInit {
   private readonly notificationApi = inject(NotificationApiService);
+  private readonly courseApi = inject(CourseApiService);
   private readonly seoService = inject(SeoService);
 
-  protected readonly courses = signal([
-    { id: 'c-1', title: 'Full-Stack Web Development with Angular & .NET 10', studentsCount: 420 },
-    { id: 'c-2', title: 'Building Production AI Agents with Semantic Kernel', studentsCount: 185 },
-  ]);
+  protected readonly courses = signal<{ id: string; title: string; studentsCount?: number }[]>([]);
+  protected readonly isLoadingCourses = signal(false);
 
-  protected readonly selectedCourseId = signal('c-1');
+  protected readonly selectedCourseId = signal('');
   protected readonly announcementTitle = signal('');
   protected readonly announcementMessage = signal('');
   protected readonly sendEmailNotification = signal(true);
@@ -61,26 +62,7 @@ export class InstructorAnnouncementsPage implements OnInit {
   protected readonly isSending = signal(false);
   protected readonly sendSuccess = signal(false);
 
-  protected readonly announcements = signal<AnnouncementHistoryItem[]>([
-    {
-      id: 'ann-1',
-      courseTitle: 'Full-Stack Web Development with Angular & .NET 10',
-      title: 'อัปเดตบทเรียนใหม่: การจัดการ State ด้วย Angular 22 Signals',
-      message: 'สวัสดีครับผู้เรียนทุกคน ตอนนี้อาจารย์ได้เพิ่มวิดีโอเนื้อหาใหม่ในหมวดที่ 3 แล้ว...',
-      sentAtUtc: '2026-08-18T09:30:00Z',
-      recipientsCount: 420,
-      isEmailSent: true,
-    },
-    {
-      id: 'ann-2',
-      courseTitle: 'Full-Stack Web Development with Angular & .NET 10',
-      title: 'แจ้งนัดหมาย Live Q&A ถาม-ตอบปัญหาประจำเดือน',
-      message: 'ขอเชิญนักเรียนทุกคนเข้าร่วม Live Q&A วันเสาร์นี้เวลา 19.00 น....',
-      sentAtUtc: '2026-08-10T14:00:00Z',
-      recipientsCount: 390,
-      isEmailSent: true,
-    },
-  ]);
+  protected readonly announcements = signal<AnnouncementHistoryItem[]>([]);
 
   ngOnInit(): void {
     this.seoService.set({
@@ -88,6 +70,20 @@ export class InstructorAnnouncementsPage implements OnInit {
       description: 'ระบบส่งข้อความประกาศและอีเมลแจ้งเตือนถึงผู้เรียนในคอร์ส',
       path: '/instructor/announcements',
       robots: 'noindex',
+    });
+
+    this.isLoadingCourses.set(true);
+    this.courseApi.getMyCourses(1, 100).subscribe({
+      next: (res) => {
+        this.isLoadingCourses.set(false);
+        if (res.items && res.items.length > 0) {
+          this.courses.set(res.items.map((c) => ({ id: c.id, title: c.title })));
+          this.selectedCourseId.set(res.items[0].id);
+        }
+      },
+      error: () => {
+        this.isLoadingCourses.set(false);
+      },
     });
 
     this.notificationApi.getInstructorAnnouncements().subscribe({

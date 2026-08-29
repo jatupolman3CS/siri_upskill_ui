@@ -58,7 +58,7 @@ describe('CategoryMegaMenu', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [TestHost],
-      providers: [provideRouter([])],
+      providers: [provideRouter([{ path: '**', component: TestHost }])],
     });
     fixture = TestBed.createComponent(TestHost);
     TestBed.inject(TranslationService).setLocale('en');

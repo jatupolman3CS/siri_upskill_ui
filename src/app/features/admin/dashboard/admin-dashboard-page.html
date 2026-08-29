@@ -1,71 +1,278 @@
-<div class="max-w-6xl mx-auto space-y-8">
-  <div>
-    <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
-      ศูนย์ควบคุมระบบ (Admin Control Center)
-    </h1>
-    <p class="text-xs text-[var(--color-text-muted)] mt-1">
-      จัดการเนื้อหา หน้าเว็บ ประชาสัมพันธ์ และการเงิน
-    </p>
+<div class="animate-fade-in max-w-6xl mx-auto space-y-8">
+  <!-- Page Header -->
+  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
+        ศูนย์ควบคุมระบบ (Admin Control Center)
+      </h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">
+        ภาพรวมสถิติแพลตฟอร์ม จัดการคอร์ส ผู้ใช้งาน การเงิน และเนื้อหา
+      </p>
+    </div>
+    @if (isLoading()) {
+      <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+        <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+        กำลังอัปเดตข้อมูล...
+      </div>
+    }
   </div>
 
-  <!-- Metric Statistics Cards -->
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">ยอดขายรวมแพลตฟอร์ม</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
-          <ng-icon name="phosphorCurrencyDollar" class="text-lg" />
+  <!-- Error Banner -->
+  @if (isError()) {
+    <div class="animate-fade-in rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5 text-rose-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <ng-icon name="phosphorWarning" class="text-2xl shrink-0 text-rose-600" />
+        <div>
+          <p class="text-sm font-bold">ไม่สามารถดึงข้อมูลสรุปแดชบอร์ดได้</p>
+          <p class="text-xs text-rose-600/80">กรุณาตรวจสอบการเชื่อมต่อ API หรือลองใหม่อีกครั้ง</p>
         </div>
       </div>
-      <p class="mt-3 text-2xl font-black text-[var(--color-text)]">฿342,800</p>
-      <p class="mt-1 text-[11px] text-emerald-600 font-medium">+22% ในเดือนนี้</p>
+      <button
+        type="button"
+        (click)="loadSummary()"
+        class="btn-tactile inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition"
+      >
+        ลองใหม่อีกครั้ง
+      </button>
+    </div>
+  }
+
+  <!-- Loading Skeletons -->
+  @if (isLoading() && !summary()) {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+        <app-skeleton className="h-4 w-24" />
+        <app-skeleton className="h-8 w-32" />
+        <app-skeleton className="h-3 w-20" />
+      </div>
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+        <app-skeleton className="h-4 w-24" />
+        <app-skeleton className="h-8 w-32" />
+        <app-skeleton className="h-3 w-20" />
+      </div>
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+        <app-skeleton className="h-4 w-24" />
+        <app-skeleton className="h-8 w-32" />
+        <app-skeleton className="h-3 w-20" />
+      </div>
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+        <app-skeleton className="h-4 w-24" />
+        <app-skeleton className="h-8 w-32" />
+        <app-skeleton className="h-3 w-20" />
+      </div>
+    </div>
+  }
+
+  <!-- Live Stats Cards -->
+  @if (summary(); as data) {
+    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- 1. Today's Sales -->
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">ยอดขายวันนี้ (Live)</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+            <ng-icon name="phosphorCurrencyDollar" class="text-lg" />
+          </div>
+        </div>
+        <p class="mt-3 text-2xl font-black text-[var(--color-text)]">
+          {{ data.todaySales | currencyThb }}
+        </p>
+        <p class="mt-1 text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          คำนวณสดจากระบบคำสั่งซื้อ
+        </p>
+      </div>
+
+      <!-- 2. Total Learners -->
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">ผู้เรียนทั้งหมด</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600">
+            <ng-icon name="phosphorUsers" class="text-lg" />
+          </div>
+        </div>
+        <p class="mt-3 text-2xl font-black text-[var(--color-text)]">
+          {{ data.totalLearners | number }} คน
+        </p>
+        <p class="mt-1 text-[11px] text-indigo-600 font-medium">
+          +{{ data.todayNewLearners }} สมัครใหม่วันนี้
+        </p>
+      </div>
+
+      <!-- 3. Pending Course Reviews -->
+      <a
+        routerLink="/admin/courses"
+        class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm hover:border-[var(--color-primary)] transition group block"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">คอร์สรออนุมัติ</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 group-hover:scale-110 transition-transform">
+            <ng-icon name="phosphorGraduationCap" class="text-lg" />
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline justify-between">
+          <p class="text-2xl font-black text-[var(--color-text)]">
+            {{ data.pendingCourseReviewsCount }} คอร์ส
+          </p>
+          @if (data.pendingCourseReviewsCount > 0) {
+            <span class="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600">
+              ต้องตรวจสอบ
+            </span>
+          }
+        </div>
+        <p class="mt-1 text-[11px] text-[var(--color-primary)] font-semibold flex items-center gap-1 group-hover:underline">
+          <span>เข้าสู่คิวตรวจสอบคอร์ส</span>
+          <ng-icon name="phosphorArrowRight" class="text-xs" />
+        </p>
+      </a>
+
+      <!-- 4. Pending Refunds -->
+      <a
+        routerLink="/admin/payouts"
+        class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm hover:border-[var(--color-primary)] transition group block"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">คำขอคืนเงินรออนุมัติ</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 group-hover:scale-110 transition-transform">
+            <ng-icon name="phosphorReceipt" class="text-lg" />
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline justify-between">
+          <p class="text-2xl font-black text-[var(--color-text)]">
+            {{ data.pendingRefundsCount }} รายการ
+          </p>
+          @if (data.pendingRefundsCount > 0) {
+            <span class="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+              รอดำเนินการ
+            </span>
+          }
+        </div>
+        <p class="mt-1 text-[11px] text-[var(--color-primary)] font-semibold flex items-center gap-1 group-hover:underline">
+          <span>เข้าสู่รายการการเงิน</span>
+          <ng-icon name="phosphorArrowRight" class="text-xs" />
+        </p>
+      </a>
     </div>
 
-    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+    <!-- Top Courses Section (30 Days Rollup) -->
+    <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm space-y-4">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">ผู้ใช้งานทั้งหมด</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600">
-          <ng-icon name="phosphorUsers" class="text-lg" />
+        <div>
+          <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
+            <ng-icon name="phosphorChartBar" class="text-indigo-600 text-lg" />
+            <span>คอร์สขายดี 30 วันล่าสุด (Top Performing Courses)</span>
+          </h2>
+          <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
+            ข้อมูล Rollup สถิติยอดขาย จำนวนผู้เรียน และยอดการดูวิดีโอ
+          </p>
         </div>
       </div>
-      <p class="mt-3 text-2xl font-black text-[var(--color-text)]">3,450 คน</p>
-      <p class="mt-1 text-[11px] text-indigo-600 font-medium">Active 890 คน/วัน</p>
-    </div>
 
-    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">แบนเนอร์ที่เปิดใช้</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
-          <ng-icon name="phosphorImage" class="text-lg" />
+      @if (data.topCourses30Days.length === 0) {
+        <div class="rounded-xl border border-dashed border-[var(--color-border)] p-8 text-center text-xs text-[var(--color-text-muted)]">
+          ยังไม่มีข้อมูลสถิติคอร์สขายดีในรอบ 30 วันที่ผ่านมา
         </div>
-      </div>
-      <p class="mt-3 text-2xl font-black text-[var(--color-text)]">3 รายการ</p>
-      <p class="mt-1 text-[11px] text-[var(--color-text-muted)] font-medium">แสดงบนหน้าแรก</p>
-    </div>
-
-    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">สถานะความปลอดภัย</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600">
-          <ng-icon name="phosphorShieldCheck" class="text-lg" />
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-[var(--color-text)]">
+            <thead class="border-b border-[var(--color-border)] text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4">#</th>
+                <th class="py-3 px-4">ชื่อคอร์ส</th>
+                <th class="py-3 px-4 text-right">ยอดขายรวม</th>
+                <th class="py-3 px-4 text-right">ผู้ลงเรียน</th>
+                <th class="py-3 px-4 text-right">ยอดเข้าชม (วิว)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-border)]">
+              @for (course of data.topCourses30Days; track course.courseId; let idx = $index) {
+                <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
+                  <td class="py-3 px-4 font-bold text-[var(--color-text-muted)]">{{ idx + 1 }}</td>
+                  <td class="py-3 px-4 font-semibold text-[var(--color-text)]">{{ course.courseTitle }}</td>
+                  <td class="py-3 px-4 text-right font-black text-emerald-600">{{ course.totalRevenue | currencyThb }}</td>
+                  <td class="py-3 px-4 text-right font-medium">{{ course.totalEnrollments | number }} คน</td>
+                  <td class="py-3 px-4 text-right font-medium text-[var(--color-text-muted)]">{{ course.totalViews | number }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-      </div>
-      <p class="mt-3 text-2xl font-black text-teal-600">ปกติ 100%</p>
-      <p class="mt-1 text-[11px] text-teal-600 font-medium">DRM Watermark & HMAC Active</p>
+      }
     </div>
-  </div>
+  }
 
-  <!-- Quick Management Links -->
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+  <!-- Quick Hub Navigation Cards -->
+  <div class="animate-fade-in-up stagger-3 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Moderation Hub -->
+    <a
+      routerLink="/admin/courses"
+      class="card-hover flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
+    >
+      <div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 mb-4">
+          <ng-icon name="phosphorGraduationCap" class="text-2xl" />
+        </div>
+        <h3 class="text-base font-bold text-[var(--color-text)]">อนุมัติคอร์ส (Course Moderation)</h3>
+        <p class="text-xs text-[var(--color-text-muted)] mt-1">
+          ตรวจสอบเนื้อหาคอร์สใหม่ที่ผู้สอนส่งเข้ามา พิจารณาอนุมัติหรือส่งกลับแก้ไข
+        </p>
+      </div>
+      <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] group-hover:translate-x-1 transition-transform">
+        <span>เข้าสู่ระบบจัดการ</span>
+        <ng-icon name="phosphorArrowRight" />
+      </div>
+    </a>
+
+    <!-- Users & Permissions Hub -->
+    <a
+      routerLink="/admin/users"
+      class="card-hover flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
+    >
+      <div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 mb-4">
+          <ng-icon name="phosphorUsers" class="text-2xl" />
+        </div>
+        <h3 class="text-base font-bold text-[var(--color-text)]">ผู้ใช้งานและสิทธิ์ (Users & Audit)</h3>
+        <p class="text-xs text-[var(--color-text-muted)] mt-1">
+          ค้นหาผู้ใช้ กำหนดสิทธิ์บทบาท ระงับการใช้งาน และตรวจสอบ Audit Logs
+        </p>
+      </div>
+      <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] group-hover:translate-x-1 transition-transform">
+        <span>เข้าสู่ระบบจัดการ</span>
+        <ng-icon name="phosphorArrowRight" />
+      </div>
+    </a>
+
+    <!-- Marketing & Promos Hub -->
+    <a
+      routerLink="/admin/marketing"
+      class="card-hover flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
+    >
+      <div>
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-600 mb-4">
+          <ng-icon name="phosphorTag" class="text-2xl" />
+        </div>
+        <h3 class="text-base font-bold text-[var(--color-text)]">การตลาด & โปรโมชัน (Marketing)</h3>
+        <p class="text-xs text-[var(--color-text-muted)] mt-1">
+          สร้างโค้ดส่วนลด จัดแคมเปญ Flash Sale และจัดชุดแพ็กเกจคอร์ส Bundle
+        </p>
+      </div>
+      <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] group-hover:translate-x-1 transition-transform">
+        <span>เข้าสู่ระบบจัดการ</span>
+        <ng-icon name="phosphorArrowRight" />
+      </div>
+    </a>
+
+    <!-- Banners CMS Hub -->
     <a
       routerLink="/admin/banners"
-      class="flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
+      class="card-hover flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
     >
       <div>
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 mb-4">
           <ng-icon name="phosphorImage" class="text-2xl" />
         </div>
-        <h3 class="text-base font-bold text-[var(--color-text)]">จัดการแบนเนอร์หน้าแรก</h3>
+        <h3 class="text-base font-bold text-[var(--color-text)]">จัดการแบนเนอร์หน้าแรก (Banners)</h3>
         <p class="text-xs text-[var(--color-text-muted)] mt-1">
           เพิ่ม ลบ แก้ไขลำดับภาพแบนเนอร์โปรโมชั่นบนหน้าแรกของแพลตฟอร์ม
         </p>
@@ -76,17 +283,18 @@
       </div>
     </a>
 
+    <!-- CMS Posts Hub -->
     <a
       routerLink="/admin/posts"
-      class="flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
+      class="card-hover flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
     >
       <div>
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 mb-4">
           <ng-icon name="phosphorArticle" class="text-2xl" />
         </div>
-        <h3 class="text-base font-bold text-[var(--color-text)]">บทความ & ข่าวสาร (CMS)</h3>
+        <h3 class="text-base font-bold text-[var(--color-text)]">บทความ & ข่าวสาร (CMS Posts)</h3>
         <p class="text-xs text-[var(--color-text-muted)] mt-1">
-          เขียนบทความ แนะนำเทคนิคการเรียน และประชาสัมพันธ์ข่าวสารองค์กร
+          เขียนบทความ แนะนำเทคนิคการเรียน และประชาสัมพันธ์ข่าวสาร
         </p>
       </div>
       <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] group-hover:translate-x-1 transition-transform">
@@ -95,17 +303,18 @@
       </div>
     </a>
 
+    <!-- Payouts & Finance Hub -->
     <a
       routerLink="/admin/payouts"
-      class="flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
+      class="card-hover flex flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm hover:border-[var(--color-primary)] transition group"
     >
       <div>
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 mb-4">
           <ng-icon name="phosphorCurrencyDollar" class="text-2xl" />
         </div>
-        <h3 class="text-base font-bold text-[var(--color-text)]">รอบจ่ายเงินผู้สอน (Payouts)</h3>
+        <h3 class="text-base font-bold text-[var(--color-text)]">รอบจ่ายเงิน & คืนเงิน (Finance)</h3>
         <p class="text-xs text-[var(--color-text-muted)] mt-1">
-          ประมวลผลส่วนแบ่งรายได้ประจำเดือน สร้าง Payout Batch และส่งออกข้อมูล
+          สร้างรอบจ่ายเงินโอนผู้สอน ส่งออกไฟล์ธนาคาร และอนุมัติคำขอคืนเงิน
         </p>
       </div>
       <div class="mt-6 flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] group-hover:translate-x-1 transition-transform">

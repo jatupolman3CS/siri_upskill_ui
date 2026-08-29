@@ -1,0 +1,55 @@
+<div class="animate-fade-in mx-auto max-w-4xl px-4 py-12 space-y-8">
+  <header class="animate-fade-in-down space-y-2 border-b border-[var(--color-border)] pb-6">
+    <h1 class="text-3xl font-black tracking-tight text-[var(--color-text)]">
+      นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+    </h1>
+    <p class="text-xs text-[var(--color-text-muted)]">
+      สอดคล้องตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) | อัปเดตล่าสุด: 27 สิงหาคม 2569
+    </p>
+  </header>
+
+  <article class="animate-fade-in-up stagger-1 prose prose-neutral dark:prose-invert max-w-none text-xs sm:text-sm text-[var(--color-text)] leading-relaxed space-y-6">
+    <section class="space-y-2">
+      <h2 class="text-base font-bold text-[var(--color-text)]">1. ข้อมูลส่วนบุคคลที่เราเก็บรวบรวม</h2>
+      <ul class="list-disc pl-5 space-y-1 text-[var(--color-text-muted)]">
+        <li><strong>ข้อมูลระบุตัวตน:</strong> ชื่อ-นามสกุล, ที่อยู่อีเมล, เบอร์โทรศัพท์, รูปประจำตัว</li>
+        <li><strong>ข้อมูลการชำระเงินและภาษี:</strong> ประวัติคำสั่งซื้อ, ข้อมูลผู้เสียภาษีและที่อยู่สำหรับการออกใบกำกับภาษี (ข้อมูลบัตรเครดิตถูกประมวลผลอย่างปลอดภัยผ่าน Stripe PCI-DSS Level 1)</li>
+        <li><strong>ข้อมูลการใช้งานระบบ:</strong> ประวัติการเข้าสู่ระบบ, ที่อยู่ IP, อุปกรณ์และเบราว์เซอร์, ความคืบหน้าในการเรียน</li>
+      </ul>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-bold text-[var(--color-text)]">2. วัตถุประสงค์ในการประมวลผลข้อมูล</h2>
+      <p>
+        เราประมวลผลข้อมูลเพื่อการให้บริการคอร์สเรียนออนไลน์ การออกใบรับรองความสำเร็จ (Certificate) การจัดทำใบกำกับภาษีตามกฎหมาย การรักษาความปลอดภัยของระบบ และการส่งการแจ้งเตือนสำคัญเกี่ยวกับหลักสูตร
+      </p>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-bold text-[var(--color-text)]">3. สิทธิ์ของเจ้าของข้อมูลส่วนบุคคล (Data Subject Rights)</h2>
+      <p>
+        ท่านมีสิทธิ์ตามกฎหมาย PDPA ดังต่อไปนี้:
+      </p>
+      <ul class="list-disc pl-5 space-y-1 text-[var(--color-text-muted)]">
+        <li><strong>สิทธิ์ในการเข้าถึงและขอรับสำเนาข้อมูล (Right to Access):</strong> ขอรับสำเนาข้อมูลส่วนบุคคลของคุณ</li>
+        <li><strong>สิทธิ์ในการโอนย้ายข้อมูล (Right to Data Portability):</strong> ส่งออกข้อมูลในรูปแบบ JSON ได้ทันทีผ่านเมนู <a routerLink="/account/privacy" class="text-[var(--color-primary)] underline font-semibold">ส่งออกข้อมูลส่วนบุคคล</a></li>
+        <li><strong>สิทธิ์ในการขอให้ลบหรือทำลายข้อมูล (Right to Erasure):</strong> ขอให้ลบบัญชีและทำให้นิรนามได้ด้วยตนเองผ่านเมนู <a routerLink="/account/privacy" class="text-[var(--color-primary)] underline font-semibold">จัดการความเป็นส่วนตัว</a></li>
+        <li><strong>สิทธิ์ในการคัดค้านหรือเพิกถอนความยินยอม:</strong> จัดการความยินยอมคุกกี้และการตลาดได้ตลอดเวลา</li>
+      </ul>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-bold text-[var(--color-text)]">4. การรักษาความปลอดภัยของข้อมูล</h2>
+      <p>
+        ข้อมูลสำคัญ เช่น เลขประจำตัวผู้เสียภาษี ถูกเข้ารหัสแบบ Authenticated Encryption (AES-256-GCM) รหัสผ่านถูกแฮชด้วย ASP.NET Core Identity PBKDF2 with HMAC-SHA512 และระบบเชื่อมต่อผ่าน HTTPS (TLS 1.3) เสมอ
+      </p>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-bold text-[var(--color-text)]">5. การติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล (DPO)</h2>
+      <p>
+        หากท่านมีคำถามเกี่ยวกับนโยบายนี้หรือต้องการใช้สิทธิ์ PDPA สามารถติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคลได้ที่ <a href="mailto:dpo@siriupskill.com" class="text-[var(--color-primary)] underline">dpo&#64;siriupskill.com</a>
+      </p>
+    </section>
+  </article>
+</div>

@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 import {
   GetAdminAuditLogsResponse,
   GetAdminUsersResponse,
+  InviteUserRequest,
+  InviteUserResponse,
   SuspendUserRequest,
   UpdateUserRolesRequest,
 } from './admin-users-api.models';
@@ -28,6 +30,10 @@ export class AdminUsersApiService {
     params = params.set('pageSize', options.pageSize ?? 20);
 
     return this.http.get<GetAdminUsersResponse>('/api/identity/admin/users', { params });
+  }
+
+  inviteUser(request: InviteUserRequest): Observable<InviteUserResponse> {
+    return this.http.post<InviteUserResponse>('/api/identity/admin/users/invite', request);
   }
 
   suspendUser(userId: string, request: SuspendUserRequest): Observable<void> {

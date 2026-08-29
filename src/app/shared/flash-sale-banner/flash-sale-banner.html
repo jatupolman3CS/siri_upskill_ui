@@ -1,0 +1,60 @@
+@if (!isExpired()) {
+  <div class="relative overflow-hidden rounded-[var(--radius-xl)] bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 p-0.5 shadow-lg">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-[calc(var(--radius-xl)-2px)] bg-zinc-950/95 px-5 py-4 text-white backdrop-blur">
+      <!-- Left: Title & Subtitle with Badge -->
+      <div class="flex items-center gap-3.5 text-center sm:text-left">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          <ng-icon name="phosphorLightning" class="text-2xl animate-pulse" />
+        </div>
+        <div>
+          <div class="flex items-center justify-center sm:justify-start gap-2">
+            <span class="rounded bg-rose-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+              FLASH DEAL
+            </span>
+            <h3 class="text-sm sm:text-base font-extrabold text-white">
+              {{ title() || ('flashSale.title' | translate) }}
+            </h3>
+          </div>
+          <p class="text-xs text-zinc-300 mt-0.5">
+            {{ subtitle() || ('flashSale.subtitle' | translate) }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Countdown Timer & CTA -->
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <!-- Timer -->
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs text-zinc-400 mr-1 hidden md:inline">
+            {{ 'flashSale.endsIn' | translate }}:
+          </span>
+          <div class="flex items-center gap-1 font-mono text-sm font-black">
+            <div class="flex flex-col items-center rounded-lg bg-zinc-900 border border-zinc-800 px-2 py-1">
+              <span>{{ hours() }}</span>
+              <span class="text-[9px] font-sans font-medium text-zinc-500">{{ 'flashSale.hours' | translate }}</span>
+            </div>
+            <span class="text-amber-400">:</span>
+            <div class="flex flex-col items-center rounded-lg bg-zinc-900 border border-zinc-800 px-2 py-1">
+              <span>{{ minutes() }}</span>
+              <span class="text-[9px] font-sans font-medium text-zinc-500">{{ 'flashSale.minutes' | translate }}</span>
+            </div>
+            <span class="text-amber-400">:</span>
+            <div class="flex flex-col items-center rounded-lg bg-zinc-900 border border-zinc-800 px-2 py-1">
+              <span>{{ seconds() }}</span>
+              <span class="text-[9px] font-sans font-medium text-zinc-500">{{ 'flashSale.seconds' | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <a
+          [routerLink]="targetUrl()"
+          class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-2 text-xs font-bold text-white shadow-md transition hover:opacity-90 hover:scale-105 active:scale-95"
+        >
+          <span>{{ 'flashSale.cta' | translate }}</span>
+          <ng-icon name="phosphorArrowRight" />
+        </a>
+      </div>
+    </div>
+  </div>
+}

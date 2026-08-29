@@ -1,6 +1,6 @@
-<div class="mx-auto max-w-6xl px-4 py-8 pb-20">
+<div class="animate-fade-in mx-auto max-w-6xl px-4 py-8 pb-20">
   <!-- Page Header -->
-  <div class="mb-8">
+  <div class="animate-fade-in-down mb-8">
     <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
       {{ 'myCourses.heading' | translate }}
     </h1>
@@ -10,11 +10,11 @@
   </div>
 
   <!-- Filter Tabs -->
-  <div class="mb-6 flex items-center gap-2 border-b border-[var(--color-border)] pb-2">
+  <div class="animate-fade-in-up stagger-1 mb-6 flex items-center gap-2 border-b border-[var(--color-border)] pb-2">
     <button
       type="button"
       (click)="activeFilter.set('all')"
-      class="rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
+      class="btn-tactile rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
       [class.bg-[var(--color-primary)]]="activeFilter() === 'all'"
       [class.text-[var(--color-primary-foreground)]]="activeFilter() === 'all'"
       [class.text-[var(--color-text-muted)]]="activeFilter() !== 'all'"
@@ -26,7 +26,7 @@
     <button
       type="button"
       (click)="activeFilter.set('inProgress')"
-      class="rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
+      class="btn-tactile rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
       [class.bg-[var(--color-primary)]]="activeFilter() === 'inProgress'"
       [class.text-[var(--color-primary-foreground)]]="activeFilter() === 'inProgress'"
       [class.text-[var(--color-text-muted)]]="activeFilter() !== 'inProgress'"
@@ -38,7 +38,7 @@
     <button
       type="button"
       (click)="activeFilter.set('completed')"
-      class="rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
+      class="btn-tactile rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
       [class.bg-[var(--color-primary)]]="activeFilter() === 'completed'"
       [class.text-[var(--color-primary-foreground)]]="activeFilter() === 'completed'"
       [class.text-[var(--color-text-muted)]]="activeFilter() !== 'completed'"
@@ -50,7 +50,7 @@
 
   <!-- Loading State -->
   @if (isLoading()) {
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="animate-fade-in grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @for (i of [1, 2, 3]; track i) {
         <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <app-skeleton variant="block" height="10rem" />
@@ -64,7 +64,7 @@
     </div>
   } @else if (filteredEnrollments().length === 0) {
     <!-- Empty State -->
-    <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/50 p-12 text-center">
+    <div class="animate-fade-in-up flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/50 p-12 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
         <ng-icon name="phosphorGraduationCap" class="text-3xl" />
       </div>
@@ -76,7 +76,7 @@
       </p>
       <a
         routerLink="/courses"
-        class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] focus:outline-none"
+        class="btn-tactile mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] focus:outline-none"
       >
         <span>{{ 'myCourses.browseCourses' | translate }}</span>
         <ng-icon name="phosphorArrowRight" />
@@ -84,9 +84,9 @@
     </div>
   } @else {
     <!-- Grid of Enrolled Courses -->
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="animate-fade-in-up stagger-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @for (enrollment of filteredEnrollments(); track enrollment.id) {
-        <div class="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition hover:shadow-md hover:border-[var(--color-primary)]/50">
+        <div class="card-hover group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
           <!-- Thumbnail Container -->
           <div class="relative aspect-video w-full overflow-hidden bg-zinc-900">
             @if (enrollment.thumbnailUrl) {
@@ -103,7 +103,7 @@
 
             <!-- Overlay Badge for Completed Status -->
             @if (enrollment.progressPercentage >= 100) {
-              <div class="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[11px] font-bold text-white shadow backdrop-blur-sm">
+              <div class="animate-pop-in absolute top-3 right-3 flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[11px] font-bold text-white shadow backdrop-blur-sm">
                 <ng-icon name="phosphorCertificate" />
                 <span>สำเร็จแล้ว</span>
               </div>
@@ -141,11 +141,23 @@
               <div class="flex items-center gap-2">
                 <a
                   [routerLink]="['/learn', enrollment.slug]"
-                  class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)]"
+                  class="btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)]"
                 >
                   <ng-icon name="phosphorPlayCircle" class="text-base" />
                   <span>{{ 'myCourses.continueLearning' | translate }}</span>
                 </a>
+
+                @if (enrollment.progressPercentage >= 100) {
+                  <button
+                    type="button"
+                    (click)="downloadCertificate(enrollment.id)"
+                    class="btn-tactile inline-flex items-center justify-center gap-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-600 shadow-sm transition hover:bg-emerald-500/20"
+                    title="{{ 'myCourses.downloadCertificate' | translate }}"
+                  >
+                    <ng-icon name="phosphorCertificate" class="text-base" />
+                    <span>{{ 'myCourses.viewCertificate' | translate }}</span>
+                  </button>
+                }
               </div>
             </div>
           </div>

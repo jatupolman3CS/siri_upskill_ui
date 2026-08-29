@@ -12,16 +12,24 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeft,
+  phosphorBookOpen,
+  phosphorCertificate,
   phosphorChatCircleDots,
   phosphorCheckCircle,
+  phosphorDownloadSimple,
   phosphorFileText,
   phosphorInfo,
   phosphorPaperPlaneRight,
+  phosphorSealCheck,
   phosphorThumbsUp,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CurriculumSidebar } from '../curriculum-sidebar/curriculum-sidebar';
+import { QuizTakingComponent } from '../quiz-taking/quiz-taking.component';
+import { AssignmentSubmissionComponent } from '../assignment-submission/assignment-submission.component';
+import { EpisodeAttachmentsComponent } from '../episode-attachments/episode-attachments.component';
 import {
+  CertificateDetailResponse,
   CourseProgressResponse,
   DiscussionItem,
   EpisodeProgressResponse,
@@ -35,6 +43,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { DurationPipe } from '../../../core/i18n/duration.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-learn-page',
@@ -45,20 +54,28 @@ import { SeoService } from '../../../core/seo/seo.service';
     NgIcon,
     VideoPlayer,
     CurriculumSidebar,
+    QuizTakingComponent,
+    AssignmentSubmissionComponent,
+    EpisodeAttachmentsComponent,
     TranslatePipe,
     DurationPipe,
+    Spinner,
   ],
   templateUrl: './learn-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     provideIcons({
       phosphorArrowLeft,
+      phosphorBookOpen,
       phosphorInfo,
       phosphorChatCircleDots,
       phosphorFileText,
       phosphorThumbsUp,
       phosphorPaperPlaneRight,
       phosphorCheckCircle,
+      phosphorCertificate,
+      phosphorDownloadSimple,
+      phosphorSealCheck,
     }),
   ],
 })
@@ -73,14 +90,18 @@ export class LearnPage implements OnInit {
   protected readonly course = signal<CourseDetailResponse | null>(null);
   protected readonly courseProgress = signal<CourseProgressResponse | null>(null);
   protected readonly currentEpisodeId = signal<string | null>(null);
+  protected readonly enrollmentId = signal<string | null>(null);
+  protected readonly certificate = signal<CertificateDetailResponse | null>(null);
   protected readonly playbackSession = signal<PlaybackSessionResponse | null>(null);
   protected readonly episodeProgress = signal<EpisodeProgressResponse | null>(null);
 
-  protected readonly activeTab = signal<'overview' | 'qa' | 'resources'>('overview');
+  protected readonly activeTab = signal<'curriculum' | 'overview' | 'quiz' | 'assignment' | 'resources' | 'qa'>('overview');
   protected readonly discussions = signal<readonly DiscussionItem[]>([]);
   protected readonly isSubmittingQuestion = signal(false);
   protected readonly newQuestionBody = signal('');
   protected readonly upvotedDiscussionIds = signal<Set<string>>(new Set());
+
+  protected readonly isEnrolled = computed<boolean>(() => this.enrollmentId() !== null);
 
   protected readonly currentEpisode = computed<CourseDetailEpisode | null>(() => {
     const c = this.course();
@@ -122,9 +143,25 @@ export class LearnPage implements OnInit {
           robots: 'noindex',
         });
 
+        // Load enrollment ID
+        this.learningApi.getMyEnrollments().subscribe({
+          next: (res) => {
+            const myEnroll = res.items.find((e) => e.courseId === courseData.id);
+            if (myEnroll) {
+              this.enrollmentId.set(myEnroll.id);
+            }
+          },
+          error: () => {},
+        });
+
         // Load progress
         this.learningApi.getCourseProgress(courseData.id).subscribe({
-          next: (prog) => this.courseProgress.set(prog),
+          next: (prog) => {
+            this.courseProgress.set(prog);
+            if (prog.isCompleted || prog.progressPercent >= 100) {
+              this.loadCertificate(courseData.id);
+            }
+          },
           error: () => {},
         });
 
@@ -145,28 +182,58 @@ export class LearnPage implements OnInit {
     });
   }
 
+  private loadCertificate(courseId: string): void {
+    this.learningApi.getCertificateByCourse(courseId).subscribe({
+      next: (cert) => this.certificate.set(cert),
+      error: () => {},
+    });
+  }
+
+  protected downloadCertificatePdf(): void {
+    const cert = this.certificate();
+    if (!cert) return;
+
+    this.learningApi.downloadCertificatePdf(cert.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Certificate-${cert.serialNo}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        window.open(cert.verifyUrl || `/certificates/verify/${cert.verifyCode}`, '_blank');
+      },
+    });
+  }
+
+  protected readonly playbackError = signal<string | null>(null);
+  protected readonly isLoadingPlayback = signal<boolean>(false);
+
   protected selectEpisode(episodeId: string, updateUrl = true): void {
     this.currentEpisodeId.set(episodeId);
+
+    if (this.activeTab() === 'curriculum') {
+      this.activeTab.set('overview');
+    }
 
     if (updateUrl && this.course()) {
       this.router.navigate(['/learn', this.course()!.slug, episodeId]);
     }
 
     // Load playback session
+    this.isLoadingPlayback.set(true);
+    this.playbackError.set(null);
     this.learningApi.getPlaybackSession(episodeId).subscribe({
-      next: (session) => this.playbackSession.set(session),
+      next: (session) => {
+        this.playbackSession.set(session);
+        this.isLoadingPlayback.set(false);
+      },
       error: () => {
-        // Fallback demo mock if backend needs live bunny key
-        this.playbackSession.set({
-          playbackUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-          expiresAtUtc: new Date(Date.now() + 3600000).toISOString(),
-          watermark: {
-            text: 'SIRI UpSkill DRM',
-            userId: this.auth.currentUser()?.id ?? 'guest',
-            email: 'learner@siriupskill.com',
-            timestamp: new Date().toISOString(),
-          },
-        });
+        this.playbackSession.set(null);
+        this.isLoadingPlayback.set(false);
+        this.playbackError.set('ไม่สามารถเข้าถึงวิดีโอนี้ได้ กรุณาลงทะเบียนเรียนหรือตรวจสอบสิทธิ์การเข้าถึงของคุณ');
       },
     });
 
@@ -197,7 +264,12 @@ export class LearnPage implements OnInit {
         // Refresh overall course progress
         if (this.course()) {
           this.learningApi.getCourseProgress(this.course()!.id).subscribe({
-            next: (cp) => this.courseProgress.set(cp),
+            next: (cp) => {
+              this.courseProgress.set(cp);
+              if ((cp.isCompleted || cp.progressPercent >= 100) && !this.certificate()) {
+                this.loadCertificate(this.course()!.id);
+              }
+            },
             error: () => {},
           });
         }
@@ -205,6 +277,7 @@ export class LearnPage implements OnInit {
       error: () => {},
     });
   }
+
 
   protected onVideoEnded(): void {
     const epId = this.currentEpisodeId();
@@ -214,7 +287,18 @@ export class LearnPage implements OnInit {
     const currentIdx = episodes.findIndex((e) => e.id === epId);
     if (currentIdx >= 0 && currentIdx < episodes.length - 1) {
       const nextEpisode = episodes[currentIdx + 1];
-      this.selectEpisode(nextEpisode.id);
+      // If user is enrolled, or if the next episode is also a free preview, proceed
+      if (this.isEnrolled() || nextEpisode.isFreePreview) {
+        this.selectEpisode(nextEpisode.id);
+      }
+      // If not enrolled and next episode is locked, stay on current preview and let player show CTA
+    }
+  }
+
+  protected buyCourse(): void {
+    const slug = this.course()?.slug;
+    if (slug) {
+      this.router.navigate(['/courses', slug]);
     }
   }
 

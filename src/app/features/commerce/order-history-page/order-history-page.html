@@ -1,0 +1,460 @@
+<div class="animate-fade-in mx-auto max-w-5xl px-4 py-8 pb-20 space-y-6">
+  <!-- Page Header -->
+  <div class="animate-fade-in-down space-y-1 border-b border-[var(--color-border)] pb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-[var(--color-text)] sm:text-3xl">
+      {{ 'orders.heading' | translate }}
+    </h1>
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'orders.subheading' | translate }}
+    </p>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <div class="animate-fade-in-up stagger-1 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <!-- Tabs -->
+    <div
+      role="tablist"
+      aria-label="Order status filter"
+      class="inline-flex rounded-xl bg-[var(--color-surface-muted)] p-1 text-xs font-semibold text-[var(--color-text-muted)]"
+    >
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="selectedTab() === 'all'"
+        (click)="setTab('all')"
+        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        [class.bg-[var(--color-bg)]]="selectedTab() === 'all'"
+        [class.text-[var(--color-text)]]="selectedTab() === 'all'"
+        [class.shadow-sm]="selectedTab() === 'all'"
+      >
+        {{ 'orders.tabs.all' | translate }}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="selectedTab() === 'paid'"
+        (click)="setTab('paid')"
+        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        [class.bg-[var(--color-bg)]]="selectedTab() === 'paid'"
+        [class.text-[var(--color-text)]]="selectedTab() === 'paid'"
+        [class.shadow-sm]="selectedTab() === 'paid'"
+      >
+        {{ 'orders.tabs.paid' | translate }}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="selectedTab() === 'awaiting'"
+        (click)="setTab('awaiting')"
+        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        [class.bg-[var(--color-bg)]]="selectedTab() === 'awaiting'"
+        [class.text-[var(--color-text)]]="selectedTab() === 'awaiting'"
+        [class.shadow-sm]="selectedTab() === 'awaiting'"
+      >
+        {{ 'orders.tabs.awaitingPayment' | translate }}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="selectedTab() === 'refunded'"
+        (click)="setTab('refunded')"
+        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        [class.bg-[var(--color-bg)]]="selectedTab() === 'refunded'"
+        [class.text-[var(--color-text)]]="selectedTab() === 'refunded'"
+        [class.shadow-sm]="selectedTab() === 'refunded'"
+      >
+        {{ 'orders.tabs.refunded' | translate }}
+      </button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="relative w-full sm:w-64">
+      <ng-icon
+        name="phosphorMagnifyingGlass"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--color-text-muted)]"
+        aria-hidden="true"
+      />
+      <input
+        type="search"
+        [placeholder]="'orders.searchPlaceholder' | translate"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        class="h-10 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] pl-9 pr-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+      />
+    </div>
+  </div>
+
+  <!-- Loading Skeletons -->
+  @if (isLoading()) {
+    <div class="animate-fade-in space-y-4" aria-busy="true" aria-live="polite">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4 shadow-sm">
+          <div class="flex items-center justify-between">
+            <app-skeleton variant="text" width="180px" height="20px" />
+            <app-skeleton variant="text" width="100px" height="24px" radius="full" />
+          </div>
+          <app-skeleton variant="text" width="100%" height="48px" />
+          <div class="flex justify-between items-center pt-2">
+            <app-skeleton variant="text" width="120px" height="24px" />
+            <app-skeleton variant="text" width="160px" height="36px" radius="md" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (loadError(); as err) {
+    <!-- Error State -->
+    <div class="animate-fade-in rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center space-y-3">
+      <ng-icon name="phosphorWarning" class="text-3xl text-[var(--color-danger)] mx-auto" />
+      <p class="text-sm font-medium text-[var(--color-danger)]">{{ err | translate }}</p>
+      <app-button variant="secondary" size="sm" (click)="loadOrders(page())">
+        {{ 'common.error' | translate }}
+      </app-button>
+    </div>
+  } @else if (filteredOrders().length === 0) {
+    <!-- Empty State -->
+    <div class="animate-fade-in-up">
+      <app-empty-state
+        icon="default"
+        [heading]="'orders.empty.heading' | translate"
+        [description]="'orders.empty.description' | translate"
+      >
+        <div emptyStateAction class="pt-4">
+          <a
+            routerLink="/courses"
+            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-hover)]"
+          >
+            <ng-icon name="phosphorArrowRight" />
+            <span>{{ 'orders.empty.browseCourses' | translate }}</span>
+          </a>
+        </div>
+      </app-empty-state>
+    </div>
+  } @else {
+    <!-- Order List -->
+    <div class="animate-fade-in-up stagger-2 space-y-4">
+      @for (order of filteredOrders(); track order.id) {
+        <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+          <!-- Card Header & Summary -->
+          <div class="p-5 sm:p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[var(--color-border)] pb-4">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-mono text-sm font-bold text-[var(--color-text)]">
+                    #{{ order.orderNo }}
+                  </span>
+                  <!-- Status Badge -->
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold"
+                    [ngClass]="getStatusBadgeClass(order.status)"
+                  >
+                    <ng-icon [name]="getStatusIcon(order.status)" class="text-xs" />
+                    <span>{{ 'orders.status.' + (order.status | lowercase) | translate }}</span>
+                  </span>
+                </div>
+                <p class="text-xs text-[var(--color-text-muted)]">
+                  {{ 'orders.card.orderedOn' | translate: { date: formatDate(order.createdAtUtc) } }}
+                  @if (order.paidAtUtc) {
+                    · {{ 'orders.card.paidOn' | translate: { date: formatDate(order.paidAtUtc) } }}
+                  }
+                </p>
+              </div>
+
+              <!-- Total Amount -->
+              <div class="text-right">
+                <span class="text-xs font-medium text-[var(--color-text-muted)]">{{ 'orders.card.total' | translate }}</span>
+                <p class="text-base font-black text-[var(--color-primary)]">
+                  {{ order.totalAmount | currencyThb }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Items Quick Preview -->
+            <div class="space-y-2">
+              @for (item of order.items; track item.id) {
+                <div class="flex items-center justify-between text-xs py-1">
+                  <div class="flex items-center gap-2 min-w-0 pr-4">
+                    <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--color-primary)] shrink-0" />
+                    <span class="font-medium text-[var(--color-text)] truncate">{{ item.titleSnapshot }}</span>
+                  </div>
+                  <span class="font-bold text-[var(--color-text)] shrink-0">{{ item.lineTotal | currencyThb }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Card Actions -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <!-- Expand/Collapse Button -->
+              <button
+                type="button"
+                (click)="toggleExpand(order.id)"
+                class="btn-tactile inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition"
+              >
+                <span>
+                  {{ (isExpanded(order.id) ? 'orders.card.hideDetails' : 'orders.card.viewDetails') | translate }}
+                </span>
+                <ng-icon [name]="isExpanded(order.id) ? 'phosphorCaretUp' : 'phosphorCaretDown'" />
+              </button>
+
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Awaiting Payment Actions -->
+                @if (order.status === 'AwaitingPayment' || order.status === 'Pending') {
+                  <a
+                    [routerLink]="['/checkout', order.id]"
+                    class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:bg-[var(--color-primary-hover)] transition"
+                  >
+                    <ng-icon name="phosphorCreditCard" />
+                    <span>{{ 'orders.card.payNow' | translate }}</span>
+                  </a>
+                }
+
+                <!-- Paid Order Actions -->
+                @if (order.status === 'Paid') {
+                  <button
+                    type="button"
+                    (click)="openReceiptModal(order)"
+                    class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                  >
+                    <ng-icon name="phosphorReceipt" class="text-[var(--color-primary)]" />
+                    <span>{{ 'orders.card.downloadReceipt' | translate }}</span>
+                  </button>
+
+                  <a
+                    routerLink="/my-courses"
+                    class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:bg-[var(--color-primary-hover)] transition"
+                  >
+                    <ng-icon name="phosphorPlayCircle" />
+                    <span>{{ 'orders.card.startLearning' | translate }}</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    (click)="openRefundModal(order)"
+                    class="btn-tactile inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition px-2 py-1"
+                  >
+                    <span>{{ 'orders.card.requestRefund' | translate }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Expanded Order Details Section -->
+          @if (isExpanded(order.id)) {
+            <div class="animate-fade-in border-t border-[var(--color-border)] bg-[var(--color-bg)] p-5 sm:p-6 space-y-4 rounded-b-2xl">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                {{ 'orders.detail.title' | translate }}
+              </h2>
+
+              <!-- Detailed Course Breakdown -->
+              <div class="divide-y divide-[var(--color-border)]/60 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface)]">
+                @for (item of order.items; track item.id) {
+                  <div class="flex items-center justify-between p-3.5 text-xs">
+                    <div>
+                      <p class="font-bold text-[var(--color-text)]">{{ item.titleSnapshot }}</p>
+                      <p class="text-[var(--color-text-muted)]">
+                        {{ 'orders.detail.price' | translate }}: {{ item.unitPrice | currencyThb }}
+                      </p>
+                    </div>
+                    <span class="font-mono font-bold text-[var(--color-text)]">{{ item.lineTotal | currencyThb }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Price Breakdown Box -->
+              <div class="space-y-1.5 rounded-xl bg-[var(--color-surface-muted)]/50 p-4 text-xs">
+                <div class="flex justify-between text-[var(--color-text-muted)]">
+                  <span>{{ 'orders.detail.subtotal' | translate }}</span>
+                  <span class="font-mono">{{ order.subtotalAmount | currencyThb }}</span>
+                </div>
+                @if (order.discountAmount > 0) {
+                  <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span>{{ 'orders.detail.discount' | translate }}</span>
+                    <span class="font-mono">-{{ order.discountAmount | currencyThb }}</span>
+                  </div>
+                }
+                <div class="flex justify-between text-[var(--color-text-muted)]">
+                  <span>{{ 'orders.detail.vat' | translate }}</span>
+                  <span class="font-mono">{{ order.taxAmount | currencyThb }}</span>
+                </div>
+                <div class="flex justify-between border-t border-[var(--color-border)] pt-2 font-bold text-sm text-[var(--color-text)]">
+                  <span>{{ 'orders.detail.netTotal' | translate }}</span>
+                  <span class="font-mono font-black text-[var(--color-primary)]">{{ order.totalAmount | currencyThb }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pt-4 flex justify-center">
+        <app-pagination
+          [currentPage]="page()"
+          [totalPages]="totalPages()"
+          (currentPageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  }
+</div>
+
+<!-- Receipt Modal -->
+<app-modal
+  [open]="receiptModalOpen()"
+  (openChange)="receiptModalOpen.set($event)"
+  [titleText]="'orders.receipt.title' | translate"
+>
+  @if (receiptOrder(); as ord) {
+    <div class="space-y-6" id="printable-receipt">
+      <!-- Printable Receipt View -->
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-6 space-y-5">
+        <!-- Receipt Header -->
+        <div class="flex justify-between items-start border-b border-[var(--color-border)] pb-4">
+          <div>
+            <h3 class="text-base font-bold text-[var(--color-primary)]">{{ 'orders.receipt.companyName' | translate }}</h3>
+            <p class="text-xs text-[var(--color-text-muted)]">{{ 'orders.receipt.companyAddress' | translate }}</p>
+          </div>
+          <div class="text-right text-xs">
+            <span class="font-mono font-bold text-[var(--color-text)]">#{{ ord.orderNo }}</span>
+            <p class="text-[var(--color-text-muted)]">{{ formatDate(ord.paidAtUtc || ord.createdAtUtc) }}</p>
+          </div>
+        </div>
+
+        <!-- e-Tax Invoice Details if available -->
+        @if (receiptInvoice(); as inv) {
+          <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 space-y-1 text-xs">
+            <div class="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
+              <ng-icon name="phosphorCheckCircle" />
+              <span>{{ 'orders.detail.taxInvoice' | translate }}</span>
+            </div>
+            <p class="text-[var(--color-text)]">{{ 'orders.detail.invoiceNo' | translate: { invoiceNo: inv.invoiceNo } }}</p>
+            <p class="text-[var(--color-text)]">{{ 'orders.detail.buyerName' | translate: { buyerName: inv.buyerName } }}</p>
+          </div>
+        }
+
+        <!-- Items Table -->
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-[var(--color-border)] text-[var(--color-text-muted)]">
+              <th class="pb-2">{{ 'orders.receipt.description' | translate }}</th>
+              <th class="pb-2 text-right">{{ 'orders.receipt.amount' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]/50">
+            @for (item of ord.items; track item.id) {
+              <tr>
+                <td class="py-2.5 font-medium text-[var(--color-text)]">{{ item.titleSnapshot }}</td>
+                <td class="py-2.5 text-right font-mono font-bold text-[var(--color-text)]">{{ item.lineTotal | currencyThb }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <!-- Totals Summary -->
+        <div class="space-y-1.5 border-t border-[var(--color-border)] pt-3 text-xs">
+          <div class="flex justify-between text-[var(--color-text-muted)]">
+            <span>{{ 'orders.receipt.subtotal' | translate }}</span>
+            <span class="font-mono">{{ ord.subtotalAmount | currencyThb }}</span>
+          </div>
+          @if (ord.discountAmount > 0) {
+            <div class="flex justify-between text-emerald-600 dark:text-emerald-400">
+              <span>{{ 'orders.receipt.discount' | translate }}</span>
+              <span class="font-mono">-{{ ord.discountAmount | currencyThb }}</span>
+            </div>
+          }
+          <div class="flex justify-between text-[var(--color-text-muted)]">
+            <span>{{ 'orders.receipt.vat' | translate }}</span>
+            <span class="font-mono">{{ ord.taxAmount | currencyThb }}</span>
+          </div>
+          <div class="flex justify-between border-t border-[var(--color-border)] pt-2 font-bold text-sm text-[var(--color-text)]">
+            <span>{{ 'orders.receipt.total' | translate }}</span>
+            <span class="font-mono text-base font-black text-[var(--color-primary)]">{{ ord.totalAmount | currencyThb }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <app-button variant="secondary" size="md" (click)="closeReceiptModal()">
+          {{ 'orders.receipt.close' | translate }}
+        </app-button>
+        <app-button variant="primary" size="md" (click)="printReceipt()">
+          <ng-icon leading name="phosphorPrinter" class="text-base" />
+          <span>{{ 'orders.receipt.print' | translate }}</span>
+        </app-button>
+      </div>
+    </div>
+  }
+</app-modal>
+
+<!-- Refund Request Modal -->
+<app-modal
+  [open]="refundModalOpen()"
+  (openChange)="refundModalOpen.set($event)"
+  [titleText]="'orders.refund.modalTitle' | translate"
+>
+  @if (refundOrder(); as ord) {
+    <div class="space-y-4">
+      <p class="text-xs text-[var(--color-text-muted)]">
+        {{ 'orders.refund.description' | translate }}
+      </p>
+
+      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-3 text-xs">
+        <span class="font-mono font-bold text-[var(--color-text)]">#{{ ord.orderNo }}</span>
+        <span class="text-[var(--color-text-muted)]"> · {{ ord.totalAmount | currencyThb }}</span>
+      </div>
+
+      @if (refundSuccess()) {
+        <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center space-y-2">
+          <ng-icon name="phosphorCheckCircle" class="text-2xl text-emerald-600 dark:text-emerald-400 mx-auto" />
+          <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+            {{ 'orders.refund.successMessage' | translate }}
+          </p>
+          <div class="pt-2">
+            <app-button variant="primary" size="sm" (click)="closeRefundModal()">
+              {{ 'orders.receipt.close' | translate }}
+            </app-button>
+          </div>
+        </div>
+      } @else {
+        <div class="space-y-2">
+          <label for="refund-reason" class="text-xs font-bold text-[var(--color-text)]">
+            {{ 'orders.refund.reasonLabel' | translate }} *
+          </label>
+          <textarea
+            id="refund-reason"
+            rows="4"
+            [placeholder]="'orders.refund.reasonPlaceholder' | translate"
+            [ngModel]="refundReason()"
+            (ngModelChange)="refundReason.set($event)"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+          ></textarea>
+        </div>
+
+        @if (refundError()) {
+          <div class="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-danger)]">
+            <ng-icon name="phosphorWarning" />
+            <span>{{ refundError()! | translate }}</span>
+          </div>
+        }
+
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <app-button variant="secondary" size="md" (click)="closeRefundModal()">
+            {{ 'orders.refund.cancel' | translate }}
+          </app-button>
+          <app-button
+            variant="primary"
+            size="md"
+            [disabled]="!refundReason().trim()"
+            [loading]="refundSubmitting()"
+            (click)="submitRefund()"
+          >
+            <span>{{ 'orders.refund.submit' | translate }}</span>
+          </app-button>
+        </div>
+      }
+    </div>
+  }
+</app-modal>

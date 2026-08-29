@@ -1,7 +1,7 @@
-<div class="min-h-screen bg-[var(--color-bg,#F8FAFC)] py-8 px-4 sm:px-6 lg:px-8">
+<div class="animate-fade-in min-h-screen bg-[var(--color-bg,#F8FAFC)] py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="mb-8">
+    <div class="animate-fade-in-down mb-8">
       <h1 class="text-2xl sm:text-3xl font-bold text-[var(--color-text,#0F172A)]">
         {{ 'checkout.heading' | translate }}
       </h1>
@@ -12,18 +12,36 @@
       }
     </div>
 
+    <!-- Checkout Steps Progress Bar -->
+    <div class="animate-fade-in-up stagger-1 mb-8 flex items-center justify-center gap-2 sm:gap-4 text-xs font-semibold">
+      <div class="flex items-center gap-1.5 transition-colors" [class.text-[var(--color-primary)]]="currentStep() === 'selection'" [class.text-zinc-400]="currentStep() !== 'selection'">
+        <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all" [class.bg-[var(--color-primary)]]="currentStep() === 'selection'" [class.text-white]="currentStep() === 'selection'" [class.bg-zinc-200]="currentStep() !== 'selection'" [class.text-zinc-600]="currentStep() !== 'selection'">1</span>
+        <span>เลือกวิธีชำระ</span>
+      </div>
+      <div class="h-0.5 w-6 sm:w-12 bg-zinc-200"></div>
+      <div class="flex items-center gap-1.5 transition-colors" [class.text-[var(--color-primary)]]="currentStep() === 'qr_display'" [class.text-zinc-400]="currentStep() !== 'qr_display'">
+        <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all" [class.bg-[var(--color-primary)]]="currentStep() === 'qr_display'" [class.text-white]="currentStep() === 'qr_display'" [class.bg-zinc-200]="currentStep() !== 'qr_display'" [class.text-zinc-600]="currentStep() !== 'qr_display'">2</span>
+        <span>สแกน QR Code</span>
+      </div>
+      <div class="h-0.5 w-6 sm:w-12 bg-zinc-200"></div>
+      <div class="flex items-center gap-1.5 transition-colors" [class.text-[var(--color-primary)]]="currentStep() === 'success'" [class.text-zinc-400]="currentStep() !== 'success'">
+        <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all" [class.bg-[var(--color-primary)]]="currentStep() === 'success'" [class.text-white]="currentStep() === 'success'" [class.bg-zinc-200]="currentStep() !== 'success'" [class.text-zinc-600]="currentStep() !== 'success'">3</span>
+        <span>เสร็จสมบูรณ์</span>
+      </div>
+    </div>
+
     @if (isLoadingOrder()) {
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div class="lg:col-span-7 space-y-6">
-          <app-skeleton class="h-64 rounded-xl w-full" />
-          <app-skeleton class="h-32 rounded-xl w-full" />
+          <app-skeleton variant="block" height="16rem" />
+          <app-skeleton variant="block" height="8rem" />
         </div>
         <div class="lg:col-span-5">
-          <app-skeleton class="h-96 rounded-xl w-full" />
+          <app-skeleton variant="block" height="24rem" />
         </div>
       </div>
     } @else if (orderError()) {
-      <div class="max-w-md mx-auto my-16 text-center bg-white p-8 rounded-2xl border border-[var(--color-border,#E2E8F0)] shadow-sm">
+      <div class="animate-fade-in max-w-md mx-auto my-16 text-center bg-white p-8 rounded-2xl border border-[var(--color-border,#E2E8F0)] shadow-sm">
         <ng-icon name="phosphorWarningCircle" class="text-4xl text-[var(--color-danger,#EF4444)] mx-auto mb-4" />
         <h2 class="text-lg font-bold text-[var(--color-text,#0F172A)] mb-2">
           {{ 'checkout.error.orderNotFound' | translate }}
@@ -36,7 +54,7 @@
     } @else {
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <!-- Left Column: Payment Methods & QR & e-Tax -->
-        <div class="lg:col-span-7 space-y-6">
+        <div class="animate-fade-in-up stagger-2 lg:col-span-7 space-y-6">
           <!-- Payment Method Card -->
           <div class="bg-white border border-[var(--color-border,#E2E8F0)] rounded-2xl p-6 shadow-sm">
             <h2 class="text-lg font-semibold text-[var(--color-text,#0F172A)] mb-4">
@@ -51,11 +69,11 @@
                 [class.border-[var(--color-primary,#DB2777)]]="selectedMethod() === 'PromptPay'"
                 [class.bg-[var(--color-primary-subtle,#FDF2F8)]]="selectedMethod() === 'PromptPay'"
                 [class.border-[var(--color-border,#E2E8F0)]]="selectedMethod() !== 'PromptPay'"
-                class="w-full text-left p-4 rounded-xl border flex items-center gap-4 transition-all hover:bg-slate-50 cursor-pointer"
+                class="btn-tactile w-full text-left p-4 rounded-xl border flex items-center gap-4 transition-all hover:bg-slate-50 cursor-pointer"
               >
                 <div class="w-5 h-5 rounded-full border-2 border-[var(--color-primary,#DB2777)] flex items-center justify-center flex-none">
                   @if (selectedMethod() === 'PromptPay') {
-                    <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-primary,#DB2777)]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-primary,#DB2777)] animate-pop-in"></div>
                   }
                 </div>
                 <ng-icon name="phosphorQrCode" class="text-2xl text-[var(--color-primary,#DB2777)] flex-none" />
@@ -114,16 +132,16 @@
 
             <!-- QR Code Display Area -->
             @if (payment(); as p) {
-              <div class="mt-6 pt-6 border-t border-[var(--color-border,#E2E8F0)]">
+              <div class="animate-fade-in-up mt-6 pt-6 border-t border-[var(--color-border,#E2E8F0)]">
                 @if (paymentPollStatus() === 'succeeded') {
-                  <div class="p-6 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
-                    <ng-icon name="phosphorCheckCircle" class="text-5xl text-emerald-600 mx-auto" />
+                  <div class="animate-pop-in p-6 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
+                    <ng-icon name="phosphorCheckCircle" class="text-5xl text-emerald-600 mx-auto animate-bounce-subtle" />
                     <h3 class="text-lg font-bold text-emerald-900">
                       {{ 'checkout.qr.paid' | translate }}
                     </h3>
                   </div>
                 } @else if (paymentPollStatus() === 'expired') {
-                  <div class="p-6 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-3">
+                  <div class="animate-pop-in p-6 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-3">
                     <ng-icon name="phosphorWarningCircle" class="text-5xl text-rose-600 mx-auto" />
                     <h3 class="text-lg font-bold text-rose-900">
                       {{ 'checkout.qr.expired' | translate }}
@@ -135,7 +153,7 @@
                 } @else {
                   <div class="flex flex-col sm:flex-row items-center gap-6">
                     <!-- QR Box -->
-                    <div class="w-44 h-44 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 flex flex-col items-center justify-center p-3 shadow-inner flex-none">
+                    <div class="card-hover w-44 h-44 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 flex flex-col items-center justify-center p-3 shadow-inner flex-none">
                       @if (p.qrCodeUrl) {
                         <img [src]="p.qrCodeUrl" alt="PromptPay QR Code" class="w-32 h-32 object-contain" />
                       } @else {
@@ -164,9 +182,9 @@
                         <ng-icon name="phosphorTimer" class="text-sm" />
                         {{ 'checkout.qr.expiresIn' | translate: { minutes: formattedTimeRemaining().split(':')[0], seconds: formattedTimeRemaining().split(':')[1] } }}
                       </div>
-                      <div class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted,#64748B)] justify-center sm:justify-start">
-                        <ng-icon name="phosphorCheckCircle" class="text-emerald-500" />
-                        {{ 'checkout.qr.autoConfirm' | translate }}
+                      <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted,#64748B)] justify-center sm:justify-start">
+                        <app-spinner size="xs" color="primary" />
+                        <span>{{ 'checkout.qr.autoConfirm' | translate }}</span>
                       </div>
                     </div>
                   </div>
@@ -184,7 +202,7 @@
             />
 
             @if (etaxChecked()) {
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div class="animate-fade-in-up grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <app-input
                   [label]="'checkout.etax.taxIdLabel' | translate"
                   [placeholder]="'checkout.etax.taxIdPlaceholder' | translate"
@@ -208,7 +226,7 @@
         </div>
 
         <!-- Right Column: Sticky Order Summary -->
-        <div class="lg:col-span-5 bg-white border border-[var(--color-border,#E2E8F0)] rounded-2xl p-6 shadow-sm sticky top-24 space-y-6">
+        <div class="animate-fade-in-up stagger-3 lg:col-span-5 bg-white border border-[var(--color-border,#E2E8F0)] rounded-2xl p-6 shadow-sm sticky top-24 space-y-6">
           <h2 class="text-lg font-semibold text-[var(--color-text,#0F172A)]">
             {{ 'checkout.summary.heading' | translate }}
           </h2>
@@ -259,12 +277,15 @@
                 [disabled]="isApplyingPromo() || !promoCodeInput()"
                 (click)="applyPromoCode()"
               >
+                @if (isApplyingPromo()) {
+                  <app-spinner size="xs" color="muted" />
+                }
                 {{ 'checkout.summary.applyPromo' | translate }}
               </app-button>
             </div>
 
             @if (appliedPromo(); as p) {
-              <div class="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+              <div class="animate-fade-in flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
                 <ng-icon name="phosphorCheckCircle" />
                 <span>
                   {{ 'checkout.summary.promoApplied' | translate: { code: p.code, discount: ((p.discountAmount | currencyThb) ?? '') } }}
@@ -273,7 +294,7 @@
             }
 
             @if (promoError(); as err) {
-              <div class="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+              <div class="animate-fade-in flex items-center gap-1.5 text-xs text-rose-600 font-medium">
                 <ng-icon name="phosphorWarningCircle" />
                 <span>{{ err }}</span>
               </div>
@@ -288,7 +309,7 @@
             </div>
 
             @if (discount() > 0) {
-              <div class="flex justify-between text-emerald-600 font-medium">
+              <div class="animate-fade-in flex justify-between text-emerald-600 font-medium">
                 <span>{{ 'checkout.summary.discount' | translate }}</span>
                 <span>-{{ discount() | currencyThb }}</span>
               </div>
@@ -316,9 +337,10 @@
                 (click)="initiatePayment()"
               >
                 @if (isCreatingPayment()) {
-                  {{ 'checkout.summary.processing' | translate }}
+                  <app-spinner size="sm" color="white" />
+                  <span>{{ 'checkout.summary.processing' | translate }}</span>
                 } @else {
-                  {{ 'checkout.summary.payButton' | translate: { amount: ((total() | currencyThb) ?? '') } }}
+                  <span>{{ 'checkout.summary.payButton' | translate: { amount: ((total() | currencyThb) ?? '') } }}</span>
                 }
               </app-button>
             }
@@ -333,4 +355,29 @@
       </div>
     }
   </div>
+
+  <!-- Sticky Bottom Bar for Mobile -->
+  @if (!payment() && !isLoadingOrder() && !orderError()) {
+    <div class="animate-slide-in-up fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border,#E2E8F0)] bg-white p-4 shadow-lg lg:hidden">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <span class="text-[11px] text-[var(--color-text-muted,#64748B)] block">ยอดชำระทั้งหมด</span>
+          <span class="text-lg font-extrabold text-[var(--color-primary,#DB2777)]">{{ total() | currencyThb }}</span>
+        </div>
+        <button
+          type="button"
+          (click)="initiatePayment()"
+          [disabled]="isCreatingPayment()"
+          class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary,#DB2777)] px-6 py-2.5 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover,#BE185D)] disabled:opacity-50"
+        >
+          @if (isCreatingPayment()) {
+            <app-spinner size="xs" color="white" />
+            <span>กำลังดำเนินการ...</span>
+          } @else {
+            <span>ชำระเงิน</span>
+          }
+        </button>
+      </div>
+    </div>
+  }
 </div>

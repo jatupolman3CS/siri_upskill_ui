@@ -26,10 +26,11 @@ import { CertificateVerificationResponse } from '../data/learning-api.models';
 import { LearningApiService } from '../data/learning-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-certificate-verify-page',
-  imports: [CommonModule, FormsModule, RouterLink, NgIcon, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, TranslatePipe, Spinner],
   templateUrl: './certificate-verify-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -115,6 +116,25 @@ export class CertificateVerifyPage implements OnInit {
 
     const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${certName}&organizationName=${orgName}&issueYear=${year}&issueMonth=${month}&certUrl=${certUrl}&certId=${certId}`;
     window.open(linkedInUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  protected downloadPdf(): void {
+    const cert = this.certificate();
+    if (!cert || typeof window === 'undefined') return;
+
+    this.learningApi.downloadCertificatePdfByVerifyCode(cert.verifyCode).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Certificate-${cert.serialNo || cert.verifyCode}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        window.open(`/api/learning/certificates/verify/${encodeURIComponent(cert.verifyCode)}/download`, '_blank');
+      },
+    });
   }
 
   private verify(code: string): void {

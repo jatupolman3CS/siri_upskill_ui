@@ -11,10 +11,17 @@
     </div>
 
     <!-- Right Header CTA & Switcher -->
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
       <a
-        routerLink="/"
-        class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)]/80"
+        routerLink="/admin"
+        class="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/20"
+      >
+        <span>โหมดผู้ดูแลระบบ (Admin)</span>
+      </a>
+
+      <a
+        routerLink="/my-courses"
+        class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-500/20"
       >
         <ng-icon name="phosphorArrowLeft" />
         <span>สลับไปมุมมองผู้เรียน</span>

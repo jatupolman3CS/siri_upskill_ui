@@ -27,6 +27,14 @@
       >
         {{ 'nav.blog' | translate }}
       </a>
+      <a
+        routerLink="/learning-paths"
+        routerLinkActive="text-[var(--color-primary)]"
+        class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
+          hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'nav.learningPaths' | translate }}
+      </a>
     </nav>
 
     <div class="hidden items-center gap-3 md:flex">
@@ -53,7 +61,40 @@
         </button>
       </div>
 
+      <!-- Wishlist Link Desktop -->
+      <a
+        routerLink="/wishlist"
+        aria-label="สิ่งที่อยากได้"
+        class="relative flex min-h-11 items-center justify-center rounded-[var(--radius-md)] px-2.5 text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
+      >
+        <ng-icon name="phosphorHeart" class="text-xl" />
+        @if (wishlistStore.count() > 0) {
+          <span
+            class="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm"
+          >
+            {{ wishlistStore.count() }}
+          </span>
+        }
+      </a>
+
+      <!-- Cart Link Desktop -->
+      <a
+        routerLink="/cart"
+        [attr.aria-label]="'nav.cart' | translate"
+        class="relative flex min-h-11 items-center justify-center rounded-[var(--radius-md)] px-2.5 text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
+      >
+        <ng-icon name="phosphorShoppingCart" class="text-xl" />
+        @if (cartStore.itemCount() > 0) {
+          <span
+            class="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-[var(--color-primary-foreground)] shadow-sm"
+          >
+            {{ cartStore.itemCount() }}
+          </span>
+        }
+      </a>
+
       @if (authService.isAuthenticated()) {
+        <app-notification-bell />
         <a
           routerLink="/my-courses"
           class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-primary)]
@@ -67,6 +108,20 @@
             hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           {{ 'nav.instructor' | translate }}
+        </a>
+        <a
+          routerLink="/admin"
+          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-bold text-rose-600 dark:text-rose-400
+            hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          ผู้ดูแลระบบ (Admin)
+        </a>
+        <a
+          routerLink="/account/orders"
+          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
+            hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          {{ 'nav.orders' | translate }}
         </a>
         <a
           routerLink="/account/devices"
@@ -106,19 +161,56 @@
       }
     </div>
 
-    <button
-      type="button"
-      (click)="mobileNavOpen.set(true)"
-      [attr.aria-expanded]="mobileNavOpen()"
-      [attr.aria-controls]="mobileNavPanelId"
-      aria-haspopup="dialog"
-      [attr.aria-label]="'nav.openMenu' | translate"
-      class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)]
-        text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] md:hidden"
-    >
-      <ng-icon name="phosphorList" aria-hidden="true" />
-    </button>
+    <div class="flex items-center gap-1 md:hidden">
+      <!-- Mobile Wishlist Button -->
+      <a
+        routerLink="/wishlist"
+        aria-label="สิ่งที่อยากได้"
+        class="relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        <ng-icon name="phosphorHeart" class="text-xl" />
+        @if (wishlistStore.count() > 0) {
+          <span
+            class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white"
+          >
+            {{ wishlistStore.count() }}
+          </span>
+        }
+      </a>
+
+      <!-- Mobile Cart Button -->
+      <a
+        routerLink="/cart"
+        [attr.aria-label]="'nav.cart' | translate"
+        class="relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        <ng-icon name="phosphorShoppingCart" class="text-xl" />
+        @if (cartStore.itemCount() > 0) {
+          <span
+            class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[9px] font-bold text-[var(--color-primary-foreground)]"
+          >
+            {{ cartStore.itemCount() }}
+          </span>
+        }
+      </a>
+
+      @if (authService.isAuthenticated()) {
+        <app-notification-bell />
+      }
+      <button
+        type="button"
+        (click)="mobileNavOpen.set(true)"
+        [attr.aria-expanded]="mobileNavOpen()"
+        [attr.aria-controls]="mobileNavPanelId"
+        aria-haspopup="dialog"
+        [attr.aria-label]="'nav.openMenu' | translate"
+        class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)]
+          text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        <ng-icon name="phosphorList" aria-hidden="true" />
+      </button>
+    </div>
   </div>
 
   <app-mobile-nav [(open)]="mobileNavOpen" [categories]="categories()" />

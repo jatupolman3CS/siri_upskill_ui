@@ -48,22 +48,79 @@
               [watermark]="playbackSession()!.watermark"
               [initialPosition]="episodeProgress()?.positionSeconds ?? 0"
               [isFreePreview]="currentEpisode()?.isFreePreview ?? false"
+              [courseTitle]="course()?.title"
+              [courseSlug]="course()?.slug"
               (progressHeartbeat)="onHeartbeat($event)"
               (ended)="onVideoEnded()"
+              (buyCourseClicked)="buyCourse()"
             />
+          } @else if (playbackError()) {
+            <div class="animate-fade-in aspect-video w-full flex flex-col items-center justify-center rounded-[var(--radius-xl)] bg-zinc-900 text-zinc-400 p-6 text-center">
+              <span class="text-sm font-medium text-zinc-200 mb-3">{{ playbackError() }}</span>
+              @if (!isEnrolled()) {
+                <button
+                  type="button"
+                  (click)="buyCourse()"
+                  class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition"
+                >
+                  {{ 'learn.buyFullCourse' | translate }}
+                </button>
+              }
+            </div>
           } @else {
-            <div class="aspect-video w-full flex items-center justify-center rounded-[var(--radius-xl)] bg-zinc-900 text-zinc-500">
-              <span class="text-sm font-medium">กำลังเตรียมเครื่องเล่นวิดีโอ...</span>
+            <div class="animate-fade-in aspect-video w-full flex flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] bg-zinc-900 text-zinc-400">
+              <app-spinner size="md" color="white" />
+              <span class="text-xs font-medium">กำลังเตรียมเครื่องเล่นวิดีโอ...</span>
             </div>
           }
         </div>
       </div>
 
+      <!-- Course Completion Celebration Banner -->
+      @if (courseProgress()?.progressPercent === 100 || certificate()) {
+        <div class="animate-fade-in-down mx-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="animate-pop-in flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white font-bold text-xl shadow">
+              🎓
+            </span>
+            <div>
+              <p class="text-sm font-bold text-[var(--color-text)]">
+                {{ 'learn.celebration.congratsHeading' | translate }}
+              </p>
+              <p class="text-xs text-[var(--color-text-muted)]">
+                {{ 'learn.celebration.congratsSubheading' | translate }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            @if (certificate(); as cert) {
+              <a
+                [routerLink]="['/certificates/verify', cert.verifyCode]"
+                target="_blank"
+                class="btn-tactile inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-[var(--color-surface)] px-3 py-1.5 text-xs font-bold text-emerald-600 shadow-sm transition hover:bg-emerald-50"
+              >
+                <ng-icon name="phosphorCertificate" />
+                <span>{{ 'learn.celebration.viewCertificate' | translate }}</span>
+              </a>
+              <button
+                type="button"
+                (click)="downloadCertificatePdf()"
+                class="btn-tactile inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow transition hover:bg-emerald-700"
+              >
+                <ng-icon name="phosphorDownloadSimple" />
+                <span>{{ 'learn.celebration.downloadCertificate' | translate }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
       <!-- Free Preview Notice -->
       @if (currentEpisode()?.isFreePreview && !courseProgress()) {
-        <div class="mx-4 mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+        <div class="animate-fade-in mx-4 mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
           <div class="flex items-center gap-3">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white font-bold text-sm">
+            <span class="animate-pop-in flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white font-bold text-sm">
               ★
             </span>
             <div>
@@ -73,7 +130,7 @@
           </div>
           <a
             [routerLink]="['/courses', course()?.slug]"
-            class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+            class="btn-tactile rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
           >
             {{ 'learn.buyFullCourse' | translate }}
           </a>
@@ -102,7 +159,23 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="flex items-center gap-4 border-b border-[var(--color-border)] mb-6">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-4 border-b border-[var(--color-border)] mb-6">
+          <!-- Mobile Curriculum Tab Button (Visible on screens < lg) -->
+          <button
+            type="button"
+            (click)="activeTab.set('curriculum')"
+            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none lg:hidden"
+            [class.border-[var(--color-primary)]]="activeTab() === 'curriculum'"
+            [class.text-[var(--color-primary)]]="activeTab() === 'curriculum'"
+            [class.border-transparent]="activeTab() !== 'curriculum'"
+            [class.text-[var(--color-text-muted)]]="activeTab() !== 'curriculum'"
+          >
+            <div class="flex items-center gap-1.5">
+              <ng-icon name="phosphorBookOpen" />
+              <span>{{ 'learn.tabs.curriculum' | translate }} ({{ allEpisodes().length }})</span>
+            </div>
+          </button>
+
           <button
             type="button"
             (click)="activeTab.set('overview')"
@@ -112,9 +185,54 @@
             [class.border-transparent]="activeTab() !== 'overview'"
             [class.text-[var(--color-text-muted)]]="activeTab() !== 'overview'"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <ng-icon name="phosphorInfo" />
-              <span>ภาพรวม</span>
+              <span>{{ 'learn.tabs.overview' | translate }}</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            (click)="activeTab.set('quiz')"
+            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            [class.border-[var(--color-primary)]]="activeTab() === 'quiz'"
+            [class.text-[var(--color-primary)]]="activeTab() === 'quiz'"
+            [class.border-transparent]="activeTab() !== 'quiz'"
+            [class.text-[var(--color-text-muted)]]="activeTab() !== 'quiz'"
+          >
+            <div class="flex items-center gap-1.5">
+              <ng-icon name="phosphorSealCheck" />
+              <span>{{ 'learn.tabs.quiz' | translate }}</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            (click)="activeTab.set('assignment')"
+            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            [class.border-[var(--color-primary)]]="activeTab() === 'assignment'"
+            [class.text-[var(--color-primary)]]="activeTab() === 'assignment'"
+            [class.border-transparent]="activeTab() !== 'assignment'"
+            [class.text-[var(--color-text-muted)]]="activeTab() !== 'assignment'"
+          >
+            <div class="flex items-center gap-1.5">
+              <ng-icon name="phosphorFileText" />
+              <span>{{ 'learn.tabs.assignment' | translate }}</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            (click)="activeTab.set('resources')"
+            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            [class.border-[var(--color-primary)]]="activeTab() === 'resources'"
+            [class.text-[var(--color-primary)]]="activeTab() === 'resources'"
+            [class.border-transparent]="activeTab() !== 'resources'"
+            [class.text-[var(--color-text-muted)]]="activeTab() !== 'resources'"
+          >
+            <div class="flex items-center gap-1.5">
+              <ng-icon name="phosphorDownloadSimple" />
+              <span>{{ 'learn.tabs.resources' | translate }}</span>
             </div>
           </button>
 
@@ -127,15 +245,31 @@
             [class.border-transparent]="activeTab() !== 'qa'"
             [class.text-[var(--color-text-muted)]]="activeTab() !== 'qa'"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <ng-icon name="phosphorChatCircleDots" />
-              <span>ถาม-ตอบ (Q&A) ({{ discussions().length }})</span>
+              <span>{{ 'learn.tabs.qa' | translate }} ({{ discussions().length }})</span>
             </div>
           </button>
         </div>
 
         <!-- Tab Content -->
         <div class="flex-1">
+          <!-- Mobile Curriculum Tab (Visible on screens < lg) -->
+          @if (activeTab() === 'curriculum') {
+            <div class="lg:hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden mb-6">
+              @if (course()) {
+                <app-curriculum-sidebar
+                  [sections]="course()!.sections"
+                  [activeEpisodeId]="currentEpisodeId() ?? undefined"
+                  [progress]="courseProgress()"
+                  [isEnrolled]="isEnrolled()"
+                  (selectEpisode)="selectEpisode($event)"
+                  (lockedEpisodeClicked)="buyCourse()"
+                />
+              }
+            </div>
+          }
+
           <!-- Overview Tab -->
           @if (activeTab() === 'overview') {
             <div class="space-y-4 text-sm text-[var(--color-text)] leading-relaxed">
@@ -160,6 +294,30 @@
             </div>
           }
 
+          <!-- Quiz Tab -->
+          @if (activeTab() === 'quiz') {
+            <app-quiz-taking
+              [episodeId]="currentEpisodeId()"
+              [enrollmentId]="enrollmentId()"
+            />
+          }
+
+          <!-- Assignment Tab -->
+          @if (activeTab() === 'assignment') {
+            <app-assignment-submission
+              [episodeId]="currentEpisodeId()"
+              [enrollmentId]="enrollmentId()"
+            />
+          }
+
+          <!-- Resources / Attachments Tab -->
+          @if (activeTab() === 'resources') {
+            <app-episode-attachments
+              [episodeId]="currentEpisodeId()"
+            />
+          }
+
+
           <!-- Q&A Tab -->
           @if (activeTab() === 'qa') {
             <div class="space-y-6">
@@ -177,10 +335,15 @@
                     type="button"
                     (click)="submitQuestion()"
                     [disabled]="!newQuestionBody().trim() || isSubmittingQuestion()"
-                    class="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+                    class="btn-tactile inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
                   >
-                    <ng-icon name="phosphorPaperPlaneRight" />
-                    <span>{{ isSubmittingQuestion() ? 'กำลังส่ง...' : 'ส่งคำถาม' }}</span>
+                    @if (isSubmittingQuestion()) {
+                      <app-spinner size="xs" color="white" />
+                      <span>กำลังส่ง...</span>
+                    } @else {
+                      <ng-icon name="phosphorPaperPlaneRight" />
+                      <span>ส่งคำถาม</span>
+                    }
                   </button>
                 </div>
               </div>
@@ -243,8 +406,9 @@
           [sections]="course()!.sections"
           [activeEpisodeId]="currentEpisodeId() ?? undefined"
           [progress]="courseProgress()"
-          [isEnrolled]="true"
+          [isEnrolled]="isEnrolled()"
           (selectEpisode)="selectEpisode($event)"
+          (lockedEpisodeClicked)="buyCourse()"
         />
       }
     </aside>

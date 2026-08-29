@@ -46,6 +46,9 @@ describe('SiteHeader', () => {
   async function detectChangesAndFlushCategories(categories: readonly unknown[] = []): Promise<void> {
     fixture.detectChanges();
     httpMock.expectOne('/api/catalog/categories').flush(categories);
+    if (authService.isAuthenticated()) {
+      httpMock.match('/api/notifications/my').forEach((req) => req.flush([]));
+    }
     await fixture.whenStable();
     fixture.detectChanges();
   }

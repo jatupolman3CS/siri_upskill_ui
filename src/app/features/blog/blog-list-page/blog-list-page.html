@@ -1,6 +1,6 @@
-<div class="mx-auto max-w-6xl px-4 py-12 pb-24">
+<div class="animate-fade-in mx-auto max-w-6xl px-4 py-12 pb-24">
   <!-- Page Header -->
-  <div class="mb-12 text-center max-w-2xl mx-auto">
+  <div class="animate-fade-in-down mb-12 text-center max-w-2xl mx-auto">
     <span class="rounded-full bg-[var(--color-primary)]/10 px-3 py-1 text-xs font-bold text-[var(--color-primary)]">
       SIRI UpSkill Knowledge Hub
     </span>
@@ -13,9 +13,9 @@
   </div>
 
   <!-- Featured / Recent Posts Grid -->
-  <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+  <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
     @for (post of posts(); track post.id) {
-      <article class="group flex flex-col overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition hover:shadow-xl hover:border-[var(--color-primary)]/40">
+      <article class="card-hover group flex flex-col overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
         <!-- Cover Image -->
         <a [routerLink]="['/blog', post.slug]" class="relative aspect-[16/10] w-full overflow-hidden bg-zinc-900">
           @if (post.coverImageUrl) {
@@ -46,7 +46,7 @@
               </span>
             </div>
 
-            <h2 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition line-clamp-2">
+            <h2 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
               <a [routerLink]="['/blog', post.slug]">
                 {{ post.title }}
               </a>

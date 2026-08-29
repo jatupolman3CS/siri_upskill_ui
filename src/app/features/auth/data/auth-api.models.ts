@@ -95,3 +95,50 @@ export interface RevokeAllSessionsResponse {
   readonly message: string;
   readonly revokedCount: number;
 }
+
+// ---- PDPA / Data Export & Erasure (P7-04) --------------------------------------------------
+
+export interface UserExportDto {
+  readonly id: string;
+  readonly email: string;
+  readonly displayName: string;
+  readonly phoneNumber: string | null;
+  readonly avatarUrl: string | null;
+  readonly status: string;
+  readonly twoFactorEnabled: boolean;
+  readonly createdAtUtc: string;
+  readonly roles: readonly string[];
+}
+
+export interface UserSessionExportDto {
+  readonly id: string;
+  readonly deviceId: string;
+  readonly deviceName: string | null;
+  readonly userAgent: string | null;
+  readonly ipAddress: string | null;
+  readonly createdAtUtc: string;
+  readonly lastSeenAtUtc: string;
+  readonly isActive: boolean;
+}
+
+export interface SecurityAuditExportDto {
+  readonly eventType: string;
+  readonly occurredAtUtc: string;
+  readonly ipAddress: string | null;
+}
+
+export interface DataExportResponse {
+  readonly exportedAtUtc: string;
+  readonly profile: UserExportDto;
+  readonly sessions: readonly UserSessionExportDto[];
+  readonly securityAudits: readonly SecurityAuditExportDto[];
+}
+
+export interface AnonymizeAccountRequest {
+  readonly password?: string;
+  readonly confirmation: string;
+}
+
+export interface AnonymizeAccountResponse {
+  readonly message: string;
+}

@@ -1,0 +1,5 @@
+/* Document-wide defaults, mirrored from frontend/src/styles.css */
+body{background-color:var(--color-bg);color:var(--color-text);font-family:var(--font-sans);margin:0}
+html{scroll-padding-top:4rem}
+a{color:var(--color-primary)}
+a:hover{color:var(--color-primary-hover)}

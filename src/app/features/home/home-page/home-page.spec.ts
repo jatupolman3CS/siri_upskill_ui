@@ -8,6 +8,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { CategoryTreeNode } from '../../catalog/data/category-api.models';
 import { CourseSearchResultItem, SearchCoursesResponse } from '../../catalog/data/course-api.models';
+import { BannerItem } from '../../cms/data/cms-api.models';
 import { HomePage } from './home-page';
 
 const CATEGORIES: readonly CategoryTreeNode[] = [
@@ -20,6 +21,20 @@ const CATEGORIES: readonly CategoryTreeNode[] = [
     sortOrder: 0,
     isActive: true,
     children: [],
+  },
+];
+
+const BANNERS: readonly BannerItem[] = [
+  {
+    id: 'b-1',
+    title: 'Mid-Year Mega Sale ลด 50%',
+    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
+    targetUrl: '/courses',
+    sortOrder: 1,
+    isActive: true,
+    startsAtUtc: null,
+    endsAtUtc: null,
+    createdAtUtc: '2026-08-01T00:00:00Z',
   },
 ];
 
@@ -60,11 +75,10 @@ describe('HomePage', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: '', component: HomePage }]),
-        // withFetch() — matches app.config.ts's real HTTP client (see CourseDetailPage's own spec for
-        // why this isn't just cosmetic).
         provideHttpClient(withFetch()),
         provideHttpClientTesting(),
       ],
@@ -77,6 +91,10 @@ describe('HomePage', () => {
   afterEach(() => httpMock.verify());
 
   async function settle(): Promise<void> {
+    const flashRequests = httpMock.match((r) => r.url.includes('/api/commerce/flash-sales'));
+    for (const req of flashRequests) {
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 1 });
+    }
     harness.detectChanges();
     TestBed.flushEffects();
     await Promise.resolve();
@@ -87,6 +105,14 @@ describe('HomePage', () => {
     const component = await harness.navigateByUrl('/', HomePage);
     await settle();
     return component;
+  }
+
+  function flushBanners(banners: readonly BannerItem[] = []): Promise<void> {
+    const reqs = httpMock.match((r) => r.url === '/api/cms/banners');
+    for (const req of reqs) {
+      req.flush(banners);
+    }
+    return settle();
   }
 
   function flushCategories(categories: readonly CategoryTreeNode[] = []): Promise<void> {
@@ -114,7 +140,7 @@ describe('HomePage', () => {
     return settle();
   }
 
-  it('sets canonical/OG for "/" on construction, with no JSON-LD (no Course/BreadcrumbList schema applies to a landing page)', async () => {
+  it('sets canonical/OG for "/" on construction, with no JSON-LD', async () => {
     await navigate();
 
     const document = TestBed.inject(DOCUMENT);
@@ -124,6 +150,7 @@ describe('HomePage', () => {
     expect(document.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe('SIRI UpSkill');
     expect(document.querySelectorAll('script[type="application/ld+json"]').length).toBe(0);
 
+    await flushBanners();
     await flushCategories();
     await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
   });
@@ -136,8 +163,20 @@ describe('HomePage', () => {
     expect(harness.routeNativeElement?.querySelector('a[href="/register"]')).not.toBeNull();
     expect(harness.routeNativeElement?.querySelector('a[href="/login"]')).not.toBeNull();
 
+    await flushBanners();
     await flushCategories();
     await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
+  });
+
+  it('renders promotional CMS banner if present', async () => {
+    await navigate();
+    await flushBanners(BANNERS);
+    await flushCategories();
+    await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
+
+    const bannerSection = harness.routeNativeElement?.querySelector('section[aria-label="Promotional Banners"]');
+    expect(bannerSection).not.toBeNull();
+    expect(bannerSection?.textContent).toContain('Mid-Year Mega Sale ลด 50%');
   });
 
   it('shows busy skeletons for all three sections while loading', async () => {
@@ -145,12 +184,14 @@ describe('HomePage', () => {
 
     expect(harness.routeNativeElement?.querySelectorAll('[aria-busy="true"]').length).toBe(3);
 
+    await flushBanners();
     await flushCategories();
     await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
   });
 
   it('renders category cards linking to /courses?category=<slug> once loaded', async () => {
     await navigate();
+    await flushBanners();
     await flushCategories(CATEGORIES);
     await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
 
@@ -160,6 +201,7 @@ describe('HomePage', () => {
 
   it('renders recommended and newest course cards with correct "view all" links', async () => {
     await navigate();
+    await flushBanners();
     await flushCategories();
     await flushSearches(searchResponse([courseItem('rec-1', 'Top Rated Course')]), searchResponse([courseItem('new-1', 'Brand New Course')]));
 
@@ -175,6 +217,7 @@ describe('HomePage', () => {
 
   it('omits a section entirely once it settles with zero results, instead of showing an empty heading', async () => {
     await navigate();
+    await flushBanners();
     await flushCategories([]);
     await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
 
@@ -186,6 +229,7 @@ describe('HomePage', () => {
 
   it('still renders the rest of the page when the categories fetch fails (section silently omitted)', async () => {
     await navigate();
+    await flushBanners();
     await failCategories();
     await flushSearches(searchResponse([courseItem('rec-1', 'Top Rated Course')]), EMPTY_RESPONSE);
 

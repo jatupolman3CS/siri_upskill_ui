@@ -20,6 +20,7 @@ import { InputField } from '../../../shared/input/input';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { SelectField, SelectOption } from '../../../shared/select/select';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
+import { SearchAutocompleteComponent } from '../search-autocomplete/search-autocomplete.component';
 
 const PAGE_SIZE = 20;
 
@@ -79,6 +80,7 @@ function toPositiveNumberOrNull(value: string | null): number | null {
     Pagination,
     SelectField,
     Skeleton,
+    SearchAutocompleteComponent,
   ],
   templateUrl: './courses-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,6 +101,7 @@ export class CoursesPage {
 
   protected readonly searchText = computed(() => this.queryParamMap().get('q') ?? '');
   protected readonly categorySlug = computed(() => this.queryParamMap().get('category'));
+  protected readonly instructorId = computed(() => this.queryParamMap().get('instructorId'));
   protected readonly level = computed(() => this.queryParamMap().get('level'));
   protected readonly minPrice = computed(() => toPositiveNumberOrNull(this.queryParamMap().get('minPrice')));
   protected readonly maxPrice = computed(() => toPositiveNumberOrNull(this.queryParamMap().get('maxPrice')));
@@ -110,6 +113,7 @@ export class CoursesPage {
     () =>
       !!this.searchText() ||
       !!this.categorySlug() ||
+      !!this.instructorId() ||
       !!this.level() ||
       this.minPrice() !== null ||
       this.maxPrice() !== null ||
@@ -148,6 +152,7 @@ export class CoursesPage {
       return {
         q: this.searchText() || undefined,
         categoryId: this.categoryId(),
+        instructorId: this.instructorId() || undefined,
         level: (this.level() as SearchCoursesQuery['level']) ?? undefined,
         minPrice: this.minPrice() ?? undefined,
         maxPrice: this.maxPrice() ?? undefined,
@@ -229,6 +234,10 @@ export class CoursesPage {
     this.updateQueryParams({ q: this.searchControl.value.trim() || null, page: null });
   }
 
+  protected onSearchSubmit(query: string): void {
+    this.updateQueryParams({ q: query.trim() || null, page: null });
+  }
+
   protected applyLevelFilter(): void {
     this.updateQueryParams({ level: this.levelControl.value || null, page: null });
   }
@@ -249,8 +258,14 @@ export class CoursesPage {
     });
   }
 
+  protected readonly instructorFacets = computed(() => this.searchResult().facets.instructors ?? []);
+
   protected toggleCategory(slug: string): void {
     this.updateQueryParams({ category: this.categorySlug() === slug ? null : slug, page: null });
+  }
+
+  protected toggleInstructor(id: string): void {
+    this.updateQueryParams({ instructorId: this.instructorId() === id ? null : id, page: null });
   }
 
   protected onPageChange(page: number): void {

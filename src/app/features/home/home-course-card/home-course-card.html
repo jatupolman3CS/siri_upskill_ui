@@ -1,15 +1,29 @@
 <a
   [routerLink]="['/courses', course().slug]"
-  class="flex h-full flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
-    transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-md)]
+  class="card-hover group flex h-full flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
 >
   <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
     @if (course().thumbnailUrl) {
       <!-- fill, not width/height: thumbnail dimensions aren't known ahead of time, only the
            container's aspect ratio is (frontend.md requires NgOptimizedImage on every image). -->
-      <img [ngSrc]="course().thumbnailUrl!" alt="" fill class="object-cover" />
+      <img [ngSrc]="course().thumbnailUrl!" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105" />
     }
+
+    <button
+      type="button"
+      (click)="toggleWishlist($event)"
+      [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'เพิ่มในสิ่งที่อยากได้'"
+      class="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:scale-110"
+      [class.text-rose-500]="isWishlisted()"
+      [class.text-zinc-500]="!isWishlisted()"
+    >
+      @if (isWishlisted()) {
+        <ng-icon name="phosphorHeartFill" class="text-base text-rose-500" />
+      } @else {
+        <ng-icon name="phosphorHeart" class="text-base" />
+      }
+    </button>
   </div>
   <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">{{ course().title }}</h3>
   <p class="text-sm text-[var(--color-text-muted)]">{{ course().instructorDisplayName }}</p>
@@ -20,9 +34,15 @@
     </p>
   }
   <div class="mt-auto flex items-baseline gap-2">
-    <span class="text-lg font-bold text-[var(--color-primary)]">{{ course().price | currencyThb }}</span>
-    @if (course().comparePrice) {
-      <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().comparePrice | currencyThb }}</span>
+    @if (salePrice() !== undefined && salePrice()! < course().price) {
+      <span class="text-lg font-bold text-rose-600">{{ salePrice()! | currencyThb }}</span>
+      <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().price | currencyThb }}</span>
+      <span class="rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold text-rose-600">ลดพิเศษ</span>
+    } @else {
+      <span class="text-lg font-bold text-[var(--color-primary)]">{{ course().price | currencyThb }}</span>
+      @if (course().comparePrice) {
+        <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().comparePrice | currencyThb }}</span>
+      }
     }
   </div>
 </a>

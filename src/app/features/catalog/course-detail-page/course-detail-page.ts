@@ -1,22 +1,32 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { of } from 'rxjs';
 import {
+  phosphorArrowRight,
   phosphorBookOpen,
   phosphorCaretDown,
+  phosphorCertificate,
   phosphorCheck,
+  phosphorCheckCircle,
   phosphorClock,
+  phosphorHeart,
   phosphorPlayCircle,
+  phosphorReceipt,
+  phosphorSealCheck,
+  phosphorShoppingCart,
   phosphorStar,
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHeartFill } from '@ng-icons/phosphor-icons/fill';
 
 import { CategoryTreeNode } from '../data/category-api.models';
 import { CategoryApiService } from '../data/category-api.service';
 import { CourseDetailResponse, CourseDetailSection, CourseLevel } from '../data/course-api.models';
 import { CourseApiService } from '../data/course-api.service';
+import { WishlistStore } from '../data/wishlist.store';
 import { findCategoryById } from '../category-tree.util';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
@@ -29,60 +39,34 @@ import { SeoService } from '../../../core/seo/seo.service';
 import { Breadcrumb, BreadcrumbItem } from '../../../shared/breadcrumb/breadcrumb';
 import { Button } from '../../../shared/button/button';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
+import { CartStore } from '../../commerce/cart/cart-store.service';
 
 /**
  * `/courses/:slug` (task P1-22) — the destination every course card (`CoursesPage`, P1-21) and
- * `CategoryMegaMenu`'s own indirect "ดูคอร์สทั้งหมด" path already point at. Public + SSR-indexable
- * (default `RenderMode.Server` in `app.routes.server.ts` — no override needed, same reasoning
- * `/register`/`/login` already established: nothing here is session-dependent, `GetCourseDetailEndpoint`
- * is `.AllowAnonymous()`).
- * <para>
- * <b>Full SEO via `SeoService`</b> (task P1-24) — title, description, canonical, Open Graph, hreflang,
- * and `Course`+`BreadcrumbList` JSON-LD, all set from one `effect()` reacting to `courseResource`
- * (not the smaller `setPageMeta()` helper — that one assumes synchronous, constructor-time values;
- * this page's title/JSON-LD depend on the fetched course). The not-found branch calls `SeoService`
- * too (title + `robots: noindex`, no JSON-LD), and so does `hasOtherError()` — every branch calls
- * `SeoService.set()` exactly once per effect run, always for the *current* `path`, so neither a
- * client-side navigation into a 404 nor a same-route slug change that fails (Angular reuses this
- * component across `/courses/courseA` → `/courses/courseB`) can leave a previous course's canonical/
- * OG/JSON-LD attached to a page that no longer shows that course — `SeoService.set()` itself always
- * clears what a call doesn't re-add. `aggregateRating` in the `Course` JSON-LD is only emitted once
- * `ratingCount > 0` — see
- * `buildCourseJsonLd`'s own doc comment for why (every course's `ratingCount` is genuinely 0 today).
- * </para>
- * <para>
- * <b>The buy button is disabled everywhere, not routed anywhere</b> — Commerce (Cart/Order/Checkout,
- * P3) does not exist yet in this codebase at all, for any user, authenticated or not. Routing an
- * unauthenticated visitor to `/register` on click (mirroring `HomePage`'s hero CTA) would imply
- * registering leads somewhere buyable, which is not true yet; a plain disabled button with an
- * explanatory caption is the honest state until P3 lands. The same reasoning applies to free-preview
- * episodes: they carry a badge (the acceptance criterion) but are not clickable — there is no player
- * to send them to until Phase 2.
- * </para>
- * <para>
- * <b>No review list, only the rating summary</b> — `CourseDetailResponse` only carries
- * `ratingAverage`/`ratingCount` (denormalized fields updated by a not-yet-built
- * `CourseStatsUpdater`, per `Course.cs`'s own doc comment); there is no endpoint for individual
- * reviews. Writing a review is task P1-08, itself blocked on `Enrollments` not existing yet (Learning
- * module). Every seeded course's `ratingCount` is 0 today, so the "no reviews yet" state is what
- * actually renders right now — a true statement, not a placeholder.
- * </para>
+ * `CategoryMegaMenu`'s own indirect "ดูคอร์สทั้งหมด" path already point at.
  */
 @Component({
   selector: 'app-course-detail-page',
-  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, DurationPipe, NgIcon, Breadcrumb, Button, Skeleton],
+  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, DurationPipe, DatePipe, NgIcon, Breadcrumb, Button, Skeleton],
   templateUrl: './course-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // CurrencyPipe: CurrencyThbPipe's own inject(CurrencyPipe) needs this — Angular's built-in
-  // CurrencyPipe is not providedIn: 'root' (same reason CoursesPage/DevicesPage already needed this).
   providers: [
     CurrencyPipe,
+    DatePipe,
     provideIcons({
+      phosphorArrowRight,
       phosphorBookOpen,
       phosphorCaretDown,
+      phosphorCertificate,
       phosphorCheck,
+      phosphorCheckCircle,
       phosphorClock,
+      phosphorHeart,
+      phosphorHeartFill,
       phosphorPlayCircle,
+      phosphorReceipt,
+      phosphorSealCheck,
+      phosphorShoppingCart,
       phosphorStar,
       phosphorUsers,
     }),
@@ -90,11 +74,57 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
 })
 export class CourseDetailPage {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly courseApi = inject(CourseApiService);
   private readonly categoryApi = inject(CategoryApiService);
   private readonly seoService = inject(SeoService);
+  protected readonly cart = inject(CartStore);
+  protected readonly wishlistStore = inject(WishlistStore);
   protected readonly translation = inject(TranslationService);
   protected readonly auth = inject(AuthService);
+
+  protected readonly isWishlisted = computed(() => {
+    const course = this.courseResource.value();
+    if (!course) return false;
+    return this.wishlistStore.isWishlisted(course.id);
+  });
+
+  protected toggleWishlist(): void {
+    const course = this.courseResource.value();
+    if (!course) return;
+    this.wishlistStore.toggleWishlist({
+      id: course.id,
+      slug: course.slug,
+      title: course.title,
+      price: course.price,
+      thumbnailUrl: course.thumbnailUrl,
+      instructorName: course.instructor.displayName,
+    });
+  }
+
+  protected readonly isAddedToCart = computed(() => {
+    const course = this.courseResource.value();
+    if (!course) return false;
+    return this.cart.items().some((i) => i.courseId === course.id);
+  });
+
+  protected addToCart(): void {
+    const course = this.courseResource.value();
+    if (!course) return;
+    this.cart.addItem({
+      courseId: course.id,
+      title: course.title,
+      slug: course.slug,
+      price: course.price,
+      thumbnailUrl: course.thumbnailUrl,
+      instructorName: course.instructor?.displayName,
+    });
+  }
+
+  protected buyNow(): void {
+    this.addToCart();
+    this.router.navigate(['/cart']);
+  }
 
   private readonly paramMap = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
   protected readonly slug = computed(() => this.paramMap().get('slug') ?? '');
@@ -109,6 +139,52 @@ export class CourseDetailPage {
   protected readonly courseResource = rxResource({
     params: () => this.slug(),
     stream: ({ params }) => this.courseApi.getCourseDetail(params),
+  });
+
+  protected readonly reviewsResource = rxResource({
+    params: () => this.courseResource.value()?.id,
+    stream: ({ params: courseId }) => {
+      if (!courseId) return of(null);
+      return this.courseApi.getCourseReviews(courseId, 1, 20);
+    },
+  });
+
+  protected readonly reviewsSummary = computed(() => this.reviewsResource.value());
+  protected readonly reviews = computed(() => this.reviewsSummary()?.items ?? []);
+
+  protected readonly ratingDistribution = computed(() => {
+    const summary = this.reviewsSummary();
+    const total = summary?.ratingCount ?? 0;
+    const dist = summary?.distribution;
+    if (!dist || total === 0) {
+      return [5, 4, 3, 2, 1].map((stars) => ({ stars, count: 0, percent: 0 }));
+    }
+
+    const counts: Record<number, number> = {
+      5: dist.star5,
+      4: dist.star4,
+      3: dist.star3,
+      2: dist.star2,
+      1: dist.star1,
+    };
+
+    return [5, 4, 3, 2, 1].map((stars) => {
+      const count = counts[stars] ?? 0;
+      const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+      return { stars, count, percent };
+    });
+  });
+
+  protected readonly discountPercent = computed(() => {
+    const course = this.courseResource.value();
+    if (!course || !course.comparePrice || course.comparePrice <= course.price) return 0;
+    return Math.round(((course.comparePrice - course.price) / course.comparePrice) * 100);
+  });
+
+  protected readonly freePreviewCount = computed(() => {
+    const course = this.courseResource.value();
+    if (!course) return 0;
+    return course.sections.flatMap((s) => s.episodes).filter((e) => e.isFreePreview).length;
   });
 
   protected readonly categoriesResource = rxResource({

@@ -46,3 +46,28 @@ export interface CreatePostRequest {
   readonly seoTitle?: string | null;
   readonly seoDescription?: string | null;
 }
+
+export interface MenuItem {
+  readonly id: string;
+  readonly parentId: string | null;
+  readonly label: string;
+  readonly url: string;
+  readonly sortOrder: number;
+  readonly isActive: boolean;
+}
+
+export interface CreateMenuItemRequest {
+  readonly label: string;
+  readonly url: string;
+  readonly parentId?: string | null;
+  readonly sortOrder?: number;
+  readonly isActive?: boolean;
+}
+
+export interface UpdateMenuItemRequest {
+  readonly label: string;
+  readonly url: string;
+  readonly parentId?: string | null;
+  readonly sortOrder?: number;
+  readonly isActive?: boolean;
+}

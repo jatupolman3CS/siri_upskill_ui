@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ApiService } from '../../../core/http/api.service';
+import { PagedResult } from '../../../core/http/paged-result.model';
 import {
   AutosaveCourseCommand,
   AutosaveCourseResponse,
@@ -13,12 +14,15 @@ import {
   CreateCourseEpisodeCommand,
   CreateCourseResponse,
   CreateCourseSectionCommand,
+  InstructorCourseSummary,
   ReorderCourseEpisodesCommand,
   ReorderCourseSectionsCommand,
   SearchCoursesQuery,
   SearchCoursesResponse,
+  CourseReviewSummaryResponse,
   UpdateCourseEpisodeCommand,
   UpdateCourseSectionCommand,
+  WishlistCourseItemResponse,
 } from './course-api.models';
 
 /**
@@ -110,5 +114,43 @@ export class CourseApiService extends ApiService {
       `/catalog/instructor/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/episodes/reorder`,
       command,
     );
+  }
+
+  // --- Reviews (P1-08) ---
+  getCourseReviews(
+    courseId: string,
+    page = 1,
+    pageSize = 10,
+  ): Observable<CourseReviewSummaryResponse> {
+    return this.get<CourseReviewSummaryResponse>(`/catalog/courses/${encodeURIComponent(courseId)}/reviews`, {
+      page,
+      pageSize,
+    });
+  }
+
+  createCourseReview(
+    courseId: string,
+    command: { rating: number; comment?: string },
+  ): Observable<unknown> {
+    return this.post(`/catalog/courses/${encodeURIComponent(courseId)}/reviews`, command);
+  }
+
+  getMyCourses(page = 1, pageSize = 50): Observable<PagedResult<InstructorCourseSummary>> {
+    return this.get<PagedResult<InstructorCourseSummary>>('/catalog/instructor/courses', {
+      page,
+      pageSize,
+    });
+  }
+
+  getWishlist(): Observable<WishlistCourseItemResponse[]> {
+    return this.get<WishlistCourseItemResponse[]>('/catalog/wishlist');
+  }
+
+  addToWishlist(courseId: string): Observable<void> {
+    return this.post<void>(`/catalog/wishlist/${encodeURIComponent(courseId)}`, {});
+  }
+
+  removeFromWishlist(courseId: string): Observable<void> {
+    return this.delete<void>(`/catalog/wishlist/${encodeURIComponent(courseId)}`);
   }
 }

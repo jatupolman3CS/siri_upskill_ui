@@ -1,0 +1,126 @@
+<div class="relative w-full">
+  <!-- Search Input Container -->
+  <div class="relative flex items-center w-full">
+    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--color-text-muted)]">
+      <ng-icon name="phosphorMagnifyingGlass" class="text-base" />
+    </div>
+
+    <input
+      #searchInput
+      type="text"
+      [ngModel]="query()"
+      (ngModelChange)="onInput($event)"
+      (focus)="onFocus()"
+      (keydown)="onKeyDown($event)"
+      [placeholder]="placeholder"
+      class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 pl-10 pr-10 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 shadow-sm"
+      autocomplete="off"
+    />
+
+    <!-- Action buttons inside input: clear or loader -->
+    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+      @if (isLoading()) {
+        <div class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent"></div>
+      } @else if (query().length > 0) {
+        <button
+          type="button"
+          (click)="onClear()"
+          class="flex h-5 w-5 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
+          title="ล้างคำค้นหา"
+        >
+          <ng-icon name="phosphorX" class="text-xs" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Autocomplete Suggestions Dropdown -->
+  @if (isOpen() && (suggestions().length > 0 || recentSearches().length > 0)) {
+    <div
+      class="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl animate-in fade-in slide-in-from-top-1 duration-150"
+    >
+      <!-- Suggestions when typing -->
+      @if (query().length >= 2 && suggestions().length > 0) {
+        <div class="p-2 space-y-1">
+          <p class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+            คอร์สเรียนที่ตรงกัน
+          </p>
+
+          @for (course of suggestions(); track course.id; let idx = $index) {
+            <button
+              type="button"
+              (click)="selectCourse(course)"
+              class="w-full flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-[var(--color-surface-muted)]"
+              [class.bg-[var(--color-surface-muted)]]="activeIndex() === idx"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="h-9 w-12 rounded-lg bg-zinc-900 overflow-hidden shrink-0">
+                  @if (course.thumbnailUrl) {
+                    <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover" />
+                  }
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-[var(--color-text)] truncate">{{ course.title }}</p>
+                  <p class="text-[10px] text-[var(--color-text-muted)]">{{ course.instructorDisplayName }}</p>
+                </div>
+              </div>
+              <span class="text-xs font-black text-[var(--color-primary)] shrink-0">
+                {{ course.price | currencyThb }}
+              </span>
+            </button>
+          }
+        </div>
+
+        <div class="border-t border-[var(--color-border)] p-2">
+          <button
+            type="button"
+            (click)="onSubmit()"
+            class="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-surface-muted)] py-2 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition"
+          >
+            <span>ดูผลการค้นหาทั้งหมดสำหรับ "{{ query() }}"</span>
+            <ng-icon name="phosphorArrowRight" />
+          </button>
+        </div>
+      }
+
+      <!-- Recent Searches when empty or short query -->
+      @if (recentSearches().length > 0 && query().length < 2) {
+        <div class="p-2 space-y-1">
+          <div class="flex items-center justify-between px-3 py-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+              การค้นหาล่าสุด
+            </span>
+            <button
+              type="button"
+              (click)="clearAllRecent($event)"
+              class="text-[10px] font-semibold text-rose-500 hover:underline"
+            >
+              ล้างทั้งหมด
+            </button>
+          </div>
+
+          @for (recent of recentSearches(); track recent; let idx = $index) {
+            <div
+              (click)="selectRecent(recent)"
+              class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 cursor-pointer transition hover:bg-[var(--color-surface-muted)]"
+              [class.bg-[var(--color-surface-muted)]]="activeIndex() === idx"
+            >
+              <div class="flex items-center gap-2 text-xs text-[var(--color-text)]">
+                <ng-icon name="phosphorClockCounterClockwise" class="text-[var(--color-text-muted)] text-sm" />
+                <span>{{ recent }}</span>
+              </div>
+              <button
+                type="button"
+                (click)="removeRecent(recent, $event)"
+                class="flex h-5 w-5 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-rose-600 transition"
+                title="ลบ"
+              >
+                <ng-icon name="phosphorX" class="text-xs" />
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

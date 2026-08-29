@@ -34,6 +34,7 @@ describe('DevicesPage', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [DevicesPage],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],

@@ -1,0 +1,116 @@
+<div class="animate-fade-in mx-auto max-w-3xl px-4 py-8 space-y-8">
+  <div class="animate-fade-in-down space-y-2">
+    <h1 class="text-2xl font-bold tracking-tight text-[var(--color-text)]">
+      ความเป็นส่วนตัวและการจัดการข้อมูล (Privacy & PDPA)
+    </h1>
+    <p class="text-sm text-[var(--color-text-muted)]">
+      จัดการสิทธิ์ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) รวมถึงการส่งออกข้อมูลและการลบบัญชี
+    </p>
+  </div>
+
+  <!-- Section 1: Data Portability / Export -->
+  <div class="animate-fade-in-up stagger-1 card-hover rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4 shadow-xs">
+    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div class="space-y-1">
+        <h2 class="text-base font-bold text-[var(--color-text)]">สิทธิ์ในการขอรับข้อมูล (Right to Data Portability)</h2>
+        <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+          ดาวน์โหลดสำเนาข้อมูลส่วนบุคคลของคุณในรูปแบบ JSON ที่สามารถอ่านได้ด้วยเครื่อง รวมถึงข้อมูลโปรไฟล์ ประวัติการเข้าสู่ระบบ และบันทึกความปลอดภัย
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="exportData()"
+        [disabled]="isExporting()"
+        class="btn-tactile shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:opacity-50 transition"
+      >
+        @if (isExporting()) {
+          <app-spinner size="xs" />
+          <span>กำลังส่งออก...</span>
+        } @else {
+          <span>ส่งออกข้อมูลของฉัน (JSON)</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Section 2: Account Erasure / Anonymization -->
+  <div class="animate-fade-in-up stagger-2 card-hover rounded-[var(--radius-lg)] border border-rose-200 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/10 p-6 space-y-4 shadow-xs">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <h2 class="text-base font-bold text-rose-600 dark:text-rose-400">สิทธิ์ในการขอให้ลบข้อมูล (Right to Erasure)</h2>
+        <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+          การดำเนินการนี้จะลบข้อมูลระบุตัวตนของคุณอย่างถาวร (อีเมล, ชื่อ, เบอร์โทร) ยกเลิกการเข้าสู่ระบบทั้งหมด และทำให้นิรนาม (Anonymize) ไม่สามารถกู้คืนได้
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="openDeleteModal()"
+        class="btn-tactile shrink-0 px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+      >
+        ลบบัญชีผู้ใช้ถาวร
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Delete Account -->
+<app-modal
+  [(open)]="showDeleteModal"
+  titleText="ยืนยันการลบบัญชีผู้ใช้ถาวร"
+  [closeOnOverlayClick]="false"
+>
+  <div class="space-y-4 text-xs text-[var(--color-text)]">
+    <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300">
+      ⚠️ <strong>คำเตือน:</strong> การดำเนินการนี้ไม่สามารถยกเลิกหรือกู้คืนได้ ข้อมูลส่วนตัวของคุณจะถูกแปลงเป็นข้อมูลนิรนาม และคุณจะไม่สามารถเข้าสู่ระบบด้วยบัญชีนี้ได้อีก
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="delete-password" class="block font-semibold">รหัสผ่านปัจจุบันของคุณ</label>
+      <input
+        type="password"
+        id="delete-password"
+        [(ngModel)]="deletePassword"
+        placeholder="กรอกรหัสผ่านเพื่อยืนยันตัวตน"
+        class="w-full px-3 py-2 text-xs rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] focus:ring-2 focus:ring-rose-500"
+      />
+    </div>
+
+    <div class="space-y-1.5">
+      <label for="delete-confirm" class="block font-semibold">พิมพ์คำว่า <span class="font-mono text-rose-600 font-bold">DELETE</span> เพื่อยืนยัน</label>
+      <input
+        type="text"
+        id="delete-confirm"
+        [(ngModel)]="deleteConfirmation"
+        placeholder="DELETE"
+        class="w-full px-3 py-2 text-xs rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] focus:ring-2 focus:ring-rose-500 uppercase"
+      />
+    </div>
+
+    @if (deleteError()) {
+      <p class="text-rose-600 text-xs font-semibold">{{ deleteError() }}</p>
+    }
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button
+        type="button"
+        (click)="closeDeleteModal()"
+        class="btn-tactile px-3 py-1.5 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+      >
+        ยกเลิก
+      </button>
+      <button
+        type="button"
+        (click)="confirmDelete()"
+        [disabled]="isDeleting() || deleteConfirmation.trim().toUpperCase() !== 'DELETE'"
+        class="btn-tactile inline-flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50"
+      >
+        @if (isDeleting()) {
+          <app-spinner size="xs" color="white" />
+          <span>กำลังลบบัญชี...</span>
+        } @else {
+          <span>ยืนยันลบบัญชีถาวร</span>
+        }
+      </button>
+    </div>
+  </div>
+</app-modal>

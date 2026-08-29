@@ -54,9 +54,10 @@ describe('CategoryAccordionItem', () => {
   let host: TestHost;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [TestHost],
-      providers: [provideRouter([])],
+      providers: [provideRouter([{ path: '**', component: TestHost }])],
     });
     fixture = TestBed.createComponent(TestHost);
     host = fixture.componentInstance;

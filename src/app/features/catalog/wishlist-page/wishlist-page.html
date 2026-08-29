@@ -1,0 +1,123 @@
+<div class="animate-fade-in min-h-[70vh] bg-[var(--color-bg,#F8FAFC)] py-10 px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-6xl">
+    <!-- Page Header -->
+    <div class="animate-fade-in-down mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-[var(--color-text,#0F172A)] flex items-center gap-3">
+          <ng-icon name="phosphorHeartFill" class="text-[var(--color-primary,#DB2777)] animate-pop-in" />
+          <span>{{ 'wishlist.title' | translate }}</span>
+        </h1>
+        <p class="mt-1 text-sm text-[var(--color-text-muted,#64748B)]">
+          {{ 'wishlist.description' | translate: { count: wishlistStore.count() } }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (wishlistStore.isLoading()) {
+      <div class="animate-fade-in grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <app-skeleton variant="block" height="20rem" />
+        <app-skeleton variant="block" height="20rem" />
+        <app-skeleton variant="block" height="20rem" />
+      </div>
+    } @else if (wishlistStore.items().length === 0) {
+      <!-- Empty State -->
+      <div class="animate-fade-in-up mx-auto max-w-md my-16 text-center rounded-3xl border border-[var(--color-border,#E2E8F0)] bg-[var(--color-surface,#ffffff)] p-10 shadow-sm">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary,#DB2777)] text-3xl">
+          <ng-icon name="phosphorHeart" />
+        </div>
+        <h2 class="text-lg font-bold text-[var(--color-text,#0F172A)] mb-2">
+          {{ 'wishlist.emptyTitle' | translate }}
+        </h2>
+        <p class="text-sm text-[var(--color-text-muted,#64748B)] mb-6">
+          {{ 'wishlist.emptyDescription' | translate }}
+        </p>
+        <a
+          routerLink="/courses"
+          class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary,#DB2777)] px-6 py-3 text-sm font-bold text-white shadow transition hover:bg-[var(--color-primary-hover,#BE185D)]"
+        >
+          <span>{{ 'wishlist.exploreCourses' | translate }}</span>
+          <ng-icon name="phosphorArrowRight" />
+        </a>
+      </div>
+    } @else {
+      <!-- Wishlist Grid -->
+      <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        @for (item of wishlistStore.items(); track item.courseId) {
+          <div class="card-hover group flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-border,#E2E8F0)] bg-[var(--color-surface,#ffffff)] shadow-sm">
+            <div>
+              <!-- Course Thumbnail -->
+              <a [routerLink]="['/courses', item.slug]" class="relative block aspect-video overflow-hidden bg-slate-100">
+                @if (item.thumbnailUrl) {
+                  <img
+                    [src]="item.thumbnailUrl"
+                    [alt]="item.title"
+                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                  />
+                } @else {
+                  <div class="flex h-full w-full items-center justify-center text-slate-400 font-bold">
+                    {{ item.title }}
+                  </div>
+                }
+
+                <!-- Remove Button overlay -->
+                <button
+                  type="button"
+                  (click)="removeItem(item); $event.preventDefault(); $event.stopPropagation()"
+                  class="btn-tactile absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-rose-600 shadow-sm backdrop-blur transition hover:bg-rose-50 hover:text-rose-700"
+                  [attr.aria-label]="'wishlist.remove' | translate"
+                >
+                  <ng-icon name="phosphorTrash" class="text-base" />
+                </button>
+              </a>
+
+              <!-- Course Info -->
+              <div class="p-5">
+                <p class="text-xs font-medium text-[var(--color-text-muted,#64748B)] mb-1">
+                  {{ item.instructorName }}
+                </p>
+                <h3 class="line-clamp-2 text-base font-bold text-[var(--color-text,#0F172A)] group-hover:text-[var(--color-primary,#DB2777)] transition-colors">
+                  <a [routerLink]="['/courses', item.slug]">{{ item.title }}</a>
+                </h3>
+
+                <!-- Rating -->
+                @if (item.ratingCount > 0) {
+                  <div class="mt-2 flex items-center gap-1.5 text-xs text-amber-500 font-bold">
+                    <ng-icon name="phosphorStarFill" />
+                    <span>{{ item.ratingAverage | number: '1.1-1' }}</span>
+                    <span class="text-[var(--color-text-muted,#64748B)] font-normal">({{ item.ratingCount }})</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Card Footer: Price & Add to Cart -->
+            <div class="border-t border-[var(--color-border,#E2E8F0)] p-5 pt-3">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-lg font-extrabold text-[var(--color-text,#0F172A)]">
+                    {{ item.price | currencyThb }}
+                  </span>
+                  @if (item.comparePrice && item.comparePrice > item.price) {
+                    <span class="ml-2 text-xs text-[var(--color-text-muted,#64748B)] line-through">
+                      {{ item.comparePrice | currencyThb }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <button
+                type="button"
+                (click)="addToCart(item)"
+                class="btn-tactile w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary,#DB2777)] py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover,#BE185D)]"
+              >
+                <ng-icon name="phosphorShoppingCart" class="text-base" />
+                <span>{{ 'wishlist.addToCart' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

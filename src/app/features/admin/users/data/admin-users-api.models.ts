@@ -41,3 +41,18 @@ export interface SuspendUserRequest {
 export interface UpdateUserRolesRequest {
   readonly roles: readonly string[];
 }
+
+export interface InviteUserRequest {
+  readonly email: string;
+  readonly displayName: string;
+  readonly role: string;
+}
+
+export interface InviteUserResponse {
+  readonly id: string;
+  readonly email: string;
+  readonly displayName: string;
+  readonly role: string;
+  readonly status: string;
+  readonly createdAtUtc: string;
+}

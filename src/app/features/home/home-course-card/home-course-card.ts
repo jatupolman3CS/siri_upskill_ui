@@ -1,10 +1,12 @@
-import { CurrencyPipe, NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { CommonModule, CurrencyPipe, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorStar } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHeart, phosphorStar } from '@ng-icons/phosphor-icons/regular';
+import { phosphorHeartFill } from '@ng-icons/phosphor-icons/fill';
 
 import { CourseSearchResultItem } from '../../catalog/data/course-api.models';
+import { WishlistStore } from '../../catalog/data/wishlist.store';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
@@ -18,17 +20,35 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
  */
 @Component({
   selector: 'app-home-course-card',
-  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, NgIcon, NgOptimizedImage],
+  imports: [CommonModule, RouterLink, TranslatePipe, CurrencyThbPipe, NgIcon, NgOptimizedImage],
   templateUrl: './home-course-card.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // CurrencyPipe: CurrencyThbPipe's own inject(CurrencyPipe) needs this on whichever component's
-  // template actually invokes `| currencyThb` — that's this card, not HomePage (same reason
-  // CoursesPage/CourseDetailPage each provide it themselves).
-  providers: [CurrencyPipe, provideIcons({ phosphorStar })],
+  providers: [CurrencyPipe, provideIcons({ phosphorStar, phosphorHeart, phosphorHeartFill })],
   host: {
     class: 'block',
   },
 })
 export class HomeCourseCard {
+  protected readonly wishlistStore = inject(WishlistStore);
   readonly course = input.required<CourseSearchResultItem>();
+  readonly salePrice = input<number | undefined>(undefined);
+
+  protected readonly isWishlisted = computed(() => {
+    const c = this.course();
+    return this.wishlistStore.isWishlisted(c.id) || (c.isWishlisted ?? false);
+  });
+
+  protected toggleWishlist(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const c = this.course();
+    this.wishlistStore.toggleWishlist({
+      id: c.id,
+      slug: c.slug,
+      title: c.title,
+      price: c.price,
+      thumbnailUrl: c.thumbnailUrl,
+      instructorName: c.instructorDisplayName,
+    });
+  }
 }

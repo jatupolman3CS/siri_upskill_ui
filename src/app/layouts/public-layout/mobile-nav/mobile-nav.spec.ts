@@ -72,7 +72,7 @@ describe('MobileNav', () => {
     document.body.style.overflow = '';
     TestBed.configureTestingModule({
       imports: [MobileNavTestHost],
-      providers: [provideRouter([])],
+      providers: [provideRouter([{ path: '**', component: MobileNavTestHost }])],
     });
     fixture = TestBed.createComponent(MobileNavTestHost);
     host = fixture.componentInstance;

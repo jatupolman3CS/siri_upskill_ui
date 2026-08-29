@@ -1,75 +1,524 @@
-<div class="max-w-6xl mx-auto space-y-6">
-  <!-- Page Header -->
-  <div class="flex items-center justify-between">
+<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+  <!-- Header -->
+  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">รอบการจ่ายเงินผู้สอน (Instructor Payout Batches)</h1>
-      <p class="text-xs text-[var(--color-text-muted)] mt-1">ประมวลผลส่วนแบ่งรายได้ตามรอบบัญชี และทำรายการโอนเงิน</p>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
+        รอบจ่ายเงิน & คิวคำขอคืนเงิน (Finance & Payouts)
+      </h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">
+        ประมวลผลส่วนแบ่งรายได้ผู้สอน (สูตร Q4: 70/30 หักค่าธรรมเนียมก่อนแบ่ง) และอนุมัติคำขอคืนเงิน
+      </p>
     </div>
+
+    @if (activeTab() === 'batches') {
+      <button
+        type="button"
+        (click)="openCreateBatchModal()"
+        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:opacity-95 transition"
+      >
+        <ng-icon name="phosphorPlus" class="text-base" />
+        <span>เปิดรอบจ่ายเงินใหม่ (Create Batch)</span>
+      </button>
+    }
+  </div>
+
+  <!-- Toast Notification -->
+  @if (actionMessage(); as msg) {
+    <div
+      class="rounded-xl p-4 text-xs font-semibold flex items-center justify-between shadow-sm transition animate-pop-in"
+      [ngClass]="msg.type === 'success' ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-700 border border-rose-500/20'"
+    >
+      <div class="flex items-center gap-2">
+        <ng-icon [name]="msg.type === 'success' ? 'phosphorCheckCircle' : 'phosphorWarning'" class="text-lg shrink-0" />
+        <span>{{ msg.text }}</span>
+      </div>
+      <button (click)="actionMessage.set(null)" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+        <ng-icon name="phosphorXCircle" class="text-base" />
+      </button>
+    </div>
+  }
+
+  <!-- Navigation Tabs -->
+  <div class="animate-fade-in-up stagger-1 flex border-b border-[var(--color-border)] gap-6">
+    <button
+      type="button"
+      (click)="activeTab.set('batches')"
+      [class]="activeTab() === 'batches' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+      class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
+    >
+      <ng-icon name="phosphorCurrencyDollar" class="text-base" />
+      <span>รอบการจ่ายเงิน (Payout Batches)</span>
+      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalBatches() }}</span>
+    </button>
 
     <button
       type="button"
-      (click)="generateBatch()"
-      [disabled]="isGenerating()"
-      class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+      (click)="activeTab.set('splits')"
+      [class]="activeTab() === 'splits' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+      class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
     >
-      <ng-icon name="phosphorPlus" />
-      <span>{{ isGenerating() ? 'กำลังประมวลผล...' : 'สร้างรอบจ่ายเงินใหม่' }}</span>
+      <ng-icon name="phosphorChartPieSlice" class="text-base" />
+      <span>ส่วนแบ่งรายได้ (Revenue Splits)</span>
+      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalSplits() }}</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="activeTab.set('refunds')"
+      [class]="activeTab() === 'refunds' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+      class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
+    >
+      <ng-icon name="phosphorReceipt" class="text-base" />
+      <span>คำขอคืนเงินรออนุมัติ (Pending Refunds)</span>
+      <span class="rounded-full bg-rose-500/10 text-rose-600 px-2 py-0.5 text-[10px] font-bold">{{ totalRefunds() }}</span>
     </button>
   </div>
 
-  <!-- Batches Table -->
-  <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm text-[var(--color-text)]">
-        <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-          <tr>
-            <th class="px-6 py-3">เลขที่รอบบัญชี (Batch #)</th>
-            <th class="px-6 py-3">ช่วงเวลา</th>
-            <th class="px-6 py-3">จำนวนผู้สอน</th>
-            <th class="px-6 py-3">ยอดรวมสุทธิ</th>
-            <th class="px-6 py-3">สถานะ</th>
-            <th class="px-6 py-3 text-right">การจัดการ</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-[var(--color-border)]">
-          @for (batch of batches(); track batch.id) {
-            <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-              <td class="px-6 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
-                {{ batch.batchNumber }}
-              </td>
-              <td class="px-6 py-4 text-xs text-[var(--color-text-muted)]">
-                {{ batch.periodStartUtc | date: 'dd/MM/yyyy' }} - {{ batch.periodEndUtc | date: 'dd/MM/yyyy' }}
-              </td>
-              <td class="px-6 py-4 text-xs font-medium">
-                {{ batch.totalInstructors }} ท่าน
-              </td>
-              <td class="px-6 py-4 font-bold text-[var(--color-primary)]">
-                {{ batch.totalAmount | currencyThb }}
-              </td>
-              <td class="px-6 py-4">
-                <span
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold"
-                  [class.bg-emerald-500/10]="batch.status === 'Paid'"
-                  [class.text-emerald-600]="batch.status === 'Paid'"
-                  [class.bg-amber-500/10]="batch.status === 'Pending'"
-                  [class.text-amber-600]="batch.status === 'Pending'"
-                >
-                  {{ batch.status === 'Paid' ? 'โอนเงินแล้ว' : 'รอดำเนินการ' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-1 rounded-lg bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-border)] transition"
-                >
-                  <ng-icon name="phosphorDownloadSimple" />
-                  <span>ส่งออก CSV</span>
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <!-- TAB 1: PAYOUT BATCHES -->
+  @if (activeTab() === 'batches') {
+    <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+      @if (isLoadingBatches() && batches().length === 0) {
+        <div class="p-6 space-y-4">
+          <app-skeleton className="h-12 w-full" />
+          <app-skeleton className="h-12 w-full" />
+        </div>
+      } @else if (batches().length === 0) {
+        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
+          <ng-icon name="phosphorCurrencyDollar" class="text-3xl text-[var(--color-text-muted)]" />
+          <p>ยังไม่มีรอบการจ่ายเงินในระบบ</p>
+          <button
+            type="button"
+            (click)="openCreateBatchModal()"
+            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary)] font-bold hover:underline"
+          >
+            <span>+ เปิดรอบจ่ายเงินงวดแรก</span>
+          </button>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-[var(--color-text)]">
+            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
+              <tr>
+                <th class="py-3.5 px-4">งวดประจำเดือน (Period)</th>
+                <th class="py-3.5 px-4 text-right">ยอดเงินรวมสุทธิ</th>
+                <th class="py-3.5 px-4 text-center">จำนวนผู้สอน</th>
+                <th class="py-3.5 px-4">สร้างเมื่อ</th>
+                <th class="py-3.5 px-4 text-center">สถานะ</th>
+                <th class="py-3.5 px-4 text-right">การดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-border)]">
+              @for (batch of batches(); track batch.id) {
+                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                  <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-text)]">
+                    {{ batch.periodKey }}
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-black text-emerald-600">
+                    {{ batch.totalAmount | currencyThb }}
+                  </td>
+                  <td class="py-3.5 px-4 text-center font-semibold">
+                    {{ batch.items ? batch.items.length : 0 }} คน
+                  </td>
+                  <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
+                    {{ batch.createdAtUtc | date:'d/M/yyyy HH:mm' }}
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    @if (batch.status === 'Paid') {
+                      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                        โอนเงินแล้ว
+                      </span>
+                    } @else if (batch.status === 'Processing') {
+                      <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">
+                        กำลังประมวลผล
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-bold text-sky-600">
+                        รอดำเนินการ
+                      </span>
+                    }
+                  </td>
+                  <td class="py-3.5 px-4 text-right space-x-2">
+                    <button
+                      type="button"
+                      (click)="exportBatch(batch)"
+                      class="btn-tactile inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                      title="ส่งออกไฟล์โอนเงินธนาคาร"
+                    >
+                      <ng-icon name="phosphorDownloadSimple" />
+                      <span>ส่งออกไฟล์</span>
+                    </button>
+
+                    @if (batch.status === 'Pending') {
+                      <button
+                        type="button"
+                        (click)="executeBatch(batch)"
+                        class="btn-tactile inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+                      >
+                        <ng-icon name="phosphorPlay" />
+                        <span>ยืนยันจ่ายเงิน</span>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     </div>
-  </div>
+  }
+
+  <!-- TAB 2: REVENUE SPLITS REPORT -->
+  @if (activeTab() === 'splits') {
+    <div class="animate-fade-in-up stagger-2 space-y-4">
+      <!-- Filter Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+        <div class="flex items-center gap-2 flex-1 max-w-sm">
+          <div class="relative w-full">
+            <ng-icon name="phosphorMagnifyingGlass" class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--color-text-muted)]" />
+            <input
+              type="text"
+              [(ngModel)]="splitSearchInstructor"
+              (keyup.enter)="onFilterSplits()"
+              placeholder="ค้นหา Instructor ID..."
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pl-9 pr-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+            />
+          </div>
+          <button
+            type="button"
+            (click)="onFilterSplits()"
+            class="btn-tactile rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition shrink-0"
+          >
+            ค้นหา
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">สถานะ:</span>
+          <select
+            [(ngModel)]="splitFilterStatus"
+            (change)="onFilterSplits()"
+            class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] py-2 px-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          >
+            <option value="All">ทั้งหมด</option>
+            <option value="Pending">รอโอน (Pending)</option>
+            <option value="Paid">โอนแล้ว (Paid)</option>
+            <option value="Voided">ยกเลิก (Voided)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Splits Table -->
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+        @if (isLoadingSplits() && revenueSplits().length === 0) {
+          <div class="p-6 space-y-4">
+            <app-skeleton className="h-12 w-full" />
+            <app-skeleton className="h-12 w-full" />
+          </div>
+        } @else if (revenueSplits().length === 0) {
+          <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+              <ng-icon name="phosphorChartPieSlice" class="text-2xl" />
+            </div>
+            <p class="font-bold text-sm text-[var(--color-text)]">ไม่พบข้อมูลส่วนแบ่งรายได้</p>
+            <p>ยังไม่มีรายการส่วนแบ่งรายได้ตามเงื่อนไขการค้นหาที่ระบุ</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-[var(--color-surface-muted)]/50 font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+                <tr>
+                  <th class="py-3.5 px-4">วันที่ทำรายการ</th>
+                  <th class="py-3.5 px-4">ผู้สอน (Instructor ID)</th>
+                  <th class="py-3.5 px-4 text-right">ยอดรวม (Gross)</th>
+                  <th class="py-3.5 px-4 text-right">ค่าธรรมเนียม Gateway</th>
+                  <th class="py-3.5 px-4 text-right">ค่าธรรมเนียม Platform</th>
+                  <th class="py-3.5 px-4 text-right font-bold text-emerald-600">ส่วนแบ่งผู้สอน (Instructor)</th>
+                  <th class="py-3.5 px-4 text-center">สถานะ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @for (item of revenueSplits(); track item.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                    <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">
+                      {{ item.createdAtUtc | date: 'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td class="py-3.5 px-4 font-mono font-semibold text-[var(--color-text)]">
+                      {{ item.instructorId }}
+                    </td>
+                    <td class="py-3.5 px-4 text-right font-semibold text-[var(--color-text)]">
+                      {{ item.grossAmount | currencyThb }}
+                    </td>
+                    <td class="py-3.5 px-4 text-right text-rose-500 font-medium">
+                      -{{ item.paymentFeeAmount | currencyThb }}
+                    </td>
+                    <td class="py-3.5 px-4 text-right text-[var(--color-text-muted)] font-medium">
+                      -{{ item.platformFeeAmount | currencyThb }}
+                    </td>
+                    <td class="py-3.5 px-4 text-right font-bold text-emerald-600">
+                      {{ item.instructorAmount | currencyThb }}
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                      @if (item.status === 'Paid') {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                          โอนสำเร็จ
+                        </span>
+                      } @else if (item.status === 'Voided') {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-bold text-rose-600">
+                          ยกเลิก
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">
+                          รอโอน (Pending)
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: PENDING REFUNDS -->
+  @if (activeTab() === 'refunds') {
+    <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+      @if (isLoadingRefunds() && pendingRefunds().length === 0) {
+        <div class="p-6 space-y-4">
+          <app-skeleton className="h-12 w-full" />
+          <app-skeleton className="h-12 w-full" />
+        </div>
+      } @else if (pendingRefunds().length === 0) {
+        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-2">
+          <ng-icon name="phosphorCheckCircle" class="text-3xl text-emerald-500 animate-pop-in" />
+          <p class="font-bold text-[var(--color-text)]">ไม่มีคำขอคืนเงินที่ค้างอยู่</p>
+          <p>รายการคำขอคืนเงินทั้งหมดได้รับการพิจารณาเรียบร้อยแล้ว</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-[var(--color-text)]">
+            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
+              <tr>
+                <th class="py-3.5 px-4">วันที่ยื่นขอ</th>
+                <th class="py-3.5 px-4">Payment ID</th>
+                <th class="py-3.5 px-4 text-right">ยอดเงินขอคืน</th>
+                <th class="py-3.5 px-4">เหตุผลของผู้ซื้อ</th>
+                <th class="py-3.5 px-4 text-center">สถานะ</th>
+                <th class="py-3.5 px-4 text-right">การพิจารณา</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-border)]">
+              @for (refund of pendingRefunds(); track refund.id) {
+                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                  <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
+                    {{ refund.requestedAtUtc | date:'d/M/yyyy HH:mm' }}
+                  </td>
+                  <td class="py-3.5 px-4 font-mono text-[11px] text-[var(--color-text-muted)]">
+                    {{ refund.paymentId }}
+                  </td>
+                  <td class="py-3.5 px-4 text-right font-black text-rose-600">
+                    {{ refund.amount | currencyThb }}
+                  </td>
+                  <td class="py-3.5 px-4 max-w-xs truncate text-[var(--color-text)] font-medium">
+                    {{ refund.reason }}
+                  </td>
+                  <td class="py-3.5 px-4 text-center">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-bold text-rose-600">
+                      รออนุมัติ
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right space-x-2">
+                    <button
+                      type="button"
+                      (click)="openApproveRefundModal(refund)"
+                      class="btn-tactile inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+                    >
+                      <span>อนุมัติคืนเงิน</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="openRejectRefundModal(refund)"
+                      class="btn-tactile inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-500/20 transition"
+                    >
+                      <span>ปฏิเสธ</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- MODAL: CREATE PAYOUT BATCH -->
+  @if (showCreateBatchModal()) {
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+          <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
+            <ng-icon name="phosphorCurrencyDollar" class="text-emerald-600 text-lg" />
+            <span>เปิดรอบการจ่ายเงินใหม่ (Create Batch)</span>
+          </h2>
+          <button (click)="closeCreateBatchModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <ng-icon name="phosphorXCircle" class="text-xl" />
+          </button>
+        </div>
+
+        <form (ngSubmit)="submitCreateBatch()" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-[var(--color-text)] mb-1">รหัสงวดประจำเดือน (Period Key)*</label>
+            <input
+              type="text"
+              [ngModel]="newPeriodKey()"
+              (ngModelChange)="newPeriodKey.set($event)"
+              name="pKey"
+              required
+              placeholder="YYYY-MM เช่น 2026-08"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+            />
+            <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
+              ระบบจะตัดยอดคำสั่งซื้อที่ชำระสำเร็จและพ้นระยะเวลา Hold 14 วัน คำนวณภาษีหัก ณ ที่จ่าย 3% และยอดขั้นต่ำ ฿500
+            </p>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
+            <button
+              type="button"
+              (click)="closeCreateBatchModal()"
+              class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              [disabled]="isSubmittingBatch()"
+              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-white shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+            >
+              @if (isSubmittingBatch()) {
+                <app-spinner size="xs" color="white" />
+                <span>กำลังสร้างรอบ...</span>
+              } @else {
+                <span>เปิดรอบจ่ายเงิน</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: APPROVE REFUND -->
+  @if (approvingRefund(); as refund) {
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+          <h2 class="text-base font-bold text-[var(--color-text)]">ยืนยันการอนุมัติคืนเงิน</h2>
+          <button (click)="closeApproveRefundModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <ng-icon name="phosphorXCircle" class="text-xl" />
+          </button>
+        </div>
+
+        <div class="rounded-xl bg-emerald-500/10 p-4 text-xs text-emerald-800 space-y-1">
+          <p class="font-bold">ยอดเงินที่จะคืน: {{ refund.amount | currencyThb }}</p>
+          <p class="text-[11px]">เหตุผล: {{ refund.reason }}</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-[var(--color-text)] text-xs mb-1">บันทึกเพิ่มเติม (Note to buyer - ไม่บังคับ)</label>
+          <textarea
+            [ngModel]="approveDecisionNote()"
+            (ngModelChange)="approveDecisionNote.set($event)"
+            name="appNote"
+            rows="2"
+            placeholder="เช่น อนุมัติการคืนเงินเข้าบัญชีต้นทางเรียบร้อยแล้ว"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
+          <button
+            type="button"
+            (click)="closeApproveRefundModal()"
+            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            (click)="submitApproveRefund()"
+            [disabled]="isSubmittingApprove()"
+            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 transition"
+          >
+            @if (isSubmittingApprove()) {
+              <app-spinner size="xs" color="white" />
+              <span>กำลังดำเนินการ...</span>
+            } @else {
+              <span>อนุมัติคืนเงินทันที</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: REJECT REFUND -->
+  @if (rejectingRefund(); as refund) {
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+          <h2 class="text-base font-bold text-rose-600">ปฏิเสธคำขอคืนเงิน</h2>
+          <button (click)="closeRejectRefundModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <ng-icon name="phosphorXCircle" class="text-xl" />
+          </button>
+        </div>
+
+        <div class="rounded-xl bg-rose-500/10 p-4 text-xs text-rose-800 space-y-1">
+          <p class="font-bold">ยอดเงิน: {{ refund.amount | currencyThb }}</p>
+          <p class="text-[11px]">เหตุผลของผู้ซื้อ: {{ refund.reason }}</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-[var(--color-text)] text-xs mb-1">เหตุผลในการปฏิเสธ*</label>
+          <textarea
+            [ngModel]="rejectReason()"
+            (ngModelChange)="rejectReason.set($event)"
+            name="rejReason"
+            rows="2"
+            required
+            placeholder="ระบุเหตุผลในการปฏิเสธเพื่อแจ้งผู้ซื้อ เช่น เกินระยะเวลานโยบายคืนเงิน หรือเรียนเนื้อหาเกิน 30%"
+            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
+          <button
+            type="button"
+            (click)="closeRejectRefundModal()"
+            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            (click)="submitRejectRefund()"
+            [disabled]="isSubmittingReject()"
+            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 transition"
+          >
+            @if (isSubmittingReject()) {
+              <app-spinner size="xs" color="white" />
+              <span>กำลังบันทึก...</span>
+            } @else {
+              <span>ปฏิเสธคำขอ</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

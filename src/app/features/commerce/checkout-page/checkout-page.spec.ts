@@ -3,11 +3,15 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import localeTh from '@angular/common/locales/th';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { PaymentResponse } from '../data/commerce-api.models';
 import { CheckoutPage } from './checkout-page';
+
+@Component({ template: '' })
+class DummyCartComponent {}
 
 registerLocaleData(localeTh);
 
@@ -34,7 +38,9 @@ describe('CheckoutPage', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([]),
+        provideRouter([
+          { path: 'cart', component: DummyCartComponent },
+        ]),
       ],
     });
 
@@ -43,6 +49,36 @@ describe('CheckoutPage', () => {
     httpMock = TestBed.inject(HttpTestingController);
 
     TestBed.inject(TranslationService).setLocale('th');
+
+    (component as any).order.set({
+      id: 'order-123',
+      orderNo: 'SU-88214',
+      subtotalAmount: 3880,
+      discountAmount: 0,
+      taxAmount: 253.83,
+      totalAmount: 3880,
+      currency: 'THB',
+      status: 'Pending',
+      items: [
+        {
+          id: 'item-1',
+          titleSnapshot: 'Digital Marketing ครบวงจร',
+          instructorName: 'คุณนภา วงศ์สว่าง',
+          unitPrice: 1890,
+          lineTotal: 1890,
+        },
+        {
+          id: 'item-2',
+          titleSnapshot: 'สร้าง Mobile App ด้วย Flutter',
+          instructorName: 'อ.สมชาย ใจดี',
+          unitPrice: 1990,
+          lineTotal: 1990,
+        },
+      ],
+    });
+    (component as any).isLoadingOrder.set(false);
+    (component as any).orderError.set(null);
+
     fixture.detectChanges();
   });
 

@@ -65,3 +65,27 @@ export function buildBreadcrumbListJsonLd(items: readonly BreadcrumbListItemInpu
     })),
   };
 }
+
+export interface LearningPathJsonLdInput {
+  readonly name: string;
+  readonly description: string;
+  readonly url: string;
+  readonly items: readonly { name: string; url: string; position: number }[];
+}
+
+export function buildLearningPathJsonLd(input: LearningPathJsonLdInput): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: input.name,
+    description: input.description,
+    url: input.url,
+    numberOfItems: input.items.length,
+    itemListElement: input.items.map((item) => ({
+      '@type': 'ListItem',
+      position: item.position,
+      name: item.name,
+      url: item.url,
+    })),
+  };
+}

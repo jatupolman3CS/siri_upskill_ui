@@ -7,12 +7,12 @@
   <!-- Video Element -->
   <video
     #videoElement
-    [src]="src"
     [poster]="poster"
     class="h-full w-full object-contain cursor-pointer"
     (timeupdate)="onTimeUpdated()"
     (loadedmetadata)="onLoadedMetadata()"
     (ended)="onVideoEnded()"
+    (error)="onNativeError($event)"
     (click)="togglePlay()"
     playsinline
   ></video>
@@ -24,20 +24,63 @@
       [style.top.%]="watermarkTop()"
       [style.left.%]="watermarkLeft()"
     >
-      <div class="rounded bg-black/40 px-2 py-0.5 text-[10px] font-mono tracking-wider text-white/30 backdrop-blur-[1px]">
+      <div class="rounded bg-black/50 px-2.5 py-1 text-[11px] font-mono tracking-wider text-white/35 backdrop-blur-[2px] shadow-sm">
         <span>{{ watermark.text }}</span>
-        <span class="ml-1 opacity-75">· {{ watermark.email }}</span>
+        <span class="ml-1 opacity-80">· {{ watermark.email }}</span>
       </div>
     </div>
   }
 
-  <!-- Big Play Button Overlay (When paused and not showing prompt) -->
-  @if (!isPlaying() && !showResumePrompt()) {
+  <!-- Free Preview Active Badge -->
+  @if (isFreePreview && !showFreePreviewCta()) {
+    <div class="absolute top-4 left-4 z-20 flex items-center gap-2 rounded-full bg-emerald-600/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md">
+      <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
+      <span>ตัวอย่างฟรี (Free Preview)</span>
+    </div>
+  }
+
+  <!-- Buffering Indicator -->
+  @if (isBuffering()) {
+    <div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+      <div class="flex flex-col items-center gap-3">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-[var(--color-primary)]"></div>
+        <span class="text-xs font-medium text-white/80">กำลังโหลดวิดีโอ...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Error Overlay with Retry -->
+  @if (playbackError(); as err) {
+    <div class="absolute inset-0 z-30 flex items-center justify-center bg-black/90 p-6 backdrop-blur-md">
+      <div class="max-w-md rounded-2xl border border-rose-500/30 bg-zinc-900/95 p-6 text-center shadow-2xl text-white">
+        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/20 text-rose-400">
+          <ng-icon name="phosphorArrowsClockwise" class="text-2xl" />
+        </div>
+        <h3 class="text-base font-bold text-white">{{ err.title }}</h3>
+        <p class="mt-2 text-xs text-zinc-400 leading-relaxed">{{ err.message }}</p>
+        <div class="mt-6 flex justify-center gap-3">
+          @if (err.isRecoverable) {
+            <button
+              type="button"
+              (click)="retryPlayback()"
+              class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              <ng-icon name="phosphorArrowsClockwise" class="text-base" />
+              <span>ลองใหม่อีกครั้ง</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Big Play Button Overlay -->
+  @if (!isPlaying() && !showResumePrompt() && !showFreePreviewCta() && !playbackError() && !isBuffering()) {
     <button
       type="button"
       (click)="togglePlay()"
       aria-label="Play video"
-      class="absolute inset-0 z-10 m-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-primary)]/90 text-white shadow-2xl backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-[var(--color-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/50"
+      class="absolute inset-0 z-10 m-auto flex h-20 w-20 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-[var(--color-primary)]/90 text-white shadow-2xl backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-[var(--color-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/50"
     >
       <ng-icon name="phosphorPlay" class="text-4xl translate-x-0.5" />
     </button>
@@ -55,14 +98,14 @@
           <button
             type="button"
             (click)="resumeFromSaved()"
-            class="flex-1 rounded-lg bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-hover)] focus:outline-none"
+            class="flex-1 min-h-[44px] rounded-lg bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-hover)] focus:outline-none"
           >
             เล่นต่อจากจุดเดิม
           </button>
           <button
             type="button"
             (click)="startFromBeginning()"
-            class="rounded-lg border border-white/20 bg-white/5 py-2.5 px-4 text-sm font-medium text-zinc-300 transition hover:bg-white/10 focus:outline-none"
+            class="min-h-[44px] rounded-lg border border-white/20 bg-white/5 py-2.5 px-4 text-sm font-medium text-zinc-300 transition hover:bg-white/10 focus:outline-none"
           >
             เริ่มใหม่
           </button>
@@ -71,17 +114,45 @@
     </div>
   }
 
-  <!-- Free Preview Banner -->
-  @if (isFreePreview) {
-    <div class="absolute top-4 left-4 z-20 flex items-center gap-2 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white shadow-lg backdrop-blur-md">
-      <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
-      <span>ดูตัวอย่างฟรี (Free Preview)</span>
+  <!-- Free Preview Ended CTA Overlay (P2-25) -->
+  @if (showFreePreviewCta()) {
+    <div class="absolute inset-0 z-30 flex items-center justify-center bg-black/85 p-6 backdrop-blur-md">
+      <div class="max-w-md rounded-2xl border border-[var(--color-primary)]/40 bg-zinc-900/95 p-6 text-center shadow-2xl text-white">
+        <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary)] shadow-inner">
+          <ng-icon name="phosphorShoppingCart" class="text-2xl" />
+        </div>
+
+        <h3 class="text-lg font-bold text-white">จบช่วงดูตัวอย่างฟรีแล้ว</h3>
+        <p class="mt-2 text-xs text-zinc-300 leading-relaxed">
+          {{ courseTitle ? 'ชอบเนื้อหาบทเรียนนี้ไหม? สมัครเรียนคอร์ส ' + courseTitle : 'สมัครเรียนคอร์สเต็ม' }} เพื่อเข้าถึงบทเรียนทั้งหมด, เอกสารประกอบการเรียน, แบบฝึกหัด และรับใบประกาศนียบัตรเมื่อเรียนจบ
+        </p>
+
+        <div class="mt-6 flex flex-col gap-2 sm:flex-row justify-center">
+          <button
+            type="button"
+            (click)="onBuyCourseClick()"
+            class="flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            <span>สมัครเรียนเลย</span>
+            <ng-icon name="phosphorArrowRight" class="text-base" />
+          </button>
+
+          <button
+            type="button"
+            (click)="startFromBeginning(); showFreePreviewCta.set(false)"
+            class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-xs font-medium text-zinc-300 transition hover:bg-white/10 focus:outline-none"
+          >
+            <ng-icon name="phosphorArrowsClockwise" />
+            <span>ดูตัวอย่างอีกครั้ง</span>
+          </button>
+        </div>
+      </div>
     </div>
   }
 
   <!-- Bottom Controls Bar -->
   <div
-    class="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-4 pb-3 pt-8 transition-opacity duration-300"
+    class="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/95 via-black/60 to-transparent px-4 pb-3 pt-10 transition-opacity duration-300"
     [class.opacity-0]="!showControls() && isPlaying()"
     [class.pointer-events-none]="!showControls() && isPlaying()"
   >
@@ -92,7 +163,8 @@
         min="0"
         [max]="duration() || 100"
         [value]="currentTime()"
-        (input)="onSeek($event)"
+        (input)="onSeekInput($event)"
+        (change)="onSeekChange($event)"
         class="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2.5 focus:outline-none"
         aria-label="Video seek bar"
       />
@@ -100,43 +172,49 @@
 
     <div class="flex items-center justify-between text-white text-sm">
       <!-- Left Controls: Play, Skip, Volume, Time -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <!-- Play / Pause Button (≥44x44px touch target) -->
         <button
           type="button"
           (click)="togglePlay()"
-          class="rounded-lg p-1.5 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none"
-          [attr.aria-label]="isPlaying() ? 'Pause' : 'Play'"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          [attr.aria-label]="isPlaying() ? 'Pause (Space/k)' : 'Play (Space/k)'"
         >
           <ng-icon [name]="isPlaying() ? 'phosphorPause' : 'phosphorPlay'" class="text-xl" />
         </button>
 
+        <!-- Rewind 10s Button -->
         <button
           type="button"
           (click)="skip(-10)"
-          class="rounded-lg p-1.5 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none hidden sm:block"
-          aria-label="Rewind 10 seconds"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          aria-label="Rewind 10 seconds (j/←)"
         >
           <ng-icon name="phosphorArrowCounterClockwise" class="text-lg" />
         </button>
 
+        <!-- Forward 10s Button -->
         <button
           type="button"
           (click)="skip(10)"
-          class="rounded-lg p-1.5 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none hidden sm:block"
-          aria-label="Forward 10 seconds"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          aria-label="Forward 10 seconds (l/→)"
         >
           <ng-icon name="phosphorArrowClockwise" class="text-lg" />
         </button>
 
-        <!-- Volume -->
-        <div class="flex items-center gap-2 group/vol">
+        <!-- Volume Control -->
+        <div class="flex items-center gap-1 group/vol">
           <button
             type="button"
             (click)="toggleMute()"
-            class="rounded-lg p-1.5 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none"
-            [attr.aria-label]="isMuted() ? 'Unmute' : 'Mute'"
+            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            [attr.aria-label]="isMuted() || volume() === 0 ? 'Unmute (m)' : 'Mute (m)'"
           >
-            <ng-icon [name]="isMuted() || volume() === 0 ? 'phosphorSpeakerSlash' : 'phosphorSpeakerHigh'" class="text-xl" />
+            <ng-icon
+              [name]="isMuted() || volume() === 0 ? 'phosphorSpeakerSlash' : volume() < 0.5 ? 'phosphorSpeakerLow' : 'phosphorSpeakerHigh'"
+              class="text-xl"
+            />
           </button>
           <input
             type="range"
@@ -144,46 +222,49 @@
             max="1"
             step="0.05"
             [value]="isMuted() ? 0 : volume()"
-            (input)="onVolumeChange($event)"
-            class="h-1 w-16 cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2 focus:outline-none hidden sm:block"
-            aria-label="Volume slider"
+            (input)="onVolumeInput($event)"
+            class="h-1.5 w-16 cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2 focus:outline-none hidden sm:block"
+            aria-label="Volume slider (↑/↓)"
           />
         </div>
 
         <!-- Time Display -->
-        <div class="text-xs font-mono text-white/80 ml-2">
+        <div class="text-xs font-mono text-white/80 ml-1 select-none">
           <span>{{ formatTime(currentTime()) }}</span>
           <span class="mx-1 text-white/40">/</span>
           <span>{{ formatTime(duration()) }}</span>
         </div>
       </div>
 
-      <!-- Right Controls: Speed, Fullscreen -->
-      <div class="flex items-center gap-2 relative">
-        <!-- Speed Selector -->
+      <!-- Right Controls: Speed, Quality, Captions, PiP, Fullscreen -->
+      <div class="flex items-center gap-1 sm:gap-1.5 relative">
+        <!-- Speed Menu Button (≥44x44px) -->
         <div class="relative">
           <button
             type="button"
-            (click)="showSpeedMenu.set(!showSpeedMenu())"
-            class="rounded-lg px-2 py-1 text-xs font-semibold text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none border border-white/20"
+            (click)="showSpeedMenu.set(!showSpeedMenu()); showQualityMenu.set(false); showCaptionsMenu.set(false)"
+            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 text-xs font-semibold text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             aria-label="Playback speed"
           >
-            {{ playbackRate() }}x
+            <span>{{ playbackRate() }}x</span>
           </button>
 
           @if (showSpeedMenu()) {
-            <div class="absolute bottom-full right-0 mb-2 w-24 rounded-xl border border-white/10 bg-zinc-900/95 py-1 shadow-2xl backdrop-blur-lg">
+            <div class="absolute bottom-full right-0 mb-2 w-28 rounded-xl border border-white/10 bg-zinc-900/95 py-1.5 shadow-2xl backdrop-blur-lg z-30">
+              <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 border-b border-white/10 mb-1">
+                ความเร็ว
+              </div>
               @for (speed of speedOptions; track speed) {
                 <button
                   type="button"
                   (click)="setPlaybackRate(speed)"
-                  class="flex w-full items-center justify-between px-3 py-1.5 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                  class="flex min-h-[36px] w-full items-center justify-between px-3 py-1 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
                   [class.text-[var(--color-primary)]]="playbackRate() === speed"
                   [class.font-bold]="playbackRate() === speed"
                 >
                   <span>{{ speed }}x</span>
                   @if (playbackRate() === speed) {
-                    <span>✓</span>
+                    <span class="text-[var(--color-primary)]">✓</span>
                   }
                 </button>
               }
@@ -191,12 +272,80 @@
           }
         </div>
 
-        <!-- Fullscreen -->
+        <!-- Quality / Resolution Selector Button (≥44x44px) -->
+        <div class="relative">
+          <button
+            type="button"
+            (click)="showQualityMenu.set(!showQualityMenu()); showSpeedMenu.set(false); showCaptionsMenu.set(false)"
+            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            aria-label="Video quality settings"
+          >
+            <ng-icon name="phosphorGear" class="text-lg" />
+          </button>
+
+          @if (showQualityMenu()) {
+            <div class="absolute bottom-full right-0 mb-2 w-36 rounded-xl border border-white/10 bg-zinc-900/95 py-1.5 shadow-2xl backdrop-blur-lg z-30">
+              <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 border-b border-white/10 mb-1">
+                คุณภาพวิดีโอ
+              </div>
+              <button
+                type="button"
+                (click)="setQuality('auto')"
+                class="flex min-h-[36px] w-full items-center justify-between px-3 py-1 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                [class.text-[var(--color-primary)]]="selectedQuality() === 'auto'"
+                [class.font-bold]="selectedQuality() === 'auto'"
+              >
+                <span>อัตโนมัติ (Auto)</span>
+                @if (selectedQuality() === 'auto') {
+                  <span class="text-[var(--color-primary)]">✓</span>
+                }
+              </button>
+
+              @for (q of qualityOptions(); track q.id) {
+                <button
+                  type="button"
+                  (click)="setQuality(q.height)"
+                  class="flex min-h-[36px] w-full items-center justify-between px-3 py-1 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                  [class.text-[var(--color-primary)]]="selectedQuality() === q.height"
+                  [class.font-bold]="selectedQuality() === q.height"
+                >
+                  <span>{{ q.label }}</span>
+                  @if (selectedQuality() === q.height) {
+                    <span class="text-[var(--color-primary)]">✓</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Captions / Subtitles Button (≥44x44px) -->
+        <button
+          type="button"
+          (click)="toggleCaptions()"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          [class.text-[var(--color-primary)]]="isCaptionsEnabled()"
+          [attr.aria-label]="isCaptionsEnabled() ? 'Disable captions (c)' : 'Enable captions (c)'"
+        >
+          <ng-icon name="phosphorClosedCaptioning" class="text-lg" />
+        </button>
+
+        <!-- Picture-in-Picture Button (≥44x44px) -->
+        <button
+          type="button"
+          (click)="togglePip()"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] hidden sm:flex"
+          aria-label="Picture in Picture"
+        >
+          <ng-icon name="phosphorPictureInPicture" class="text-lg" />
+        </button>
+
+        <!-- Fullscreen Button (≥44x44px) -->
         <button
           type="button"
           (click)="toggleFullscreen()"
-          class="rounded-lg p-1.5 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none"
-          [attr.aria-label]="isFullscreen() ? 'Exit Fullscreen' : 'Fullscreen'"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          [attr.aria-label]="isFullscreen() ? 'Exit Fullscreen (f)' : 'Fullscreen (f)'"
         >
           <ng-icon [name]="isFullscreen() ? 'phosphorCornersIn' : 'phosphorCornersOut'" class="text-xl" />
         </button>
