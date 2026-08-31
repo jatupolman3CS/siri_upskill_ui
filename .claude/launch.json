@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "frontend-dev",
+      "name": "siri_upskill_ui-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start"],
       "port": 4200,
