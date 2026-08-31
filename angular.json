@@ -10,7 +10,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "frontend": {
+    "siri_upskill_ui": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -41,9 +41,6 @@
             },
             "ssr": {
               "entry": "src/server.ts"
-            },
-            "outputPath": {
-              "base": "dist/siri_upskill_ui"
             }
           },
           "configurations": {
