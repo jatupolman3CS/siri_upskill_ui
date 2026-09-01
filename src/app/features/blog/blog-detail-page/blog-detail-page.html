@@ -1,5 +1,33 @@
 <div class="animate-fade-in mx-auto max-w-4xl px-4 py-12 pb-24">
-  @if (post(); as article) {
+  @if (postResource.isLoading() && !postResource.hasValue()) {
+    <div class="flex flex-col gap-6" aria-busy="true" [attr.aria-label]="'blog.detail.loadingLabel' | translate">
+      <app-skeleton variant="text" width="30%" />
+      <app-skeleton variant="text" width="70%" height="2rem" />
+      <app-skeleton variant="block" height="16rem" />
+      <app-skeleton variant="text" [lines]="6" />
+    </div>
+  } @else if (isNotFound()) {
+    <app-empty-state [heading]="'blog.detail.notFoundHeading' | translate" [description]="'blog.detail.notFoundDescription' | translate">
+      <a
+        emptyStateAction
+        routerLink="/blog"
+        class="btn-tactile inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+      >
+        {{ 'blog.detail.backToBlog' | translate }}
+      </a>
+    </app-empty-state>
+  } @else if (hasOtherError()) {
+    <app-empty-state [heading]="'blog.detail.errorHeading' | translate" [description]="'blog.detail.errorDescription' | translate">
+      <button
+        emptyStateAction
+        type="button"
+        (click)="retry()"
+        class="btn-tactile inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+      >
+        {{ 'blog.detail.retryButton' | translate }}
+      </button>
+    </app-empty-state>
+  } @else if (postResource.value(); as article) {
     <!-- Back to Blog Button -->
     <a
       routerLink="/blog"

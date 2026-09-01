@@ -1,11 +1,6 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -16,14 +11,27 @@ import {
   phosphorUser,
 } from '@ng-icons/phosphor-icons/regular';
 
-import { PostItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
+import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { Skeleton } from '../../../shared/skeleton/skeleton';
 
+/**
+ * `/blog/:slug`. Previously this fabricated a complete fake `PostItem` (fake title, fake HTML body,
+ * fake Unsplash cover image) and displayed it whenever `getPublishedPostBySlug` failed — a bad slug
+ * (deleted/unpublished post, mistyped link) or a genuine network failure both rendered as if they were
+ * a real, published article. That violated frontend.md's "จัดการ loading / error / empty state ให้ครบ"
+ * rule outright. Rebuilt on `rxResource` + the same `ApiError.status === 404` "not found vs other error"
+ * split `CourseDetailPage` already established (`features/catalog/course-detail-page/course-detail-page.ts`)
+ * — a missing/unpublished slug renders a real not-found state, any other failure renders a real error
+ * state with retry, and nothing here ever fabricates article content.
+ */
 @Component({
   selector: 'app-blog-detail-page',
-  imports: [CommonModule, RouterLink, NgIcon],
+  imports: [CommonModule, RouterLink, NgIcon, TranslatePipe, EmptyState, Skeleton],
   templateUrl: './blog-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -36,60 +44,77 @@ import { SeoService } from '../../../core/seo/seo.service';
     }),
   ],
 })
-export class BlogDetailPage implements OnInit {
+export class BlogDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
+  protected readonly translation = inject(TranslationService);
 
-  protected readonly post = signal<PostItem | null>(null);
+  private readonly paramMap = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
+  protected readonly slug = computed(() => this.paramMap().get('slug') ?? '');
 
-  ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    this.loadPost(slug);
+  // No `defaultValue` — same reasoning as `CourseDetailPage.courseResource`: there is no meaningful
+  // "empty" `PostItem` to fabricate, so `.value()` is `PostItem | undefined` (undefined while
+  // loading/idle, throws only while `status()` is `'error'`). Every template read of `.value()` happens
+  // after `isNotFound()`/`hasOtherError()` have already been checked false in the same `@if`/`@else if`
+  // chain, so that throw path is never reached.
+  protected readonly postResource = rxResource({
+    params: () => this.slug(),
+    stream: ({ params }) => this.cmsApi.getPublishedPostBySlug(params),
+  });
+
+  private readonly resourceError = computed(() => this.postResource.error() as ApiError | undefined);
+  protected readonly isNotFound = computed(() => this.resourceError()?.status === 404);
+  protected readonly hasOtherError = computed(() => {
+    const error = this.resourceError();
+    return error !== undefined && error.status !== 404;
+  });
+
+  constructor() {
+    // Same "always call seoService.set() on every run, including error branches" reasoning as
+    // CourseDetailPage's own constructor effect — this component instance is reused across
+    // `/blog/postA` → `/blog/postB` (same route, only `:slug` changes), so a branch that skipped
+    // `seoService.set()` would leave postA's title/canonical/description on screen while the visible
+    // UI already shows postB's not-found/error state.
+    effect(() => {
+      const appName = this.translation.t('common.appName');
+      const path = `/blog/${this.slug()}`;
+
+      if (this.isNotFound()) {
+        this.seoService.set({
+          title: `${this.translation.t('blog.detail.notFoundHeading')} | ${appName}`,
+          description: this.translation.t('blog.detail.notFoundDescription'),
+          path,
+          robots: 'noindex',
+        });
+        return;
+      }
+
+      if (this.hasOtherError()) {
+        this.seoService.set({
+          title: `${this.translation.t('blog.detail.errorHeading')} | ${appName}`,
+          description: this.translation.t('blog.detail.errorDescription'),
+          path,
+          robots: 'noindex',
+        });
+        return;
+      }
+
+      const post = this.postResource.value();
+      if (!post) {
+        return;
+      }
+
+      this.seoService.set({
+        title: `${post.seoTitle ?? post.title} | ${appName} Blog`,
+        description: post.seoDescription ?? post.excerpt ?? '',
+        path,
+        openGraph: { image: post.coverImageUrl, type: 'article' },
+      });
+    });
   }
 
-  private loadPost(slug: string): void {
-    this.cmsApi.getPublishedPostBySlug(slug).subscribe({
-      next: (postData) => {
-        this.post.set(postData);
-        this.seoService.set({
-          title: `${postData.seoTitle ?? postData.title} | SIRI UpSkill Blog`,
-          description: postData.seoDescription ?? postData.excerpt ?? '',
-          path: `/blog/${slug}`,
-          openGraph: { image: postData.coverImageUrl },
-        });
-      },
-      error: () => {
-        // Fallback demo mock
-        const fallback: PostItem = {
-          id: 'p-demo',
-          title: '5 ทักษะสำคัญในการเป็น AI Software Engineer ในปี 2026',
-          slug,
-          excerpt: 'เจาะลึกเทคโนโลยีที่นักพัฒนาซอฟต์แวร์ต้องรู้เพื่อต่อยอดสู่อนาคต...',
-          contentHtml: `
-            <p class="lead">ในยุคที่เทคโนโลยี AI และ Generative Agents เติบโตอย่างก้าวกระโดด นักพัฒนาซอฟต์แวร์จำเป็นต้องปรับตัวและเพิ่มพูนทักษะที่เกี่ยวข้องเพื่อให้พร้อมสำหรับการสร้างนวัตกรรมระดับ Enterprise</p>
-            <h3>1. ความเข้าใจใน Large Language Model Architecture</h3>
-            <p>การเข้าใจกลไก Transformer, Context Window, Tokenization และ Attention Mechanism ช่วยให้เราสามารถออกแบบ Prompt และ System Context ได้อย่างมีประสิทธิภาพสูงสุด</p>
-            <h3>2. Retrieval-Augmented Generation (RAG) & Vector Databases</h3>
-            <p>การนำข้อมูลขององค์กรมาเชื่อมต่อกับ AI จำเป็นต้องอาศัย Vector Embeddings และ Hybrid Search เพื่อให้ผลลัพธ์มีความแม่นยำและปลอดภัย</p>
-            <h3>3. Clean Architecture & Production-Grade API Design</h3>
-            <p>การสร้างระบบที่ยั่งยืนยังคงต้องการรากฐานของ Software Architecture ที่ดี เช่น Domain-Driven Design, Hexagonal Architecture และ Robust Error Handling</p>
-          `,
-          coverImageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200',
-          authorId: 'admin',
-          status: 'Published',
-          publishedAtUtc: '2026-08-15T09:00:00Z',
-          seoTitle: '5 ทักษะสำคัญ AI Software Engineer 2026',
-          seoDescription: 'เจาะลึกทักษะ AI Engineer ที่ตลาดต้องการมากที่สุด',
-          createdAtUtc: '2026-08-15T09:00:00Z',
-        };
-        this.post.set(fallback);
-        this.seoService.set({
-          title: `${fallback.title} | SIRI UpSkill Blog`,
-          description: fallback.excerpt ?? '',
-          path: `/blog/${slug}`,
-        });
-      },
-    });
+  protected retry(): void {
+    this.postResource.reload();
   }
 }

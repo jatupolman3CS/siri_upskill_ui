@@ -81,12 +81,12 @@
                 <label
                   class="option-item"
                   [class.selected]="isOptionSelected(quest.id, opt.id)"
-                  (click)="selectOption(quest, opt.id)"
                 >
                   <input
                     [type]="quest.type === 'SingleChoice' || quest.type === 1 ? 'radio' : 'checkbox'"
                     [name]="quest.id"
                     [checked]="isOptionSelected(quest.id, opt.id)"
+                    (change)="selectOption(quest, opt.id)"
                   />
                   <span class="opt-text">{{ opt.text }}</span>
                 </label>

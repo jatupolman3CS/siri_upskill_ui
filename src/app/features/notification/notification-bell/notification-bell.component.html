@@ -64,9 +64,13 @@
         } @else {
           @for (item of notifications(); track item.id) {
             <div
+              role="button"
+              tabindex="0"
               (click)="onNotificationClick(item)"
+              (keydown.enter)="onNotificationClick(item)"
+              (keydown.space)="$event.preventDefault(); onNotificationClick(item)"
               [class.bg-[var(--color-surface-muted)]]="!item.isRead"
-              class="flex items-start gap-3 p-3.5 hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors duration-150 relative group"
+              class="flex items-start gap-3 p-3.5 hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors duration-150 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <!-- Icon -->
               <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]">

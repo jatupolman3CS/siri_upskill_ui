@@ -142,8 +142,9 @@
 
         <div class="space-y-3">
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblLabel' | translate }}</label>
+            <label for="menu-label-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblLabel' | translate }}</label>
             <input
+              id="menu-label-input"
               type="text"
               [(ngModel)]="formLabel"
               [placeholder]="'admin.menus.placeholderLabel' | translate"
@@ -152,8 +153,9 @@
           </div>
 
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblUrl' | translate }}</label>
+            <label for="menu-url-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblUrl' | translate }}</label>
             <input
+              id="menu-url-input"
               type="text"
               [(ngModel)]="formUrl"
               [placeholder]="'admin.menus.placeholderUrl' | translate"
@@ -162,8 +164,9 @@
           </div>
 
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblParent' | translate }}</label>
+            <label for="menu-parent-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblParent' | translate }}</label>
             <select
+              id="menu-parent-select"
               [(ngModel)]="formParentId"
               class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             >
@@ -178,8 +181,9 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblSortOrder' | translate }}</label>
+              <label for="menu-sort-order-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.menus.lblSortOrder' | translate }}</label>
               <input
+                id="menu-sort-order-input"
                 type="number"
                 [(ngModel)]="formSortOrder"
                 min="1"

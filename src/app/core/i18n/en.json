@@ -291,6 +291,23 @@
       "accessDurationDays": "{{days}} days of access after purchase"
     }
   },
+  "blog": {
+    "loadingLabel": "Loading articles",
+    "emptyHeading": "No articles yet",
+    "emptyDescription": "There are no published articles right now. Check back later.",
+    "errorHeading": "Couldn't load articles",
+    "errorDescription": "Something went wrong while loading articles. Please try again.",
+    "retryButton": "Try again",
+    "detail": {
+      "loadingLabel": "Loading article",
+      "notFoundHeading": "Article not found",
+      "notFoundDescription": "This article may have been removed, moved, or isn't published yet. Try browsing other articles instead.",
+      "backToBlog": "Back to all articles",
+      "errorHeading": "Couldn't load this article",
+      "errorDescription": "Something went wrong while loading this article. Please try again.",
+      "retryButton": "Try again"
+    }
+  },
   "shared": {
     "modal": {
       "close": "Close"
@@ -708,6 +725,25 @@
       "publish": {
         "readyHeading": "Your course is ready for publishing!",
         "readyDescription": "When submitted, your course will be reviewed and published to SIRI UpSkill."
+      }
+    },
+    "earnings": {
+      "loadingLabel": "Loading earnings data",
+      "summaryErrorHeading": "Couldn't load earnings data",
+      "summaryErrorDescription": "Something went wrong while loading your earnings data. Please try again.",
+      "retryButton": "Try again",
+      "latestPayoutHeading": "Latest payout",
+      "latestPayoutPaidOn": "Paid on {{date}}",
+      "latestPayoutNone": "No payout yet",
+      "nextPayoutHeading": "Estimated next payout",
+      "historyEmptyHeading": "No payout history yet",
+      "historyEmptyDescription": "Your first payout will show up here once it's processed.",
+      "bankAccountErrorHeading": "Couldn't load bank account details",
+      "bankAccountErrorDescription": "Something went wrong while loading your bank account details. Please try again.",
+      "status": {
+        "pending": "Pending",
+        "transferred": "Transferred",
+        "failed": "Failed"
       }
     }
   },

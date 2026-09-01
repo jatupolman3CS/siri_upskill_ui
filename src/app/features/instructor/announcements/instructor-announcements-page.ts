@@ -102,7 +102,10 @@ export class InstructorAnnouncementsPage implements OnInit {
           );
         }
       },
-      error: () => {},
+      error: () => {
+        // Intentional no-op: announcement history is optional context, so
+        // keep the announcements signal at its empty default on failure.
+      },
     });
   }
 

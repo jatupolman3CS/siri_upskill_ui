@@ -3,12 +3,31 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import localeTh from '@angular/common/locales/th';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
-import { PaymentResponse } from '../data/commerce-api.models';
+import { OrderDetailResponse, PaymentResponse } from '../data/commerce-api.models';
 import { CheckoutPage } from './checkout-page';
+
+/**
+ * `order`/`isLoadingOrder`/`orderError` are `protected` signals on `CheckoutPage` — this test
+ * seeds them directly instead of going through a real HTTP flush to keep these tests focused on
+ * rendering, not on the fetch itself (which is covered separately). `unknown` + an inline shape
+ * (matching this codebase's established pattern, see courses-page.spec.ts) keeps this typed
+ * instead of reaching for `any`.
+ */
+function testAccess(page: CheckoutPage): {
+  readonly order: WritableSignal<OrderDetailResponse | null>;
+  readonly isLoadingOrder: WritableSignal<boolean>;
+  readonly orderError: WritableSignal<string | null>;
+} {
+  return page as unknown as {
+    readonly order: WritableSignal<OrderDetailResponse | null>;
+    readonly isLoadingOrder: WritableSignal<boolean>;
+    readonly orderError: WritableSignal<string | null>;
+  };
+}
 
 @Component({ template: '' })
 class DummyCartComponent {}
@@ -50,7 +69,7 @@ describe('CheckoutPage', () => {
 
     TestBed.inject(TranslationService).setLocale('th');
 
-    (component as any).order.set({
+    testAccess(component).order.set({
       id: 'order-123',
       orderNo: 'SU-88214',
       subtotalAmount: 3880,
@@ -76,8 +95,8 @@ describe('CheckoutPage', () => {
         },
       ],
     });
-    (component as any).isLoadingOrder.set(false);
-    (component as any).orderError.set(null);
+    testAccess(component).isLoadingOrder.set(false);
+    testAccess(component).orderError.set(null);
 
     fixture.detectChanges();
   });

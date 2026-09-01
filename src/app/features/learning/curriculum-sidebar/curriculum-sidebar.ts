@@ -2,9 +2,8 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  output,
   signal,
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -34,13 +33,13 @@ import { DurationPipe } from '../../../core/i18n/duration.pipe';
   ],
 })
 export class CurriculumSidebar {
-  @Input() sections: readonly CourseDetailSection[] = [];
-  @Input() activeEpisodeId?: string;
-  @Input() progress?: CourseProgressResponse | null;
-  @Input() isEnrolled = false;
+  readonly sections = input<readonly CourseDetailSection[]>([]);
+  readonly activeEpisodeId = input<string>();
+  readonly progress = input<CourseProgressResponse | null>();
+  readonly isEnrolled = input(false);
 
-  @Output() readonly selectEpisode = new EventEmitter<string>();
-  @Output() readonly lockedEpisodeClicked = new EventEmitter<string>();
+  readonly selectEpisode = output<string>();
+  readonly lockedEpisodeClicked = output<string>();
 
   private readonly expandedSections = signal<Set<string>>(new Set());
 
@@ -64,11 +63,11 @@ export class CurriculumSidebar {
   }
 
   protected isEpisodeCompleted(episodeId: string): boolean {
-    return this.progress?.episodes.some((e) => e.episodeId === episodeId && e.isCompleted) ?? false;
+    return this.progress()?.episodes.some((e) => e.episodeId === episodeId && e.isCompleted) ?? false;
   }
 
   protected onEpisodeClick(episodeId: string, isFreePreview: boolean): void {
-    if (this.isEnrolled || isFreePreview) {
+    if (this.isEnrolled() || isFreePreview) {
       this.selectEpisode.emit(episodeId);
     } else {
       this.lockedEpisodeClicked.emit(episodeId);

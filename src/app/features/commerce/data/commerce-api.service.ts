@@ -22,7 +22,7 @@ import {
  */
 @Injectable({ providedIn: 'root' })
 export class CommerceApiService extends ApiService {
-  getOrders(page: number = 1, pageSize: number = 20): Observable<PagedResult<OrderDetailResponse>> {
+  getOrders(page = 1, pageSize = 20): Observable<PagedResult<OrderDetailResponse>> {
     return this.get<PagedResult<OrderDetailResponse>>('/commerce/orders', {
       page,
       pageSize,
@@ -61,7 +61,7 @@ export class CommerceApiService extends ApiService {
     return this.get<BundleResponse[]>(`/commerce/bundles/by-course/${encodeURIComponent(courseId)}`);
   }
 
-  getFlashSales(page: number = 1, pageSize: number = 20): Observable<PagedResult<FlashSaleResponse>> {
+  getFlashSales(page = 1, pageSize = 20): Observable<PagedResult<FlashSaleResponse>> {
     return this.get<PagedResult<FlashSaleResponse>>('/commerce/flash-sales', {
       page,
       pageSize,

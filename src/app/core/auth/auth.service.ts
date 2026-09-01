@@ -1,6 +1,7 @@
 import { Injectable, computed, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
+import { environment } from '../../../environments/environment';
 import { accessTokenStore } from '../http/access-token.store';
 import { decodeAccessTokenUserId } from './jwt.util';
 
@@ -136,17 +137,23 @@ export class AuthService {
   });
 
   constructor() {
-    // Initialize mock token if in bypass mode
-    if (this.isBypassActive() && this.currentMockRole() !== 'Guest') {
+    // Initialize mock token if in bypass mode — dev-only, see setBypassRole()'s doc comment.
+    if (environment.devAuth.bypass && this.isBypassActive() && this.currentMockRole() !== 'Guest') {
       const mockToken = createMockJwt(MOCK_USERS[this.currentMockRole()]);
       accessTokenStore.set(mockToken);
     }
   }
 
   /**
-   * Switch role instantly in bypass mode (SuperAdmin, Admin, Instructor, Learner, Guest)
+   * Switch role instantly in bypass mode (SuperAdmin, Admin, Instructor, Learner, Guest).
+   * DEV-BYPASS: gated on `environment.devAuth.bypass`, which is `false` in every production
+   * build (`environment.ts`) — a no-op there even if called directly (e.g. from devtools),
+   * not just hidden behind UI that happens not to render it.
    */
   setBypassRole(role: UserRole): void {
+    if (!environment.devAuth.bypass) {
+      return;
+    }
     this.currentMockRole.set(role);
     if (role === 'Guest') {
       accessTokenStore.set(null);
@@ -158,9 +165,12 @@ export class AuthService {
   }
 
   /**
-   * Toggle bypass mode on/off
+   * Toggle bypass mode on/off. DEV-BYPASS: see `setBypassRole()`'s doc comment.
    */
   toggleBypass(enabled?: boolean): void {
+    if (!environment.devAuth.bypass) {
+      return;
+    }
     const newState = enabled !== undefined ? enabled : !this.isBypassActive();
     this.isBypassActive.set(newState);
     if (newState && this.currentMockRole() !== 'Guest') {
@@ -174,7 +184,9 @@ export class AuthService {
       if (this.currentMockRole() === 'SuperAdmin') return true;
       return this.activeUser().roles.includes(role);
     }
-    return true;
+    // `jwt.util.ts`'s decoder deliberately only reads the `sub` claim today, not `role` — so
+    // there's no real role to check yet. Deny by default rather than granting every role.
+    return false;
   }
 
   /** Store access token */

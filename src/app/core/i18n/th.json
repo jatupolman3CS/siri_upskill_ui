@@ -291,6 +291,23 @@
       "accessDurationDays": "เข้าถึงได้ {{days}} วันหลังซื้อ"
     }
   },
+  "blog": {
+    "loadingLabel": "กำลังโหลดบทความ",
+    "emptyHeading": "ยังไม่มีบทความ",
+    "emptyDescription": "ยังไม่มีบทความเผยแพร่ในขณะนี้ กลับมาดูใหม่ภายหลัง",
+    "errorHeading": "โหลดบทความไม่สำเร็จ",
+    "errorDescription": "เกิดข้อผิดพลาดระหว่างโหลดบทความ กรุณาลองใหม่อีกครั้ง",
+    "retryButton": "ลองใหม่",
+    "detail": {
+      "loadingLabel": "กำลังโหลดบทความ",
+      "notFoundHeading": "ไม่พบบทความนี้",
+      "notFoundDescription": "บทความนี้อาจถูกลบ เปลี่ยนลิงก์ หรือยังไม่เผยแพร่ ลองดูบทความอื่นแทน",
+      "backToBlog": "กลับไปยังหน้ารวมบทความ",
+      "errorHeading": "โหลดบทความไม่สำเร็จ",
+      "errorDescription": "เกิดข้อผิดพลาดระหว่างโหลดบทความ กรุณาลองใหม่อีกครั้ง",
+      "retryButton": "ลองใหม่"
+    }
+  },
   "shared": {
     "modal": {
       "close": "ปิด"
@@ -708,6 +725,25 @@
       "publish": {
         "readyHeading": "คอร์สของคุณพร้อมสำหรับเผยแพร่แล้ว!",
         "readyDescription": "เมื่อคุณกดส่งตรวจ คอร์สจะเข้าสู่กระบวนการอนุมัติและเผยแพร่บนระบบ SIRI UpSkill"
+      }
+    },
+    "earnings": {
+      "loadingLabel": "กำลังโหลดข้อมูลรายได้",
+      "summaryErrorHeading": "โหลดข้อมูลรายได้ไม่สำเร็จ",
+      "summaryErrorDescription": "เกิดข้อผิดพลาดระหว่างโหลดข้อมูลรายได้ กรุณาลองใหม่อีกครั้ง",
+      "retryButton": "ลองใหม่",
+      "latestPayoutHeading": "ยอดโอนรอบล่าสุด",
+      "latestPayoutPaidOn": "โอนสำเร็จเมื่อ {{date}}",
+      "latestPayoutNone": "ยังไม่มีการโอนเงิน",
+      "nextPayoutHeading": "ประมาณการรอบถัดไป",
+      "historyEmptyHeading": "ยังไม่มีประวัติการรับเงิน",
+      "historyEmptyDescription": "เมื่อมีการโอนเงินรอบแรก ประวัติจะแสดงที่นี่",
+      "bankAccountErrorHeading": "โหลดข้อมูลบัญชีธนาคารไม่สำเร็จ",
+      "bankAccountErrorDescription": "เกิดข้อผิดพลาดระหว่างโหลดข้อมูลบัญชีธนาคาร กรุณาลองใหม่อีกครั้ง",
+      "status": {
+        "pending": "รอโอน",
+        "transferred": "โอนเงินแล้ว",
+        "failed": "โอนไม่สำเร็จ"
       }
     }
   },

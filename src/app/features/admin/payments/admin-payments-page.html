@@ -429,9 +429,9 @@
 
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+            <span class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
               เลือกวิธีการแก้ไข
-            </label>
+            </span>
             <div class="grid grid-cols-1 gap-2">
               <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
                 <input
@@ -478,10 +478,11 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+            <label for="payment-resolve-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
               บันทึกการดำเนินการ (Notes)
             </label>
             <textarea
+              id="payment-resolve-note-textarea"
               [(ngModel)]="resolveNote"
               rows="3"
               placeholder="ระบุเหตุผลหรือรายละเอียดการตรวจสอบ..."
@@ -533,10 +534,11 @@
         </p>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+          <label for="payment-dismiss-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
             เหตุผลในการยกเลิก (จำเป็น) <span class="text-rose-500">*</span>
           </label>
           <textarea
+            id="payment-dismiss-note-textarea"
             [(ngModel)]="dismissNote"
             rows="3"
             placeholder="เช่น รายการซ้ำซ้อน, ผู้ใช้ชำระเงินใหม่แล้ว..."
@@ -590,10 +592,11 @@
         </p>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+          <label for="payment-refund-decision-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
             หมายเหตุการพิจารณา
           </label>
           <textarea
+            id="payment-refund-decision-note-textarea"
             [(ngModel)]="refundDecisionNote"
             rows="3"
             placeholder="ระบุข้อความถึงผู้เรียนหรือบันทึกภายใน..."

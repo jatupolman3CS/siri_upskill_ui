@@ -68,36 +68,36 @@ import { AdminPaymentsApiService } from './data/admin-payments-api.service';
 export class AdminPaymentsPage implements OnInit {
   private readonly api = inject(AdminPaymentsApiService);
 
-  activeTab = signal<'ops-queue' | 'refunds'>('ops-queue');
-  loading = signal<boolean>(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
+  readonly activeTab = signal<'ops-queue' | 'refunds'>('ops-queue');
+  readonly loading = signal<boolean>(false);
+  readonly errorMessage = signal<string | null>(null);
+  readonly successMessage = signal<string | null>(null);
 
   // Ops Queue
-  opsEntries = signal<readonly PaymentOpsQueueDto[]>([]);
-  opsTotalCount = signal<number>(0);
-  opsStatusFilter = signal<PaymentOpsQueueStatus | 'ALL'>('ALL');
-  opsPage = signal<number>(1);
+  readonly opsEntries = signal<readonly PaymentOpsQueueDto[]>([]);
+  readonly opsTotalCount = signal<number>(0);
+  readonly opsStatusFilter = signal<PaymentOpsQueueStatus | 'ALL'>('ALL');
+  readonly opsPage = signal<number>(1);
   pageSize = 20;
 
   // Refunds
-  pendingRefunds = signal<readonly AdminRefundItem[]>([]);
-  refundsTotalCount = signal<number>(0);
+  readonly pendingRefunds = signal<readonly AdminRefundItem[]>([]);
+  readonly refundsTotalCount = signal<number>(0);
 
   // Modals
-  selectedEntryForResolve = signal<PaymentOpsQueueDto | null>(null);
-  resolveAction = signal<PaymentOpsResolutionAction>('Refund');
-  resolveNote = signal<string>('');
-  resolveRefundReason = signal<string>('requested_by_customer');
-  isSubmittingResolve = signal<boolean>(false);
+  readonly selectedEntryForResolve = signal<PaymentOpsQueueDto | null>(null);
+  readonly resolveAction = signal<PaymentOpsResolutionAction>('Refund');
+  readonly resolveNote = signal<string>('');
+  readonly resolveRefundReason = signal<string>('requested_by_customer');
+  readonly isSubmittingResolve = signal<boolean>(false);
 
-  selectedEntryForDismiss = signal<PaymentOpsQueueDto | null>(null);
-  dismissNote = signal<string>('');
-  isSubmittingDismiss = signal<boolean>(false);
+  readonly selectedEntryForDismiss = signal<PaymentOpsQueueDto | null>(null);
+  readonly dismissNote = signal<string>('');
+  readonly isSubmittingDismiss = signal<boolean>(false);
 
-  selectedRefundForAction = signal<{ refund: AdminRefundItem; action: 'approve' | 'reject' } | null>(null);
-  refundDecisionNote = signal<string>('');
-  isSubmittingRefundAction = signal<boolean>(false);
+  readonly selectedRefundForAction = signal<{ refund: AdminRefundItem; action: 'approve' | 'reject' } | null>(null);
+  readonly refundDecisionNote = signal<string>('');
+  readonly isSubmittingRefundAction = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadData();

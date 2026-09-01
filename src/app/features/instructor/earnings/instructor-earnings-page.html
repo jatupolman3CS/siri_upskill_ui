@@ -10,25 +10,56 @@
   </div>
 
   <!-- Metric Statistics Cards -->
-  <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
-    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-      <span class="text-xs font-semibold text-[var(--color-text-muted)]">รายได้สะสมทั้งหมด (Net)</span>
-      <p class="mt-2 text-2xl font-black text-[var(--color-text)]">{{ cumulativeEarnings() | currencyThb }}</p>
-      <p class="mt-1 text-[11px] text-emerald-600 font-medium">โอนเข้าบัญชีเรียบร้อยแล้ว</p>
+  @if (earningsLoading()) {
+    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
+      @for (placeholder of [0, 1, 2]; track placeholder) {
+        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm flex flex-col gap-3">
+          <app-skeleton variant="text" width="60%" />
+          <app-skeleton variant="text" width="45%" height="1.75rem" />
+          <app-skeleton variant="text" width="55%" />
+        </div>
+      }
     </div>
+  } @else if (earningsError()) {
+    <div class="animate-fade-in-up stagger-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+      <app-empty-state [heading]="'instructor.earnings.summaryErrorHeading' | translate" [description]="'instructor.earnings.summaryErrorDescription' | translate">
+        <button
+          emptyStateAction
+          type="button"
+          (click)="retryEarnings()"
+          class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)]"
+        >
+          {{ 'instructor.earnings.retryButton' | translate }}
+        </button>
+      </app-empty-state>
+    </div>
+  } @else if (earningsSummary(); as summary) {
+    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+        <span class="text-xs font-semibold text-[var(--color-text-muted)]">รายได้สะสมทั้งหมด (Net)</span>
+        <p class="mt-2 text-2xl font-black text-[var(--color-text)]">{{ summary.cumulativeEarnings | currencyThb }}</p>
+        <p class="mt-1 text-[11px] text-emerald-600 font-medium">โอนเข้าบัญชีเรียบร้อยแล้ว</p>
+      </div>
 
-    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-      <span class="text-xs font-semibold text-[var(--color-text-muted)]">ยอดโอนรอบล่าสุด (ก.ค. 2026)</span>
-      <p class="mt-2 text-2xl font-black text-emerald-600">{{ latestPayout() | currencyThb }}</p>
-      <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">โอนสำเร็จเมื่อ 05/08/2026</p>
-    </div>
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutHeading' | translate }}</span>
+        <p class="mt-2 text-2xl font-black text-emerald-600">{{ summary.latestPayoutAmount | currencyThb }}</p>
+        @if (latestPaidHistoryItem(); as latest) {
+          <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
+            {{ 'instructor.earnings.latestPayoutPaidOn' | translate: { date: (latest.paidAtUtc | date: 'dd/MM/yyyy') || '' } }}
+          </p>
+        } @else {
+          <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutNone' | translate }}</p>
+        }
+      </div>
 
-    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-      <span class="text-xs font-semibold text-[var(--color-text-muted)]">ประมาณการรอบถัดไป (ส.ค. 2026)</span>
-      <p class="mt-2 text-2xl font-black text-[var(--color-primary)]">{{ estimatedNextPayout() | currencyThb }}</p>
-      <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">ยอดคำนวณแบบ Real-time</p>
+      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHeading' | translate }}</span>
+        <p class="mt-2 text-2xl font-black text-[var(--color-primary)]">{{ summary.estimatedNextPayoutAmount | currencyThb }}</p>
+        <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">ยอดคำนวณแบบ Real-time</p>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Bank Account Settings Card -->
   <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm space-y-4">
@@ -60,22 +91,7 @@
       </div>
     }
 
-    @if (!showEditBank()) {
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 rounded-xl bg-[var(--color-bg)] p-4 text-xs">
-        <div>
-          <span class="text-[var(--color-text-muted)] block mb-0.5">ธนาคาร</span>
-          <span class="font-bold text-[var(--color-text)]">{{ bankName() }}</span>
-        </div>
-        <div>
-          <span class="text-[var(--color-text-muted)] block mb-0.5">เลขที่บัญชี</span>
-          <span class="font-mono font-bold text-[var(--color-text)]">{{ maskedAccountNumber() }}</span>
-        </div>
-        <div>
-          <span class="text-[var(--color-text-muted)] block mb-0.5">ชื่อบัญชี</span>
-          <span class="font-bold text-[var(--color-text)]">{{ accountHolderName() }}</span>
-        </div>
-      </div>
-    } @else {
+    @if (showEditBank()) {
       <div class="animate-fade-in rounded-xl bg-[var(--color-bg)] p-4 space-y-4 border border-[var(--color-border)]">
         @if (saveBankError(); as err) {
           <div class="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs font-semibold text-red-600">
@@ -85,8 +101,9 @@
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เลือกธนาคาร</label>
+            <label for="earnings-bank-name-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">เลือกธนาคาร</label>
             <select
+              id="earnings-bank-name-select"
               [(ngModel)]="editBankName"
               class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
             >
@@ -98,8 +115,9 @@
           </div>
 
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เลขที่บัญชี (ตัวเลขเท่านั้น)</label>
+            <label for="earnings-account-number-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">เลขที่บัญชี (ตัวเลขเท่านั้น)</label>
             <input
+              id="earnings-account-number-input"
               type="text"
               [(ngModel)]="editAccountNumber"
               placeholder="0123456789"
@@ -108,8 +126,9 @@
           </div>
 
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ชื่อเจ้าของบัญชี</label>
+            <label for="earnings-account-holder-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">ชื่อเจ้าของบัญชี</label>
             <input
+              id="earnings-account-holder-input"
               type="text"
               [(ngModel)]="editAccountHolder"
               class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs text-[var(--color-text)] focus:outline-none"
@@ -141,6 +160,41 @@
           </button>
         </div>
       </div>
+    } @else if (payoutAccountLoading()) {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 rounded-xl bg-[var(--color-bg)] p-4" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
+        @for (placeholder of [0, 1, 2]; track placeholder) {
+          <div class="flex flex-col gap-1.5">
+            <app-skeleton variant="text" width="50%" />
+            <app-skeleton variant="text" width="80%" />
+          </div>
+        }
+      </div>
+    } @else if (payoutAccountError()) {
+      <app-empty-state [heading]="'instructor.earnings.bankAccountErrorHeading' | translate" [description]="'instructor.earnings.bankAccountErrorDescription' | translate">
+        <button
+          emptyStateAction
+          type="button"
+          (click)="retryPayoutAccount()"
+          class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-1.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'instructor.earnings.retryButton' | translate }}
+        </button>
+      </app-empty-state>
+    } @else {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 rounded-xl bg-[var(--color-bg)] p-4 text-xs">
+        <div>
+          <span class="text-[var(--color-text-muted)] block mb-0.5">ธนาคาร</span>
+          <span class="font-bold text-[var(--color-text)]">{{ bankName() }}</span>
+        </div>
+        <div>
+          <span class="text-[var(--color-text-muted)] block mb-0.5">เลขที่บัญชี</span>
+          <span class="font-mono font-bold text-[var(--color-text)]">{{ maskedAccountNumber() }}</span>
+        </div>
+        <div>
+          <span class="text-[var(--color-text-muted)] block mb-0.5">ชื่อบัญชี</span>
+          <span class="font-bold text-[var(--color-text)]">{{ accountHolderName() }}</span>
+        </div>
+      </div>
     }
   </div>
 
@@ -148,54 +202,67 @@
   <div class="animate-fade-in-up stagger-3 space-y-4">
     <h2 class="text-base font-bold text-[var(--color-text)]">ประวัติการรับเงินโอน (Payout History)</h2>
 
-    <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-[var(--color-text)]">
-          <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-            <tr>
-              <th class="px-6 py-3">รอบบัญชี</th>
-              <th class="px-6 py-3">ยอดขายรวม (Gross)</th>
-              <th class="px-6 py-3">ภาษี หัก ณ ที่จ่าย (3%)</th>
-              <th class="px-6 py-3">ยอดโอนสุทธิ (Net 70%)</th>
-              <th class="px-6 py-3">สถานะ</th>
-              <th class="px-6 py-3 text-right">เอกสาร</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-border)]">
-            @for (item of history(); track item.payoutId) {
-              <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                <td class="px-6 py-4 font-mono font-bold text-xs">
-                  {{ item.batchNumber }}
-                </td>
-                <td class="px-6 py-4 text-xs font-medium">
-                  {{ item.grossAmount | currencyThb }}
-                </td>
-                <td class="px-6 py-4 text-xs text-rose-500 font-medium">
-                  -{{ item.withholdingTaxAmount | currencyThb }}
-                </td>
-                <td class="px-6 py-4 font-bold text-emerald-600">
-                  {{ item.netAmount | currencyThb }}
-                </td>
-                <td class="px-6 py-4">
-                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600">
-                    <ng-icon name="phosphorCheckCircle" />
-                    <span>โอนเงินแล้ว</span>
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button
-                    type="button"
-                    class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
-                  >
-                    <ng-icon name="phosphorDownloadSimple" />
-                    <span>ใบหักภาษี 50 ทวิ</span>
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    @if (earningsLoading()) {
+      <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm p-6 space-y-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
+        <app-skeleton variant="text" [lines]="4" />
       </div>
-    </div>
+    } @else if (!earningsError() && payoutHistory().length === 0) {
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <app-empty-state [heading]="'instructor.earnings.historyEmptyHeading' | translate" [description]="'instructor.earnings.historyEmptyDescription' | translate" />
+      </div>
+    } @else if (!earningsError()) {
+      <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-[var(--color-text)]">
+            <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              <tr>
+                <th class="px-6 py-3">รอบบัญชี</th>
+                <th class="px-6 py-3">ยอดขายรวม (Gross)</th>
+                <th class="px-6 py-3">ภาษี หัก ณ ที่จ่าย (3%)</th>
+                <th class="px-6 py-3">ยอดโอนสุทธิ (Net 70%)</th>
+                <th class="px-6 py-3">สถานะ</th>
+                <th class="px-6 py-3 text-right">เอกสาร</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-border)]">
+              @for (item of payoutHistory(); track item.payoutId) {
+                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                  <td class="px-6 py-4 font-mono font-bold text-xs">
+                    {{ item.batchNumber }}
+                  </td>
+                  <td class="px-6 py-4 text-xs font-medium">
+                    {{ item.grossAmount | currencyThb }}
+                  </td>
+                  <td class="px-6 py-4 text-xs text-rose-500 font-medium">
+                    -{{ item.withholdingTaxAmount | currencyThb }}
+                  </td>
+                  <td class="px-6 py-4 font-bold text-emerald-600">
+                    {{ item.netAmount | currencyThb }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold"
+                      [ngClass]="getPayoutStatusBadgeClass(item.status)"
+                    >
+                      <ng-icon [name]="getPayoutStatusIcon(item.status)" />
+                      <span>{{ 'instructor.earnings.status.' + (item.status | lowercase) | translate }}</span>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <button
+                      type="button"
+                      class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+                    >
+                      <ng-icon name="phosphorDownloadSimple" />
+                      <span>ใบหักภาษี 50 ทวิ</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
   </div>
 </div>

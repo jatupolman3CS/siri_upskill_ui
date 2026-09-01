@@ -178,7 +178,7 @@ export class AdminPayoutsPage implements OnInit {
 
     this.isSubmittingBatch.set(true);
     this.payoutApi.createPayoutBatch({ periodKey }).subscribe({
-      next: (created) => {
+      next: () => {
         this.isSubmittingBatch.set(false);
         this.closeCreateBatchModal();
         this.showMessage('success', `สร้างรอบการจ่ายเงินงวด ${periodKey} เรียบร้อยแล้ว`);

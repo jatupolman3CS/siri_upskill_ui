@@ -7,7 +7,7 @@
   <!-- Video Element -->
   <video
     #videoElement
-    [poster]="poster"
+    [poster]="poster()"
     class="h-full w-full object-contain cursor-pointer"
     (timeupdate)="onTimeUpdated()"
     (loadedmetadata)="onLoadedMetadata()"
@@ -18,21 +18,21 @@
   ></video>
 
   <!-- Dynamic Anti-Piracy Watermark (Subtle moving overlay) -->
-  @if (watermark) {
+  @if (watermark(); as wm) {
     <div
       class="pointer-events-none absolute z-20 transition-all duration-1000 ease-in-out select-none"
       [style.top.%]="watermarkTop()"
       [style.left.%]="watermarkLeft()"
     >
       <div class="rounded bg-black/50 px-2.5 py-1 text-[11px] font-mono tracking-wider text-white/35 backdrop-blur-[2px] shadow-sm">
-        <span>{{ watermark.text }}</span>
-        <span class="ml-1 opacity-80">· {{ watermark.email }}</span>
+        <span>{{ wm.text }}</span>
+        <span class="ml-1 opacity-80">· {{ wm.email }}</span>
       </div>
     </div>
   }
 
   <!-- Free Preview Active Badge -->
-  @if (isFreePreview && !showFreePreviewCta()) {
+  @if (isFreePreview() && !showFreePreviewCta()) {
     <div class="absolute top-4 left-4 z-20 flex items-center gap-2 rounded-full bg-emerald-600/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md">
       <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
       <span>ตัวอย่างฟรี (Free Preview)</span>
@@ -92,7 +92,7 @@
       <div class="max-w-sm rounded-2xl border border-white/10 bg-zinc-900/90 p-6 text-center shadow-2xl text-white">
         <h3 class="text-lg font-bold">ต้องการเล่นต่อจากเดิม?</h3>
         <p class="mt-2 text-sm text-zinc-400">
-          คุณดูค้างไว้ที่นาที <span class="font-semibold text-white">{{ formatTime(initialPosition) }}</span>
+          คุณดูค้างไว้ที่นาที <span class="font-semibold text-white">{{ formatTime(initialPosition()) }}</span>
         </p>
         <div class="mt-6 flex flex-col gap-2 sm:flex-row">
           <button
@@ -124,7 +124,7 @@
 
         <h3 class="text-lg font-bold text-white">จบช่วงดูตัวอย่างฟรีแล้ว</h3>
         <p class="mt-2 text-xs text-zinc-300 leading-relaxed">
-          {{ courseTitle ? 'ชอบเนื้อหาบทเรียนนี้ไหม? สมัครเรียนคอร์ส ' + courseTitle : 'สมัครเรียนคอร์สเต็ม' }} เพื่อเข้าถึงบทเรียนทั้งหมด, เอกสารประกอบการเรียน, แบบฝึกหัด และรับใบประกาศนียบัตรเมื่อเรียนจบ
+          {{ courseTitle() ? 'ชอบเนื้อหาบทเรียนนี้ไหม? สมัครเรียนคอร์ส ' + courseTitle() : 'สมัครเรียนคอร์สเต็ม' }} เพื่อเข้าถึงบทเรียนทั้งหมด, เอกสารประกอบการเรียน, แบบฝึกหัด และรับใบประกาศนียบัตรเมื่อเรียนจบ
         </p>
 
         <div class="mt-6 flex flex-col gap-2 sm:flex-row justify-center">

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowRight,
@@ -39,6 +39,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService, UserRole } from '../../core/auth/auth.service';
+import { environment } from '../../../environments/environment';
 import { ToastService } from '../toast/toast.service';
 
 export interface NavItem {
@@ -105,6 +106,13 @@ export class DevRoleSwitcher {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+
+  /**
+   * DEV-BYPASS: `false` in every production build (`environment.ts`) — this whole floating
+   * widget renders nothing there. `app.html` mounts this component unconditionally on every
+   * route, so the gate has to live here rather than at the mount point.
+   */
+  protected readonly devBypassEnabled = environment.devAuth.bypass;
 
   /** Whether the full navigator drawer is opened */
   protected readonly isExpanded = signal(false);
@@ -269,5 +277,13 @@ export class DevRoleSwitcher {
   protected navigateTo(path: string): void {
     this.isExpanded.set(false);
     void this.router.navigateByUrl(path);
+  }
+
+  /** Mirrors shared/modal/modal.ts's `onOverlayClick` — only dismiss when the backdrop itself
+   * (not a bubbled click from the dialog panel) was the actual click target. */
+  protected onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.isExpanded.set(false);
+    }
   }
 }

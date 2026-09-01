@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
@@ -19,11 +19,11 @@ type QuizState = 'loading' | 'no-quiz' | 'idle' | 'taking' | 'result' | 'error';
   templateUrl: './quiz-taking.component.html',
   styleUrls: ['./quiz-taking.component.scss'],
 })
-export class QuizTakingComponent implements OnChanges {
+export class QuizTakingComponent {
   private readonly learningApi = inject(LearningApiService);
 
-  @Input() episodeId: string | null = null;
-  @Input() enrollmentId: string | null = null;
+  readonly episodeId = input<string | null>(null);
+  readonly enrollmentId = input<string | null>(null);
 
   readonly state = signal<QuizState>('loading');
   readonly quiz = signal<LearnerQuiz | null>(null);
@@ -33,14 +33,20 @@ export class QuizTakingComponent implements OnChanges {
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['episodeId'] || changes['enrollmentId']) {
+  constructor() {
+    // Reload whenever either input changes — mirrors the previous ngOnChanges behavior, which
+    // reloaded on a change to either episodeId or enrollmentId (learn-page.ts resolves these two
+    // from separate async calls that can settle at different times).
+    effect(() => {
+      this.episodeId();
+      this.enrollmentId();
       this.loadQuiz();
-    }
+    });
   }
 
   loadQuiz(): void {
-    if (!this.episodeId) {
+    const episodeId = this.episodeId();
+    if (!episodeId) {
       this.state.set('no-quiz');
       return;
     }
@@ -48,7 +54,7 @@ export class QuizTakingComponent implements OnChanges {
     this.state.set('loading');
     this.errorMessage.set(null);
 
-    this.learningApi.getLearnerQuizByEpisode(this.episodeId).subscribe({
+    this.learningApi.getLearnerQuizByEpisode(episodeId).subscribe({
       next: (quiz) => {
         if (!quiz || !quiz.questions || quiz.questions.length === 0) {
           this.state.set('no-quiz');
@@ -88,10 +94,11 @@ export class QuizTakingComponent implements OnChanges {
 
   startAttempt(): void {
     const q = this.quiz();
-    if (!q || !this.enrollmentId) return;
+    const enrollmentId = this.enrollmentId();
+    if (!q || !enrollmentId) return;
 
     this.isSubmitting.set(true);
-    this.learningApi.startQuizAttempt(q.id, this.enrollmentId).subscribe({
+    this.learningApi.startQuizAttempt(q.id, enrollmentId).subscribe({
       next: (attempt) => {
         this.isSubmitting.set(false);
         this.currentAttempt.set(attempt);
@@ -158,7 +165,7 @@ export class QuizTakingComponent implements OnChanges {
           },
         });
       })
-      .catch((err) => {
+      .catch(() => {
         this.isSubmitting.set(false);
         this.errorMessage.set('ไม่สามารถบันทึกคำตอบได้');
       });

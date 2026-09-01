@@ -28,7 +28,7 @@ export class AccountPrivacyPage {
 
   deletePassword = '';
   deleteConfirmation = '';
-  deleteError = signal<string | null>(null);
+  readonly deleteError = signal<string | null>(null);
 
   constructor() {
     setPageMeta({

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
@@ -18,11 +18,11 @@ type AssignmentState = 'loading' | 'no-assignment' | 'ready' | 'error';
   templateUrl: './assignment-submission.component.html',
   styleUrls: ['./assignment-submission.component.scss'],
 })
-export class AssignmentSubmissionComponent implements OnChanges {
+export class AssignmentSubmissionComponent {
   private readonly learningApi = inject(LearningApiService);
 
-  @Input() episodeId: string | null = null;
-  @Input() enrollmentId: string | null = null;
+  readonly episodeId = input<string | null>(null);
+  readonly enrollmentId = input<string | null>(null);
 
   readonly state = signal<AssignmentState>('loading');
   readonly assignment = signal<AssignmentItem | null>(null);
@@ -33,14 +33,19 @@ export class AssignmentSubmissionComponent implements OnChanges {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['episodeId'] || changes['enrollmentId']) {
+  constructor() {
+    // Reload whenever either input changes — mirrors the previous ngOnChanges behavior (see
+    // quiz-taking.component.ts's identical pattern and its doc comment for why).
+    effect(() => {
+      this.episodeId();
+      this.enrollmentId();
       this.loadAssignment();
-    }
+    });
   }
 
   loadAssignment(): void {
-    if (!this.episodeId) {
+    const episodeId = this.episodeId();
+    if (!episodeId) {
       this.state.set('no-assignment');
       return;
     }
@@ -49,7 +54,7 @@ export class AssignmentSubmissionComponent implements OnChanges {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    this.learningApi.getAssignmentByEpisode(this.episodeId).subscribe({
+    this.learningApi.getAssignmentByEpisode(episodeId).subscribe({
       next: (assignment) => {
         if (!assignment) {
           this.state.set('no-assignment');
@@ -88,7 +93,8 @@ export class AssignmentSubmissionComponent implements OnChanges {
 
   submitAssignment(): void {
     const a = this.assignment();
-    if (!a || !this.enrollmentId) return;
+    const enrollmentId = this.enrollmentId();
+    if (!a || !enrollmentId) return;
 
     if (!this.storageKey().trim()) {
       this.errorMessage.set('กรุณาระบุลิงก์หรือที่จัดเก็บไฟล์งาน');
@@ -101,7 +107,7 @@ export class AssignmentSubmissionComponent implements OnChanges {
 
     this.learningApi.submitAssignment({
       assignmentId: a.id,
-      enrollmentId: this.enrollmentId,
+      enrollmentId,
       storageKey: this.storageKey().trim(),
       note: this.note().trim() || null,
     }).subscribe({

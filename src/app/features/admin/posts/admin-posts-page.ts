@@ -16,7 +16,7 @@ import {
   phosphorTrash,
 } from '@ng-icons/phosphor-icons/regular';
 
-import { PostItem, PostStatus } from '../../cms/data/cms-api.models';
+import { PostItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
@@ -104,7 +104,10 @@ export class AdminPostsPage implements OnInit {
           this.showAddForm.set(false);
           this.loadPosts();
         },
-        error: () => {},
+        error: () => {
+          // Intentional no-op: keep the add-post form open with the entered
+          // values so the user can retry instead of losing their input.
+        },
       });
   }
 

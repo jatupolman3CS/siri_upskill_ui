@@ -40,15 +40,8 @@ describe('EpisodeAttachmentsComponent', () => {
   });
 
   it('loads attachments on episodeId input change', () => {
-    component.episodeId = 'ep-001';
-    component.ngOnChanges({
-      episodeId: {
-        currentValue: 'ep-001',
-        previousValue: null,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-    });
+    fixture.componentRef.setInput('episodeId', 'ep-001');
+    TestBed.flushEffects();
 
     const req = httpTesting.expectOne('/api/catalog/episodes/ep-001/attachments');
     expect(req.request.method).toBe('GET');
@@ -60,7 +53,7 @@ describe('EpisodeAttachmentsComponent', () => {
   });
 
   it('handles attachment download authorization call', () => {
-    component.episodeId = 'ep-001';
+    fixture.componentRef.setInput('episodeId', 'ep-001');
     component.attachments.set(MOCK_ATTACHMENTS);
 
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
@@ -78,6 +71,6 @@ describe('EpisodeAttachmentsComponent', () => {
       downloadUrl: 'https://cdn.siriupskill.com/attachments/ep-001/lecture-slides.pdf',
     });
 
-    expect(window.open).toHaveBeenCalledWith('https://cdn.siriupskill.com/attachments/ep-001/lecture-slides.pdf', '_blank');
+    expect(openSpy).toHaveBeenCalledWith('https://cdn.siriupskill.com/attachments/ep-001/lecture-slides.pdf', '_blank');
   });
 });

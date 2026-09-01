@@ -5,7 +5,6 @@ import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
-import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { AuthApiService } from '../data/auth-api.service';
 
@@ -33,7 +32,7 @@ type ConfirmState = 'loading' | 'success' | 'error' | 'missingToken';
  */
 @Component({
   selector: 'app-confirm-email-page',
-  imports: [RouterLink, TranslatePipe, Skeleton, Spinner],
+  imports: [RouterLink, TranslatePipe, Spinner],
   templateUrl: './confirm-email-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

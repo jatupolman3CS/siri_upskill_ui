@@ -23,7 +23,6 @@ import {
 import { CourseSearchResultItem } from '../../catalog/data/course-api.models';
 import { CourseApiService } from '../../catalog/data/course-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
-import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 
 @Component({

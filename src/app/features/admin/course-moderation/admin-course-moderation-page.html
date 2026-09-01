@@ -142,8 +142,9 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-bold text-[var(--color-text)]">{{ 'admin.moderation.rejectReasonLabel' | translate }}</label>
+          <label for="course-reject-reason-textarea" class="text-xs font-bold text-[var(--color-text)]">{{ 'admin.moderation.rejectReasonLabel' | translate }}</label>
           <textarea
+            id="course-reject-reason-textarea"
             [(ngModel)]="rejectionReason"
             rows="4"
             [placeholder]="'admin.moderation.rejectReasonPlaceholder' | translate"

@@ -15,6 +15,7 @@ import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
+import { environment } from '../../../../environments/environment';
 import { Button } from '../../../shared/button/button';
 import { InputField } from '../../../shared/input/input';
 import { AuthApiService } from '../data/auth-api.service';
@@ -57,6 +58,9 @@ export class LoginPage {
   protected readonly submitting = signal(false);
   protected readonly apiError = signal<ApiError | null>(null);
   protected readonly showClientErrorSummary = signal(false);
+
+  /** DEV-BYPASS: `false` in every production build — hides the quick-bypass box below. */
+  protected readonly devBypassEnabled = environment.devAuth.bypass;
 
   private readonly focusRequestId = signal(0);
   private lastFocusedRequestId = 0;

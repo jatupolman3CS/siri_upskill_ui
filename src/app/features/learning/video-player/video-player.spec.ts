@@ -1,12 +1,41 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { WritableSignal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { VideoPlayer } from './video-player';
 import { mapShakaPlaybackError } from './shaka-error-mapper';
 
+/**
+ * `VideoPlayer`'s `videoElementRef`/`playerContainerRef` are `viewChild()` signals and its state
+ * (playbackRate, volume, isMuted, ...) are `protected` signals — none of these are part of the
+ * component's public API, but these tests need to seed/read them directly rather than driving a
+ * real (and in jsdom, unimplemented) `<video>` element end-to-end. `unknown` + this shape (this
+ * codebase's established pattern — see courses-page.spec.ts/checkout-page.spec.ts) keeps that
+ * typed instead of reaching for `any`. `videoElementRef` is reassigned outright to a plain
+ * closure (rather than calling `.set()` on it) because `viewChild()`'s real Signal has no public
+ * setter — tests replace the whole property with a fake accessor instead.
+ */
+interface VideoPlayerInternals {
+  videoElementRef: () => { readonly nativeElement: HTMLVideoElement } | undefined;
+  formatTime(seconds: number): string;
+  onVideoEnded(): void;
+  loadMedia(url?: string): void;
+  readonly playbackRate: WritableSignal<number>;
+  readonly volume: WritableSignal<number>;
+  readonly isMuted: WritableSignal<boolean>;
+  readonly isPlaying: WritableSignal<boolean>;
+  readonly duration: WritableSignal<number>;
+  readonly showResumePrompt: WritableSignal<boolean>;
+  readonly showFreePreviewCta: WritableSignal<boolean>;
+}
+
+function internals(component: VideoPlayer): VideoPlayerInternals {
+  return component as unknown as VideoPlayerInternals;
+}
+
 describe('VideoPlayer Component', () => {
-  let component: VideoPlayer;
   let fixture: ComponentFixture<VideoPlayer>;
+  let component: VideoPlayer;
 
   beforeEach(async () => {
     TestBed.resetTestingModule();
@@ -23,83 +52,83 @@ describe('VideoPlayer Component', () => {
   });
 
   it('should format seconds into mm:ss or hh:mm:ss correctly', () => {
-    expect((component as any).formatTime(0)).toBe('00:00');
-    expect((component as any).formatTime(65)).toBe('01:05');
-    expect((component as any).formatTime(3665)).toBe('1:01:05');
-    expect((component as any).formatTime(-1)).toBe('00:00');
+    expect(internals(component).formatTime(0)).toBe('00:00');
+    expect(internals(component).formatTime(65)).toBe('01:05');
+    expect(internals(component).formatTime(3665)).toBe('1:01:05');
+    expect(internals(component).formatTime(-1)).toBe('00:00');
   });
 
   it('should set playback rate and update signal', () => {
     const videoMock = { playbackRate: 1.0 } as HTMLVideoElement;
-    (component as any).videoElementRef = { nativeElement: videoMock };
+    internals(component).videoElementRef = () => ({ nativeElement: videoMock });
 
     component.setPlaybackRate(1.5);
 
-    expect((component as any).playbackRate()).toBe(1.5);
+    expect(internals(component).playbackRate()).toBe(1.5);
     expect(videoMock.playbackRate).toBe(1.5);
   });
 
   it('should adjust volume and toggle mute correctly with memory', () => {
     const videoMock = { volume: 1.0, muted: false } as HTMLVideoElement;
-    (component as any).videoElementRef = { nativeElement: videoMock };
+    internals(component).videoElementRef = () => ({ nativeElement: videoMock });
 
     // Set to 0.7
     component.setVolume(0.7);
-    expect((component as any).volume()).toBe(0.7);
-    expect((component as any).isMuted()).toBe(false);
+    expect(internals(component).volume()).toBe(0.7);
+    expect(internals(component).isMuted()).toBe(false);
 
     // Toggle mute
     component.toggleMute();
-    expect((component as any).isMuted()).toBe(true);
+    expect(internals(component).isMuted()).toBe(true);
     expect(videoMock.muted).toBe(true);
 
     // Toggle unmute (should restore 0.7)
     component.toggleMute();
-    expect((component as any).isMuted()).toBe(false);
+    expect(internals(component).isMuted()).toBe(false);
     expect(videoMock.muted).toBe(false);
-    expect((component as any).volume()).toBe(0.7);
+    expect(internals(component).volume()).toBe(0.7);
   });
 
   it('should show resume prompt when initialPosition > 10', () => {
-    component.initialPosition = 120;
+    fixture.componentRef.setInput('initialPosition', 120);
     component.ngOnInit();
 
-    expect((component as any).showResumePrompt()).toBe(true);
+    expect(internals(component).showResumePrompt()).toBe(true);
   });
 
   it('should seek to initialPosition on resumeFromSaved', () => {
     const videoMock = { currentTime: 0, play: vi.fn().mockResolvedValue(undefined) } as unknown as HTMLVideoElement;
-    (component as any).videoElementRef = { nativeElement: videoMock };
-    component.initialPosition = 120;
+    internals(component).videoElementRef = () => ({ nativeElement: videoMock });
+    fixture.componentRef.setInput('initialPosition', 120);
 
     component.resumeFromSaved();
 
-    expect((component as any).showResumePrompt()).toBe(false);
+    expect(internals(component).showResumePrompt()).toBe(false);
     expect(videoMock.currentTime).toBe(120);
-    expect((component as any).isPlaying()).toBe(true);
+    expect(internals(component).isPlaying()).toBe(true);
   });
 
   it('should seek to 0 on startFromBeginning', () => {
     const videoMock = { currentTime: 100, play: vi.fn().mockResolvedValue(undefined) } as unknown as HTMLVideoElement;
-    (component as any).videoElementRef = { nativeElement: videoMock };
+    internals(component).videoElementRef = () => ({ nativeElement: videoMock });
 
     component.startFromBeginning();
 
-    expect((component as any).showResumePrompt()).toBe(false);
+    expect(internals(component).showResumePrompt()).toBe(false);
     expect(videoMock.currentTime).toBe(0);
-    expect((component as any).isPlaying()).toBe(true);
+    expect(internals(component).isPlaying()).toBe(true);
   });
 
   it('should trigger free preview CTA modal when free preview ends', () => {
-    component.isFreePreview = true;
+    fixture.componentRef.setInput('isFreePreview', true);
     let endedEmitted = false;
-    component.ended.subscribe(() => {
+    component.videoEnded.subscribe(() => {
       endedEmitted = true;
     });
 
-    (component as any).onVideoEnded();
+    internals(component).onVideoEnded();
 
-    expect((component as any).showFreePreviewCta()).toBe(true);
+    expect(internals(component).showFreePreviewCta()).toBe(true);
     expect(endedEmitted).toBe(true);
   });
 
@@ -124,7 +153,7 @@ describe('VideoPlayer Component', () => {
       currentTime: 20,
       duration: 100,
     } as unknown as HTMLVideoElement;
-    (component as any).videoElementRef = { nativeElement: videoMock };
+    internals(component).videoElementRef = () => ({ nativeElement: videoMock });
 
     // Space key: Play
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: ' ' }));
@@ -141,14 +170,14 @@ describe('VideoPlayer Component', () => {
     // ArrowUp: Volume +0.1 (from 0.5)
     component.setVolume(0.5);
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-    expect((component as any).volume()).toBeCloseTo(0.6);
+    expect(internals(component).volume()).toBeCloseTo(0.6);
 
     // 'm': Toggle Mute
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'm' }));
-    expect((component as any).isMuted()).toBe(true);
+    expect(internals(component).isMuted()).toBe(true);
 
     // '5': Seek to 50%
-    (component as any).duration.set(100);
+    internals(component).duration.set(100);
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '5' }));
     expect(videoMock.currentTime).toBe(50);
   });
@@ -165,8 +194,8 @@ describe('VideoPlayer Component', () => {
   });
 
   it('should load media on ngAfterViewInit when src is provided', () => {
-    const loadSpy = vi.spyOn(component as any, 'loadMedia');
-    component.src = 'https://video.example.com/manifest.mpd';
+    const loadSpy = vi.spyOn(internals(component), 'loadMedia');
+    fixture.componentRef.setInput('src', 'https://video.example.com/manifest.mpd');
     component.ngAfterViewInit();
 
     expect(loadSpy).toHaveBeenCalledWith('https://video.example.com/manifest.mpd');

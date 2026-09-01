@@ -4,18 +4,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
-  OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   PLATFORM_ID,
-  SimpleChanges,
-  ViewChild,
+  effect,
   inject,
+  input,
+  output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -83,25 +81,27 @@ export interface TextTrackOption {
     }),
   ],
 })
-export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  @ViewChild('videoElement') videoElementRef?: ElementRef<HTMLVideoElement>;
-  @ViewChild('playerContainer') playerContainerRef?: ElementRef<HTMLDivElement>;
+  private readonly videoElementRef = viewChild<ElementRef<HTMLVideoElement>>('videoElement');
+  private readonly playerContainerRef = viewChild<ElementRef<HTMLDivElement>>('playerContainer');
 
-  @Input() src?: string;
-  @Input() poster?: string | null;
-  @Input() watermark?: PlaybackWatermark;
-  @Input() initialPosition = 0;
-  @Input() isFreePreview = false;
-  @Input() courseTitle?: string;
-  @Input() courseSlug?: string;
+  readonly src = input<string>();
+  readonly poster = input<string | null>();
+  readonly watermark = input<PlaybackWatermark>();
+  readonly initialPosition = input(0);
+  readonly isFreePreview = input(false);
+  readonly courseTitle = input<string>();
+  readonly courseSlug = input<string>();
 
-  @Output() readonly timeUpdate = new EventEmitter<number>();
-  @Output() readonly ended = new EventEmitter<void>();
-  @Output() readonly progressHeartbeat = new EventEmitter<number>();
-  @Output() readonly buyCourseClicked = new EventEmitter<void>();
+  readonly timeUpdate = output<number>();
+  /** Named `videoEnded`, not `ended` — a component output named after a native DOM event
+   * (the `<video>` element's own `ended` event) trips `@angular-eslint/no-output-native`. */
+  readonly videoEnded = output<void>();
+  readonly progressHeartbeat = output<number>();
+  readonly buyCourseClicked = output<void>();
 
   // Player state signals
   protected readonly isPlaying = signal(false);
@@ -147,8 +147,20 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   private lastNonZeroVolume = 1;
   private isSeeking = false;
 
+  constructor() {
+    // Reload media whenever `src` changes after the view is initialized — mirrors the previous
+    // ngOnChanges behavior. This effect's first run happens before ngAfterViewInit sets
+    // isViewInitialized, so it's a no-op then; ngAfterViewInit handles the very first load itself.
+    effect(() => {
+      const src = this.src();
+      if (this.isBrowser && this.isViewInitialized && src) {
+        this.loadMedia(src);
+      }
+    });
+  }
+
   ngOnInit(): void {
-    if (this.initialPosition > 10) {
+    if (this.initialPosition() > 10) {
       this.showResumePrompt.set(true);
     }
 
@@ -160,17 +172,9 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
 
   ngAfterViewInit(): void {
     this.isViewInitialized = true;
-    if (this.isBrowser && this.src) {
-      this.loadMedia(this.src);
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['src'] && this.isBrowser && this.isViewInitialized) {
-      const newSrc = changes['src'].currentValue;
-      if (newSrc) {
-        this.loadMedia(newSrc);
-      }
+    const src = this.src();
+    if (this.isBrowser && src) {
+      this.loadMedia(src);
     }
   }
 
@@ -209,12 +213,13 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   public initPlayer(): void {
-    if (!this.isBrowser || !this.videoElementRef) return;
-    const videoEl = this.videoElementRef.nativeElement;
+    const videoElementRef = this.videoElementRef();
+    if (!this.isBrowser || !videoElementRef) return;
+    const videoEl = videoElementRef.nativeElement;
 
     if (!shaka.Player.isBrowserSupported()) {
       // Fallback to native video playback if browser does not support MSE/Shaka
-      const directSrc = this.pendingMediaUrl || this.src;
+      const directSrc = this.pendingMediaUrl || this.src();
       if (directSrc) {
         videoEl.src = directSrc;
       }
@@ -269,7 +274,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
         this.updateActiveTrack();
       });
 
-      const urlToLoad = this.pendingMediaUrl || this.src;
+      const urlToLoad = this.pendingMediaUrl || this.src();
       this.pendingMediaUrl = null;
       if (urlToLoad) {
         this.loadMedia(urlToLoad);
@@ -296,14 +301,16 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
 
     this.shakaPlayer.load(url).then(() => {
       this.updateAvailableTracks();
-      if (!this.showResumePrompt() && this.initialPosition > 0 && this.videoElementRef) {
-        this.videoElementRef.nativeElement.currentTime = this.initialPosition;
+      const videoElementRef = this.videoElementRef();
+      if (!this.showResumePrompt() && this.initialPosition() > 0 && videoElementRef) {
+        videoElementRef.nativeElement.currentTime = this.initialPosition();
       }
     }).catch((err) => {
       // If Shaka fails to parse manifest, try fallback native direct src if mp4
-      if (url.endsWith('.mp4') && this.videoElementRef) {
-        this.videoElementRef.nativeElement.src = url;
-        this.videoElementRef.nativeElement.load();
+      const videoElementRef = this.videoElementRef();
+      if (url.endsWith('.mp4') && videoElementRef) {
+        videoElementRef.nativeElement.src = url;
+        videoElementRef.nativeElement.load();
       } else {
         this.playbackError.set(mapShakaPlaybackError(err));
       }
@@ -314,7 +321,10 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
     this.isInitializingPlayer = false;
     this.pendingMediaUrl = null;
     if (this.shakaPlayer) {
-      this.shakaPlayer.destroy().catch(() => {});
+      this.shakaPlayer.destroy().catch(() => {
+        // Intentional no-op: this player instance is being replaced/torn down regardless of
+        // whether teardown itself succeeds — nothing left to recover into.
+      });
       this.shakaPlayer = null;
     }
   }
@@ -362,7 +372,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   // --- Public / Protected Playback Controls ---
 
   public togglePlay(): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
 
     if (this.playbackError()) {
@@ -371,7 +381,11 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
     }
 
     if (el.paused) {
-      el.play().catch(() => {});
+      el.play().catch(() => {
+        // Intentional no-op: play() rejects if the browser's autoplay policy blocks it (e.g. no
+        // prior user gesture) or playback is interrupted by a near-simultaneous pause() — the
+        // native `pause`/`play` events (not wired here) and playbackError() handle real failures.
+      });
       this.isPlaying.set(true);
     } else {
       el.pause();
@@ -380,7 +394,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   public skip(seconds: number): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
     const target = Math.max(0, Math.min(el.duration || 0, el.currentTime + seconds));
     el.currentTime = target;
@@ -389,7 +403,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   public toggleMute(): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
 
     if (el.muted || el.volume === 0) {
@@ -407,7 +421,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   public setVolume(vol: number): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
 
     const clamped = Math.max(0, Math.min(1, vol));
@@ -426,7 +440,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   public setPlaybackRate(rate: number): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
 
     el.playbackRate = rate;
@@ -486,50 +500,67 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   public toggleFullscreen(): void {
-    const container = this.playerContainerRef?.nativeElement;
+    const container = this.playerContainerRef()?.nativeElement;
     if (!container) return;
 
     if (!document.fullscreenElement) {
-      container.requestFullscreen().then(() => this.isFullscreen.set(true)).catch(() => {});
+      container.requestFullscreen().then(() => this.isFullscreen.set(true)).catch(() => {
+        // Intentional no-op: rejects if fullscreen is disallowed (e.g. iframe without the
+        // `allowfullscreen` attribute, or no user gesture) — isFullscreen() simply stays false.
+      });
     } else {
-      document.exitFullscreen().then(() => this.isFullscreen.set(false)).catch(() => {});
+      document.exitFullscreen().then(() => this.isFullscreen.set(false)).catch(() => {
+        // Intentional no-op: exitFullscreen() only rejects if the document wasn't actually in
+        // fullscreen — isFullscreen() already reflects reality via the browser's own state.
+      });
     }
   }
 
   public togglePip(): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el || !('pictureInPictureEnabled' in document)) return;
 
     if (document.pictureInPictureElement) {
-      document.exitPictureInPicture().then(() => this.isPip.set(false)).catch(() => {});
+      document.exitPictureInPicture().then(() => this.isPip.set(false)).catch(() => {
+        // Intentional no-op: rejects only if no element is currently in Picture-in-Picture —
+        // isPip() already reflects reality via the browser's own state.
+      });
     } else {
-      el.requestPictureInPicture().then(() => this.isPip.set(true)).catch(() => {});
+      el.requestPictureInPicture().then(() => this.isPip.set(true)).catch(() => {
+        // Intentional no-op: rejects if PiP is unsupported for this media or disallowed without
+        // a user gesture — isPip() simply stays false.
+      });
     }
   }
 
   public retryPlayback(): void {
     this.playbackError.set(null);
-    if (this.src) {
-      this.loadMedia(this.src);
+    const src = this.src();
+    if (src) {
+      this.loadMedia(src);
     }
   }
 
   public resumeFromSaved(): void {
     this.showResumePrompt.set(false);
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (el) {
-      el.currentTime = this.initialPosition;
-      el.play().catch(() => {});
+      el.currentTime = this.initialPosition();
+      el.play().catch(() => {
+        // Intentional no-op: same autoplay-policy rejection as togglePlay() above.
+      });
       this.isPlaying.set(true);
     }
   }
 
   public startFromBeginning(): void {
     this.showResumePrompt.set(false);
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (el) {
       el.currentTime = 0;
-      el.play().catch(() => {});
+      el.play().catch(() => {
+        // Intentional no-op: same autoplay-policy rejection as togglePlay() above.
+      });
       this.isPlaying.set(true);
     }
   }
@@ -614,9 +645,10 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
       case '9': {
         const percent = Number(event.key) / 10;
         const dur = this.duration();
-        if (dur > 0 && this.videoElementRef) {
+        const videoElementRef = this.videoElementRef();
+        if (dur > 0 && videoElementRef) {
           event.preventDefault();
-          this.videoElementRef.nativeElement.currentTime = dur * percent;
+          videoElementRef.nativeElement.currentTime = dur * percent;
           this.currentTime.set(dur * percent);
         }
         break;
@@ -628,7 +660,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
 
   protected onTimeUpdated(): void {
     if (this.isSeeking) return;
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
 
     this.currentTime.set(el.currentTime);
@@ -636,12 +668,12 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   }
 
   protected onLoadedMetadata(): void {
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (!el) return;
 
     this.duration.set(el.duration);
-    if (!this.showResumePrompt() && this.initialPosition > 0) {
-      el.currentTime = this.initialPosition;
+    if (!this.showResumePrompt() && this.initialPosition() > 0) {
+      el.currentTime = this.initialPosition();
     }
   }
 
@@ -649,11 +681,11 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
     this.isPlaying.set(false);
     this.progressHeartbeat.emit(Math.floor(this.duration()));
 
-    if (this.isFreePreview) {
+    if (this.isFreePreview()) {
       this.showFreePreviewCta.set(true);
     }
 
-    this.ended.emit();
+    this.videoEnded.emit();
   }
 
   protected onNativeError(event: Event): void {
@@ -670,7 +702,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnChanges, OnDestroy 
   protected onSeekChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     const seekTo = Number(target.value);
-    const el = this.videoElementRef?.nativeElement;
+    const el = this.videoElementRef()?.nativeElement;
     if (el) {
       el.currentTime = seekTo;
       this.currentTime.set(seekTo);

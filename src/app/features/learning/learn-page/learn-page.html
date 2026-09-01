@@ -51,7 +51,7 @@
               [courseTitle]="course()?.title"
               [courseSlug]="course()?.slug"
               (progressHeartbeat)="onHeartbeat($event)"
-              (ended)="onVideoEnded()"
+              (videoEnded)="onVideoEnded()"
               (buyCourseClicked)="buyCourse()"
             />
           } @else if (playbackError()) {

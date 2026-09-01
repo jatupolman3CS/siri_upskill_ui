@@ -10,7 +10,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { CartStore } from '../../commerce/cart/cart-store.service';
 import { CategoryTreeNode } from '../data/category-api.models';
-import { CourseDetailResponse } from '../data/course-api.models';
+import { CourseDetailResponse, CourseReviewSummaryResponse } from '../data/course-api.models';
 import { CourseDetailPage } from './course-detail-page';
 
 @Component({ template: '' })
@@ -109,7 +109,19 @@ describe('CourseDetailPage', () => {
     return component;
   }
 
-  function flushReviews(reviews: any = { ratingAverage: 0, ratingCount: 0, distribution: { star5: 0, star4: 0, star3: 0, star2: 0, star1: 0 }, items: [], totalCount: 0, page: 1, pageSize: 20 }, courseId = 'course-1'): Promise<void> {
+  function flushReviews(
+    reviews: CourseReviewSummaryResponse = {
+      averageRating: 0,
+      ratingCount: 0,
+      distribution: { star5: 0, star4: 0, star3: 0, star2: 0, star1: 0 },
+      items: [],
+      totalCount: 0,
+      page: 1,
+      pageSize: 20,
+      totalPages: 0,
+    },
+    courseId = 'course-1'
+  ): Promise<void> {
     const reqs = httpMock.match((r) => r.url === `/api/catalog/courses/${courseId}/reviews`);
     for (const rReq of reqs) {
       rReq.flush(reviews);

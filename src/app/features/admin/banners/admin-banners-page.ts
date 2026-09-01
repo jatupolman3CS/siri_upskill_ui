@@ -123,14 +123,17 @@ export class AdminBannersPage implements OnInit {
         isActive: true,
       })
       .subscribe({
-        next: (created) => {
+        next: () => {
           this.newTitle.set('');
           this.newImageUrl.set('');
           this.newTargetUrl.set('');
           this.showAddForm.set(false);
           this.loadBanners();
         },
-        error: () => {},
+        error: () => {
+          // Intentional no-op: keep the add-banner form open with the entered
+          // values so the user can retry instead of losing their input.
+        },
       });
   }
 }

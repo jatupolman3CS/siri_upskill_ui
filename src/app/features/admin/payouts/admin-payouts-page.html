@@ -372,8 +372,9 @@
 
         <form (ngSubmit)="submitCreateBatch()" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-[var(--color-text)] mb-1">รหัสงวดประจำเดือน (Period Key)*</label>
+            <label for="payout-period-key-input" class="block font-bold text-[var(--color-text)] mb-1">รหัสงวดประจำเดือน (Period Key)*</label>
             <input
+              id="payout-period-key-input"
               type="text"
               [ngModel]="newPeriodKey()"
               (ngModelChange)="newPeriodKey.set($event)"
@@ -430,8 +431,9 @@
         </div>
 
         <div>
-          <label class="block font-bold text-[var(--color-text)] text-xs mb-1">บันทึกเพิ่มเติม (Note to buyer - ไม่บังคับ)</label>
+          <label for="payout-approve-decision-note-textarea" class="block font-bold text-[var(--color-text)] text-xs mb-1">บันทึกเพิ่มเติม (Note to buyer - ไม่บังคับ)</label>
           <textarea
+            id="payout-approve-decision-note-textarea"
             [ngModel]="approveDecisionNote()"
             (ngModelChange)="approveDecisionNote.set($event)"
             name="appNote"
@@ -484,8 +486,9 @@
         </div>
 
         <div>
-          <label class="block font-bold text-[var(--color-text)] text-xs mb-1">เหตุผลในการปฏิเสธ*</label>
+          <label for="payout-reject-reason-textarea" class="block font-bold text-[var(--color-text)] text-xs mb-1">เหตุผลในการปฏิเสธ*</label>
           <textarea
+            id="payout-reject-reason-textarea"
             [ngModel]="rejectReason()"
             (ngModelChange)="rejectReason.set($event)"
             name="rejReason"

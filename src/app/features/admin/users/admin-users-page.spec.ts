@@ -94,7 +94,7 @@ describe('AdminUsersPage', () => {
   });
 
   it('updates user role to Instructor and reloads data', async () => {
-    const component = await navigate();
+    await navigate();
     flushInitialRequests();
     await settle();
 
@@ -151,7 +151,7 @@ describe('AdminUsersPage', () => {
   });
 
   it('suspends and reactivates a user account', async () => {
-    const component = await navigate();
+    await navigate();
     flushInitialRequests();
     await settle();
 

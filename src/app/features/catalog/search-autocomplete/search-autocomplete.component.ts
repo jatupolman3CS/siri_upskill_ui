@@ -3,14 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
   OnInit,
-  Output,
-  ViewChild,
   inject,
+  input,
+  output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -54,25 +53,25 @@ export class SearchAutocompleteComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly hostRef = inject(ElementRef);
 
-  @Input() placeholder = 'ค้นหาคอร์สเรียน ทักษะ หรือผู้สอน...';
-  @Input() initialQuery = '';
-  @Output() queryChange = new EventEmitter<string>();
-  @Output() searchSubmit = new EventEmitter<string>();
+  readonly placeholder = input('ค้นหาคอร์สเรียน ทักษะ หรือผู้สอน...');
+  readonly initialQuery = input('');
+  readonly queryChange = output<string>();
+  readonly searchSubmit = output<string>();
 
-  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+  private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  protected query = signal('');
-  protected isOpen = signal(false);
-  protected isLoading = signal(false);
-  protected suggestions = signal<readonly CourseSearchResultItem[]>([]);
-  protected recentSearches = signal<readonly string[]>([]);
-  protected activeIndex = signal(-1);
+  protected readonly query = signal('');
+  protected readonly isOpen = signal(false);
+  protected readonly isLoading = signal(false);
+  protected readonly suggestions = signal<readonly CourseSearchResultItem[]>([]);
+  protected readonly recentSearches = signal<readonly string[]>([]);
+  protected readonly activeIndex = signal(-1);
 
   private readonly searchTerms = new Subject<string>();
 
   ngOnInit(): void {
-    if (this.initialQuery) {
-      this.query.set(this.initialQuery);
+    if (this.initialQuery()) {
+      this.query.set(this.initialQuery());
     }
     this.loadRecentSearches();
 
@@ -120,7 +119,7 @@ export class SearchAutocompleteComponent implements OnInit {
     this.query.set('');
     this.suggestions.set([]);
     this.queryChange.emit('');
-    this.searchInput?.nativeElement.focus();
+    this.searchInput()?.nativeElement.focus();
   }
 
   protected selectRecent(term: string): void {
@@ -229,6 +228,9 @@ export class SearchAutocompleteComponent implements OnInit {
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(list));
       }
-    } catch {}
+    } catch {
+      // Intentional no-op: recent-search history is a best-effort convenience, not critical
+      // state — ignore storage failures (e.g. quota exceeded, private browsing mode).
+    }
   }
 }

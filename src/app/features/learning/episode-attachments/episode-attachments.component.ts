@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 import { EpisodeAttachmentItem } from '../data/learning-api.models';
@@ -12,23 +12,25 @@ import { LearningApiService } from '../data/learning-api.service';
   templateUrl: './episode-attachments.component.html',
   styleUrls: ['./episode-attachments.component.scss'],
 })
-export class EpisodeAttachmentsComponent implements OnChanges {
+export class EpisodeAttachmentsComponent {
   private readonly learningApi = inject(LearningApiService);
 
-  @Input() episodeId: string | null = null;
+  readonly episodeId = input<string | null>(null);
 
   readonly attachments = signal<EpisodeAttachmentItem[]>([]);
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['episodeId']) {
+  constructor() {
+    effect(() => {
+      this.episodeId();
       this.loadAttachments();
-    }
+    });
   }
 
   loadAttachments(): void {
-    if (!this.episodeId) {
+    const episodeId = this.episodeId();
+    if (!episodeId) {
       this.attachments.set([]);
       return;
     }
@@ -36,7 +38,7 @@ export class EpisodeAttachmentsComponent implements OnChanges {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.learningApi.getEpisodeAttachments(this.episodeId).subscribe({
+    this.learningApi.getEpisodeAttachments(episodeId).subscribe({
       next: (items) => {
         this.isLoading.set(false);
         this.attachments.set(items || []);
@@ -49,9 +51,10 @@ export class EpisodeAttachmentsComponent implements OnChanges {
   }
 
   download(att: EpisodeAttachmentItem): void {
-    if (!this.episodeId) return;
+    const episodeId = this.episodeId();
+    if (!episodeId) return;
 
-    this.learningApi.downloadEpisodeAttachment(this.episodeId, att.id).subscribe({
+    this.learningApi.downloadEpisodeAttachment(episodeId, att.id).subscribe({
       next: (info) => {
         window.open(info.downloadUrl, '_blank');
       },

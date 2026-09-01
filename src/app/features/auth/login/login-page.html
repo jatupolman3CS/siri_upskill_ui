@@ -1,70 +1,74 @@
 <div class="animate-fade-in mx-auto flex min-h-[75vh] max-w-lg flex-col justify-center gap-6 px-4 py-8">
   <header class="animate-fade-in-down text-center">
-    <div class="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)]/10 px-3 py-1 text-xs font-bold text-[var(--color-primary)] mb-2 animate-pulse-subtle">
-      <span>🚀 Quick Access / Bypass Mode Available</span>
-    </div>
+    @if (devBypassEnabled) {
+      <div class="inline-flex items-center gap-2 rounded-full bg-[var(--color-primary)]/10 px-3 py-1 text-xs font-bold text-[var(--color-primary)] mb-2 animate-pulse-subtle">
+        <span>🚀 Quick Access / Bypass Mode Available</span>
+      </div>
+    }
     <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'auth.login.heading' | translate }}</h1>
     <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'auth.login.subheading' | translate }}</p>
   </header>
 
-  <!-- 1-Click Role Bypass Box -->
-  <div class="animate-fade-in-up stagger-1 rounded-2xl border-2 border-dashed border-indigo-500/40 bg-indigo-500/5 p-4 sm:p-5 shadow-sm">
-    <div class="flex items-center justify-between gap-2 mb-3">
-      <div class="flex items-center gap-2">
-        <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-500 text-white font-bold text-xs">⚡</span>
-        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-          เข้าใช้งานทันที (1-Click Bypass)
-        </span>
+  <!-- 1-Click Role Bypass Box — DEV-BYPASS only, see LoginPage.devBypassEnabled's doc comment -->
+  @if (devBypassEnabled) {
+    <div class="animate-fade-in-up stagger-1 rounded-2xl border-2 border-dashed border-indigo-500/40 bg-indigo-500/5 p-4 sm:p-5 shadow-sm">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-500 text-white font-bold text-xs">⚡</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            เข้าใช้งานทันที (1-Click Bypass)
+          </span>
+        </div>
+        <span class="text-[11px] text-slate-400">ไม่ต้องกรอกรหัสผ่าน</span>
       </div>
-      <span class="text-[11px] text-slate-400">ไม่ต้องกรอกรหัสผ่าน</span>
+
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          (click)="quickBypass('SuperAdmin')"
+          class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-left transition hover:bg-rose-500/20"
+        >
+          <span class="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+            👑 Super Admin
+          </span>
+          <span class="text-[10px] text-[var(--color-text-muted)]">จัดการระบบสูงสุด & CMS</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="quickBypass('Admin')"
+          class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-left transition hover:bg-amber-500/20"
+        >
+          <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            🛠️ Admin
+          </span>
+          <span class="text-[10px] text-[var(--color-text-muted)]">อนุมัติคอร์ส & จัดการผู้ใช้</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="quickBypass('Instructor')"
+          class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-2.5 text-left transition hover:bg-indigo-500/20"
+        >
+          <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+            👨‍🏫 Instructor
+          </span>
+          <span class="text-[10px] text-[var(--color-text-muted)]">สตูดิโอผู้สอน & บทเรียน</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="quickBypass('Learner')"
+          class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-left transition hover:bg-emerald-500/20"
+        >
+          <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            🎓 Learner
+          </span>
+          <span class="text-[10px] text-[var(--color-text-muted)]">คอร์สของฉัน & ห้องเรียน</span>
+        </button>
+      </div>
     </div>
-
-    <div class="grid grid-cols-2 gap-2 sm:grid-cols-2">
-      <button
-        type="button"
-        (click)="quickBypass('SuperAdmin')"
-        class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-left transition hover:bg-rose-500/20"
-      >
-        <span class="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-          👑 Super Admin
-        </span>
-        <span class="text-[10px] text-[var(--color-text-muted)]">จัดการระบบสูงสุด & CMS</span>
-      </button>
-
-      <button
-        type="button"
-        (click)="quickBypass('Admin')"
-        class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-left transition hover:bg-amber-500/20"
-      >
-        <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-          🛠️ Admin
-        </span>
-        <span class="text-[10px] text-[var(--color-text-muted)]">อนุมัติคอร์ส & จัดการผู้ใช้</span>
-      </button>
-
-      <button
-        type="button"
-        (click)="quickBypass('Instructor')"
-        class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-2.5 text-left transition hover:bg-indigo-500/20"
-      >
-        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-          👨‍🏫 Instructor
-        </span>
-        <span class="text-[10px] text-[var(--color-text-muted)]">สตูดิโอผู้สอน & บทเรียน</span>
-      </button>
-
-      <button
-        type="button"
-        (click)="quickBypass('Learner')"
-        class="btn-tactile flex flex-col items-start gap-0.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-left transition hover:bg-emerald-500/20"
-      >
-        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-          🎓 Learner
-        </span>
-        <span class="text-[10px] text-[var(--color-text-muted)]">คอร์สของฉัน & ห้องเรียน</span>
-      </button>
-    </div>
-  </div>
+  }
 
   <div class="animate-fade-in-up stagger-2 relative flex items-center justify-center">
     <div class="absolute inset-0 flex items-center">

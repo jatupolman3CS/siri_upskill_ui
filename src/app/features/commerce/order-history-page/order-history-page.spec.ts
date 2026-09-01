@@ -81,7 +81,6 @@ const MOCK_ORDERS: PagedResult<OrderDetailResponse> = {
 
 describe('OrderHistoryPage', () => {
   let fixture: ComponentFixture<OrderHistoryPage>;
-  let component: OrderHistoryPage;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
@@ -91,7 +90,6 @@ describe('OrderHistoryPage', () => {
     });
 
     fixture = TestBed.createComponent(OrderHistoryPage);
-    component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
 
     TestBed.inject(TranslationService).setLocale('en');

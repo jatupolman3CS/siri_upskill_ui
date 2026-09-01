@@ -151,7 +151,9 @@ export class LearnPage implements OnInit {
               this.enrollmentId.set(myEnroll.id);
             }
           },
-          error: () => {},
+          error: () => {
+            // Intentional no-op: enrollmentId() simply stays null, treated the same as "not enrolled".
+          },
         });
 
         // Load progress
@@ -162,7 +164,9 @@ export class LearnPage implements OnInit {
               this.loadCertificate(courseData.id);
             }
           },
-          error: () => {},
+          error: () => {
+            // Intentional no-op: courseProgress() simply stays null; the progress UI degrades to 0%.
+          },
         });
 
         // Determine active episode
@@ -185,7 +189,9 @@ export class LearnPage implements OnInit {
   private loadCertificate(courseId: string): void {
     this.learningApi.getCertificateByCourse(courseId).subscribe({
       next: (cert) => this.certificate.set(cert),
-      error: () => {},
+      error: () => {
+        // Intentional no-op: certificate() simply stays null (e.g. not issued yet) — no error UI needed.
+      },
     });
   }
 
@@ -270,11 +276,17 @@ export class LearnPage implements OnInit {
                 this.loadCertificate(this.course()!.id);
               }
             },
-            error: () => {},
+            error: () => {
+              // Intentional no-op: this is a background refresh piggybacking on a heartbeat save —
+              // courseProgress() simply keeps its last known value on failure.
+            },
           });
         }
       },
-      error: () => {},
+      error: () => {
+        // Intentional no-op: heartbeat saves are periodic and non-critical — a single failed
+        // save is silently dropped rather than surfaced, the next heartbeat will retry naturally.
+      },
     });
   }
 
@@ -339,7 +351,10 @@ export class LearnPage implements OnInit {
           list.map((d) => (d.id === discussionId ? { ...d, upvoteCount: d.upvoteCount + 1 } : d))
         );
       },
-      error: () => {},
+      error: () => {
+        // Intentional no-op: upvote is optimistic-free (state only updates via `next`) — a failed
+        // request simply leaves the discussion's upvote count unchanged, safe to retry by re-clicking.
+      },
     });
   }
 }

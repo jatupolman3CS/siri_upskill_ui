@@ -139,7 +139,7 @@ describe('AdminMarketingPage', () => {
   });
 
   it('switches tabs and displays flash sales and bundles', async () => {
-    const component = await navigate();
+    await navigate();
     flushInitialRequests();
     await settle();
 
@@ -165,7 +165,7 @@ describe('AdminMarketingPage', () => {
   });
 
   it('submits create promo code modal form to backend', async () => {
-    const component = await navigate();
+    await navigate();
     flushInitialRequests();
     await settle();
 

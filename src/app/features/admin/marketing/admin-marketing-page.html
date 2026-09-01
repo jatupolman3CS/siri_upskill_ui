@@ -319,8 +319,9 @@
         <form (ngSubmit)="submitCreatePromo()" class="space-y-4 text-xs">
           <!-- Code -->
           <div>
-            <label class="block font-bold text-[var(--color-text)] mb-1">รหัสโค้ด (Code)*</label>
+            <label for="promo-code-input" class="block font-bold text-[var(--color-text)] mb-1">รหัสโค้ด (Code)*</label>
             <input
+              id="promo-code-input"
               type="text"
               [ngModel]="promoCode()"
               (ngModelChange)="promoCode.set($event)"
@@ -334,8 +335,9 @@
           <!-- Type & Value -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">ประเภทส่วนลด*</label>
+              <label for="promo-discount-type-select" class="block font-bold text-[var(--color-text)] mb-1">ประเภทส่วนลด*</label>
               <select
+                id="promo-discount-type-select"
                 [ngModel]="promoDiscountType()"
                 (ngModelChange)="promoDiscountType.set($event)"
                 name="discountType"
@@ -346,8 +348,9 @@
               </select>
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">มูลค่าส่วนลด*</label>
+              <label for="promo-discount-value-input" class="block font-bold text-[var(--color-text)] mb-1">มูลค่าส่วนลด*</label>
               <input
+                id="promo-discount-value-input"
                 type="number"
                 [ngModel]="promoDiscountValue()"
                 (ngModelChange)="promoDiscountValue.set($event)"
@@ -362,8 +365,9 @@
           <!-- Limits -->
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">ยอดขั้นต่ำ (฿)</label>
+              <label for="promo-min-spend-input" class="block font-bold text-[var(--color-text)] mb-1">ยอดขั้นต่ำ (฿)</label>
               <input
+                id="promo-min-spend-input"
                 type="number"
                 [ngModel]="promoMinSpend()"
                 (ngModelChange)="promoMinSpend.set($event)"
@@ -373,8 +377,9 @@
               />
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">สิทธิ์รวม (ครั้ง)</label>
+              <label for="promo-max-redemptions-input" class="block font-bold text-[var(--color-text)] mb-1">สิทธิ์รวม (ครั้ง)</label>
               <input
+                id="promo-max-redemptions-input"
                 type="number"
                 [ngModel]="promoMaxRedemptions()"
                 (ngModelChange)="promoMaxRedemptions.set($event)"
@@ -384,8 +389,9 @@
               />
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">สิทธิ์/คน</label>
+              <label for="promo-max-per-user-input" class="block font-bold text-[var(--color-text)] mb-1">สิทธิ์/คน</label>
               <input
+                id="promo-max-per-user-input"
                 type="number"
                 [ngModel]="promoMaxPerUser()"
                 (ngModelChange)="promoMaxPerUser.set($event)"
@@ -399,8 +405,9 @@
           <!-- Dates -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">วันที่เริ่มต้น</label>
+              <label for="promo-starts-at-input" class="block font-bold text-[var(--color-text)] mb-1">วันที่เริ่มต้น</label>
               <input
+                id="promo-starts-at-input"
                 type="datetime-local"
                 [ngModel]="promoStartsAt()"
                 (ngModelChange)="promoStartsAt.set($event)"
@@ -409,8 +416,9 @@
               />
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">วันที่สิ้นสุด</label>
+              <label for="promo-ends-at-input" class="block font-bold text-[var(--color-text)] mb-1">วันที่สิ้นสุด</label>
               <input
+                id="promo-ends-at-input"
                 type="datetime-local"
                 [ngModel]="promoEndsAt()"
                 (ngModelChange)="promoEndsAt.set($event)"
@@ -462,8 +470,9 @@
 
         <form (ngSubmit)="submitCreateFlashSale()" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-[var(--color-text)] mb-1">ชื่อแคมเปญ Flash Sale*</label>
+            <label for="flash-sale-title-input" class="block font-bold text-[var(--color-text)] mb-1">ชื่อแคมเปญ Flash Sale*</label>
             <input
+              id="flash-sale-title-input"
               type="text"
               [ngModel]="flashSaleTitle()"
               (ngModelChange)="flashSaleTitle.set($event)"
@@ -476,8 +485,9 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">Course ID (GUID)*</label>
+              <label for="flash-sale-course-id-input" class="block font-bold text-[var(--color-text)] mb-1">Course ID (GUID)*</label>
               <input
+                id="flash-sale-course-id-input"
                 type="text"
                 [ngModel]="flashSaleCourseId()"
                 (ngModelChange)="flashSaleCourseId.set($event)"
@@ -488,8 +498,9 @@
               />
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">ราคาพิเศษ Flash Sale (฿)*</label>
+              <label for="flash-sale-price-input" class="block font-bold text-[var(--color-text)] mb-1">ราคาพิเศษ Flash Sale (฿)*</label>
               <input
+                id="flash-sale-price-input"
                 type="number"
                 [ngModel]="flashSalePrice()"
                 (ngModelChange)="flashSalePrice.set($event)"
@@ -503,8 +514,9 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">เริ่มวันที่</label>
+              <label for="flash-sale-starts-at-input" class="block font-bold text-[var(--color-text)] mb-1">เริ่มวันที่</label>
               <input
+                id="flash-sale-starts-at-input"
                 type="datetime-local"
                 [ngModel]="flashSaleStartsAt()"
                 (ngModelChange)="flashSaleStartsAt.set($event)"
@@ -513,8 +525,9 @@
               />
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">สิ้นสุดวันที่</label>
+              <label for="flash-sale-ends-at-input" class="block font-bold text-[var(--color-text)] mb-1">สิ้นสุดวันที่</label>
               <input
+                id="flash-sale-ends-at-input"
                 type="datetime-local"
                 [ngModel]="flashSaleEndsAt()"
                 (ngModelChange)="flashSaleEndsAt.set($event)"
@@ -566,8 +579,9 @@
 
         <form (ngSubmit)="submitCreateBundle()" class="space-y-4 text-xs">
           <div>
-            <label class="block font-bold text-[var(--color-text)] mb-1">ชื่อแพ็กเกจ (Title)*</label>
+            <label for="bundle-title-input" class="block font-bold text-[var(--color-text)] mb-1">ชื่อแพ็กเกจ (Title)*</label>
             <input
+              id="bundle-title-input"
               type="text"
               [ngModel]="bundleTitle()"
               (ngModelChange)="bundleTitle.set($event)"
@@ -580,8 +594,9 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">Slug URL*</label>
+              <label for="bundle-slug-input" class="block font-bold text-[var(--color-text)] mb-1">Slug URL*</label>
               <input
+                id="bundle-slug-input"
                 type="text"
                 [ngModel]="bundleSlug()"
                 (ngModelChange)="bundleSlug.set($event)"
@@ -591,8 +606,9 @@
               />
             </div>
             <div>
-              <label class="block font-bold text-[var(--color-text)] mb-1">ราคาแพ็กเกจ (฿)*</label>
+              <label for="bundle-price-input" class="block font-bold text-[var(--color-text)] mb-1">ราคาแพ็กเกจ (฿)*</label>
               <input
+                id="bundle-price-input"
                 type="number"
                 [ngModel]="bundlePrice()"
                 (ngModelChange)="bundlePrice.set($event)"
@@ -605,8 +621,9 @@
           </div>
 
           <div>
-            <label class="block font-bold text-[var(--color-text)] mb-1">คำอธิบาย</label>
+            <label for="bundle-description-textarea" class="block font-bold text-[var(--color-text)] mb-1">คำอธิบาย</label>
             <textarea
+              id="bundle-description-textarea"
               [ngModel]="bundleDescription()"
               (ngModelChange)="bundleDescription.set($event)"
               name="bDesc"
@@ -617,10 +634,11 @@
           </div>
 
           <div>
-            <label class="block font-bold text-[var(--color-text)] mb-1">
+            <label for="bundle-course-ids-textarea" class="block font-bold text-[var(--color-text)] mb-1">
               Course IDs (1 รหัสต่อ 1 บรรทัด)*
             </label>
             <textarea
+              id="bundle-course-ids-textarea"
               [ngModel]="bundleCourseIdsRaw()"
               (ngModelChange)="bundleCourseIdsRaw.set($event)"
               name="bCourses"

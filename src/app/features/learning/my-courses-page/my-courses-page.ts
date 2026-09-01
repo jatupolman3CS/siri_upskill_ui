@@ -24,7 +24,6 @@ import { LearningApiService } from '../data/learning-api.service';
 import { CourseApiService } from '../../catalog/data/course-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
-import { Button } from '../../../shared/button/button';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 
 interface EnrichedEnrollment extends EnrollmentItemResponse {
@@ -153,7 +152,10 @@ export class MyCoursesPage implements OnInit {
           },
         });
       },
-      error: () => {},
+      error: () => {
+        // Intentional no-op: no certificate record was found for this
+        // enrollment, so there is nothing to download or fall back to.
+      },
     });
   }
 }

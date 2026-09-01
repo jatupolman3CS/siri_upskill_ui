@@ -75,8 +75,9 @@
       </div>
 
       <div class="flex items-center gap-2 w-full sm:w-auto">
-        <label class="text-xs font-bold text-[var(--color-text-muted)] whitespace-nowrap">บทบาท:</label>
+        <label for="users-role-filter-select" class="text-xs font-bold text-[var(--color-text-muted)] whitespace-nowrap">บทบาท:</label>
         <select
+          id="users-role-filter-select"
           [(ngModel)]="selectedRole"
           (change)="onSearch()"
           class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none"
@@ -87,8 +88,9 @@
           <option value="Learner">ผู้เรียน (Learner)</option>
         </select>
 
-        <label class="text-xs font-bold text-[var(--color-text-muted)] whitespace-nowrap ml-2">สถานะ:</label>
+        <label for="users-status-filter-select" class="text-xs font-bold text-[var(--color-text-muted)] whitespace-nowrap ml-2">สถานะ:</label>
         <select
+          id="users-status-filter-select"
           [(ngModel)]="selectedStatus"
           (change)="onSearch()"
           class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none"
@@ -258,8 +260,9 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-bold text-[var(--color-text)]">เลือกบทบาทหลัก:</label>
+          <label for="edit-role-select" class="text-xs font-bold text-[var(--color-text)]">เลือกบทบาทหลัก:</label>
           <select
+            id="edit-role-select"
             [(ngModel)]="editRoleSelected"
             class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
           >
@@ -305,8 +308,9 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-bold text-[var(--color-text)]">ระบุเหตุผลในการระงับบัญชี:</label>
+          <label for="suspend-reason-textarea" class="text-xs font-bold text-[var(--color-text)]">ระบุเหตุผลในการระงับบัญชี:</label>
           <textarea
+            id="suspend-reason-textarea"
             [(ngModel)]="suspendReason"
             rows="3"
             placeholder="เช่น ละเมิดข้อกำหนดการใช้งาน, มีพฤติกรรมน่าสงสัย..."
@@ -351,8 +355,9 @@
 
         <div class="space-y-4">
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">อีเมล (Email) *</label>
+            <label for="invite-email-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">อีเมล (Email) *</label>
             <input
+              id="invite-email-input"
               type="email"
               [(ngModel)]="inviteEmail"
               placeholder="user@example.com"
@@ -361,8 +366,9 @@
           </div>
 
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ชื่อที่แสดง (Display Name) *</label>
+            <label for="invite-display-name-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">ชื่อที่แสดง (Display Name) *</label>
             <input
+              id="invite-display-name-input"
               type="text"
               [(ngModel)]="inviteDisplayName"
               placeholder="เช่น สมชาย ใจดี"
@@ -371,8 +377,9 @@
           </div>
 
           <div>
-            <label class="text-xs font-bold text-[var(--color-text)] block mb-1">บทบาท / สิทธิ์การใช้งาน *</label>
+            <label for="invite-role-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">บทบาท / สิทธิ์การใช้งาน *</label>
             <select
+              id="invite-role-select"
               [(ngModel)]="inviteRole"
               class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             >

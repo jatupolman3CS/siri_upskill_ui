@@ -1,3 +1,4 @@
+@if (devBypassEnabled) {
 <!-- Floating Quick Access Pill (Always Visible on Screen) -->
 <div class="fixed bottom-5 right-5 z-50 flex items-center gap-2 shadow-2xl transition-all duration-300">
   <button
@@ -42,17 +43,24 @@
 
 <!-- Full Master Navigation & Role Switcher Modal Dialog -->
 @if (isExpanded()) {
+  <!--
+    Backdrop is intentionally not a keyboard tab stop: it's a decorative click-catcher
+    (role="presentation"), not a widget. The keyboard-equivalent close action is Escape, handled
+    here via native keydown bubbling from whatever is focused inside the dialog. The dialog panel
+    itself has no click handler of its own (target-vs-currentTarget check below instead) — matches
+    shared/modal/modal.html's/modal.ts's established pattern for this exact scenario.
+  -->
   <div
     role="presentation"
     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-in fade-in duration-200"
-    (click)="isExpanded.set(false)"
+    (click)="onBackdropClick($event)"
+    (keydown.escape)="isExpanded.set(false)"
   >
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="dev-hub-title"
       class="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-700/80 bg-slate-900 text-slate-100 shadow-2xl animate-in zoom-in-95 duration-200"
-      (click)="$event.stopPropagation()"
     >
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-6 py-4">
@@ -115,13 +123,17 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             @for (role of roles; track role.id) {
               <div
-                class="group relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 cursor-pointer"
+                role="button"
+                tabindex="0"
+                class="group relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                 [ngClass]="
                   auth.currentMockRole() === role.id
                     ? 'border-indigo-500 bg-indigo-950/40 ring-2 ring-indigo-500/20 shadow-lg'
                     : 'border-slate-800 bg-slate-950/40 hover:border-slate-700 hover:bg-slate-800/40'
                 "
                 (click)="switchRole(role.id)"
+                (keydown.enter)="switchRole(role.id)"
+                (keydown.space)="$event.preventDefault(); switchRole(role.id)"
               >
                 <div>
                   <div class="flex items-center justify-between mb-2">
@@ -139,6 +151,7 @@
                   <button
                     type="button"
                     (click)="$event.stopPropagation(); switchRole(role.id, true, role.defaultPath)"
+                    (keydown)="$event.stopPropagation()"
                     class="font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
                   >
                     <span>ไปยังแดชบอร์ด</span>
@@ -184,9 +197,10 @@
           <!-- Tab Content Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-4">
             @for (item of currentGroup().items; track item.path) {
-              <div
+              <button
+                type="button"
                 (click)="navigateTo(item.path)"
-                class="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/50 p-4 transition-all duration-200 hover:border-indigo-500/50 hover:bg-slate-800/50 cursor-pointer"
+                class="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/50 p-4 text-left transition-all duration-200 hover:border-indigo-500/50 hover:bg-slate-800/50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
               >
                 <div>
                   <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -218,7 +232,7 @@
                     เปิดหน้านี้ <ng-icon name="phosphorArrowRight" />
                   </span>
                 </div>
-              </div>
+              </button>
             }
           </div>
         </div>
@@ -241,4 +255,5 @@
       </div>
     </div>
   </div>
+}
 }

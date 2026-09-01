@@ -53,16 +53,9 @@ describe('AssignmentSubmissionComponent', () => {
   });
 
   it('loads assignment and previous submission on episode change', () => {
-    component.episodeId = 'ep-001';
-    component.enrollmentId = 'enr-001';
-    component.ngOnChanges({
-      episodeId: {
-        currentValue: 'ep-001',
-        previousValue: null,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-    });
+    fixture.componentRef.setInput('episodeId', 'ep-001');
+    fixture.componentRef.setInput('enrollmentId', 'enr-001');
+    TestBed.flushEffects();
 
     const asnReq = httpTesting.expectOne('/api/learning/assignments/by-episode/ep-001');
     expect(asnReq.request.method).toBe('GET');
@@ -78,16 +71,9 @@ describe('AssignmentSubmissionComponent', () => {
   });
 
   it('allows submitting assignment when no previous submission exists', () => {
-    component.episodeId = 'ep-001';
-    component.enrollmentId = 'enr-001';
-    component.ngOnChanges({
-      episodeId: {
-        currentValue: 'ep-001',
-        previousValue: null,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-    });
+    fixture.componentRef.setInput('episodeId', 'ep-001');
+    fixture.componentRef.setInput('enrollmentId', 'enr-001');
+    TestBed.flushEffects();
 
     httpTesting.expectOne('/api/learning/assignments/by-episode/ep-001').flush(MOCK_ASSIGNMENT);
     httpTesting.expectOne('/api/learning/assignment-submissions/by-assignment/asn-001').flush(null);

@@ -54,6 +54,12 @@ describe('AdminPayoutsPage', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    // AdminPayoutsPage's ngOnInit derives the default new-batch period key from the
+    // real wall clock — freeze Date only (not setTimeout/etc., which the router harness
+    // relies on) so that derived value is deterministic regardless of when tests run.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-08-15T00:00:00Z'));
+
     TestBed.configureTestingModule({
       providers: [
         CurrencyPipe,
@@ -66,7 +72,10 @@ describe('AdminPayoutsPage', () => {
     harness = await RouterTestingHarness.create();
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.useRealTimers();
+  });
 
   async function settle(): Promise<void> {
     harness.detectChanges();
@@ -113,7 +122,7 @@ describe('AdminPayoutsPage', () => {
   });
 
   it('switches to refunds tab and approves pending refund', async () => {
-    const component = await navigate();
+    await navigate();
     flushInitialRequests();
     await settle();
 
@@ -169,7 +178,7 @@ describe('AdminPayoutsPage', () => {
   });
 
   it('creates a new payout batch and updates list', async () => {
-    const component = await navigate();
+    await navigate();
     flushInitialRequests();
     await settle();
 

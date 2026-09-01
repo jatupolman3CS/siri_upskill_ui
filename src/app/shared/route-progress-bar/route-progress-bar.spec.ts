@@ -1,5 +1,5 @@
 ﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { Event as RouterEvent, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { describe, expect, it, beforeEach } from 'vitest';
 import { RouteProgressBar } from './route-progress-bar';
@@ -7,7 +7,7 @@ import { RouteProgressBar } from './route-progress-bar';
 describe('RouteProgressBar', () => {
   let fixture: ComponentFixture<RouteProgressBar>;
   let component: RouteProgressBar;
-  let routerEvents$: Subject<any>;
+  let routerEvents$: Subject<RouterEvent>;
 
   beforeEach(async () => {
     routerEvents$ = new Subject();

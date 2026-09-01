@@ -68,16 +68,9 @@ describe('QuizTakingComponent', () => {
   });
 
   it('loads quiz and previous attempts on episode change', () => {
-    component.episodeId = 'ep-001';
-    component.enrollmentId = 'enr-001';
-    component.ngOnChanges({
-      episodeId: {
-        currentValue: 'ep-001',
-        previousValue: null,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-    });
+    fixture.componentRef.setInput('episodeId', 'ep-001');
+    fixture.componentRef.setInput('enrollmentId', 'enr-001');
+    TestBed.flushEffects();
 
     const quizReq = httpTesting.expectOne('/api/learning/quizzes/by-episode/ep-001');
     expect(quizReq.request.method).toBe('GET');
@@ -93,16 +86,9 @@ describe('QuizTakingComponent', () => {
   });
 
   it('handles starting a new attempt and selecting options', () => {
-    component.episodeId = 'ep-001';
-    component.enrollmentId = 'enr-001';
-    component.ngOnChanges({
-      episodeId: {
-        currentValue: 'ep-001',
-        previousValue: null,
-        firstChange: true,
-        isFirstChange: () => true,
-      },
-    });
+    fixture.componentRef.setInput('episodeId', 'ep-001');
+    fixture.componentRef.setInput('enrollmentId', 'enr-001');
+    TestBed.flushEffects();
 
     httpTesting.expectOne('/api/learning/quizzes/by-episode/ep-001').flush(MOCK_QUIZ);
     httpTesting.expectOne('/api/learning/quiz-attempts/by-quiz/quiz-001').flush([]);

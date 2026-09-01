@@ -22,8 +22,9 @@
       <h2 class="text-sm font-bold text-[var(--color-text)]">เขียนบทความใหม่</h2>
       <div class="space-y-3">
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อบทความ *</label>
+          <label for="post-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อบทความ *</label>
           <input
+            id="post-title-input"
             type="text"
             [(ngModel)]="newTitle"
             placeholder="เช่น 5 เทคนิคการเรียนรู้ Programming ให้เข้าใจเร็ว"
@@ -32,8 +33,9 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">URL Slug (ภาษาอังกฤษ)</label>
+          <label for="post-slug-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">URL Slug (ภาษาอังกฤษ)</label>
           <input
+            id="post-slug-input"
             type="text"
             [(ngModel)]="newSlug"
             placeholder="5-tips-learn-programming-fast"
@@ -42,8 +44,9 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">บทคัดย่อ (Excerpt)</label>
+          <label for="post-excerpt-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">บทคัดย่อ (Excerpt)</label>
           <input
+            id="post-excerpt-input"
             type="text"
             [(ngModel)]="newExcerpt"
             placeholder="สรุปสั้น ๆ สำหรับแสดงในการ์ดหน้ารวมบทความ"
@@ -52,8 +55,9 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">เนื้อหาบทความ (HTML / Text) *</label>
+          <label for="post-content-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">เนื้อหาบทความ (HTML / Text) *</label>
           <textarea
+            id="post-content-textarea"
             [(ngModel)]="newContent"
             rows="6"
             placeholder="พิมพ์เนื้อหาบทความที่นี่..."
@@ -62,8 +66,9 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์รูปภาพหน้าปก</label>
+          <label for="post-cover-url-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์รูปภาพหน้าปก</label>
           <input
+            id="post-cover-url-input"
             type="text"
             [(ngModel)]="newCoverUrl"
             placeholder="https://example.com/cover.jpg"

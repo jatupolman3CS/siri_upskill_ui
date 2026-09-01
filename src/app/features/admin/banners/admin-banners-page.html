@@ -22,8 +22,9 @@
       <h2 class="text-sm font-bold text-[var(--color-text)]">ข้อมูลแบนเนอร์ใหม่</h2>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อแบนเนอร์ *</label>
+          <label for="banner-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อแบนเนอร์ *</label>
           <input
+            id="banner-title-input"
             type="text"
             [(ngModel)]="newTitle"
             placeholder="เช่น โปรโมชั่นคอร์สใหม่ ลด 40%"
@@ -32,8 +33,9 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์รูปภาพ (Image URL) *</label>
+          <label for="banner-image-url-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์รูปภาพ (Image URL) *</label>
           <input
+            id="banner-image-url-input"
             type="text"
             [(ngModel)]="newImageUrl"
             placeholder="https://example.com/banner.jpg"
@@ -42,8 +44,9 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์ปลายทาง (Target URL)</label>
+          <label for="banner-target-url-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">ลิงก์ปลายทาง (Target URL)</label>
           <input
+            id="banner-target-url-input"
             type="text"
             [(ngModel)]="newTargetUrl"
             placeholder="/courses หรือ /courses/slug"
