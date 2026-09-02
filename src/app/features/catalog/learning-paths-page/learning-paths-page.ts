@@ -62,7 +62,8 @@ export class LearningPathsPage implements OnInit {
     this.hasError.set(false);
     this.learningPathApi.getLearningPaths().subscribe({
       next: (res) => {
-        this.paths.set([...res]);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.paths.set([...items]);
         this.isLoading.set(false);
       },
       error: () => {

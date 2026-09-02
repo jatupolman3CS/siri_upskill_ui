@@ -94,6 +94,7 @@ export class LearnPage implements OnInit {
   protected readonly certificate = signal<CertificateDetailResponse | null>(null);
   protected readonly playbackSession = signal<PlaybackSessionResponse | null>(null);
   protected readonly episodeProgress = signal<EpisodeProgressResponse | null>(null);
+  protected readonly episodeProgressMap = signal<Map<string, EpisodeProgressResponse>>(new Map());
 
   protected readonly activeTab = signal<'curriculum' | 'overview' | 'quiz' | 'assignment' | 'resources' | 'qa'>('overview');
   protected readonly discussions = signal<readonly DiscussionItem[]>([]);
@@ -143,29 +144,18 @@ export class LearnPage implements OnInit {
           robots: 'noindex',
         });
 
-        // Load enrollment ID
+        // Load enrollment ID & progress
         this.learningApi.getMyEnrollments().subscribe({
           next: (res) => {
-            const myEnroll = res.items.find((e) => e.courseId === courseData.id);
+            const items = Array.isArray(res) ? res : (res?.items ?? []);
+            const myEnroll = items.find((e) => e.courseId === courseData.id);
             if (myEnroll) {
               this.enrollmentId.set(myEnroll.id);
+              this.loadEnrollmentProgress(myEnroll.id, myEnroll.progressPercentage, courseData.id);
             }
           },
           error: () => {
             // Intentional no-op: enrollmentId() simply stays null, treated the same as "not enrolled".
-          },
-        });
-
-        // Load progress
-        this.learningApi.getCourseProgress(courseData.id).subscribe({
-          next: (prog) => {
-            this.courseProgress.set(prog);
-            if (prog.isCompleted || prog.progressPercent >= 100) {
-              this.loadCertificate(courseData.id);
-            }
-          },
-          error: () => {
-            // Intentional no-op: courseProgress() simply stays null; the progress UI degrades to 0%.
           },
         });
 
@@ -182,6 +172,43 @@ export class LearnPage implements OnInit {
       },
       error: () => {
         this.router.navigate(['/courses']);
+      },
+    });
+  }
+
+  private loadEnrollmentProgress(enrollmentId: string, currentPercent: number, courseId: string): void {
+    this.learningApi.getEpisodeProgressList(enrollmentId).subscribe({
+      next: (episodes) => {
+        const map = new Map<string, EpisodeProgressResponse>();
+        for (const ep of episodes) {
+          map.set(ep.episodeId, ep);
+        }
+        this.episodeProgressMap.set(map);
+
+        const currentEpId = this.currentEpisodeId();
+        if (currentEpId && map.has(currentEpId)) {
+          this.episodeProgress.set(map.get(currentEpId)!);
+        }
+
+        const completedCount = episodes.filter((e) => e.isCompleted).length;
+        const totalCount = this.allEpisodes().length;
+        const percent = currentPercent ?? (totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0);
+
+        this.courseProgress.set({
+          courseId,
+          progressPercent: percent,
+          isCompleted: percent >= 100,
+          completedEpisodesCount: completedCount,
+          totalEpisodesCount: totalCount,
+          episodes,
+        });
+
+        if (percent >= 100) {
+          this.loadCertificate(courseId);
+        }
+      },
+      error: () => {
+        // Intentional no-op: progress UI degrades gracefully
       },
     });
   }
@@ -243,11 +270,9 @@ export class LearnPage implements OnInit {
       },
     });
 
-    // Load episode progress
-    this.learningApi.getEpisodeProgress(episodeId).subscribe({
-      next: (epProg) => this.episodeProgress.set(epProg),
-      error: () => this.episodeProgress.set(null),
-    });
+    // Set episode progress from cache if already loaded
+    const cachedProg = this.episodeProgressMap().get(episodeId);
+    this.episodeProgress.set(cachedProg ?? null);
 
     // Load Q&A for this episode
     this.loadDiscussions(episodeId);
@@ -262,39 +287,88 @@ export class LearnPage implements OnInit {
 
   protected onHeartbeat(positionSeconds: number): void {
     const epId = this.currentEpisodeId();
-    if (!epId) return;
+    const enrollId = this.enrollmentId();
+    if (!epId || !enrollId) return;
 
-    this.learningApi.saveHeartbeatProgress(epId, positionSeconds).subscribe({
-      next: (prog) => {
-        this.episodeProgress.set(prog);
-        // Refresh overall course progress
-        if (this.course()) {
-          this.learningApi.getCourseProgress(this.course()!.id).subscribe({
-            next: (cp) => {
-              this.courseProgress.set(cp);
-              if ((cp.isCompleted || cp.progressPercent >= 100) && !this.certificate()) {
-                this.loadCertificate(this.course()!.id);
-              }
-            },
-            error: () => {
-              // Intentional no-op: this is a background refresh piggybacking on a heartbeat save —
-              // courseProgress() simply keeps its last known value on failure.
-            },
+    const pos = Math.floor(positionSeconds);
+    this.learningApi
+      .saveEpisodeProgress(enrollId, epId, {
+        lastPositionSeconds: pos,
+        watchedSeconds: pos,
+        isCompleted: false,
+      })
+      .subscribe({
+        next: (prog) => {
+          this.episodeProgress.set(prog);
+          this.episodeProgressMap.update((m) => {
+            const next = new Map(m);
+            next.set(epId, prog);
+            return next;
           });
-        }
-      },
-      error: () => {
-        // Intentional no-op: heartbeat saves are periodic and non-critical — a single failed
-        // save is silently dropped rather than surfaced, the next heartbeat will retry naturally.
-      },
-    });
+        },
+        error: () => {
+          // Intentional no-op: heartbeat saves are periodic and non-critical
+        },
+      });
   }
-
 
   protected onVideoEnded(): void {
     const epId = this.currentEpisodeId();
+    const enrollId = this.enrollmentId();
     const episodes = this.allEpisodes();
     if (!epId || episodes.length === 0) return;
+
+    if (enrollId) {
+      const currentProg = this.episodeProgress();
+      const pos = currentProg?.lastPositionSeconds ?? currentProg?.positionSeconds ?? 0;
+      this.learningApi
+        .saveEpisodeProgress(enrollId, epId, {
+          lastPositionSeconds: pos,
+          watchedSeconds: pos,
+          isCompleted: true,
+        })
+        .subscribe({
+          next: (prog) => {
+            this.episodeProgress.set(prog);
+            this.episodeProgressMap.update((m) => {
+              const next = new Map(m);
+              next.set(epId, prog);
+              return next;
+            });
+
+            // Recompute progress percent
+            const allEps = this.allEpisodes();
+            const map = this.episodeProgressMap();
+            const completedCount = allEps.filter((e) => map.get(e.id)?.isCompleted).length;
+            const newPercent =
+              allEps.length > 0 ? Math.round((completedCount / allEps.length) * 100) : 100;
+
+            if (this.course()) {
+              this.courseProgress.set({
+                courseId: this.course()!.id,
+                progressPercent: newPercent,
+                isCompleted: newPercent >= 100,
+                completedEpisodesCount: completedCount,
+                totalEpisodesCount: allEps.length,
+                episodes: Array.from(map.values()),
+              });
+
+              this.learningApi.updateEnrollmentProgress(enrollId, newPercent).subscribe({
+                error: () => {
+                  // Intentional no-op: enrollment progress sync failure is non-fatal
+                },
+              });
+
+              if (newPercent >= 100 && !this.certificate()) {
+                this.loadCertificate(this.course()!.id);
+              }
+            }
+          },
+          error: () => {
+            // Intentional no-op: episode progress sync failure is non-fatal
+          },
+        });
+    }
 
     const currentIdx = episodes.findIndex((e) => e.id === epId);
     if (currentIdx >= 0 && currentIdx < episodes.length - 1) {

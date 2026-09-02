@@ -51,4 +51,34 @@ describe('LearningPathsPage', () => {
     expect(text).toContain('Fullstack .NET & Angular Developer');
     expect(text).toContain('3 คอร์สเรียน');
   });
+
+  it('should handle PagedResult responses without throwing is not iterable error', () => {
+    vi.spyOn(apiService, 'getLearningPaths').mockReturnValue(
+      of({
+        items: [
+          {
+            id: 'lp-2',
+            slug: 'cloud-devops',
+            title: 'Cloud & DevOps Engineer',
+            description: 'เส้นทางสู่ผู้เชี่ยวชาญ Cloud Infrastructure',
+            sortOrder: 2,
+            isActive: true,
+            courseCount: 5,
+            createdAtUtc: '2026-08-01T00:00:00Z',
+          },
+        ],
+        totalCount: 1,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+      })
+    );
+
+    component['loadPaths']();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Cloud & DevOps Engineer');
+    expect(text).toContain('5 คอร์สเรียน');
+  });
 });

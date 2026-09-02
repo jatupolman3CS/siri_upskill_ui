@@ -96,12 +96,14 @@ export class MyCoursesPage implements OnInit {
 
     this.learningApi.getMyEnrollments().subscribe({
       next: (res) => {
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
         // Fetch courses to enrich title & thumbnail
         this.courseApi.searchCourses({ page: 1, pageSize: 50 }).subscribe({
           next: (coursesRes) => {
-            const courseMap = new Map(coursesRes.results.items.map((c) => [c.id, c]));
+            const courseList = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results?.items ?? []);
+            const courseMap = new Map(courseList.map((c) => [c.id, c]));
 
-            const enriched: EnrichedEnrollment[] = res.items.map((e) => {
+            const enriched: EnrichedEnrollment[] = items.map((e) => {
               const matchedCourse = courseMap.get(e.courseId);
               return {
                 ...e,
@@ -117,7 +119,7 @@ export class MyCoursesPage implements OnInit {
           },
           error: () => {
             // Fallback enriched
-            const basicEnriched: EnrichedEnrollment[] = res.items.map((e) => ({
+            const basicEnriched: EnrichedEnrollment[] = items.map((e) => ({
               ...e,
               title: e.courseTitle ?? 'หลักสูตรออนไลน์',
               slug: e.courseSlug ?? e.courseId,

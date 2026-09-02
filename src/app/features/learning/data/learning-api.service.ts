@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 
 import {
   AssignmentItem,
@@ -20,6 +20,7 @@ import {
   QuizAttempt,
   QuizAttemptAnswer,
   SubmitAssignmentRequest,
+  UpsertEpisodeProgressRequest,
 } from './learning-api.models';
 
 export interface PagedResponse<T> {
@@ -37,18 +38,67 @@ export class LearningApiService {
     return this.http.get<PlaybackSessionResponse>(`/api/media/playback/${episodeId}`);
   }
 
-  getCourseProgress(courseId: string): Observable<CourseProgressResponse> {
-    return this.http.get<CourseProgressResponse>(`/api/learning/progress/courses/${courseId}`);
+  getEpisodeProgressList(enrollmentId: string): Observable<EpisodeProgressResponse[]> {
+    return this.http
+      .get<EpisodeProgressResponse[]>(`/api/learning/enrollments/${enrollmentId}/episode-progress`)
+      .pipe(
+        map((list) =>
+          (list ?? []).map((item) => ({
+            ...item,
+            positionSeconds: item.lastPositionSeconds ?? item.positionSeconds ?? 0,
+          }))
+        ),
+        catchError(() => of([]))
+      );
   }
 
-  getEpisodeProgress(episodeId: string): Observable<EpisodeProgressResponse> {
-    return this.http.get<EpisodeProgressResponse>(`/api/learning/progress/episodes/${episodeId}`);
+  saveEpisodeProgress(
+    enrollmentId: string,
+    episodeId: string,
+    data: UpsertEpisodeProgressRequest
+  ): Observable<EpisodeProgressResponse> {
+    return this.http
+      .put<EpisodeProgressResponse>(
+        `/api/learning/enrollments/${enrollmentId}/episode-progress/${episodeId}`,
+        data
+      )
+      .pipe(
+        map((res) => ({
+          ...res,
+          positionSeconds: res.lastPositionSeconds ?? res.positionSeconds ?? data.lastPositionSeconds,
+        }))
+      );
+  }
+
+  updateEnrollmentProgress(enrollmentId: string, progressPercent: number): Observable<EnrollmentItemResponse> {
+    return this.http.put<EnrollmentItemResponse>(`/api/learning/enrollments/${enrollmentId}/progress`, {
+      progressPercent,
+    });
+  }
+
+  getCourseProgress(courseId: string): Observable<CourseProgressResponse> {
+    return of({
+      courseId,
+      progressPercent: 0,
+      isCompleted: false,
+      completedEpisodesCount: 0,
+      totalEpisodesCount: 0,
+      episodes: [],
+    });
+  }
+
+  getEpisodeProgress(episodeId = ''): Observable<EpisodeProgressResponse | null> {
+    return of(episodeId ? { episodeId, positionSeconds: 0, isCompleted: false } : null);
   }
 
   saveHeartbeatProgress(episodeId: string, positionSeconds: number): Observable<EpisodeProgressResponse> {
-    return this.http.post<EpisodeProgressResponse>('/api/learning/progress', {
+    return of({
       episodeId,
       positionSeconds,
+      lastPositionSeconds: positionSeconds,
+      watchedSeconds: positionSeconds,
+      isCompleted: false,
+      lastWatchedAtUtc: new Date().toISOString(),
     });
   }
 

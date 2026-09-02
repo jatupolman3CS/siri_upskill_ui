@@ -40,8 +40,9 @@ export class WishlistStore {
         catchError(() => of([])),
       )
       .subscribe((items) => {
-        this._items.set(items);
-        this._wishlistIds.set(new Set(items.map((i) => i.courseId)));
+        const list = Array.isArray(items) ? items : ((items as { items?: typeof items })?.items ?? []);
+        this._items.set(list);
+        this._wishlistIds.set(new Set(list.map((i) => i.courseId)));
         this._isLoading.set(false);
       });
   }

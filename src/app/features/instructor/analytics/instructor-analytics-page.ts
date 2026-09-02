@@ -87,12 +87,12 @@ export class InstructorAnalyticsPage implements OnInit {
       .getSummary(this.selectedTimeRange(), this.selectedCourse())
       .subscribe({
         next: (data) => {
-          this.totalViews.set(data.totalViews);
-          this.totalWatchMinutes.set(data.totalWatchMinutes);
-          this.avgCompletionRate.set(data.avgCompletionRate);
-          this.dropOffStats.set([...data.dropOffStats]);
-          this.students.set([...data.students]);
-          this.courses.set([...data.courses]);
+          this.totalViews.set(data.totalViews ?? 0);
+          this.totalWatchMinutes.set(data.totalWatchMinutes ?? 0);
+          this.avgCompletionRate.set(data.avgCompletionRate ?? 0);
+          this.dropOffStats.set(data.dropOffStats ? [...data.dropOffStats] : []);
+          this.students.set(data.students ? [...data.students] : []);
+          this.courses.set(data.courses ? [...data.courses] : []);
           this.isLoading.set(false);
         },
         error: () => {

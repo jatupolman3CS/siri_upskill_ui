@@ -14,11 +14,22 @@ export interface PlaybackSessionResponse {
 }
 
 export interface EpisodeProgressResponse {
+  readonly id?: string;
+  readonly enrollmentId?: string;
   readonly episodeId: string;
+  readonly lastPositionSeconds?: number;
+  readonly watchedSeconds?: number;
   readonly positionSeconds: number;
   readonly isCompleted: boolean;
   readonly completedAtUtc?: string | null;
-  readonly lastWatchedAtUtc: string;
+  readonly lastWatchedAtUtc?: string;
+  readonly updatedAtUtc?: string;
+}
+
+export interface UpsertEpisodeProgressRequest {
+  readonly lastPositionSeconds: number;
+  readonly watchedSeconds: number;
+  readonly isCompleted: boolean;
 }
 
 export interface CourseProgressResponse {

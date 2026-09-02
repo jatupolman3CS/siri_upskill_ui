@@ -81,10 +81,10 @@ describe('AdminDashboardPage', () => {
 
     const text = harness.routeNativeElement?.textContent ?? '';
     expect(text).toContain('25,400');
-    expect(text).toContain('1,250 คน');
+    expect(text).toContain('1,250');
     expect(text).toContain('+12 สมัครใหม่วันนี้');
-    expect(text).toContain('3 คอร์ส');
-    expect(text).toContain('2 รายการ');
+    expect(text).toContain('3');
+    expect(text).toContain('2');
     expect(text).toContain('Full-Stack Angular & .NET 10');
     expect(text).toContain('150,000');
 

@@ -22,7 +22,7 @@ import { TranslationService } from './translation.service';
  */
 @Pipe({ name: 'currencyThb', pure: false })
 export class CurrencyThbPipe implements PipeTransform {
-  private readonly currencyPipe = inject(CurrencyPipe);
+  private readonly currencyPipe = inject(CurrencyPipe, { optional: true }) ?? new CurrencyPipe('en-US');
   private readonly translation = inject(TranslationService);
 
   transform(value: number | null | undefined): string | null {

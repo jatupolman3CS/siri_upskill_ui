@@ -44,6 +44,12 @@ describe('CurrencyThbPipe', () => {
     expect(pipe.transform(990)).toContain('990.00');
   });
 
+  it('works without CurrencyPipe in DI providers by falling back to direct instantiation (avoids NG0201)', () => {
+    TestBed.resetTestingModule();
+    const fallbackPipe = TestBed.runInInjectionContext(() => new CurrencyThbPipe());
+    expect(fallbackPipe.transform(100)).toContain('100.00');
+  });
+
   // Regression coverage for a real bug: a `pure: true` version of this pipe passed every test above
   // (all direct .transform() calls) yet silently kept the stale locale's number format after a live
   // locale toggle in the actual app — pure pipes only re-run when their own explicit arguments change,
