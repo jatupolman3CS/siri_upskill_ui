@@ -43,9 +43,9 @@
         <div class="w-full max-w-5xl">
           @if (playbackSession()) {
             <app-video-player
-              [src]="playbackSession()!.playbackUrl"
+              [src]="playbackSession()!.manifestUrl || playbackSession()!.playbackUrl"
               [poster]="course()?.thumbnailUrl"
-              [watermark]="playbackSession()!.watermark"
+              [watermarkPayload]="playbackSession()!.watermarkPayload"
               [initialPosition]="episodeProgress()?.positionSeconds ?? 0"
               [isFreePreview]="currentEpisode()?.isFreePreview ?? false"
               [courseTitle]="course()?.title"

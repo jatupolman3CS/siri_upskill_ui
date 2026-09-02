@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   PLATFORM_ID,
+  computed,
   effect,
   inject,
   input,
@@ -90,11 +91,21 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
 
   readonly src = input<string>();
   readonly poster = input<string | null>();
-  readonly watermark = input<PlaybackWatermark>();
+  readonly watermark = input<PlaybackWatermark | string>();
+  readonly watermarkPayload = input<string>();
   readonly initialPosition = input(0);
   readonly isFreePreview = input(false);
   readonly courseTitle = input<string>();
   readonly courseSlug = input<string>();
+
+  protected readonly watermarkText = computed<string>(() => {
+    const payload = this.watermarkPayload();
+    if (payload) return payload;
+    const wm = this.watermark();
+    if (typeof wm === 'string') return wm;
+    if (wm?.text) return `${wm.text}${wm.email ? ' · ' + wm.email : ''}`;
+    return '';
+  });
 
   readonly timeUpdate = output<number>();
   /** Named `videoEnded`, not `ended` — a component output named after a native DOM event

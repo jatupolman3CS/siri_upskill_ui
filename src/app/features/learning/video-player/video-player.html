@@ -18,15 +18,14 @@
   ></video>
 
   <!-- Dynamic Anti-Piracy Watermark (Subtle moving overlay) -->
-  @if (watermark(); as wm) {
+  @if (watermarkText(); as wmText) {
     <div
       class="pointer-events-none absolute z-20 transition-all duration-1000 ease-in-out select-none"
       [style.top.%]="watermarkTop()"
       [style.left.%]="watermarkLeft()"
     >
       <div class="rounded bg-black/50 px-2.5 py-1 text-[11px] font-mono tracking-wider text-white/35 backdrop-blur-[2px] shadow-sm">
-        <span>{{ wm.text }}</span>
-        <span class="ml-1 opacity-80">· {{ wm.email }}</span>
+        <span>{{ wmText }}</span>
       </div>
     </div>
   }

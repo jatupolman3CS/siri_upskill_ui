@@ -6,9 +6,11 @@ export interface PlaybackWatermark {
 }
 
 export interface PlaybackSessionResponse {
-  readonly playbackUrl: string;
+  readonly manifestUrl: string;
+  readonly playbackUrl?: string;
   readonly expiresAtUtc: string;
-  readonly watermark: PlaybackWatermark;
+  readonly watermarkPayload?: string;
+  readonly watermark?: PlaybackWatermark | string;
 }
 
 export interface EpisodeProgressResponse {
