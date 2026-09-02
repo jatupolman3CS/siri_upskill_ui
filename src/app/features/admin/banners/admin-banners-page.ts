@@ -62,7 +62,8 @@ export class AdminBannersPage implements OnInit {
     this.isLoading.set(true);
     this.cmsApi.getAdminBanners().subscribe({
       next: (res) => {
-        this.banners.set([...res.items]);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.banners.set([...items]);
         this.isLoading.set(false);
       },
       error: () => {

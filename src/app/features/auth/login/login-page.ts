@@ -8,7 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService, UserRole } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
@@ -40,6 +40,7 @@ export class LoginPage {
   private readonly authApi = inject(AuthApiService);
   protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly translation = inject(TranslationService);
 
   private readonly errorSummary = viewChild<ElementRef<HTMLElement>>('errorSummary');
@@ -138,7 +139,8 @@ export class LoginPage {
       next: (response) => {
         this.submitting.set(false);
         this.authService.setAccessToken(response.accessToken);
-        void this.router.navigateByUrl('/account/devices');
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/account/devices';
+        void this.router.navigateByUrl(returnUrl);
       },
       error: (error: ApiError) => {
         this.submitting.set(false);

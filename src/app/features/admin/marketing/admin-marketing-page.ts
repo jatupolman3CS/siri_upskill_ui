@@ -133,8 +133,9 @@ export class AdminMarketingPage implements OnInit {
     this.isLoadingPromos.set(true);
     this.marketingApi.getPromoCodes(1, 50).subscribe({
       next: (res) => {
-        this.promos.set([...res.items]);
-        this.totalPromos.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.promos.set([...items]);
+        this.totalPromos.set(res?.totalCount ?? items.length);
         this.isLoadingPromos.set(false);
       },
       error: () => {
@@ -147,8 +148,9 @@ export class AdminMarketingPage implements OnInit {
     this.isLoadingFlashSales.set(true);
     this.marketingApi.getFlashSales(1, 50).subscribe({
       next: (res) => {
-        this.flashSales.set([...res.items]);
-        this.totalFlashSales.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.flashSales.set([...items]);
+        this.totalFlashSales.set(res?.totalCount ?? items.length);
         this.isLoadingFlashSales.set(false);
       },
       error: () => {
@@ -161,8 +163,9 @@ export class AdminMarketingPage implements OnInit {
     this.isLoadingBundles.set(true);
     this.marketingApi.getBundles(1, 50).subscribe({
       next: (res) => {
-        this.bundles.set([...res.items]);
-        this.totalBundles.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.bundles.set([...items]);
+        this.totalBundles.set(res?.totalCount ?? items.length);
         this.isLoadingBundles.set(false);
       },
       error: () => {

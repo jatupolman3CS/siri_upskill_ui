@@ -73,8 +73,9 @@ export class AdminContactMessagesPage implements OnInit {
 
     this.contactApi.getAdminContactMessages(this.currentPage(), this.pageSize, status).subscribe({
       next: (res) => {
-        this.messages.set(res.items);
-        this.totalCount.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.messages.set(items);
+        this.totalCount.set(res?.totalCount ?? items.length);
         this.isLoading.set(false);
       },
       error: () => {

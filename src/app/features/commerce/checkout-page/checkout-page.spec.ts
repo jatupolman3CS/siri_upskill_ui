@@ -1,11 +1,12 @@
 import { registerLocaleData } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import localeTh from '@angular/common/locales/th';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
+import { errorInterceptor } from '../../../core/http/error.interceptor';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { OrderDetailResponse, PaymentResponse } from '../data/commerce-api.models';
 import { CheckoutPage } from './checkout-page';
@@ -55,7 +56,7 @@ describe('CheckoutPage', () => {
     TestBed.configureTestingModule({
       imports: [CheckoutPage],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         provideRouter([
           { path: 'cart', component: DummyCartComponent },
@@ -159,5 +160,23 @@ describe('CheckoutPage', () => {
     expect(component.payment()).toEqual(SAMPLE_PAYMENT);
     expect(component.paymentPollStatus()).toBe('polling');
     expect(fixture.nativeElement.querySelector('img[alt="PromptPay QR Code"]')).toBeTruthy();
+  });
+
+  it('shows a translated error, not the raw "common.error" i18n key, when payment creation fails without a ProblemDetails body', () => {
+    // Regression test: `error.interceptor.ts` deliberately falls back to the i18n KEY
+    // 'common.error' (not display text) when the backend response carries no ProblemDetails
+    // body — e.g. a bare 401 challenge, which is exactly what happened live against a real
+    // backend here. `paymentError` must resolve that key through TranslationService before
+    // display; using `err.message` directly leaked the literal string "common.error" onto
+    // the checkout screen.
+    component.initiatePayment();
+
+    const req = httpMock.expectOne('/api/commerce/payments');
+    req.flush(null, { status: 401, statusText: 'Unauthorized' });
+    fixture.detectChanges();
+
+    expect(component.paymentError()).not.toBe('common.error');
+    expect(component.paymentError()).toBe('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    expect(fixture.nativeElement.textContent).not.toContain('common.error');
   });
 });

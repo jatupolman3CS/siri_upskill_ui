@@ -198,7 +198,11 @@ export class CheckoutPage {
       },
       error: (err: ApiError) => {
         this.isLoadingOrder.set(false);
-        this.orderError.set(err.message || this.translation.t('checkout.error.orderNotFound'));
+        this.orderError.set(
+          err.message
+            ? this.translation.t(err.message)
+            : this.translation.t('checkout.error.orderNotFound')
+        );
       },
     });
   }
@@ -230,7 +234,11 @@ export class CheckoutPage {
         },
         error: (err: ApiError) => {
           this.isCreatingPayment.set(false);
-          this.paymentError.set(err.message || this.translation.t('checkout.error.createPaymentFailed'));
+          this.paymentError.set(
+            err.message
+              ? this.translation.t(err.message)
+              : this.translation.t('checkout.error.createPaymentFailed')
+          );
         },
       });
     } else if (o.status === 'Paid' || o.totalAmount <= 0) {
@@ -261,7 +269,9 @@ export class CheckoutPage {
         error: (err: ApiError) => {
           this.isCreatingPayment.set(false);
           this.paymentError.set(
-            err.message || this.translation.t('checkout.error.createPaymentFailed')
+            err.message
+              ? this.translation.t(err.message)
+              : this.translation.t('checkout.error.createPaymentFailed')
           );
         },
       });
@@ -289,9 +299,13 @@ export class CheckoutPage {
           this.promoError.set(res.errorMessage || this.translation.t('checkout.summary.promoError'));
         }
       },
-      error: (err) => {
+      error: (err: ApiError) => {
         this.isApplyingPromo.set(false);
-        this.promoError.set(err?.error?.detail || err?.message || this.translation.t('checkout.summary.promoError'));
+        this.promoError.set(
+          err?.message
+            ? this.translation.t(err.message)
+            : this.translation.t('checkout.summary.promoError')
+        );
       },
     });
   }

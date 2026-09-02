@@ -40,6 +40,19 @@ export interface LoginResponse {
   readonly accessTokenExpiresAtUtc: string;
 }
 
+// ---- Refresh (Features/Refresh/Response.cs) --------------------------------------
+
+export interface RefreshResponse {
+  readonly accessToken: string;
+  readonly accessTokenExpiresAtUtc: string;
+}
+
+// ---- Logout (Features/Logout/Response.cs) ----------------------------------------
+
+export interface LogoutResponse {
+  readonly message: string;
+}
+
 // ---- ForgotPassword (Features/ForgotPassword/Command.cs, Response.cs) ----------------------
 
 export interface ForgotPasswordResponse {

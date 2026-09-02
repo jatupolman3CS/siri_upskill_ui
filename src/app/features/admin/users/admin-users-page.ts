@@ -111,8 +111,9 @@ export class AdminUsersPage implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.users.set([...res.items]);
-          this.totalUsers.set(res.totalCount);
+          const items = Array.isArray(res) ? res : (res?.items ?? []);
+          this.users.set([...items]);
+          this.totalUsers.set(res?.totalCount ?? items.length);
           this.isLoadingUsers.set(false);
         },
         error: () => {
@@ -130,8 +131,9 @@ export class AdminUsersPage implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.auditLogs.set([...res.items]);
-          this.totalAuditLogs.set(res.totalCount);
+          const items = Array.isArray(res) ? res : (res?.items ?? []);
+          this.auditLogs.set([...items]);
+          this.totalAuditLogs.set(res?.totalCount ?? items.length);
           this.isLoadingAudit.set(false);
         },
         error: () => {

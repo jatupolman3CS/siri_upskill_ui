@@ -95,6 +95,7 @@ describe('SiteHeader', () => {
 
     buttonNamed('Sign out')?.click();
     fixture.detectChanges();
+    httpMock.match('/api/identity/logout').forEach((req) => req.flush({ message: 'ok' }));
 
     expect(authService.isAuthenticated()).toBe(false);
   });

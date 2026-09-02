@@ -64,7 +64,8 @@ export class AdminPostsPage implements OnInit {
     this.isLoading.set(true);
     this.cmsApi.getAdminPosts().subscribe({
       next: (res) => {
-        this.posts.set([...res.items]);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.posts.set([...items]);
         this.isLoading.set(false);
       },
       error: () => {

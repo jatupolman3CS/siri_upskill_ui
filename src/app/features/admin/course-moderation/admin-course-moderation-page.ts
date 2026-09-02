@@ -73,8 +73,9 @@ export class AdminCourseModerationPage implements OnInit {
     this.isLoading.set(true);
     this.moderationApi.getPendingCourses(1, 50).subscribe({
       next: (res) => {
-        this.pendingCourses.set([...res.items]);
-        this.totalCount.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.pendingCourses.set([...items]);
+        this.totalCount.set(res?.totalCount ?? items.length);
         this.isLoading.set(false);
       },
       error: () => {

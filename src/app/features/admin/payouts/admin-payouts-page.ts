@@ -115,8 +115,9 @@ export class AdminPayoutsPage implements OnInit {
     this.isLoadingBatches.set(true);
     this.payoutApi.getAdminPayoutBatches(1, 50).subscribe({
       next: (res) => {
-        this.batches.set([...res.items]);
-        this.totalBatches.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.batches.set([...items]);
+        this.totalBatches.set(res?.totalCount ?? items.length);
         this.isLoadingBatches.set(false);
       },
       error: () => {
@@ -132,8 +133,9 @@ export class AdminPayoutsPage implements OnInit {
 
     this.payoutApi.getAdminRevenueSplits(instructorId, undefined, status, 1, 50).subscribe({
       next: (res) => {
-        this.revenueSplits.set([...res.items]);
-        this.totalSplits.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.revenueSplits.set([...items]);
+        this.totalSplits.set(res?.totalCount ?? items.length);
         this.isLoadingSplits.set(false);
       },
       error: () => {
@@ -150,8 +152,9 @@ export class AdminPayoutsPage implements OnInit {
     this.isLoadingRefunds.set(true);
     this.refundsApi.getPendingRefunds(1, 50).subscribe({
       next: (res) => {
-        this.pendingRefunds.set([...res.items]);
-        this.totalRefunds.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.pendingRefunds.set([...items]);
+        this.totalRefunds.set(res?.totalCount ?? items.length);
         this.isLoadingRefunds.set(false);
       },
       error: () => {

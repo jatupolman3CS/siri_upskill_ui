@@ -1,9 +1,11 @@
 import { Injectable, computed, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Observable, catchError, finalize, map, of, shareReplay } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { AuthApiService } from '../../features/auth/data/auth-api.service';
 import { accessTokenStore } from '../http/access-token.store';
-import { decodeAccessTokenUserId } from './jwt.util';
+import { decodeAccessToken, decodeAccessTokenUserId } from './jwt.util';
 
 export type UserRole = 'SuperAdmin' | 'Admin' | 'Instructor' | 'Learner' | 'Guest';
 
@@ -94,6 +96,10 @@ export interface CurrentUser {
 export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly authApi = inject(AuthApiService);
+
+  /** Whether the initial session restoration attempt has completed */
+  readonly isInitialized = signal<boolean>(false);
 
   /** Bypass flag: Defaults to false; enabled via dev switcher */
   readonly isBypassActive = signal<boolean>(false);
@@ -132,9 +138,19 @@ export class AuthService {
     if (token === null) {
       return null;
     }
-    const userId = decodeAccessTokenUserId(token);
-    return userId === null ? null : { id: userId };
+    const decoded = decodeAccessToken(token);
+    if (decoded === null) {
+      return null;
+    }
+    const primaryRole = (decoded.roles[0] as UserRole) ?? 'Learner';
+    return {
+      id: decoded.userId,
+      roles: decoded.roles,
+      role: primaryRole,
+    };
   });
+
+  private refreshInFlight$: Observable<string | null> | null = null;
 
   constructor() {
     // Initialize mock token if in bypass mode — dev-only, see setBypassRole()'s doc comment.
@@ -142,6 +158,68 @@ export class AuthService {
       const mockToken = createMockJwt(MOCK_USERS[this.currentMockRole()]);
       accessTokenStore.set(mockToken);
     }
+  }
+
+  /**
+   * Initializes session on application startup.
+   * Runs in the browser only (skips SSR).
+   * Restores the in-memory access token via `/api/identity/refresh` using the httpOnly cookie.
+   */
+  initSession(): Observable<boolean> {
+    if (!this.isBrowser) {
+      this.isInitialized.set(true);
+      return of(false);
+    }
+
+    if (this.isBypassActive()) {
+      this.isInitialized.set(true);
+      return of(true);
+    }
+
+    if (accessTokenStore.token() !== null) {
+      this.isInitialized.set(true);
+      return of(true);
+    }
+
+    return this.refreshToken().pipe(
+      map((token) => token !== null),
+      catchError(() => of(false)),
+      finalize(() => {
+        this.isInitialized.set(true);
+      }),
+    );
+  }
+
+  /**
+   * Refreshes the access token via `/api/identity/refresh`.
+   * Deduplicates concurrent calls so only one refresh request runs at a time,
+   * avoiding token reuse detection triggers and race conditions.
+   */
+  refreshToken(): Observable<string | null> {
+    if (!this.isBrowser) {
+      return of(null);
+    }
+
+    if (this.refreshInFlight$) {
+      return this.refreshInFlight$;
+    }
+
+    this.refreshInFlight$ = this.authApi.refresh().pipe(
+      map((response) => {
+        this.setAccessToken(response.accessToken);
+        return response.accessToken;
+      }),
+      catchError(() => {
+        this.clearSession();
+        return of(null);
+      }),
+      finalize(() => {
+        this.refreshInFlight$ = null;
+      }),
+      shareReplay(1),
+    );
+
+    return this.refreshInFlight$;
   }
 
   /**
@@ -184,9 +262,14 @@ export class AuthService {
       if (this.currentMockRole() === 'SuperAdmin') return true;
       return this.activeUser().roles.includes(role);
     }
-    // `jwt.util.ts`'s decoder deliberately only reads the `sub` claim today, not `role` — so
-    // there's no real role to check yet. Deny by default rather than granting every role.
-    return false;
+    const user = this.currentUser();
+    if (!user?.roles) {
+      return false;
+    }
+    if (user.roles.includes('SuperAdmin')) {
+      return true;
+    }
+    return user.roles.includes(role);
   }
 
   /** Store access token */
@@ -198,5 +281,20 @@ export class AuthService {
   clearSession(): void {
     accessTokenStore.set(null);
     this.currentMockRole.set('Guest');
+  }
+
+  /**
+   * Full sign-out: drops in-memory token, resets role, and revokes the refresh cookie on the backend.
+   */
+  signOut(): Observable<void> {
+    const wasAuthenticated = this.isAuthenticated() && !this.isBypassActive();
+    this.clearSession();
+    if (this.isBrowser && wasAuthenticated) {
+      return this.authApi.logout().pipe(
+        map(() => void 0),
+        catchError(() => of(void 0)),
+      );
+    }
+    return of(void 0);
   }
 }

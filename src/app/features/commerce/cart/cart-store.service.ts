@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommerceApiService } from '../data/commerce-api.service';
 import { PromoCodeValidationResponse } from '../data/commerce-api.models';
 
@@ -17,6 +18,7 @@ const STORAGE_KEY = 'siri_cart_items_v1';
 @Injectable({ providedIn: 'root' })
 export class CartStore {
   private readonly commerceApi = inject(CommerceApiService);
+  private readonly translation = inject(TranslationService);
 
   readonly items = signal<readonly CartItem[]>(this.loadFromStorage());
   readonly appliedPromo = signal<PromoCodeValidationResponse | null>(null);
@@ -91,7 +93,11 @@ export class CartStore {
           error: (err) => {
             this.isApplyingPromo.set(false);
             this.appliedPromo.set(null);
-            this.promoError.set(err?.message || 'เกิดข้อผิดพลาดในการตรวจสอบรหัสส่วนลด');
+            this.promoError.set(
+              err?.message
+                ? this.translation.t(err.message)
+                : 'เกิดข้อผิดพลาดในการตรวจสอบรหัสส่วนลด'
+            );
           },
         })
       );

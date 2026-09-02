@@ -105,7 +105,10 @@ export class HomePage {
     stream: () => {
       if (!this.auth.isAuthenticated()) return of(null);
       return this.learningApi.getMyEnrollments(1, 1).pipe(
-        map((res) => (res.items && res.items.length > 0 ? res.items[0] : null)),
+        map((res) => {
+          const items = Array.isArray(res) ? res : (res?.items ?? []);
+          return items.length > 0 ? items[0] : null;
+        }),
         catchError(() => of(null)),
       );
     },

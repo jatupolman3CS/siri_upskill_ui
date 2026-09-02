@@ -1,5 +1,8 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { catchError, throwError } from 'rxjs';
+import { inject, Injector } from '@angular/core';
+import { catchError, switchMap, throwError } from 'rxjs';
+
+import { AuthService } from '../auth/auth.service';
 
 /**
  * Normalized error shape every `*ApiService` consumer can rely on, instead
@@ -55,9 +58,14 @@ function isProblemDetailsLike(value: unknown): value is ProblemDetailsLike {
  * shape plus falls back gracefully for network-level failures that never
  * reach the server. `message` falls back to an i18n key (not display text)
  * so callers can resolve it through `TranslationService` themselves.
+ *
+ * For expired 401s on authenticated endpoints, transparently attempts token
+ * refresh and retries the failed request once before failing.
  */
-export const errorInterceptor: HttpInterceptorFn = (req, next) =>
-  next(req).pipe(
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const injector = inject(Injector);
+
+  return next(req).pipe(
     catchError((error: unknown) => {
       if (!(error instanceof HttpErrorResponse)) {
         return throwError(() => error);
@@ -73,6 +81,53 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) =>
         problemDetails,
       );
 
+      // Attempt silent refresh on 401 for authenticated endpoints (excluding auth endpoints)
+      if (
+        error.status === 401 &&
+        !req.url.includes('/identity/login') &&
+        !req.url.includes('/identity/refresh') &&
+        !req.url.includes('/identity/logout')
+      ) {
+        let authService: AuthService | null = null;
+        try {
+          authService = injector.get(AuthService);
+        } catch {
+          // If AuthService cannot be resolved (e.g. isolated unit testing), fall through
+        }
+
+        if (authService && authService.isAuthenticated() && !authService.isBypassActive()) {
+          return authService.refreshToken().pipe(
+            switchMap((newToken) => {
+              if (!newToken) {
+                return throwError(() => apiError);
+              }
+              const retriedReq = req.clone({
+                setHeaders: { Authorization: `Bearer ${newToken}` },
+              });
+              return next(retriedReq).pipe(
+                catchError((retryErr: unknown) => {
+                  if (retryErr instanceof HttpErrorResponse) {
+                    const retryBody: unknown = retryErr.error;
+                    const retryProblem = isProblemDetailsLike(retryBody) ? retryBody : undefined;
+                    return throwError(
+                      () =>
+                        new ApiError(
+                          retryErr.status,
+                          retryProblem?.detail ?? retryProblem?.title ?? 'common.error',
+                          retryProblem?.errorCode,
+                          retryProblem,
+                        ),
+                    );
+                  }
+                  return throwError(() => retryErr);
+                }),
+              );
+            }),
+          );
+        }
+      }
+
       return throwError(() => apiError);
     }),
   );
+};

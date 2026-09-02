@@ -165,9 +165,10 @@ export class OrderHistoryPage implements OnInit {
 
     this.commerceApi.getOrders(page, this.pageSize()).subscribe({
       next: (res) => {
-        this.orders.set(res.items);
-        this.totalCount.set(res.totalCount);
-        this.totalPages.set(res.totalPages || 1);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.orders.set(items);
+        this.totalCount.set(res?.totalCount ?? items.length);
+        this.totalPages.set(res?.totalPages || 1);
         this.isLoading.set(false);
       },
       error: () => {

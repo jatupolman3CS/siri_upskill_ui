@@ -21,20 +21,20 @@ function base64UrlDecode(segment: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+export interface DecodedAccessToken {
+  readonly userId: string;
+  readonly roles: readonly string[];
+  readonly sessionId?: string;
+  readonly expiresAt?: number;
+}
+
 /**
- * Reads the `sub` claim (the user's own id — `AccessTokenGenerator.cs`'s
- * `JwtRegisteredClaimNames.Sub`) out of a raw JWT access token.
- *
- * Deliberately does NOT attempt to read email/display name/anything else: per
- * `AccessTokenGenerator.cs`'s own doc comment, this backend's access tokens carry only
- * `sub`/`nameidentifier`/`jti`/`sid`/`role` claims and intentionally no PII — there is nothing else
- * here to decode. See the P0-35 final report's "gaps" section for what that means for the frontend
- * (no display name/email available after login without a future "who am I" endpoint).
- *
- * Returns `null` for any malformed/unexpected input rather than throwing — a decode failure here
- * must never crash the app; it just means `AuthService.currentUser` reports `null`.
+ * Decodes the claims out of a raw JWT access token.
+ * Reads `sub`/`nameidentifier` for userId, `role` claim (or Microsoft role claim URI) for roles,
+ * `sid` for session id, and `exp` for expiry.
+ * Returns `null` on any malformed input without throwing.
  */
-export function decodeAccessTokenUserId(token: string): string | null {
+export function decodeAccessToken(token: string): DecodedAccessToken | null {
   try {
     const segments = token.split('.');
     const payloadSegment = segments[1];
@@ -45,9 +45,39 @@ export function decodeAccessTokenUserId(token: string): string | null {
     if (typeof payload !== 'object' || payload === null) {
       return null;
     }
-    const sub = (payload as Record<string, unknown>)['sub'];
-    return typeof sub === 'string' && sub.length > 0 ? sub : null;
+    const record = payload as Record<string, unknown>;
+    const sub = record['sub'] ?? record['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+    const userId = typeof sub === 'string' && sub.length > 0 ? sub : null;
+    if (!userId) {
+      return null;
+    }
+
+    const rawRoles = record['role'] ?? record['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    let roles: string[] = [];
+    if (typeof rawRoles === 'string') {
+      roles = [rawRoles];
+    } else if (Array.isArray(rawRoles)) {
+      roles = rawRoles.filter((r): r is string => typeof r === 'string');
+    }
+
+    const sid = record['sid'];
+    const sessionId = typeof sid === 'string' && sid.length > 0 ? sid : undefined;
+
+    const exp = record['exp'];
+    const expiresAt = typeof exp === 'number' ? exp : undefined;
+
+    return { userId, roles, sessionId, expiresAt };
   } catch {
     return null;
   }
 }
+
+/**
+ * Reads the `sub` claim (the user's own id — `AccessTokenGenerator.cs`'s
+ * `JwtRegisteredClaimNames.Sub`) out of a raw JWT access token.
+ * Returns `null` for any malformed/unexpected input rather than throwing.
+ */
+export function decodeAccessTokenUserId(token: string): string | null {
+  return decodeAccessToken(token)?.userId ?? null;
+}
+

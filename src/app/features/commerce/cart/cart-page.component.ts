@@ -22,6 +22,7 @@ import {
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { CommerceApiService } from '../data/commerce-api.service';
@@ -58,6 +59,7 @@ export class CartPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected promoCodeInput = '';
   protected readonly isCreatingOrder = signal(false);
@@ -80,6 +82,10 @@ export class CartPageComponent implements OnInit {
           this.promoCodeInput = '';
         }
       },
+      // CartStore.applyPromoCode() already updates `promoError`/`isApplyingPromo` itself (its
+      // internal `tap`) — this handler exists only so RxJS doesn't treat a failed request as an
+      // unhandled observable error (it rethrows asynchronously otherwise).
+      error: () => undefined,
     });
   }
 
@@ -117,7 +123,9 @@ export class CartPageComponent implements OnInit {
         error: (err) => {
           this.isCreatingOrder.set(false);
           this.checkoutError.set(
-            err?.message || 'เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ กรุณาลองใหม่อีกครั้ง'
+            err?.message
+              ? this.translation.t(err.message)
+              : 'เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ กรุณาลองใหม่อีกครั้ง'
           );
         },
       });

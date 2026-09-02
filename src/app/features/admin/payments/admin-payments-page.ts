@@ -111,8 +111,9 @@ export class AdminPaymentsPage implements OnInit {
 
     this.api.listOpsQueue(statusParam as PaymentOpsQueueStatus, this.opsPage(), this.pageSize).subscribe({
       next: (res) => {
-        this.opsEntries.set(res.items);
-        this.opsTotalCount.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.opsEntries.set(items);
+        this.opsTotalCount.set(res?.totalCount ?? items.length);
         this.loading.set(false);
       },
       error: (err) => {
@@ -123,8 +124,9 @@ export class AdminPaymentsPage implements OnInit {
 
     this.api.listPendingRefunds(1, 50).subscribe({
       next: (res) => {
-        this.pendingRefunds.set(res.items);
-        this.refundsTotalCount.set(res.totalCount);
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.pendingRefunds.set(items);
+        this.refundsTotalCount.set(res?.totalCount ?? items.length);
       },
       error: () => {
         // Non-blocking for secondary tab

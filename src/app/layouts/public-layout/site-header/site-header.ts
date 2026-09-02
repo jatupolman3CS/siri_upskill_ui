@@ -81,9 +81,9 @@ export class SiteHeader {
     this.translation.setLocale(locale);
   }
 
-  /** First real UI wiring of `AuthService.clearSession()` — see that method's own doc comment. */
+  /** UI wiring of `AuthService.signOut()` — clears session and revokes server cookie */
   protected signOut(): void {
-    this.authService.clearSession();
+    this.authService.signOut().subscribe();
     void this.router.navigateByUrl('/');
   }
 }

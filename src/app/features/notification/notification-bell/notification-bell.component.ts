@@ -77,7 +77,8 @@ export class NotificationBellComponent implements OnInit {
     this.isLoading.set(true);
     this.notificationApi.getMyNotifications().subscribe({
       next: (items) => {
-        this.notifications.set(items ?? []);
+        const list = Array.isArray(items) ? items : ((items as any)?.items ?? []);
+        this.notifications.set(list);
         this.isLoading.set(false);
       },
       error: () => {

@@ -40,14 +40,17 @@ export class LearningApiService {
 
   getEpisodeProgressList(enrollmentId: string): Observable<EpisodeProgressResponse[]> {
     return this.http
-      .get<EpisodeProgressResponse[]>(`/api/learning/enrollments/${enrollmentId}/episode-progress`)
+      .get<EpisodeProgressResponse[] | PagedResponse<EpisodeProgressResponse>>(
+        `/api/learning/enrollments/${enrollmentId}/episode-progress`
+      )
       .pipe(
-        map((list) =>
-          (list ?? []).map((item) => ({
+        map((res) => {
+          const list = Array.isArray(res) ? res : ((res as any)?.items ?? []);
+          return list.map((item: any) => ({
             ...item,
             positionSeconds: item.lastPositionSeconds ?? item.positionSeconds ?? 0,
-          }))
-        ),
+          }));
+        }),
         catchError(() => of([]))
       );
   }

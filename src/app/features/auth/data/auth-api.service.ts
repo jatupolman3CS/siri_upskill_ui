@@ -11,6 +11,8 @@ import {
   ListSessionsResponse,
   LoginRequest,
   LoginResponse,
+  LogoutResponse,
+  RefreshResponse,
   RegisterRequest,
   RegisterResponse,
   ResetPasswordRequest,
@@ -36,6 +38,14 @@ export class AuthApiService extends ApiService {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.post<LoginResponse>('/identity/login', request, { withCredentials: true });
+  }
+
+  refresh(): Observable<RefreshResponse> {
+    return this.post<RefreshResponse>('/identity/refresh', {}, { withCredentials: true });
+  }
+
+  logout(): Observable<LogoutResponse> {
+    return this.post<LogoutResponse>('/identity/logout', {}, { withCredentials: true });
   }
 
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {

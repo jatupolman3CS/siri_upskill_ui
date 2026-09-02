@@ -179,8 +179,9 @@ export class LearnPage implements OnInit {
   private loadEnrollmentProgress(enrollmentId: string, currentPercent: number, courseId: string): void {
     this.learningApi.getEpisodeProgressList(enrollmentId).subscribe({
       next: (episodes) => {
+        const list: EpisodeProgressResponse[] = Array.isArray(episodes) ? episodes : ((episodes as any)?.items ?? []);
         const map = new Map<string, EpisodeProgressResponse>();
-        for (const ep of episodes) {
+        for (const ep of list) {
           map.set(ep.episodeId, ep);
         }
         this.episodeProgressMap.set(map);
@@ -190,7 +191,7 @@ export class LearnPage implements OnInit {
           this.episodeProgress.set(map.get(currentEpId)!);
         }
 
-        const completedCount = episodes.filter((e) => e.isCompleted).length;
+        const completedCount = list.filter((e) => e.isCompleted).length;
         const totalCount = this.allEpisodes().length;
         const percent = currentPercent ?? (totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0);
 
@@ -200,7 +201,7 @@ export class LearnPage implements OnInit {
           isCompleted: percent >= 100,
           completedEpisodesCount: completedCount,
           totalEpisodesCount: totalCount,
-          episodes,
+          episodes: list,
         });
 
         if (percent >= 100) {
@@ -280,7 +281,10 @@ export class LearnPage implements OnInit {
 
   private loadDiscussions(episodeId: string): void {
     this.learningApi.getDiscussions(episodeId).subscribe({
-      next: (res) => this.discussions.set(res.items),
+      next: (res) => {
+        const items = Array.isArray(res) ? res : (res?.items ?? []);
+        this.discussions.set(items);
+      },
       error: () => this.discussions.set([]),
     });
   }

@@ -209,8 +209,10 @@ export class CourseBuilderPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (tree) => {
+          const list: readonly CategoryTreeNode[] = Array.isArray(tree) ? tree : ((tree as any)?.items ?? []);
           const flat: CategoryTreeNode[] = [];
           const flatten = (nodes: readonly CategoryTreeNode[]) => {
+            if (!Array.isArray(nodes)) return;
             for (const node of nodes) {
               flat.push(node);
               if (node.children?.length) {
@@ -218,7 +220,7 @@ export class CourseBuilderPage implements OnInit {
               }
             }
           };
-          flatten(tree);
+          flatten(list);
           this.categories.set(flat);
         },
         error: (err) => {
