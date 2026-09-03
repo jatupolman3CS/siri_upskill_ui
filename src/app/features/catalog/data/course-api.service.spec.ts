@@ -40,4 +40,34 @@ describe('CourseApiService', () => {
     request.flush(response);
     expect(result).toEqual(response);
   });
+
+  it('attachEpisodeMedia sends PUT to the correct episode media route', () => {
+    const courseId = 'c-1';
+    const sectionId = 's-1';
+    const episodeId = 'e-1';
+    const command = { mediaAssetId: 'm-1', durationSeconds: 120 };
+
+    service.attachEpisodeMedia(courseId, sectionId, episodeId, command).subscribe();
+
+    const req = httpMock.expectOne(
+      '/api/catalog/instructor/courses/c-1/sections/s-1/episodes/e-1/media'
+    );
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(command);
+    req.flush({ episodeId: 'e-1', mediaAssetId: 'm-1', durationSeconds: 120 });
+  });
+
+  it('removeEpisodeMedia sends DELETE to the episode media route', () => {
+    const courseId = 'c-1';
+    const sectionId = 's-1';
+    const episodeId = 'e-1';
+
+    service.removeEpisodeMedia(courseId, sectionId, episodeId).subscribe();
+
+    const req = httpMock.expectOne(
+      '/api/catalog/instructor/courses/c-1/sections/s-1/episodes/e-1/media'
+    );
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });

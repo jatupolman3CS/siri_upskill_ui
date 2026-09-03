@@ -188,6 +188,7 @@ export interface CourseBuilderResponse {
   readonly outcomes: readonly string[];
   readonly requirements: readonly string[];
   readonly sections: readonly CourseBuilderSectionResponse[];
+  readonly trailerMediaAssetId?: string | null;
 }
 
 /** Mirrors `AutosaveEpisodeItem`. */
@@ -197,6 +198,8 @@ export interface AutosaveEpisodeItem {
   readonly description?: string | null;
   readonly sortOrder: number;
   readonly isFreePreview: boolean;
+  readonly mediaAssetId?: string | null;
+  readonly durationSeconds?: number | null;
 }
 
 /** Mirrors `AutosaveSectionItem`. */
@@ -225,6 +228,21 @@ export interface AutosaveCourseCommand {
   readonly requirements?: readonly string[] | null;
   readonly sections?: readonly AutosaveSectionItem[] | null;
   readonly rowVersion: string;
+  readonly trailerMediaAssetId?: string | null;
+}
+
+export interface AttachEpisodeMediaCommand {
+  readonly mediaAssetId: string;
+  readonly durationSeconds?: number | null;
+}
+
+export interface EpisodeMediaResponse {
+  readonly episodeId: string;
+  readonly sectionId: string;
+  readonly courseId: string;
+  readonly mediaAssetId: string | null;
+  readonly durationSeconds: number | null;
+  readonly status: CourseEpisodeStatus;
 }
 
 /** Mirrors `AutosaveCourseResponse`. */

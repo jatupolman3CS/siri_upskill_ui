@@ -39,6 +39,7 @@ const BUILDER_COURSE: CourseBuilderResponse = {
   currency: 'THB',
   accessDurationDays: 365,
   status: 'Draft',
+  trailerMediaAssetId: null,
   seoTitle: 'Web Dev Pro Course',
   seoDescription: 'SEO Desc',
   rowVersion: 'AAAAAAAAB9E=',
@@ -423,6 +424,64 @@ describe('CourseBuilderPage', () => {
     expect(component['courseId']()).toBe('00000000-0000-0000-0000-000000000099');
     expect(component['rowVersion']()).toBe('AAAAAAAACAE=');
     expect(component.saveStatus()).toBe('saved');
+  });
+
+  it('formats duration correctly in MM:SS and HH:MM:SS', async () => {
+    const component = await navigate('/instructor/courses/new/builder');
+    flushCategories();
+    await settle();
+
+    expect(component.formatDuration(0)).toBe('00:00');
+    expect(component.formatDuration(null)).toBe('00:00');
+    expect(component.formatDuration(65)).toBe('01:05');
+    expect(component.formatDuration(600)).toBe('10:00');
+    expect(component.formatDuration(3665)).toBe('1:01:05');
+  });
+
+  it('removes episode video and resets episode status', async () => {
+    const component = await navigate('/instructor/courses/00000000-0000-0000-0000-000000000001/builder');
+    flushCategories();
+    flushBuilderCourse();
+    await settle();
+
+    // Set an attached media on episode
+    const sections = component['sections']();
+    sections[0].episodes[0].mediaAssetId = '00000000-0000-0000-0000-000000000099';
+    sections[0].episodes[0].videoStatus = 'ready';
+
+    component.removeEpisodeVideo(0, 0);
+    await settle();
+
+    const deleteReq = httpMock.expectOne(
+      '/api/catalog/instructor/courses/00000000-0000-0000-0000-000000000001/sections/00000000-0000-0000-0000-000000000010/episodes/00000000-0000-0000-0000-000000000020/media'
+    );
+    expect(deleteReq.request.method).toBe('DELETE');
+    deleteReq.flush(null);
+    await settle();
+
+    expect(component['sections']()[0].episodes[0].mediaAssetId).toBeNull();
+    expect(component['sections']()[0].episodes[0].videoStatus).toBe('none');
+  });
+
+  it('manages trailer media and includes it in buildAutosaveCommand', async () => {
+    const component = await navigate('/instructor/courses/00000000-0000-0000-0000-000000000001/builder');
+    flushCategories();
+    flushBuilderCourse();
+    await settle();
+
+    expect(component['trailerMediaAssetId']()).toBeNull();
+
+    // Set trailer manually as if uploaded
+    component['trailerMediaAssetId'].set('00000000-0000-0000-0000-000000000088');
+    const command = component.buildAutosaveCommand();
+    expect(command.trailerMediaAssetId).toBe('00000000-0000-0000-0000-000000000088');
+
+    // Remove trailer
+    component.removeTrailer();
+    expect(component['trailerMediaAssetId']()).toBeNull();
+    expect(component['trailerStatus']()).toBe('none');
+    const updatedCommand = component.buildAutosaveCommand();
+    expect(updatedCommand.trailerMediaAssetId).toBeNull();
   });
 });
 

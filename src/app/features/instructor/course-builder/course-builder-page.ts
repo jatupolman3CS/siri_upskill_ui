@@ -41,7 +41,7 @@ import {
   phosphorWarningCircle,
 } from '@ng-icons/phosphor-icons/regular';
 import { Subject, of } from 'rxjs';
-import { catchError, debounceTime, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import {
   AutosaveCourseCommand,
@@ -51,6 +51,7 @@ import {
 import { CategoryTreeNode } from '../../catalog/data/category-api.models';
 import { CategoryApiService } from '../../catalog/data/category-api.service';
 import { CourseApiService } from '../../catalog/data/course-api.service';
+import { MediaApiService } from '../../media/data/media-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
@@ -61,6 +62,10 @@ export interface BuilderEpisode {
   title: string;
   durationSeconds: number;
   isFreePreview: boolean;
+  mediaAssetId?: string | null;
+  videoStatus?: 'none' | 'uploading' | 'processing' | 'ready' | 'failed';
+  uploadProgress?: number;
+  errorMessage?: string | null;
 }
 
 export interface BuilderSection {
@@ -83,6 +88,7 @@ export interface BuilderStateSnapshot {
   outcomes: string[];
   requirements: string[];
   sections: BuilderSection[];
+  trailerMediaAssetId?: string | null;
 }
 
 export type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'conflict' | 'error';
@@ -129,6 +135,7 @@ export class CourseBuilderPage implements OnInit {
   private readonly router = inject(Router);
   private readonly courseApi = inject(CourseApiService);
   private readonly categoryApi = inject(CategoryApiService);
+  private readonly mediaApi = inject(MediaApiService);
   protected readonly translationService = inject(TranslationService);
   private readonly seoService = inject(SeoService);
   private readonly destroyRef = inject(DestroyRef);
@@ -177,6 +184,11 @@ export class CourseBuilderPage implements OnInit {
   protected readonly requirements = signal<string[]>([]);
   protected readonly newOutcome = signal<string>('');
   protected readonly newRequirement = signal<string>('');
+
+  // Course Trailer Media
+  protected readonly trailerMediaAssetId = signal<string | null>(null);
+  protected readonly trailerStatus = signal<'none' | 'uploading' | 'processing' | 'ready' | 'failed'>('none');
+  protected readonly trailerUploadProgress = signal<number>(0);
 
   // Curriculum Sections
   protected readonly sections = signal<BuilderSection[]>([
@@ -354,6 +366,14 @@ export class CourseBuilderPage implements OnInit {
     this.outcomes.set(course.outcomes ? [...course.outcomes] : []);
     this.requirements.set(course.requirements ? [...course.requirements] : []);
 
+    if (course.trailerMediaAssetId) {
+      this.trailerMediaAssetId.set(course.trailerMediaAssetId);
+      this.trailerStatus.set('ready');
+    } else {
+      this.trailerMediaAssetId.set(null);
+      this.trailerStatus.set('none');
+    }
+
     if (course.sections.length > 0) {
       this.sections.set(
         course.sections.map((s) => ({
@@ -364,6 +384,8 @@ export class CourseBuilderPage implements OnInit {
             title: e.title,
             durationSeconds: e.durationSeconds ?? 300,
             isFreePreview: e.isFreePreview,
+            mediaAssetId: e.mediaAssetId ?? null,
+            videoStatus: e.mediaAssetId ? 'ready' : 'none',
           })),
         }))
       );
@@ -391,6 +413,7 @@ export class CourseBuilderPage implements OnInit {
         title: s.title,
         episodes: s.episodes.map((e) => ({ ...e })),
       })),
+      trailerMediaAssetId: this.trailerMediaAssetId(),
     };
   }
 
@@ -455,6 +478,10 @@ export class CourseBuilderPage implements OnInit {
       this.seoDescription.set(snapshot.seoDescription ?? '');
       this.outcomes.set([...snapshot.outcomes]);
       this.requirements.set([...snapshot.requirements]);
+      if (snapshot.trailerMediaAssetId !== undefined) {
+        this.trailerMediaAssetId.set(snapshot.trailerMediaAssetId);
+        this.trailerStatus.set(snapshot.trailerMediaAssetId ? 'ready' : 'none');
+      }
       this.sections.set(
         snapshot.sections.map((s) => ({
           id: s.id,
@@ -819,10 +846,168 @@ export class CourseBuilderPage implements OnInit {
           description: null,
           sortOrder: eIdx,
           isFreePreview: e.isFreePreview,
+          mediaAssetId: e.mediaAssetId || null,
+          durationSeconds: e.durationSeconds || null,
         })),
       })),
       rowVersion: this.rowVersion(),
+      trailerMediaAssetId: this.trailerMediaAssetId() || null,
     };
+  }
+
+  // --- Video & Trailer Upload Methods ---
+
+  public formatDuration(seconds: number | null | undefined): string {
+    if (!seconds || seconds <= 0) return '00:00';
+    const totalSecs = Math.round(seconds);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    const hrs = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    if (hrs > 0) {
+      return `${hrs}:${remMins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  public onEpisodeVideoSelected(sectionIndex: number, episodeIndex: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const currentSections = this.sections();
+    const section = currentSections[sectionIndex];
+    if (!section) return;
+    const episode = section.episodes[episodeIndex];
+    if (!episode) return;
+
+    this.recordSnapshot();
+
+    episode.videoStatus = 'uploading';
+    episode.uploadProgress = 0;
+    episode.errorMessage = null;
+    this.sections.set([...currentSections]);
+
+    this.mediaApi.createAsset({ title: episode.title || file.name }).pipe(
+      switchMap((asset) => {
+        episode.mediaAssetId = asset.id;
+        return this.mediaApi.createUploadSession(asset.id).pipe(
+          switchMap((session) =>
+            this.mediaApi.uploadVideoFile(session.uploadUrl, file).pipe(
+              tap((progressEvent) => {
+                episode.uploadProgress = progressEvent.progress;
+                this.sections.set([...this.sections()]);
+              }),
+              filter((progressEvent) => progressEvent.isComplete),
+              switchMap(() => this.mediaApi.completeUploadSession(session.id)),
+              map(() => asset)
+            )
+          )
+        );
+      }),
+      switchMap((asset) => {
+        const courseId = this.courseId();
+        const duration = asset.durationSeconds ?? (episode.durationSeconds > 0 ? episode.durationSeconds : 300);
+        episode.durationSeconds = duration;
+        episode.videoStatus = 'ready';
+        episode.uploadProgress = 100;
+        this.sections.set([...this.sections()]);
+
+        if (courseId && !episode.id.startsWith('ep-temp-') && !section.id.startsWith('sec-temp-')) {
+          return this.courseApi.attachEpisodeMedia(courseId, section.id, episode.id, {
+            mediaAssetId: asset.id,
+            durationSeconds: episode.durationSeconds,
+          }).pipe(
+            catchError(() => of(null))
+          );
+        }
+        return of(null);
+      }),
+      tap(() => {
+        this.triggerAutosave();
+        input.value = '';
+      }),
+      catchError((err) => {
+        episode.videoStatus = 'failed';
+        episode.errorMessage = err?.message || 'Upload failed';
+        this.sections.set([...this.sections()]);
+        input.value = '';
+        return of(null);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+  }
+
+  public removeEpisodeVideo(sectionIndex: number, episodeIndex: number): void {
+    const currentSections = this.sections();
+    const section = currentSections[sectionIndex];
+    if (!section) return;
+    const episode = section.episodes[episodeIndex];
+    if (!episode) return;
+
+    this.recordSnapshot();
+
+    const courseId = this.courseId();
+    if (courseId && episode.mediaAssetId && !episode.id.startsWith('ep-temp-') && !section.id.startsWith('sec-temp-')) {
+      this.courseApi.removeEpisodeMedia(courseId, section.id, episode.id).pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe();
+    }
+
+    episode.mediaAssetId = null;
+    episode.videoStatus = 'none';
+    episode.uploadProgress = 0;
+    this.sections.set([...currentSections]);
+    this.triggerAutosave();
+  }
+
+  public onTrailerSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.recordSnapshot();
+    this.trailerStatus.set('uploading');
+    this.trailerUploadProgress.set(0);
+
+    this.mediaApi.createAsset({ title: `${this.courseTitle()} - Trailer` }).pipe(
+      switchMap((asset) => {
+        this.trailerMediaAssetId.set(asset.id);
+        return this.mediaApi.createUploadSession(asset.id).pipe(
+          switchMap((session) =>
+            this.mediaApi.uploadVideoFile(session.uploadUrl, file).pipe(
+              tap((progressEvent) => {
+                this.trailerUploadProgress.set(progressEvent.progress);
+              }),
+              filter((progressEvent) => progressEvent.isComplete),
+              switchMap(() => this.mediaApi.completeUploadSession(session.id)),
+              map(() => asset)
+            )
+          )
+        );
+      }),
+      tap(() => {
+        this.trailerStatus.set('ready');
+        this.trailerUploadProgress.set(100);
+        this.triggerAutosave();
+        input.value = '';
+      }),
+      catchError(() => {
+        this.trailerStatus.set('failed');
+        input.value = '';
+        return of(null);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+  }
+
+  public removeTrailer(): void {
+    this.recordSnapshot();
+    this.trailerMediaAssetId.set(null);
+    this.trailerStatus.set('none');
+    this.trailerUploadProgress.set(0);
+    this.triggerAutosave();
   }
 
   // --- Save / Publish Pipelines (Clean RxJS switchMap) ---

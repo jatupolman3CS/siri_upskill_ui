@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/http/api.service';
 import { PagedResult } from '../../../core/http/paged-result.model';
 import {
+  AttachEpisodeMediaCommand,
   AutosaveCourseCommand,
   AutosaveCourseResponse,
   CourseBuilderResponse,
@@ -14,6 +15,7 @@ import {
   CreateCourseEpisodeCommand,
   CreateCourseResponse,
   CreateCourseSectionCommand,
+  EpisodeMediaResponse,
   InstructorCourseSummary,
   ReorderCourseEpisodesCommand,
   ReorderCourseSectionsCommand,
@@ -113,6 +115,28 @@ export class CourseApiService extends ApiService {
     return this.put<void>(
       `/catalog/instructor/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/episodes/reorder`,
       command,
+    );
+  }
+
+  attachEpisodeMedia(
+    courseId: string,
+    sectionId: string,
+    episodeId: string,
+    command: AttachEpisodeMediaCommand,
+  ): Observable<EpisodeMediaResponse> {
+    return this.put<EpisodeMediaResponse>(
+      `/catalog/instructor/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/episodes/${encodeURIComponent(episodeId)}/media`,
+      command,
+    );
+  }
+
+  removeEpisodeMedia(
+    courseId: string,
+    sectionId: string,
+    episodeId: string,
+  ): Observable<EpisodeMediaResponse> {
+    return this.delete<EpisodeMediaResponse>(
+      `/catalog/instructor/courses/${encodeURIComponent(courseId)}/sections/${encodeURIComponent(sectionId)}/episodes/${encodeURIComponent(episodeId)}/media`,
     );
   }
 
