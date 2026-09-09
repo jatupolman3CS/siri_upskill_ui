@@ -40,11 +40,12 @@ import {
   phosphorUploadSimple,
   phosphorWarningCircle,
 } from '@ng-icons/phosphor-icons/regular';
-import { Subject, of } from 'rxjs';
-import { catchError, debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
+import { Observable, Subject, Subscription, of } from 'rxjs';
+import { catchError, concatMap, debounceTime, filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
   AutosaveCourseCommand,
+  AutosaveCourseResponse,
   CourseBuilderResponse,
   CourseLevel,
 } from '../../catalog/data/course-api.models';
@@ -52,6 +53,7 @@ import { CategoryTreeNode } from '../../catalog/data/category-api.models';
 import { CategoryApiService } from '../../catalog/data/category-api.service';
 import { CourseApiService } from '../../catalog/data/course-api.service';
 import { MediaApiService } from '../../media/data/media-api.service';
+import { MediaAssetResponse } from '../../media/data/media-api.models';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
@@ -189,6 +191,9 @@ export class CourseBuilderPage implements OnInit {
   protected readonly trailerMediaAssetId = signal<string | null>(null);
   protected readonly trailerStatus = signal<'none' | 'uploading' | 'processing' | 'ready' | 'failed'>('none');
   protected readonly trailerUploadProgress = signal<number>(0);
+  protected readonly trailerError = signal<string | null>(null);
+  private readonly mediaOperations = new Map<string, Subscription>();
+  private readonly episodeIdAliases = new Map<string, string>();
 
   // Curriculum Sections
   protected readonly sections = signal<BuilderSection[]>([
@@ -196,8 +201,8 @@ export class CourseBuilderPage implements OnInit {
       id: 'sec-temp-1',
       title: 'บทนำและภาพรวม',
       episodes: [
-        { id: 'ep-temp-1', title: '1. ยินดีต้อนรับสู่หลักสูตร', durationSeconds: 300, isFreePreview: true },
-        { id: 'ep-temp-2', title: '2. แนะนำเครื่องมือที่ต้องใช้', durationSeconds: 450, isFreePreview: false },
+        { id: 'ep-temp-1', title: '1. ยินดีต้อนรับสู่หลักสูตร', durationSeconds: 0, isFreePreview: true },
+        { id: 'ep-temp-2', title: '2. แนะนำเครื่องมือที่ต้องใช้', durationSeconds: 0, isFreePreview: false },
       ],
     },
   ]);
@@ -221,7 +226,7 @@ export class CourseBuilderPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (tree) => {
-          const list: readonly CategoryTreeNode[] = Array.isArray(tree) ? tree : ((tree as any)?.items ?? []);
+          const list: readonly CategoryTreeNode[] = tree;
           const flat: CategoryTreeNode[] = [];
           const flatten = (nodes: readonly CategoryTreeNode[]) => {
             if (!Array.isArray(nodes)) return;
@@ -251,15 +256,14 @@ export class CourseBuilderPage implements OnInit {
     this.autosaveTrigger$
       .pipe(
         debounceTime(1500),
-        switchMap(() => {
+        concatMap(() => {
           const id = this.courseId();
           if (!id || this.saveStatus() === 'conflict' || this.isLoading()) {
             return of(null);
           }
           this.saveStatus.set('saving');
           this.errorMessage.set(null);
-          const command = this.buildAutosaveCommand();
-          return this.courseApi.autosaveCourse(id, command).pipe(
+          return this.saveCurrentState(id).pipe(
             tap((res) => {
               this.rowVersion.set(res.rowVersion);
               this.saveStatus.set('saved');
@@ -351,6 +355,8 @@ export class CourseBuilderPage implements OnInit {
   }
 
   private populateFromBuilder(course: CourseBuilderResponse): void {
+    this.mediaOperations.forEach((operation) => operation.unsubscribe());
+    this.mediaOperations.clear();
     this.courseId.set(course.id);
     this.rowVersion.set(course.rowVersion);
     this.courseTitle.set(course.title);
@@ -368,13 +374,12 @@ export class CourseBuilderPage implements OnInit {
 
     if (course.trailerMediaAssetId) {
       this.trailerMediaAssetId.set(course.trailerMediaAssetId);
-      this.trailerStatus.set('ready');
+      this.trailerStatus.set('processing');
     } else {
       this.trailerMediaAssetId.set(null);
       this.trailerStatus.set('none');
     }
 
-    if (course.sections.length > 0) {
       this.sections.set(
         course.sections.map((s) => ({
           id: s.id,
@@ -382,13 +387,33 @@ export class CourseBuilderPage implements OnInit {
           episodes: s.episodes.map((e) => ({
             id: e.id,
             title: e.title,
-            durationSeconds: e.durationSeconds ?? 300,
+            durationSeconds: e.durationSeconds ?? 0,
             isFreePreview: e.isFreePreview,
             mediaAssetId: e.mediaAssetId ?? null,
-            videoStatus: e.mediaAssetId ? 'ready' : 'none',
+            videoStatus: e.mediaAssetId ? 'processing' : 'none',
           })),
         }))
       );
+    for (const section of this.sections()) {
+      for (const episode of section.episodes) {
+        if (episode.mediaAssetId) {
+          this.mediaOperations.set(episode.id, this.mediaApi.watchAsset(episode.mediaAssetId)
+            .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+              next: (asset) => this.applyEpisodeAsset(episode.id, asset),
+              error: () => this.updateEpisodeMedia(episode.id, { videoStatus: 'failed', errorMessage: 'instructor.builder.upload.statusFailed' }),
+            }));
+        }
+      }
+    }
+    if (course.trailerMediaAssetId) {
+      this.mediaOperations.set('trailer', this.mediaApi.watchAsset(course.trailerMediaAssetId)
+        .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: (asset) => this.applyTrailerAsset(asset),
+          error: () => {
+            this.trailerStatus.set('failed');
+            this.trailerError.set('instructor.builder.upload.statusFailed');
+          },
+        }));
     }
   }
 
@@ -575,7 +600,7 @@ export class CourseBuilderPage implements OnInit {
           {
             id: `ep-temp-${Date.now()}`,
             title: `บทเรียนที่ 1`,
-            durationSeconds: 300,
+            durationSeconds: 0,
             isFreePreview: false,
           },
         ],
@@ -586,6 +611,10 @@ export class CourseBuilderPage implements OnInit {
   }
 
   public removeSection(index: number): void {
+    for (const episode of this.sections()[index]?.episodes ?? []) {
+      this.mediaOperations.get(episode.id)?.unsubscribe();
+      this.mediaOperations.delete(episode.id);
+    }
     this.recordSnapshot();
     this.sections.update((list) => list.filter((_, idx) => idx !== index));
     this.announceMessage(this.translationService.t('instructor.builder.curriculum.deleteSection'));
@@ -615,7 +644,7 @@ export class CourseBuilderPage implements OnInit {
             {
               id: `ep-temp-${Date.now()}`,
               title: `บทเรียนที่ ${newEpNum}`,
-              durationSeconds: 400,
+              durationSeconds: 0,
               isFreePreview: false,
             },
           ],
@@ -627,6 +656,11 @@ export class CourseBuilderPage implements OnInit {
   }
 
   public removeEpisode(sectionIndex: number, episodeIndex: number): void {
+    const episode = this.sections()[sectionIndex]?.episodes[episodeIndex];
+    if (episode) {
+      this.mediaOperations.get(episode.id)?.unsubscribe();
+      this.mediaOperations.delete(episode.id);
+    }
     this.recordSnapshot();
     this.sections.update((list) =>
       list.map((sec, idx) => {
@@ -875,67 +909,112 @@ export class CourseBuilderPage implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
 
-    const currentSections = this.sections();
-    const section = currentSections[sectionIndex];
-    if (!section) return;
-    const episode = section.episodes[episodeIndex];
-    if (!episode) return;
+    input.value = '';
+    const episode = this.sections()[sectionIndex]?.episodes[episodeIndex];
+    if (!episode || episode.videoStatus === 'uploading' || episode.videoStatus === 'processing') return;
+    const validationError = this.mediaApi.validateVideoFile(file);
+    if (validationError) {
+      this.updateEpisodeMedia(episode.id, { videoStatus: 'failed', errorMessage: validationError });
+      return;
+    }
 
     this.recordSnapshot();
+    this.mediaOperations.get(episode.id)?.unsubscribe();
+    this.updateEpisodeMedia(episode.id, { videoStatus: 'uploading', uploadProgress: 0, errorMessage: null });
+    this.mediaOperations.set(episode.id, this.uploadMedia(file, episode.title || file.name,
+      (progress) => this.updateEpisodeMedia(episode.id, { uploadProgress: progress }))
+      .pipe(
+        switchMap((asset) => {
+          this.updateEpisodeMedia(episode.id, {
+            mediaAssetId: asset.id, durationSeconds: 0, videoStatus: 'processing', uploadProgress: 100,
+          });
+          // Persist the draft reference while encoding, through the existing row-version-aware autosave.
+          this.triggerAutosave();
+          return this.mediaApi.watchAsset(asset.id);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe({
+        next: (asset) => this.applyEpisodeAsset(episode.id, asset),
+        error: () => this.updateEpisodeMedia(episode.id, { videoStatus: 'failed', errorMessage: 'instructor.builder.upload.transferFailed' }),
+      }));
+  }
 
-    episode.videoStatus = 'uploading';
-    episode.uploadProgress = 0;
-    episode.errorMessage = null;
-    this.sections.set([...currentSections]);
+  private saveCurrentState(id: string): Observable<AutosaveCourseResponse> {
+    // Match server-assigned IDs to the submitted snapshot, even if the user reorders while saving.
+    const submitted = this.sections().map((section) => ({
+      id: section.id, episodeIds: section.episodes.map((episode) => episode.id),
+    }));
+    return this.courseApi.autosaveCourse(id, this.buildAutosaveCommand()).pipe(tap((response) => {
+      if (!response.sections) return;
+      const ids = new Map<string, string>();
+      response.sections.forEach((section, sectionIndex) => {
+        const original = submitted[sectionIndex];
+        if (!original) return;
+        ids.set(original.id, section.id);
+        section.episodes.forEach((episode, episodeIndex) => {
+          const originalId = original.episodeIds[episodeIndex];
+          if (!originalId) return;
+          ids.set(originalId, episode.id);
+          if (originalId !== episode.id) {
+            this.episodeIdAliases.set(originalId, episode.id);
+            const operation = this.mediaOperations.get(originalId);
+            if (operation) {
+              this.mediaOperations.delete(originalId);
+              this.mediaOperations.set(episode.id, operation);
+            }
+          }
+        });
+      });
+      const reconcile = (sections: BuilderSection[]): BuilderSection[] => sections.map((section) => ({
+        ...section, id: ids.get(section.id) ?? section.id,
+        episodes: section.episodes.map((episode) => ({ ...episode, id: ids.get(episode.id) ?? episode.id })),
+      }));
+      this.sections.update(reconcile);
+      this.historyPast.update((history) => history.map((snapshot) => ({ ...snapshot, sections: reconcile(snapshot.sections) })));
+      this.historyFuture.update((history) => history.map((snapshot) => ({ ...snapshot, sections: reconcile(snapshot.sections) })));
+    }));
+  }
 
-    this.mediaApi.createAsset({ title: episode.title || file.name }).pipe(
-      switchMap((asset) => {
-        episode.mediaAssetId = asset.id;
-        return this.mediaApi.createUploadSession(asset.id).pipe(
-          switchMap((session) =>
-            this.mediaApi.uploadVideoFile(session.uploadUrl, file).pipe(
-              tap((progressEvent) => {
-                episode.uploadProgress = progressEvent.progress;
-                this.sections.set([...this.sections()]);
-              }),
-              filter((progressEvent) => progressEvent.isComplete),
-              switchMap(() => this.mediaApi.completeUploadSession(session.id)),
-              map(() => asset)
-            )
-          )
-        );
-      }),
-      switchMap((asset) => {
-        const courseId = this.courseId();
-        const duration = asset.durationSeconds ?? (episode.durationSeconds > 0 ? episode.durationSeconds : 300);
-        episode.durationSeconds = duration;
-        episode.videoStatus = 'ready';
-        episode.uploadProgress = 100;
-        this.sections.set([...this.sections()]);
+  private uploadMedia(file: File, title: string, onProgress: (progress: number) => void): Observable<MediaAssetResponse> {
+    return this.mediaApi.createAsset({ title }).pipe(
+      switchMap((asset) => this.mediaApi.createUploadSession(asset.id).pipe(
+        switchMap((session) => this.mediaApi.uploadVideoFile(session.uploadUrl, file).pipe(
+          tap((progress) => onProgress(progress.progress)),
+          filter((progress) => progress.isComplete),
+          take(1),
+          switchMap(() => this.mediaApi.completeUploadSession(session.id)),
+          map(() => asset),
+        )),
+      )),
+    );
+  }
 
-        if (courseId && !episode.id.startsWith('ep-temp-') && !section.id.startsWith('sec-temp-')) {
-          return this.courseApi.attachEpisodeMedia(courseId, section.id, episode.id, {
-            mediaAssetId: asset.id,
-            durationSeconds: episode.durationSeconds,
-          }).pipe(
-            catchError(() => of(null))
-          );
-        }
-        return of(null);
-      }),
-      tap(() => {
-        this.triggerAutosave();
-        input.value = '';
-      }),
-      catchError((err) => {
-        episode.videoStatus = 'failed';
-        episode.errorMessage = err?.message || 'Upload failed';
-        this.sections.set([...this.sections()]);
-        input.value = '';
-        return of(null);
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
+  private updateEpisodeMedia(episodeId: string, changes: Partial<BuilderEpisode>): void {
+    episodeId = this.episodeIdAliases.get(episodeId) ?? episodeId;
+    this.sections.update((sections) => sections.map((section) => ({
+      ...section,
+      episodes: section.episodes.map((episode) => episode.id === episodeId ? { ...episode, ...changes } : episode),
+    })));
+  }
+
+  private applyEpisodeAsset(episodeId: string, asset: MediaAssetResponse): void {
+    episodeId = this.episodeIdAliases.get(episodeId) ?? episodeId;
+    const episode = this.sections().flatMap((section) => section.episodes).find((item) => item.id === episodeId);
+    if (!episode || episode.mediaAssetId !== asset.id) return;
+    const duration = asset.durationSeconds ?? 0;
+    const durationChanged = asset.status === 'Ready' && duration !== episode.durationSeconds;
+    this.updateEpisodeMedia(episodeId, {
+      videoStatus: asset.status === 'Ready' ? 'ready' : asset.status === 'Failed' ? 'failed' : 'processing',
+      durationSeconds: duration,
+      errorMessage: asset.status === 'Failed' ? 'instructor.builder.upload.processingFailed' : null,
+    });
+    if (durationChanged) this.triggerAutosave();
+  }
+
+  private applyTrailerAsset(asset: MediaAssetResponse): void {
+    if (this.trailerMediaAssetId() !== asset.id) return;
+    this.trailerStatus.set(asset.status === 'Ready' ? 'ready' : asset.status === 'Failed' ? 'failed' : 'processing');
+    this.trailerError.set(asset.status === 'Failed' ? 'instructor.builder.upload.processingFailed' : null);
   }
 
   public removeEpisodeVideo(sectionIndex: number, episodeIndex: number): void {
@@ -945,68 +1024,58 @@ export class CourseBuilderPage implements OnInit {
     const episode = section.episodes[episodeIndex];
     if (!episode) return;
 
+    this.mediaOperations.get(episode.id)?.unsubscribe();
     this.recordSnapshot();
 
-    const courseId = this.courseId();
-    if (courseId && episode.mediaAssetId && !episode.id.startsWith('ep-temp-') && !section.id.startsWith('sec-temp-')) {
-      this.courseApi.removeEpisodeMedia(courseId, section.id, episode.id).pipe(
-        catchError(() => of(null)),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
-    }
-
-    episode.mediaAssetId = null;
-    episode.videoStatus = 'none';
-    episode.uploadProgress = 0;
-    this.sections.set([...currentSections]);
+    this.updateEpisodeMedia(episode.id, {
+      mediaAssetId: null, videoStatus: 'none', uploadProgress: 0, durationSeconds: 0, errorMessage: null,
+    });
     this.triggerAutosave();
   }
 
   public onTrailerSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
-
+    if (!file || this.trailerStatus() === 'uploading' || this.trailerStatus() === 'processing') return;
+    input.value = '';
+    const validationError = this.mediaApi.validateVideoFile(file);
+    if (validationError) {
+      this.trailerStatus.set('failed');
+      this.trailerError.set(validationError);
+      return;
+    }
     this.recordSnapshot();
+    this.mediaOperations.get('trailer')?.unsubscribe();
     this.trailerStatus.set('uploading');
     this.trailerUploadProgress.set(0);
+    this.trailerError.set(null);
 
-    this.mediaApi.createAsset({ title: `${this.courseTitle()} - Trailer` }).pipe(
+    this.mediaOperations.set('trailer', this.uploadMedia(file, `${this.courseTitle()} - Trailer`,
+      (progress) => this.trailerUploadProgress.set(progress)).pipe(
       switchMap((asset) => {
         this.trailerMediaAssetId.set(asset.id);
-        return this.mediaApi.createUploadSession(asset.id).pipe(
-          switchMap((session) =>
-            this.mediaApi.uploadVideoFile(session.uploadUrl, file).pipe(
-              tap((progressEvent) => {
-                this.trailerUploadProgress.set(progressEvent.progress);
-              }),
-              filter((progressEvent) => progressEvent.isComplete),
-              switchMap(() => this.mediaApi.completeUploadSession(session.id)),
-              map(() => asset)
-            )
-          )
-        );
-      }),
-      tap(() => {
-        this.trailerStatus.set('ready');
+        this.trailerStatus.set('processing');
         this.trailerUploadProgress.set(100);
         this.triggerAutosave();
-        input.value = '';
-      }),
-      catchError(() => {
-        this.trailerStatus.set('failed');
-        input.value = '';
-        return of(null);
+        return this.mediaApi.watchAsset(asset.id);
       }),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
+    ).subscribe({
+      next: (asset) => this.applyTrailerAsset(asset),
+      error: () => {
+        this.trailerStatus.set('failed');
+        this.trailerError.set('instructor.builder.upload.transferFailed');
+      },
+    }));
   }
 
   public removeTrailer(): void {
+    this.mediaOperations.get('trailer')?.unsubscribe();
     this.recordSnapshot();
     this.trailerMediaAssetId.set(null);
     this.trailerStatus.set('none');
     this.trailerUploadProgress.set(0);
+    this.trailerError.set(null);
     this.triggerAutosave();
   }
 
@@ -1044,8 +1113,7 @@ export class CourseBuilderPage implements OnInit {
           }),
           switchMap((builder) => {
             this.rowVersion.set(builder.rowVersion);
-            const command = this.buildAutosaveCommand();
-            return this.courseApi.autosaveCourse(builder.id, command);
+            return this.saveCurrentState(builder.id);
           }),
           tap((res) => {
             this.rowVersion.set(res.rowVersion);
@@ -1074,9 +1142,7 @@ export class CourseBuilderPage implements OnInit {
       return;
     }
 
-    const command = this.buildAutosaveCommand();
-    this.courseApi
-      .autosaveCourse(id, command)
+    this.saveCurrentState(id)
       .pipe(
         tap((res) => {
           this.rowVersion.set(res.rowVersion);
@@ -1104,9 +1170,22 @@ export class CourseBuilderPage implements OnInit {
       .subscribe();
   }
 
+  public readonly mediaReadyForReview = computed(() => {
+    const episodes = this.sections().flatMap((section) => section.episodes);
+    return episodes.length > 0 && episodes.every((episode) => episode.mediaAssetId && episode.videoStatus === 'ready') &&
+      this.trailerStatus() !== 'uploading' && this.trailerStatus() !== 'processing' &&
+      (!this.trailerMediaAssetId() || this.trailerStatus() === 'ready');
+  });
+
   public publishCourse(): void {
     if (!this.categoryId()) {
       this.errorMessage.set('instructor.builder.validation.categoryRequired');
+      this.saveStatus.set('error');
+      return;
+    }
+
+    if (!this.mediaReadyForReview()) {
+      this.errorMessage.set('instructor.builder.validation.mediaNotReady');
       this.saveStatus.set('error');
       return;
     }
@@ -1132,8 +1211,7 @@ export class CourseBuilderPage implements OnInit {
           }),
           switchMap((builder) => {
             this.rowVersion.set(builder.rowVersion);
-            const command = this.buildAutosaveCommand();
-            return this.courseApi.autosaveCourse(builder.id, command);
+            return this.saveCurrentState(builder.id);
           }),
           switchMap((res) => {
             this.rowVersion.set(res.rowVersion);
@@ -1161,9 +1239,7 @@ export class CourseBuilderPage implements OnInit {
       return;
     }
 
-    const command = this.buildAutosaveCommand();
-    this.courseApi
-      .autosaveCourse(id, command)
+    this.saveCurrentState(id)
       .pipe(
         switchMap((res) => {
           this.rowVersion.set(res.rowVersion);

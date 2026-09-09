@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import localeTh from '@angular/common/locales/th';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, WritableSignal } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { errorInterceptor } from '../../../core/http/error.interceptor';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -82,6 +82,7 @@ describe('CheckoutPage', () => {
       items: [
         {
           id: 'item-1',
+          courseId: 'course-1',
           titleSnapshot: 'Digital Marketing ครบวงจร',
           instructorName: 'คุณนภา วงศ์สว่าง',
           unitPrice: 1890,
@@ -89,6 +90,7 @@ describe('CheckoutPage', () => {
         },
         {
           id: 'item-2',
+          courseId: 'course-2',
           titleSnapshot: 'สร้าง Mobile App ด้วย Flutter',
           instructorName: 'อ.สมชาย ใจดี',
           unitPrice: 1990,
@@ -103,6 +105,8 @@ describe('CheckoutPage', () => {
   });
 
   afterEach(() => {
+    fixture.destroy();
+    vi.useRealTimers();
     httpMock.verify();
   });
 
@@ -141,6 +145,7 @@ describe('CheckoutPage', () => {
       isValid: true,
       code: 'WELCOME300',
       discountAmount: 300,
+      totalAmount: 3580,
     });
     fixture.detectChanges();
 
@@ -160,6 +165,56 @@ describe('CheckoutPage', () => {
     expect(component.payment()).toEqual(SAMPLE_PAYMENT);
     expect(component.paymentPollStatus()).toBe('polling');
     expect(fixture.nativeElement.querySelector('img[alt="PromptPay QR Code"]')).toBeTruthy();
+  });
+
+  it('uses the server total including tax instead of recomputing it from subtotal', () => {
+    const order = testAccess(component).order()!;
+    testAccess(component).order.set({ ...order, totalAmount: 4151.6 });
+    expect(component.total()).toBe(4151.6);
+  });
+
+  it('does not infer payment success from a zero total on a pending order', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    testAccess(component).order.update((order) => ({ ...order!, totalAmount: 0 }));
+    component.initiatePayment();
+    httpMock.expectOne('/api/commerce/payments').flush(null, { status: 409, statusText: 'Conflict' });
+    expect(component.paymentPollStatus()).toBe('idle');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('reprices an order with an existing discount when a new promo code is applied', () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    testAccess(component).order.update((order) => ({ ...order!, discountAmount: 100, totalAmount: 3780 }));
+    component.appliedPromo.set({ code: 'REPLACE', discountAmount: 500, totalAmount: 3380 });
+    component.initiatePayment();
+    const replacement = httpMock.expectOne('/api/commerce/orders');
+    expect(replacement.request.body).toEqual({ courseIds: ['course-1', 'course-2'], promoCode: 'REPLACE' });
+    replacement.flush({ ...testAccess(component).order()!, id: 'repriced-order', discountAmount: 500, totalAmount: 3380 });
+    const payment = httpMock.expectOne('/api/commerce/payments');
+    expect(payment.request.body.orderId).toBe('repriced-order');
+    payment.flush({ ...SAMPLE_PAYMENT, orderId: 'repriced-order', amount: 3380 });
+    expect(component.total()).toBe(3380);
+  });
+
+  it('opens the order success route after the payment poll confirms success', () => {
+    vi.useFakeTimers();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    component.initiatePayment();
+    httpMock.expectOne('/api/commerce/payments').flush(SAMPLE_PAYMENT);
+    vi.advanceTimersByTime(3000);
+    httpMock.expectOne('/api/commerce/payments/payment-456').flush({ ...SAMPLE_PAYMENT, status: 'Succeeded' });
+    expect(navigate).toHaveBeenCalledWith(['/checkout/success', 'order-123'], { replaceUrl: true });
+    expect(component.paymentPollStatus()).toBe('succeeded');
+    vi.advanceTimersByTime(6000);
+    httpMock.expectNone('/api/commerce/payments/payment-456');
+  });
+
+  it('shows a payment error when the provider returns no QR image', () => {
+    component.initiatePayment();
+    httpMock.expectOne('/api/commerce/payments').flush({ ...SAMPLE_PAYMENT, qrCodeUrl: null });
+    expect(component.payment()).toBeNull();
+    expect(component.paymentError()).toBeTruthy();
+    expect(component.currentStep()).toBe('selection');
   });
 
   it('shows a translated error, not the raw "common.error" i18n key, when payment creation fails without a ProblemDetails body', () => {

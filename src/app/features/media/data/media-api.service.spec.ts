@@ -1,15 +1,37 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import type { UploadOptions } from 'tus-js-client';
 
 import { MediaApiService } from './media-api.service';
 import { MediaAssetResponse, MediaUploadSessionResponse } from './media-api.models';
+
+const tus = vi.hoisted(() => ({
+  options: undefined as UploadOptions | undefined,
+  start: vi.fn(),
+  abort: vi.fn(() => Promise.resolve()),
+}));
+vi.mock('tus-js-client', () => ({
+  Upload: class {
+    constructor(_file: File, options: UploadOptions) { tus.options = options; }
+    start = tus.start;
+    abort = tus.abort;
+  },
+}));
+
+const ASSET: MediaAssetResponse = {
+  id: 'asset-1', provider: 'BunnyStream', providerAssetId: 'bunny-1', playbackId: null,
+  status: 'Processing', durationSeconds: null, drmEnabled: true, thumbnailUrl: null,
+  uploadedByUserId: 'user-1', readyAtUtc: null, errorMessage: null, createdAtUtc: '2026-09-09T00:00:00Z',
+};
 
 describe('MediaApiService', () => {
   let service: MediaApiService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    tus.options = undefined;
+    vi.clearAllMocks();
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -17,7 +39,78 @@ describe('MediaApiService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    vi.useRealTimers();
+  });
+
+  it('uses TUS authorization headers and reports completion only after server acknowledgement', () => {
+    const events: { progress: number; isComplete: boolean }[] = [];
+    service.uploadVideoFile(
+      'https://video.bunnycdn.com/tusupload?AuthorizationSignature=signed-value&AuthorizationExpire=1900000000&LibraryId=123&VideoId=video-1',
+      new File(['video'], 'lesson.webm', { type: 'video/webm' }),
+    ).subscribe((event) => events.push(event));
+
+    expect(tus.start).toHaveBeenCalledOnce();
+    expect(tus.options?.endpoint).toBe('https://video.bunnycdn.com/tusupload');
+    expect(tus.options?.headers).toEqual({
+      AuthorizationSignature: 'signed-value', AuthorizationExpire: '1900000000', LibraryId: '123', VideoId: 'video-1',
+    });
+    expect(tus.options?.storeFingerprintForResuming).toBe(false);
+    tus.options?.onProgress?.(5, 5);
+    expect(events).toEqual([{ progress: 99, isComplete: false }]);
+    tus.options?.onSuccess?.({} as never);
+    expect(events.at(-1)).toEqual({ progress: 100, isComplete: true });
+    httpMock.expectNone((request) => request.url.includes('bunnycdn.com'));
+  });
+
+  it('rejects empty files and untrusted upload endpoints before creating an upload', () => {
+    const errors: Error[] = [];
+    service.uploadVideoFile('https://video.bunnycdn.com/tusupload', new File([], 'empty.mp4', { type: 'video/mp4' }))
+      .subscribe({ error: (error: Error) => errors.push(error) });
+    service.uploadVideoFile('https://untrusted.example/tusupload', new File(['video'], 'lesson.mp4', { type: 'video/mp4' }))
+      .subscribe({ error: (error: Error) => errors.push(error) });
+    expect(errors.map((error) => error.message)).toEqual([
+      'instructor.builder.upload.emptyFile', 'instructor.builder.upload.invalidSession',
+    ]);
+    expect(tus.start).not.toHaveBeenCalled();
+  });
+
+  it('aborts an in-flight TUS upload when the component unsubscribes', () => {
+    const subscription = service.uploadVideoFile(
+      'https://video.bunnycdn.com/tusupload?AuthorizationSignature=s&AuthorizationExpire=1900000000&LibraryId=123&VideoId=v',
+      new File(['video'], 'lesson.mp4', { type: 'video/mp4' }),
+    ).subscribe();
+    subscription.unsubscribe();
+    expect(tus.abort).toHaveBeenCalledOnce();
+  });
+
+  it('polls processing assets and stops after a verified Ready response', async () => {
+    vi.useFakeTimers();
+    const statuses: string[] = [];
+    const done = vi.fn();
+    service.watchAsset('asset-1').subscribe({ next: (asset) => statuses.push(asset.status), complete: done });
+    httpMock.expectOne('/api/media/assets/asset-1').flush(ASSET);
+    expect(done).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(3000);
+    httpMock.expectOne('/api/media/assets/asset-1').flush({ ...ASSET, status: 'Ready', durationSeconds: 12 });
+    expect(statuses).toEqual(['Processing', 'Ready']);
+    expect(done).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(6000);
+    httpMock.expectNone('/api/media/assets/asset-1');
+  });
+
+  it('retries completion while Bunny has not acknowledged processing', async () => {
+    vi.useFakeTimers();
+    const next = vi.fn();
+    service.completeUploadSession('session-1').subscribe(next);
+    httpMock.expectOne('/api/media/upload-sessions/session-1/complete')
+      .flush({}, { status: 409, statusText: 'Conflict' });
+    expect(next).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1000);
+    httpMock.expectOne('/api/media/upload-sessions/session-1/complete').flush({ status: 'Completed' });
+    expect(next).toHaveBeenCalledOnce();
+  });
 
   it('createAsset sends POST to /api/media/assets', () => {
     const mockAsset: MediaAssetResponse = {

@@ -21,7 +21,7 @@ import {
 
 import { EnrollmentItemResponse } from '../data/learning-api.models';
 import { LearningApiService } from '../data/learning-api.service';
-import { CourseApiService } from '../../catalog/data/course-api.service';
+
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
@@ -52,10 +52,11 @@ interface EnrichedEnrollment extends EnrollmentItemResponse {
 })
 export class MyCoursesPage implements OnInit {
   private readonly learningApi = inject(LearningApiService);
-  private readonly courseApi = inject(CourseApiService);
+
   private readonly seoService = inject(SeoService);
 
   protected readonly isLoading = signal(true);
+  protected readonly loadError = signal(false);
   protected readonly activeFilter = signal<'all' | 'inProgress' | 'completed'>('all');
   protected readonly enrollments = signal<readonly EnrichedEnrollment[]>([]);
 
@@ -64,20 +65,20 @@ export class MyCoursesPage implements OnInit {
     const filter = this.activeFilter();
 
     if (filter === 'inProgress') {
-      return list.filter((e) => e.progressPercentage < 100);
+      return list.filter((e) => e.progressPercent < 100);
     }
     if (filter === 'completed') {
-      return list.filter((e) => e.progressPercentage >= 100);
+      return list.filter((e) => e.progressPercent >= 100);
     }
     return list;
   });
 
   protected readonly inProgressCount = computed(
-    () => this.enrollments().filter((e) => e.progressPercentage < 100).length
+    () => this.enrollments().filter((e) => e.progressPercent < 100).length
   );
 
   protected readonly completedCount = computed(
-    () => this.enrollments().filter((e) => e.progressPercentage >= 100).length
+    () => this.enrollments().filter((e) => e.progressPercent >= 100).length
   );
 
   ngOnInit(): void {
@@ -94,49 +95,23 @@ export class MyCoursesPage implements OnInit {
   private loadEnrollments(): void {
     this.isLoading.set(true);
 
-    this.learningApi.getMyEnrollments().subscribe({
-      next: (res) => {
-        const items = Array.isArray(res) ? res : (res?.items ?? []);
-        // Fetch courses to enrich title & thumbnail
-        this.courseApi.searchCourses({ page: 1, pageSize: 50 }).subscribe({
-          next: (coursesRes) => {
-            const courseList = Array.isArray(coursesRes) ? coursesRes : (coursesRes?.results?.items ?? []);
-            const courseMap = new Map(courseList.map((c) => [c.id, c]));
-
-            const enriched: EnrichedEnrollment[] = items.map((e) => {
-              const matchedCourse = courseMap.get(e.courseId);
-              return {
-                ...e,
-                title: matchedCourse?.title ?? e.courseTitle ?? 'หลักสูตรออนไลน์',
-                slug: matchedCourse?.slug ?? e.courseSlug ?? e.courseId,
-                thumbnailUrl: matchedCourse?.thumbnailUrl ?? e.courseThumbnailUrl ?? undefined,
-                instructorName: matchedCourse?.instructorDisplayName ?? e.instructorName ?? 'ผู้สอน SIRI UpSkill',
-              };
-            });
-
-            this.enrollments.set(enriched);
-            this.isLoading.set(false);
-          },
-          error: () => {
-            // Fallback enriched
-            const basicEnriched: EnrichedEnrollment[] = items.map((e) => ({
-              ...e,
-              title: e.courseTitle ?? 'หลักสูตรออนไลน์',
-              slug: e.courseSlug ?? e.courseId,
-              thumbnailUrl: e.courseThumbnailUrl ?? undefined,
-              instructorName: e.instructorName ?? 'ผู้สอน SIRI UpSkill',
-            }));
-            this.enrollments.set(basicEnriched);
-            this.isLoading.set(false);
-          },
-        });
+    this.learningApi.getAllMyEnrollments().subscribe({
+      next: (items) => {
+        this.enrollments.set(items.map((enrollment) => ({
+          ...enrollment,
+          title: enrollment.courseTitle ?? '',
+          slug: enrollment.courseSlug ?? '',
+          thumbnailUrl: enrollment.courseThumbnailUrl ?? undefined,
+          instructorName: enrollment.instructorName ?? '',
+        })));
+        this.isLoading.set(false);
       },
       error: () => {
+        this.loadError.set(true);
         this.isLoading.set(false);
       },
     });
   }
-
   protected downloadCertificate(enrollmentId: string): void {
     this.learningApi.getCertificateByEnrollment(enrollmentId).subscribe({
       next: (cert) => {

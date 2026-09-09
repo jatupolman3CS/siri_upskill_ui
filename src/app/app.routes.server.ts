@@ -36,7 +36,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'account/orders', renderMode: RenderMode.Client },
   { path: 'cart', renderMode: RenderMode.Client },
   { path: 'checkout', renderMode: RenderMode.Client },
-  { path: 'checkout/:orderId', renderMode: RenderMode.Client },
+  { path: 'checkout/**', renderMode: RenderMode.Client },
   { path: 'my-courses', renderMode: RenderMode.Client },
   { path: 'learn/**', renderMode: RenderMode.Client },
   { path: 'instructor/**', renderMode: RenderMode.Client },

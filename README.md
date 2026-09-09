@@ -1,16 +1,20 @@
 # Frontend
 
+For the integrated Windows development stack, follow the [backend run instructions](../siri_upskill_backend/README.md). The `scripts/dev.ps1 Start` command starts this UI at **http://localhost:4202**, plus PostgreSQL, API, workers, cache and local email. Docker is optional.
+
+Browser API requests use the same origin (`/api/*`); `ng serve` proxies them to port 5190. SSR uses `API_INTERNAL_URL` (default `http://localhost:5190`). Password authentication is enabled in Development; the UI bypass is opt-in. Node 24.15+ or 26 is suitable for the installed Angular version.
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.4.
 
 ## Development server
 
-To start a local development server, run:
+To start only the UI after the API and its dependencies are running (skip this if `dev.ps1` already started it):
 
 ```bash
-ng serve
+npm start -- --port 4202
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4202/`. The application automatically reloads when source files change. In Windows PowerShell, use `npm.cmd` if script execution policy blocks `npm.ps1`.
 
 ## Code scaffolding
 

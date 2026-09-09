@@ -436,6 +436,7 @@
     "itemCount": "Checkout · {{count}} course(s)",
     "paymentMethodHeading": "Payment Method",
     "methods": {
+      "free": "No payment required",
       "promptpay": "Thai QR Payment (PromptPay)",
       "promptpayDesc": "Scan to pay with any banking app. Instant auto-confirmation.",
       "card": "Credit / Debit Card",
@@ -668,7 +669,17 @@
         "publish": "3. Review & Publish"
       },
       "validation": {
-        "categoryRequired": "Please select a course category before saving."
+        "categoryRequired": "Please select a course category before saving.",
+        "mediaNotReady": "Upload a video for every lesson and wait for all lesson videos and the selected trailer to finish processing before submitting for review."
+      },
+      "upload": {
+        "emptyFile": "The selected file is empty. Please choose a video file.",
+        "invalidType": "Please select a supported video file.",
+        "invalidSession": "Unable to start the video upload. Please try again.",
+        "transferFailed": "Video upload failed. Check your connection and try again.",
+        "processing": "Upload complete. Processing video…",
+        "processingFailed": "The video could not be processed. Please upload another file.",
+        "statusFailed": "Unable to check the video status. Refresh the page to check again."
       },
       "basic": {
         "category": "Course Category *",

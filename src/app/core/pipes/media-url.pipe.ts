@@ -38,6 +38,6 @@ export class MediaUrlPipe implements PipeTransform {
     const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 
-    return cleanBase ? `${cleanBase}${cleanPath}` : trimmed;
+    return `${cleanBase}${cleanPath}`;
   }
 }

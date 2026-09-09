@@ -131,6 +131,7 @@ describe('CartPageComponent', () => {
         provideHttpClientTesting(),
         provideRouter([
           { path: 'login', component: LoginStubPage },
+          { path: 'checkout/success/:orderId', component: CheckoutStubPage },
           { path: 'checkout/:orderId', component: CheckoutStubPage },
           { path: 'courses', component: CoursesStubPage },
         ]),
@@ -299,6 +300,18 @@ describe('CartPageComponent', () => {
 
     expect(cart.items()).toEqual([]);
     expect(router.url).toBe('/checkout/order-1');
+  });
+
+  it('opens the verified success route when a free order is already paid', async () => {
+    accessTokenStore.set('fake.jwt.token');
+    cart.addItem({ ...ITEM_A, price: 0 });
+    fixture.detectChanges();
+    findButtonByText('ดำเนินการชำระเงิน').click();
+    httpMock.expectOne('/api/commerce/orders').flush({ ...SAMPLE_ORDER, status: 'Paid', totalAmount: 0 });
+    await macrotaskTick();
+    expect(router.url).toBe('/checkout/success/order-1');
+    expect(cart.items()).toEqual([]);
+    httpMock.expectNone('/api/commerce/payments');
   });
 
   it('shows a translated checkout error, not the raw "common.error" i18n key, when order creation fails without a ProblemDetails body', () => {

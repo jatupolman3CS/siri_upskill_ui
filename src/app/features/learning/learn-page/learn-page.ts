@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   computed,
   inject,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -85,6 +87,10 @@ export class LearnPage implements OnInit {
   private readonly courseApi = inject(CourseApiService);
   private readonly learningApi = inject(LearningApiService);
   private readonly seoService = inject(SeoService);
+  private readonly destroyRef = inject(DestroyRef);
+  private courseLoadVersion = 0;
+  private playbackLoadVersion = 0;
+  private readonly lastPositions = new Map<string, number>();
   protected readonly auth = inject(AuthService);
 
   protected readonly course = signal<CourseDetailResponse | null>(null);
@@ -123,19 +129,35 @@ export class LearnPage implements OnInit {
   });
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const slug = params.get('slug');
       const episodeId = params.get('episodeId');
 
       if (slug) {
-        this.loadCourse(slug, episodeId);
+        if (this.course()?.slug === slug) {
+          if (episodeId && episodeId !== this.currentEpisodeId()) this.selectEpisode(episodeId, false);
+        } else {
+          this.loadCourse(slug, episodeId);
+        }
       }
     });
   }
 
   private loadCourse(slug: string, targetEpisodeId: string | null): void {
-    this.courseApi.getCourseDetail(slug).subscribe({
+    const version = ++this.courseLoadVersion;
+    ++this.playbackLoadVersion;
+    this.course.set(null);
+    this.enrollmentId.set(null);
+    this.courseProgress.set(null);
+    this.certificate.set(null);
+    this.currentEpisodeId.set(null);
+    this.playbackSession.set(null);
+    this.episodeProgress.set(null);
+    this.episodeProgressMap.set(new Map());
+    this.lastPositions.clear();
+    this.courseApi.getCourseDetail(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (courseData) => {
+        if (version !== this.courseLoadVersion) return;
         this.course.set(courseData);
         this.seoService.set({
           title: `ห้องเรียน: ${courseData.title} | SIRI UpSkill`,
@@ -144,42 +166,45 @@ export class LearnPage implements OnInit {
           robots: 'noindex',
         });
 
-        // Load enrollment ID & progress
-        this.learningApi.getMyEnrollments().subscribe({
-          next: (res) => {
-            const items = Array.isArray(res) ? res : (res?.items ?? []);
-            const myEnroll = items.find((e) => e.courseId === courseData.id);
+        const startEpisode = () => {
+          if (version !== this.courseLoadVersion) return;
+          const episodes = courseData.sections.flatMap((section) => section.episodes);
+          const selected = episodes.find((episode) => episode.id === targetEpisodeId)
+            ?? (this.isEnrolled() ? episodes[0] : episodes.find((episode) => episode.isFreePreview) ?? episodes[0]);
+          if (selected) this.selectEpisode(selected.id, false);
+        };
+
+        if (!this.auth.isAuthenticated()) {
+          startEpisode();
+          return;
+        }
+
+        // Restore progress before creating the player so its initial position is available.
+        this.learningApi.getAllMyEnrollments().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: (items) => {
+            if (version !== this.courseLoadVersion) return;
+            const myEnroll = items.find((e) => e.courseId === courseData.id && e.status === 'Active'
+              && (!e.expiresAtUtc || new Date(e.expiresAtUtc).getTime() > Date.now()));
             if (myEnroll) {
               this.enrollmentId.set(myEnroll.id);
-              this.loadEnrollmentProgress(myEnroll.id, myEnroll.progressPercentage, courseData.id);
+              this.loadEnrollmentProgress(myEnroll.id, myEnroll.progressPercent, courseData.id, startEpisode);
+            } else {
+              startEpisode();
             }
           },
-          error: () => {
-            // Intentional no-op: enrollmentId() simply stays null, treated the same as "not enrolled".
-          },
+          error: startEpisode,
         });
-
-        // Determine active episode
-        let selectedId = targetEpisodeId;
-        if (!selectedId) {
-          const firstEp = courseData.sections[0]?.episodes[0];
-          selectedId = firstEp?.id ?? null;
-        }
-
-        if (selectedId) {
-          this.selectEpisode(selectedId, false);
-        }
       },
       error: () => {
-        this.router.navigate(['/courses']);
+        if (version === this.courseLoadVersion) this.router.navigate(['/courses']);
       },
     });
   }
 
-  private loadEnrollmentProgress(enrollmentId: string, currentPercent: number, courseId: string): void {
-    this.learningApi.getEpisodeProgressList(enrollmentId).subscribe({
-      next: (episodes) => {
-        const list: EpisodeProgressResponse[] = Array.isArray(episodes) ? episodes : ((episodes as any)?.items ?? []);
+  private loadEnrollmentProgress(enrollmentId: string, currentPercent: number, courseId: string, ready: () => void): void {
+    this.learningApi.getEpisodeProgressList(enrollmentId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (list) => {
+        if (this.enrollmentId() !== enrollmentId) return;
         const map = new Map<string, EpisodeProgressResponse>();
         for (const ep of list) {
           map.set(ep.episodeId, ep);
@@ -207,9 +232,10 @@ export class LearnPage implements OnInit {
         if (percent >= 100) {
           this.loadCertificate(courseId);
         }
+        ready();
       },
       error: () => {
-        // Intentional no-op: progress UI degrades gracefully
+        ready();
       },
     });
   }
@@ -246,7 +272,10 @@ export class LearnPage implements OnInit {
   protected readonly isLoadingPlayback = signal<boolean>(false);
 
   protected selectEpisode(episodeId: string, updateUrl = true): void {
+    if (!this.allEpisodes().some((episode) => episode.id === episodeId)) return;
+    const version = ++this.playbackLoadVersion;
     this.currentEpisodeId.set(episodeId);
+    this.playbackSession.set(null);
 
     if (this.activeTab() === 'curriculum') {
       this.activeTab.set('overview');
@@ -259,12 +288,14 @@ export class LearnPage implements OnInit {
     // Load playback session
     this.isLoadingPlayback.set(true);
     this.playbackError.set(null);
-    this.learningApi.getPlaybackSession(episodeId).subscribe({
+    this.learningApi.getPlaybackSession(episodeId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (session) => {
+        if (version !== this.playbackLoadVersion) return;
         this.playbackSession.set(session);
         this.isLoadingPlayback.set(false);
       },
       error: () => {
+        if (version !== this.playbackLoadVersion) return;
         this.playbackSession.set(null);
         this.isLoadingPlayback.set(false);
         this.playbackError.set('ไม่สามารถเข้าถึงวิดีโอนี้ได้ กรุณาลงทะเบียนเรียนหรือตรวจสอบสิทธิ์การเข้าถึงของคุณ');
@@ -280,8 +311,11 @@ export class LearnPage implements OnInit {
   }
 
   private loadDiscussions(episodeId: string): void {
+    this.discussions.set([]);
+    if (!this.isEnrolled()) return;
     this.learningApi.getDiscussions(episodeId).subscribe({
       next: (res) => {
+        if (this.currentEpisodeId() !== episodeId) return;
         const items = Array.isArray(res) ? res : (res?.items ?? []);
         this.discussions.set(items);
       },
@@ -295,15 +329,18 @@ export class LearnPage implements OnInit {
     if (!epId || !enrollId) return;
 
     const pos = Math.floor(positionSeconds);
+    this.lastPositions.set(epId, pos);
+    const cached = this.episodeProgressMap().get(epId);
     this.learningApi
       .saveEpisodeProgress(enrollId, epId, {
         lastPositionSeconds: pos,
-        watchedSeconds: pos,
-        isCompleted: false,
+        watchedSeconds: Math.max(cached?.watchedSeconds ?? 0, pos),
+        isCompleted: cached?.isCompleted ?? false,
       })
       .subscribe({
         next: (prog) => {
-          this.episodeProgress.set(prog);
+          if (this.enrollmentId() !== enrollId) return;
+          if (this.currentEpisodeId() === epId) this.episodeProgress.set(prog);
           this.episodeProgressMap.update((m) => {
             const next = new Map(m);
             next.set(epId, prog);
@@ -324,16 +361,17 @@ export class LearnPage implements OnInit {
 
     if (enrollId) {
       const currentProg = this.episodeProgress();
-      const pos = currentProg?.lastPositionSeconds ?? currentProg?.positionSeconds ?? 0;
+      const pos = this.lastPositions.get(epId) ?? currentProg?.positionSeconds ?? 0;
       this.learningApi
         .saveEpisodeProgress(enrollId, epId, {
           lastPositionSeconds: pos,
-          watchedSeconds: pos,
+          watchedSeconds: Math.max(currentProg?.watchedSeconds ?? 0, pos),
           isCompleted: true,
         })
         .subscribe({
           next: (prog) => {
-            this.episodeProgress.set(prog);
+            if (this.enrollmentId() !== enrollId) return;
+            if (this.currentEpisodeId() === epId) this.episodeProgress.set(prog);
             this.episodeProgressMap.update((m) => {
               const next = new Map(m);
               next.set(epId, prog);
@@ -358,14 +396,16 @@ export class LearnPage implements OnInit {
               });
 
               this.learningApi.updateEnrollmentProgress(enrollId, newPercent).subscribe({
+                next: (enrollment) => {
+                  if (enrollment.progressPercent >= 100 && !this.certificate()) {
+                    this.loadCertificate(enrollment.courseId);
+                  }
+                },
                 error: () => {
                   // Intentional no-op: enrollment progress sync failure is non-fatal
                 },
               });
 
-              if (newPercent >= 100 && !this.certificate()) {
-                this.loadCertificate(this.course()!.id);
-              }
             }
           },
           error: () => {

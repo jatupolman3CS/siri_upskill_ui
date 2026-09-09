@@ -185,10 +185,9 @@ export const routes: Routes = [
       },
     ],
   },
-  // Learn / Classroom (P2-24) — CSR + authGuard
+  // Public classroom shell; the API authorizes each episode (free preview or enrollment).
   {
     path: 'learn',
-    canActivate: [authGuard],
     loadComponent: () =>
       import('./layouts/learn-layout/learn-layout').then((m) => m.LearnLayout),
     children: [

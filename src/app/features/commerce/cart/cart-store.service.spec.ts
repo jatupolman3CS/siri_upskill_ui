@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { errorInterceptor } from '../../../core/http/error.interceptor';
+import { accessTokenStore } from '../../../core/http/access-token.store';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { CartItem, CartStore } from './cart-store.service';
 
@@ -70,6 +71,7 @@ describe('CartStore', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    accessTokenStore.set(null);
     installFakeLocalStorage();
 
     TestBed.configureTestingModule({
@@ -85,6 +87,7 @@ describe('CartStore', () => {
   });
 
   afterEach(() => {
+    accessTokenStore.set(null);
     httpMock.verify();
   });
 

@@ -46,8 +46,9 @@
               [src]="playbackSession()!.manifestUrl || playbackSession()!.playbackUrl"
               [poster]="course()?.thumbnailUrl"
               [watermarkPayload]="playbackSession()!.watermarkPayload"
+              [watermark]="playbackSession()!.watermark"
               [initialPosition]="episodeProgress()?.positionSeconds ?? 0"
-              [isFreePreview]="currentEpisode()?.isFreePreview ?? false"
+              [isFreePreview]="!isEnrolled() && (currentEpisode()?.isFreePreview ?? false)"
               [courseTitle]="course()?.title"
               [courseSlug]="course()?.slug"
               (progressHeartbeat)="onHeartbeat($event)"
@@ -191,6 +192,7 @@
             </div>
           </button>
 
+          @if (isEnrolled()) {
           <button
             type="button"
             (click)="activeTab.set('quiz')"
@@ -250,6 +252,7 @@
               <span>{{ 'learn.tabs.qa' | translate }} ({{ discussions().length }})</span>
             </div>
           </button>
+          }
         </div>
 
         <!-- Tab Content -->

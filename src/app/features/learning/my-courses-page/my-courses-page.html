@@ -62,6 +62,8 @@
         </div>
       }
     </div>
+  } @else if (loadError()) {
+    <p role="alert" class="p-6 text-center text-rose-600">{{ 'common.error' | translate }}</p>
   } @else if (filteredEnrollments().length === 0) {
     <!-- Empty State -->
     <div class="animate-fade-in-up flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)]/50 p-12 text-center">
@@ -102,7 +104,7 @@
             }
 
             <!-- Overlay Badge for Completed Status -->
-            @if (enrollment.progressPercentage >= 100) {
+            @if (enrollment.progressPercent >= 100) {
               <div class="animate-pop-in absolute top-3 right-3 flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[11px] font-bold text-white shadow backdrop-blur-sm">
                 <ng-icon name="phosphorCertificate" />
                 <span>สำเร็จแล้ว</span>
@@ -127,18 +129,19 @@
               <div>
                 <div class="flex items-center justify-between text-[11px] font-semibold mb-1">
                   <span class="text-[var(--color-text-muted)]">ความคืบหน้า</span>
-                  <span class="text-[var(--color-primary)]">{{ enrollment.progressPercentage }}%</span>
+                  <span class="text-[var(--color-primary)]">{{ enrollment.progressPercent }}%</span>
                 </div>
                 <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
                   <div
                     class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
-                    [style.width.%]="enrollment.progressPercentage"
+                    [style.width.%]="enrollment.progressPercent"
                   ></div>
                 </div>
               </div>
 
               <!-- Action Buttons -->
               <div class="flex items-center gap-2">
+                @if (enrollment.status === 'Active' && enrollment.slug) {
                 <a
                   [routerLink]="['/learn', enrollment.slug]"
                   class="btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)]"
@@ -146,8 +149,9 @@
                   <ng-icon name="phosphorPlayCircle" class="text-base" />
                   <span>{{ 'myCourses.continueLearning' | translate }}</span>
                 </a>
+                }
 
-                @if (enrollment.progressPercentage >= 100) {
+                @if (enrollment.progressPercent >= 100) {
                   <button
                     type="button"
                     (click)="downloadCertificate(enrollment.id)"

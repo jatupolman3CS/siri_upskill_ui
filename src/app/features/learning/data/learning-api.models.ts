@@ -61,22 +61,22 @@ export interface CreateDiscussionRequest {
   readonly body: string;
 }
 
-export type EnrollmentStatus = 'Active' | 'Completed' | 'Expired' | 'Revoked';
+export type EnrollmentStatus = 'Active' | 'Expired' | 'Revoked';
 
 export interface EnrollmentItemResponse {
   readonly id: string;
   readonly courseId: string;
   readonly userId: string;
-  readonly progressPercentage: number;
+  readonly progressPercent: number;
   readonly status: EnrollmentStatus;
   readonly enrolledAtUtc: string;
   readonly expiresAtUtc: string | null;
   readonly completedAtUtc: string | null;
   // Optional enriched fields for UI
-  readonly courseTitle?: string;
-  readonly courseSlug?: string;
-  readonly courseThumbnailUrl?: string;
-  readonly instructorName?: string;
+  readonly courseTitle?: string | null;
+  readonly courseSlug?: string | null;
+  readonly courseThumbnailUrl?: string | null;
+  readonly instructorName?: string | null;
 }
 
 export interface CertificateResponse {
@@ -220,4 +220,3 @@ export interface EpisodeAttachmentDownloadInfo {
   readonly sizeBytes: number;
   readonly downloadUrl: string;
 }
-

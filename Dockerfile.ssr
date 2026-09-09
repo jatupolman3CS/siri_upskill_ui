@@ -1,0 +1,15 @@
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:24-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=4000
+COPY --from=build --chown=node:node /app/dist/siri_upskill_ui ./dist/siri_upskill_ui
+USER node
+EXPOSE 4000
+CMD ["node", "dist/siri_upskill_ui/server/server.mjs"]

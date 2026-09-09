@@ -5,7 +5,7 @@ import { Observable, catchError, finalize, map, of, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthApiService } from '../../features/auth/data/auth-api.service';
 import { accessTokenStore } from '../http/access-token.store';
-import { decodeAccessToken, decodeAccessTokenUserId } from './jwt.util';
+import { decodeAccessToken } from './jwt.util';
 
 export type UserRole = 'SuperAdmin' | 'Admin' | 'Instructor' | 'Learner' | 'Guest';
 

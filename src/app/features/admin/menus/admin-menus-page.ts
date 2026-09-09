@@ -87,7 +87,7 @@ export class AdminMenusPage implements OnInit {
     this.isLoading.set(true);
     this.cmsApi.getAdminMenuItems().subscribe({
       next: (items) => {
-        const list = Array.isArray(items) ? items : ((items as any)?.items ?? []);
+        const list = items;
         this.menuItems.set(
           [...list].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
         );

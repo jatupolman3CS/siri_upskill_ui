@@ -325,7 +325,7 @@
           <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/30 p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-xs font-bold text-[var(--color-text)] block">
+                <label for="builderTrailerFile" class="text-xs font-bold text-[var(--color-text)] block">
                   {{ 'instructor.builder.basic.trailer' | translate }}
                 </label>
                 <p class="text-xs text-[var(--color-text-muted)]">
@@ -333,7 +333,7 @@
                 </p>
               </div>
 
-              @if (trailerMediaAssetId() || trailerStatus() === 'ready') {
+              @if (trailerStatus() === 'ready') {
                 <div class="flex items-center gap-2">
                   <span class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                     <ng-icon name="phosphorCheckCircle" class="text-sm" />
@@ -353,6 +353,7 @@
 
             <input
               #trailerFileInput
+              id="builderTrailerFile"
               type="file"
               accept="video/*"
               class="hidden"
@@ -375,7 +376,15 @@
                   ></div>
                 </div>
               </div>
-            } @else if (!trailerMediaAssetId()) {
+            } @else if (trailerStatus() === 'processing') {
+              <p role="status" class="flex items-center gap-2 text-xs text-[var(--color-primary)]">
+                <ng-icon name="phosphorSpinner" class="animate-spin" />
+                {{ 'instructor.builder.upload.processing' | translate }}
+              </p>
+            } @else if (trailerStatus() !== 'ready') {
+              @if (trailerError(); as error) {
+                <p role="alert" class="text-xs text-[var(--color-danger)]">{{ error | translate }}</p>
+              }
               <button
                 type="button"
                 (click)="trailerFileInput.click()"
@@ -727,7 +736,12 @@
                           <ng-icon name="phosphorSpinner" class="animate-spin text-sm" />
                           <span>{{ episode.uploadProgress ?? 0 }}%</span>
                         </div>
-                      } @else if (episode.mediaAssetId || episode.videoStatus === 'ready') {
+                      } @else if (episode.videoStatus === 'processing') {
+                        <div role="status" class="flex items-center gap-1.5 rounded-lg bg-[var(--color-primary-subtle)] px-2 py-1 text-[11px] font-medium text-[var(--color-primary)]">
+                          <ng-icon name="phosphorSpinner" class="animate-spin text-sm" />
+                          <span>{{ 'instructor.builder.upload.processing' | translate }}</span>
+                        </div>
+                      } @else if (episode.videoStatus === 'ready') {
                         <div class="flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2 py-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
                           <ng-icon name="phosphorCheckCircle" class="text-xs" />
                           <span>{{ formatDuration(episode.durationSeconds) }}</span>
@@ -741,9 +755,9 @@
                           </button>
                         </div>
                       } @else if (episode.videoStatus === 'failed') {
-                        <div class="flex items-center gap-1 rounded-lg bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-600">
+                        <div role="alert" class="flex items-center gap-1 rounded-lg bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-600">
                           <ng-icon name="phosphorWarningCircle" class="text-xs" />
-                          <span>{{ 'instructor.builder.curriculum.uploadFailed' | translate }}</span>
+                          <span>{{ (episode.errorMessage || 'instructor.builder.curriculum.uploadFailed') | translate }}</span>
                           <button
                             type="button"
                             (click)="episodeFileInput.click()"
@@ -810,10 +824,12 @@
           <ng-icon name="phosphorCheckCircle" class="text-4xl" />
         </div>
         <h3 class="text-xl font-bold text-[var(--color-text)]">
-          {{ 'instructor.builder.publish.readyHeading' | translate }}
+          {{ (mediaReadyForReview() ? 'instructor.builder.publish.readyHeading' : 'instructor.builder.validation.mediaNotReady') | translate }}
         </h3>
         <p class="max-w-md mx-auto text-xs text-[var(--color-text-muted)]">
-          {{ 'instructor.builder.publish.readyDescription' | translate }}
+          @if (mediaReadyForReview()) {
+            {{ 'instructor.builder.publish.readyDescription' | translate }}
+          }
         </p>
         <div class="pt-4">
           <button
@@ -835,4 +851,3 @@
     }
   }
 </div>
-

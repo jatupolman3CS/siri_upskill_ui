@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -123,7 +124,7 @@ export class CheckoutPage {
 
   // Promo code
   public readonly promoCodeInput = signal<string>('');
-  public readonly appliedPromo = signal<{ code: string; discountAmount: number } | null>(null);
+  public readonly appliedPromo = signal<{ code: string; discountAmount: number; totalAmount: number } | null>(null);
   public readonly promoError = signal<string | null>(null);
   public readonly isApplyingPromo = signal<boolean>(false);
 
@@ -144,9 +145,7 @@ export class CheckoutPage {
   });
 
   public readonly total = computed(() => {
-    const sub = this.subtotal();
-    const disc = this.discount();
-    return Math.max(0, sub - disc);
+    return this.appliedPromo()?.totalAmount ?? this.order()?.totalAmount ?? 0;
   });
 
   protected readonly formattedTimeRemaining = computed(() => {
@@ -188,12 +187,12 @@ export class CheckoutPage {
     this.isLoadingOrder.set(true);
     this.orderError.set(null);
 
-    this.commerceApi.getOrder(orderId).subscribe({
+    this.commerceApi.getOrder(orderId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (order) => {
         this.order.set(order);
         this.isLoadingOrder.set(false);
         if (order.status === 'Paid') {
-          this.paymentPollStatus.set('succeeded');
+          this.completeCheckout(order.id);
         }
       },
       error: (err: ApiError) => {
@@ -209,7 +208,7 @@ export class CheckoutPage {
 
   public initiatePayment(): void {
     const o = this.order();
-    if (!o) return;
+    if (!o || this.isCreatingPayment()) return;
 
     this.isCreatingPayment.set(true);
     this.paymentError.set(null);
@@ -217,19 +216,18 @@ export class CheckoutPage {
     const promo = this.appliedPromo();
     const courseIds = (o.items.map((i) => i.courseId).filter((id): id is string => !!id)) ?? [];
 
-    // If promo is applied and the order in state doesn't have the promo discount, create a new order with the promo
-    if (promo && (!o.discountAmount || o.discountAmount === 0)) {
-      this.commerceApi.createOrder({ courseIds, promoCode: promo.code }).subscribe({
+    // The server must reprice a replacement order whenever a new code is selected.
+    if (promo) {
+      this.commerceApi.createOrder({ courseIds, promoCode: promo.code }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (newOrder) => {
           this.order.set(newOrder);
-          if (newOrder.status === 'Paid' || newOrder.totalAmount <= 0) {
-            this.isCreatingPayment.set(false);
-            this.paymentPollStatus.set('succeeded');
-            setTimeout(() => {
-              this.router.navigate(['/courses']);
-            }, 1500);
+          this.orderId.set(newOrder.id);
+          this.appliedPromo.set(null);
+          if (newOrder.status === 'Paid') {
+            this.completeCheckout(newOrder.id);
             return;
           }
+          this.router.navigate(['/checkout', newOrder.id], { replaceUrl: true });
           this.executePayment(newOrder.id);
         },
         error: (err: ApiError) => {
@@ -241,12 +239,8 @@ export class CheckoutPage {
           );
         },
       });
-    } else if (o.status === 'Paid' || o.totalAmount <= 0) {
-      this.isCreatingPayment.set(false);
-      this.paymentPollStatus.set('succeeded');
-      setTimeout(() => {
-        this.router.navigate(['/courses']);
-      }, 1500);
+    } else if (o.status === 'Paid') {
+      this.completeCheckout(o.id);
     } else {
       this.executePayment(o.id);
     }
@@ -258,8 +252,18 @@ export class CheckoutPage {
         orderId,
         method: this.selectedMethod(),
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (payment) => {
+          if (payment.status === 'Succeeded') {
+            this.completeCheckout(payment.orderId);
+            return;
+          }
+          if (!payment.qrCodeUrl) {
+            this.isCreatingPayment.set(false);
+            this.paymentError.set(this.translation.t('checkout.error.createPaymentFailed'));
+            return;
+          }
           this.payment.set(payment);
           this.isCreatingPayment.set(false);
           this.paymentPollStatus.set('polling');
@@ -278,6 +282,7 @@ export class CheckoutPage {
   }
 
   public applyPromoCode(): void {
+    if (this.isApplyingPromo() || this.isCreatingPayment() || this.payment()) return;
     const code = this.promoCodeInput().trim();
     if (!code) {
       this.promoError.set(this.translation.t('checkout.summary.promoEmpty'));
@@ -290,11 +295,11 @@ export class CheckoutPage {
     this.isApplyingPromo.set(true);
     this.promoError.set(null);
 
-    this.commerceApi.validatePromoCode({ code, courseIds }).subscribe({
+    this.commerceApi.validatePromoCode({ code, courseIds }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.isApplyingPromo.set(false);
         if (res.isValid) {
-          this.appliedPromo.set({ code: res.code, discountAmount: res.discountAmount });
+          this.appliedPromo.set({ code: res.code, discountAmount: res.discountAmount, totalAmount: res.totalAmount });
         } else {
           this.promoError.set(res.errorMessage || this.translation.t('checkout.summary.promoError'));
         }
@@ -336,16 +341,10 @@ export class CheckoutPage {
   private startPaymentPolling(paymentId: string): void {
     this.stopPolling();
     this.pollingIntervalId = setInterval(() => {
-      this.commerceApi.getPayment(paymentId).subscribe({
+      this.commerceApi.getPayment(paymentId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (res) => {
           if (res.status === 'Succeeded') {
-            this.paymentPollStatus.set('succeeded');
-            this.stopPolling();
-            this.stopCountdown();
-            // Redirect to classroom / success after 2 seconds
-            setTimeout(() => {
-              this.router.navigate(['/courses']);
-            }, 2000);
+            this.completeCheckout(res.orderId);
           } else if (res.status === 'Expired' || res.status === 'Failed') {
             this.paymentPollStatus.set('expired');
             this.stopPolling();
@@ -364,6 +363,14 @@ export class CheckoutPage {
       clearInterval(this.pollingIntervalId);
       this.pollingIntervalId = null;
     }
+  }
+
+  private completeCheckout(orderId: string): void {
+    this.isCreatingPayment.set(false);
+    this.paymentPollStatus.set('succeeded');
+    this.stopPolling();
+    this.stopCountdown();
+    this.router.navigate(['/checkout/success', orderId], { replaceUrl: true });
   }
 
   public setMethod(method: PaymentMethod): void {

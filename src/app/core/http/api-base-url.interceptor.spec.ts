@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
-import { apiBaseUrlInterceptor, resolveApiUrl } from './api-base-url.interceptor';
+import { API_BASE_URL, apiBaseUrlInterceptor, resolveApiUrl } from './api-base-url.interceptor';
 
 describe('resolveApiUrl', () => {
   it('prefixes a relative api path with the configured host', () => {
@@ -66,4 +66,18 @@ describe('apiBaseUrlInterceptor', () => {
 
     httpMock.expectOne('/assets/i18n/th.json').flush({});
   });
+});
+
+it('uses the internal API host provided by the SSR application', () => {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(withInterceptors([apiBaseUrlInterceptor])),
+      provideHttpClientTesting(),
+      { provide: API_BASE_URL, useValue: 'http://api:5000' },
+    ],
+  });
+  const httpMock = TestBed.inject(HttpTestingController);
+  TestBed.inject(HttpClient).get('/api/catalog/courses').subscribe();
+  httpMock.expectOne('http://api:5000/api/catalog/courses').flush({});
+  httpMock.verify();
 });

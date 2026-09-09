@@ -94,7 +94,7 @@ export class CartPageComponent implements OnInit {
   }
 
   protected proceedToCheckout(): void {
-    if (!this.cart.hasItems()) return;
+    if (!this.cart.hasItems() || this.isCreatingOrder()) return;
 
     if (!this.auth.isAuthenticated()) {
       this.router.navigate(['/login'], {
@@ -118,7 +118,7 @@ export class CartPageComponent implements OnInit {
         next: (order) => {
           this.isCreatingOrder.set(false);
           this.cart.clearCart();
-          this.router.navigate(['/checkout', order.id]);
+          this.router.navigate([order.status === 'Paid' ? '/checkout/success' : '/checkout', order.id]);
         },
         error: (err) => {
           this.isCreatingOrder.set(false);

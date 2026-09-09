@@ -247,6 +247,10 @@ export interface EpisodeMediaResponse {
 
 /** Mirrors `AutosaveCourseResponse`. */
 export interface AutosaveCourseResponse {
+  readonly sections?: readonly {
+    readonly id: string;
+    readonly episodes: readonly { readonly id: string }[];
+  }[];
   readonly courseId: string;
   readonly rowVersion: string;
   readonly updatedAtUtc: string;
@@ -384,4 +388,3 @@ export interface CourseReviewSummaryResponse {
   readonly totalCount: number;
   readonly totalPages: number;
 }
-

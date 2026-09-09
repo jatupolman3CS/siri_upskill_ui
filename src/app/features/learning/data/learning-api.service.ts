@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of } from 'rxjs';
+import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
 
 import {
   AssignmentItem,
@@ -8,7 +8,6 @@ import {
   CertificateDetailResponse,
   CertificateResponse,
   CertificateVerificationResponse,
-  CourseProgressResponse,
   CreateDiscussionRequest,
   DiscussionItem,
   EnrollmentItemResponse,
@@ -45,13 +44,12 @@ export class LearningApiService {
       )
       .pipe(
         map((res) => {
-          const list = Array.isArray(res) ? res : ((res as any)?.items ?? []);
-          return list.map((item: any) => ({
+          const list = Array.isArray(res) ? res : res.items;
+          return list.map((item) => ({
             ...item,
             positionSeconds: item.lastPositionSeconds ?? item.positionSeconds ?? 0,
           }));
-        }),
-        catchError(() => of([]))
+        })
       );
   }
 
@@ -79,35 +77,18 @@ export class LearningApiService {
     });
   }
 
-  getCourseProgress(courseId: string): Observable<CourseProgressResponse> {
-    return of({
-      courseId,
-      progressPercent: 0,
-      isCompleted: false,
-      completedEpisodesCount: 0,
-      totalEpisodesCount: 0,
-      episodes: [],
-    });
-  }
-
-  getEpisodeProgress(episodeId = ''): Observable<EpisodeProgressResponse | null> {
-    return of(episodeId ? { episodeId, positionSeconds: 0, isCompleted: false } : null);
-  }
-
-  saveHeartbeatProgress(episodeId: string, positionSeconds: number): Observable<EpisodeProgressResponse> {
-    return of({
-      episodeId,
-      positionSeconds,
-      lastPositionSeconds: positionSeconds,
-      watchedSeconds: positionSeconds,
-      isCompleted: false,
-      lastWatchedAtUtc: new Date().toISOString(),
-    });
-  }
-
   getMyEnrollments(page = 1, pageSize = 50): Observable<PagedResponse<EnrollmentItemResponse>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
     return this.http.get<PagedResponse<EnrollmentItemResponse>>('/api/learning/enrollments/me', { params });
+  }
+
+  getAllMyEnrollments(): Observable<EnrollmentItemResponse[]> {
+    return this.getMyEnrollments().pipe(
+      expand((page) => page.items.length > 0 && page.page * page.pageSize < page.totalCount
+        ? this.getMyEnrollments(page.page + 1, page.pageSize)
+        : EMPTY),
+      reduce((items, page) => [...items, ...page.items], [] as EnrollmentItemResponse[]),
+    );
   }
 
   getMyCertificates(page = 1, pageSize = 50): Observable<PagedResponse<CertificateResponse>> {

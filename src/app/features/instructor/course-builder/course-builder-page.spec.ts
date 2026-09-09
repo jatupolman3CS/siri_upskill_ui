@@ -4,11 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { of, Subject, Subscription } from 'rxjs';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { CategoryTreeNode } from '../../catalog/data/category-api.models';
 import { CourseBuilderResponse } from '../../catalog/data/course-api.models';
 import { BuilderEpisode, BuilderSection, CourseBuilderPage } from './course-builder-page';
+import { MediaApiService, UploadProgressEvent } from '../../media/data/media-api.service';
+import { MediaAssetResponse } from '../../media/data/media-api.models';
 
 const CATEGORIES: readonly CategoryTreeNode[] = [
   {
@@ -150,6 +153,83 @@ describe('CourseBuilderPage', () => {
     const titleInput = harness.routeNativeElement?.querySelector('#builderCourseTitle') as HTMLInputElement;
     expect(titleInput).not.toBeNull();
     expect(titleInput.value).toBe('Web Dev Pro');
+  });
+
+  it('does not fabricate curriculum rows for an empty draft', async () => {
+    const component = await navigate(`/instructor/courses/${BUILDER_COURSE.id}/builder`);
+    flushCategories();
+    flushBuilderCourse({ ...BUILDER_COURSE, sections: [] });
+    expect(component.buildAutosaveCommand().sections).toEqual([]);
+  });
+
+  it('keeps a moved episode processing until the provider returns Ready and saves its measured duration', async () => {
+    const component = await navigate(`/instructor/courses/${BUILDER_COURSE.id}/builder`);
+    flushCategories();
+    flushBuilderCourse();
+    component['activeTab'].set('curriculum');
+    const asset: MediaAssetResponse = {
+      id: 'media-123', provider: 'BunnyStream', providerAssetId: 'bunny-123', playbackId: null,
+      status: 'Uploading', durationSeconds: null, drmEnabled: true, thumbnailUrl: null,
+      uploadedByUserId: BUILDER_COURSE.instructorId, readyAtUtc: null, errorMessage: null,
+      createdAtUtc: '2026-09-09T00:00:00Z',
+    };
+    const media = TestBed.inject(MediaApiService);
+    const transfer = new Subject<UploadProgressEvent>();
+    const status = new Subject<MediaAssetResponse>();
+    vi.spyOn(media, 'createAsset').mockReturnValue(of(asset));
+    vi.spyOn(media, 'createUploadSession').mockReturnValue(of({
+      id: 'upload-123', mediaAssetId: asset.id, uploadUrl: 'https://video.bunnycdn.com/tusupload',
+      status: 'Active', expiresAtUtc: '2026-09-10T00:00:00Z', createdAtUtc: asset.createdAtUtc,
+    }));
+    vi.spyOn(media, 'uploadVideoFile').mockReturnValue(transfer);
+    const complete = vi.spyOn(media, 'completeUploadSession').mockReturnValue(of({
+      id: 'upload-123', mediaAssetId: asset.id, uploadUrl: '', status: 'Completed',
+      expiresAtUtc: '2026-09-10T00:00:00Z', createdAtUtc: asset.createdAtUtc,
+    }));
+    vi.spyOn(media, 'watchAsset').mockReturnValue(status);
+    const event = new Event('change');
+    Object.defineProperty(event, 'target', { value: {
+      files: [new File(['video'], 'lesson.webm', { type: 'video/webm' })], value: 'lesson.webm',
+    } });
+    component.onEpisodeVideoSelected(0, 0, event);
+    component.moveEpisodeDown(0, 0);
+    transfer.next({ progress: 99, isComplete: false });
+    expect(complete).not.toHaveBeenCalled();
+    transfer.next({ progress: 100, isComplete: true });
+    expect(complete).toHaveBeenCalledOnce();
+    expect(component['sections']()[0].episodes[1].videoStatus).toBe('processing');
+    expect(component.buildAutosaveCommand().sections?.[0].episodes?.[1].mediaAssetId).toBe(asset.id);
+    await settle();
+    expect(harness.routeNativeElement?.textContent).toContain('Upload complete. Processing video');
+    status.next({ ...asset, status: 'Ready', durationSeconds: 17 });
+    expect(component['sections']()[0].episodes[1].videoStatus).toBe('ready');
+    expect(component.buildAutosaveCommand().sections?.[0].episodes?.[1].durationSeconds).toBe(17);
+  });
+
+  it('adopts saved curriculum IDs from the submitted order after the user reorders during a save', async () => {
+    const component = await navigate(`/instructor/courses/${BUILDER_COURSE.id}/builder`);
+    flushCategories();
+    flushBuilderCourse();
+    component.addSection();
+    const tempSectionId = component['sections']()[2].id;
+    component.saveCourse();
+    const request = httpMock.expectOne(`/api/catalog/instructor/courses/${BUILDER_COURSE.id}/autosave`);
+    component.moveSectionUp(2);
+    request.flush({
+      courseId: BUILDER_COURSE.id, rowVersion: 'new-version', updatedAtUtc: '2026-09-09T00:00:00Z',
+      sections: [
+        ...BUILDER_COURSE.sections.map((section) => ({
+          id: section.id, episodes: section.episodes.map((episode) => ({ id: episode.id })),
+        })),
+        { id: 'saved-section', episodes: [{ id: 'saved-episode' }] },
+      ],
+    });
+    const command = component.buildAutosaveCommand();
+    expect(command.sections?.[1].id).toBe('saved-section');
+    expect(command.sections?.[1].episodes?.[0].id).toBe('saved-episode');
+    expect(component['sections']().some((section) => section.id === tempSectionId)).toBe(false);
+    component.undo();
+    expect(component.buildAutosaveCommand().sections?.[2].id).toBe('saved-section');
   });
 
   it('handles autosave and sends rowVersion concurrency token', async () => {
@@ -452,15 +532,59 @@ describe('CourseBuilderPage', () => {
     component.removeEpisodeVideo(0, 0);
     await settle();
 
-    const deleteReq = httpMock.expectOne(
+    httpMock.expectNone(
       '/api/catalog/instructor/courses/00000000-0000-0000-0000-000000000001/sections/00000000-0000-0000-0000-000000000010/episodes/00000000-0000-0000-0000-000000000020/media'
     );
-    expect(deleteReq.request.method).toBe('DELETE');
-    deleteReq.flush(null);
-    await settle();
 
     expect(component['sections']()[0].episodes[0].mediaAssetId).toBeNull();
     expect(component['sections']()[0].episodes[0].videoStatus).toBe('none');
+    expect(component.buildAutosaveCommand().sections?.[0].episodes?.[0].mediaAssetId).toBeNull();
+  });
+
+  it('cancels active uploads when an episode or section is removed', async () => {
+    const component = await navigate('/instructor/courses/new/builder');
+    flushCategories();
+    await settle();
+    const episode = component['sections']()[0].episodes[0];
+    const cancelEpisode = vi.fn();
+    component['mediaOperations'].set(episode.id, new Subscription(cancelEpisode));
+    component.removeEpisode(0, 0);
+    expect(cancelEpisode).toHaveBeenCalledOnce();
+
+    component.addEpisode(0);
+    const episodes = component['sections']()[0].episodes;
+    const added = episodes[episodes.length - 1];
+    expect(added.durationSeconds).toBe(0);
+    const cancelSection = vi.fn();
+    component['mediaOperations'].set(added.id, new Subscription(cancelSection));
+    component.removeSection(0);
+    expect(cancelSection).toHaveBeenCalledOnce();
+  });
+
+  it('blocks review while any lesson or selected trailer is not ready', async () => {
+    const component = await navigate('/instructor/courses/new/builder');
+    flushCategories();
+    await settle();
+    component['categoryId'].set('cat-web');
+    component.publishCourse();
+    expect(component['errorMessage']()).toBe('instructor.builder.validation.mediaNotReady');
+    httpMock.expectNone('/api/catalog/instructor/courses');
+
+    component['sections'].update((sections) => sections.map((section) => ({
+      ...section, episodes: section.episodes.map((episode) => ({ ...episode, mediaAssetId: 'asset', videoStatus: 'ready' })),
+    })));
+    expect(component.mediaReadyForReview()).toBe(true);
+    component['trailerStatus'].set('uploading');
+    expect(component.mediaReadyForReview()).toBe(false);
+    component['trailerMediaAssetId'].set('trailer');
+    component['trailerStatus'].set('processing');
+    expect(component.mediaReadyForReview()).toBe(false);
+    component['trailerStatus'].set('ready');
+    expect(component.mediaReadyForReview()).toBe(true);
+    component['sections'].update((sections) => sections.map((section) => ({
+      ...section, episodes: section.episodes.map((episode) => ({ ...episode, videoStatus: 'failed' })),
+    })));
+    expect(component.mediaReadyForReview()).toBe(false);
   });
 
   it('manages trailer media and includes it in buildAutosaveCommand', async () => {
@@ -484,4 +608,3 @@ describe('CourseBuilderPage', () => {
     expect(updatedCommand.trailerMediaAssetId).toBeNull();
   });
 });
-
