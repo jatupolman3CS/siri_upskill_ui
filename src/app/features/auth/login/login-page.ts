@@ -11,6 +11,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService, UserRole } from '../../../core/auth/auth.service';
+import { resolvePostLoginUrl } from '../../../core/auth/post-login-route';
 import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -20,6 +21,7 @@ import { Button } from '../../../shared/button/button';
 import { InputField } from '../../../shared/input/input';
 import { AuthApiService } from '../data/auth-api.service';
 import { fieldError } from '../data/field-error.util';
+import { GoogleSignIn } from '../google-sign-in/google-sign-in';
 import { validationMessage } from '../validation-message.util';
 
 const MAX_PASSWORD_LENGTH = 128;
@@ -32,7 +34,7 @@ interface LoginForm {
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputField, Button],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputField, Button, GoogleSignIn],
   templateUrl: './login-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -139,8 +141,8 @@ export class LoginPage {
       next: (response) => {
         this.submitting.set(false);
         this.authService.setAccessToken(response.accessToken);
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/account/devices';
-        void this.router.navigateByUrl(returnUrl);
+        const roles = this.authService.currentUser()?.roles ?? [];
+        void this.router.navigateByUrl(resolvePostLoginUrl(this.route.snapshot.queryParams['returnUrl'], roles));
       },
       error: (error: ApiError) => {
         this.submitting.set(false);

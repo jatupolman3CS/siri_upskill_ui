@@ -71,9 +71,41 @@
         </header>
 
         @if (course.thumbnailUrl) {
-          <div class="animate-fade-in-up aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)] shadow-sm">
-            <img [src]="course.thumbnailUrl" alt="" class="h-full w-full object-cover" />
-          </div>
+          <!-- Preview card (task P1-26 item 2) — a plain <img> used to sit here with no affordance
+               that a free preview even exists. When the course actually has at least one free-preview
+               episode, the whole thumbnail becomes a clickable "play" card (badge + center play button)
+               linking to the same /learn preview route as the sidebar/mobile-bar CTA below; otherwise it
+               stays a plain, non-interactive image — no badge is shown when there's nothing free to
+               preview (this project's hard rule against fabricated UI state). -->
+          @if (freePreviewCount() > 0) {
+            <a
+              [routerLink]="['/learn', course.slug]"
+              [attr.aria-label]="'catalog.detail.previewCardAriaLabel' | translate: { count: freePreviewCount() }"
+              class="group animate-fade-in-up relative block aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)]
+                shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2"
+            >
+              <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105" />
+              <span
+                aria-hidden="true"
+                class="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors duration-200 group-hover:bg-black/25"
+              >
+                <span class="flex h-14 w-14 items-center justify-center rounded-[var(--radius-full)] bg-white/90 shadow-[var(--shadow-md)] transition-transform group-hover:scale-105">
+                  <ng-icon name="phosphorPlayFill" class="ml-0.5 text-2xl text-[var(--color-primary)]" />
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-[var(--radius-full)] bg-black/70 px-2.5 py-1 text-xs font-semibold text-white"
+              >
+                <ng-icon name="phosphorEye" />
+                {{ 'catalog.detail.previewCardBadge' | translate: { count: freePreviewCount() } }}
+              </span>
+            </a>
+          } @else {
+            <div class="animate-fade-in-up relative aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)] shadow-sm">
+              <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover" />
+            </div>
+          }
         }
 
         @if (course.outcomes.length > 0) {
@@ -91,7 +123,14 @@
         }
 
         @if (course.requirements.length > 0) {
-          <section class="animate-fade-in-up stagger-2">
+          <!-- Desktop (lg+) moves this into the sidebar card below, next to the buy card, matching the
+               "รายละเอียดคอร์ส" mockup (task P1-26 item 7). The whole `<aside>` is `hidden lg:flex` (see
+               below — a pre-existing decision from P1-22: only the sticky mobile bar shows on small
+               screens, not the full sidebar), so this main-column copy stays visible below `lg` instead
+               of disappearing along with it — requirements are real "should I buy this" information,
+               not decoration, and mobile users shouldn't lose it just because the sidebar itself is
+               desktop-only. -->
+          <section class="animate-fade-in-up stagger-2 lg:hidden">
             <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'catalog.detail.requirementsHeading' | translate }}</h2>
             <ul class="flex flex-col gap-2">
               @for (requirement of course.requirements; track requirement) {
@@ -116,7 +155,15 @@
           <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-3 gap-1">
             <h2 class="text-lg font-semibold text-[var(--color-text)]">{{ 'catalog.detail.syllabusHeading' | translate }}</h2>
             <span class="text-xs text-[var(--color-text-muted)] font-medium">
-              {{ course.sections.length }} เซกชัน · {{ course.episodeCount }} บทเรียน · รวม {{ course.totalDurationSeconds | duration }}
+              {{
+                'catalog.detail.syllabusSummary'
+                  | translate
+                    : {
+                        sections: course.sections.length,
+                        episodes: course.episodeCount,
+                        duration: ((course.totalDurationSeconds | duration) || ''),
+                      }
+              }}
             </span>
           </div>
 
@@ -295,8 +342,8 @@
         </section>
       </div>
 
-      <!-- Buy card (desktop sidebar) -->
-      <aside class="hidden lg:block">
+      <!-- Buy card + requirements card (desktop sidebar) -->
+      <aside class="hidden lg:flex lg:flex-col lg:gap-5">
         <div class="animate-fade-in-up sticky top-24 flex flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-md)]">
           <div class="flex items-baseline justify-between gap-2">
             <div class="flex items-baseline gap-2">
@@ -349,27 +396,47 @@
             </div>
           </div>
 
-          <!-- Guarantee & Features Summary -->
-          <div class="border-t border-[var(--color-border)] pt-4 space-y-2.5 text-xs text-[var(--color-text)]">
-            <p class="font-bold text-[var(--color-text)]">คอร์สนี้รวมถึง:</p>
+          <!-- Guarantee list (task P1-26 item 4) — the fixed 4-item set from the "รายละเอียดคอร์ส"
+               mockup (access / multi-device / certificate / refund). The access-duration line still
+               reads the real `accessDurationDays` value rather than hardcoding "lifetime access" like
+               the mockup's static copy does — some courses genuinely have a time-limited access window
+               (see `accessDurationLabel()`), and claiming lifetime access for those would be exactly the
+               kind of fabricated UI state this project's rules forbid. -->
+          <div class="border-t border-[var(--color-border)] pt-4 flex flex-col gap-2.5 text-xs text-[var(--color-text)]">
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorPlayCircle" class="text-emerald-500 text-sm shrink-0" />
-              <span>วิดีโอคุณภาพสูง {{ course.episodeCount }} ตอน ({{ course.totalDurationSeconds | duration }})</span>
-            </div>
-            <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorCheckCircle" class="text-emerald-500 text-sm shrink-0" />
+              <ng-icon name="phosphorInfinity" class="text-[var(--color-primary)] text-sm shrink-0" />
               <span>{{ accessDurationLabel(course.accessDurationDays) }}</span>
             </div>
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorCertificate" class="text-emerald-500 text-sm shrink-0" />
-              <span>ใบประกาศนียบัตรเมื่อเรียนจบ</span>
+              <ng-icon name="phosphorDevices" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <span>{{ 'catalog.detail.guaranteeMultiDevice' | translate }}</span>
             </div>
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorReceipt" class="text-emerald-500 text-sm shrink-0" />
-              <span>ออกใบกำกับภาษี e-Tax ได้</span>
+              <ng-icon name="phosphorCertificate" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <span>{{ 'catalog.detail.guaranteeCertificate' | translate }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
+              <ng-icon name="phosphorArrowUUpLeft" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <span>{{ 'catalog.detail.guaranteeRefund' | translate }}</span>
             </div>
           </div>
         </div>
+
+        <!-- Requirements card (task P1-26 item 7 — moved out of the main column into the sidebar,
+             matching the mockup; the main-column copy above stays for mobile, see its own comment). -->
+        @if (course.requirements.length > 0) {
+          <div class="animate-fade-in-up rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+            <h3 class="mb-3 text-base font-semibold text-[var(--color-text)]">{{ 'catalog.detail.requirementsSidebarHeading' | translate }}</h3>
+            <ul class="flex flex-col gap-2">
+              @for (requirement of course.requirements; track requirement) {
+                <li class="flex items-start gap-2 text-sm text-[var(--color-text-muted)]">
+                  <ng-icon name="phosphorCheck" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-primary)]" />
+                  <span>{{ requirement }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
       </aside>
     </div>
 

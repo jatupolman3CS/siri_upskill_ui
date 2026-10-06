@@ -103,19 +103,21 @@
           {{ 'nav.myCourses' | translate }}
         </a>
         <a
-          routerLink="/instructor"
+          [routerLink]="authService.canUseInstructorStudio() ? '/instructor' : '/become-instructor'"
           class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
             hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
-          {{ 'nav.instructor' | translate }}
+          {{ (authService.canUseInstructorStudio() ? 'nav.instructor' : 'nav.becomeInstructor') | translate }}
         </a>
-        <a
-          routerLink="/admin"
-          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-bold text-rose-600 dark:text-rose-400
-            hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          ผู้ดูแลระบบ (Admin)
-        </a>
+        @if (authService.isAdmin()) {
+          <a
+            routerLink="/admin"
+            class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-bold text-rose-600 dark:text-rose-400
+              hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            ผู้ดูแลระบบ (Admin)
+          </a>
+        }
         <a
           routerLink="/account/orders"
           class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]

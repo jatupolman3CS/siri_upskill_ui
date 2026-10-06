@@ -8,10 +8,12 @@ import {
   ConfirmEmailResponse,
   DataExportResponse,
   ForgotPasswordResponse,
+  GoogleLoginRequest,
   ListSessionsResponse,
   LoginRequest,
   LoginResponse,
   LogoutResponse,
+  OAuthClientsResponse,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
@@ -38,6 +40,15 @@ export class AuthApiService extends ApiService {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.post<LoginResponse>('/identity/login', request, { withCredentials: true });
+  }
+
+  /** Exchanges a Google ID token for a session; sets the same httpOnly refresh cookie as `login`. */
+  googleLogin(request: GoogleLoginRequest): Observable<LoginResponse> {
+    return this.post<LoginResponse>('/identity/external-login/google', request, { withCredentials: true });
+  }
+
+  getOAuthClients(): Observable<OAuthClientsResponse> {
+    return this.get<OAuthClientsResponse>('/auth/oauth-clients');
   }
 
   refresh(): Observable<RefreshResponse> {

@@ -3,6 +3,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   OnDestroy,
@@ -16,6 +17,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowClockwise,
@@ -38,8 +40,11 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import shaka from 'shaka-player';
 
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { PlaybackWatermark } from '../data/learning-api.models';
-import { PlaybackErrorInfo, mapShakaPlaybackError } from './shaka-error-mapper';
+import { LearningApiService } from '../data/learning-api.service';
+import { PlaybackErrorInfo, mapPlaybackRenewalError, mapShakaPlaybackError } from './shaka-error-mapper';
+import { AuthPrefixRewrite, PlaybackRenewalTimer, computeAuthPrefixRewrite, rewriteRequestUris } from './playback-url-renewal';
 
 export interface QualityTrackOption {
   readonly id: number;
@@ -85,6 +90,9 @@ export interface TextTrackOption {
 export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly learningApi = inject(LearningApiService);
+  private readonly translation = inject(TranslationService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly videoElementRef = viewChild<ElementRef<HTMLVideoElement>>('videoElement');
   private readonly playerContainerRef = viewChild<ElementRef<HTMLDivElement>>('playerContainer');
@@ -97,6 +105,12 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   readonly isFreePreview = input(false);
   readonly courseTitle = input<string>();
   readonly courseSlug = input<string>();
+  /** Episode id for X-28's proactive playback-URL renewal — used to re-fetch a fresh signed URL
+   * from `LearningApiService.getPlaybackSession` before `expiresAtUtc` below is reached. */
+  readonly episodeId = input<string>();
+  /** `PlaybackSessionResponse.expiresAtUtc` for the currently loaded `src` — when absent (e.g.
+   * tests that don't set it), no renewal is scheduled. */
+  readonly expiresAtUtc = input<string>();
 
   protected readonly watermarkText = computed<string>(() => {
     const payload = this.watermarkPayload();
@@ -158,6 +172,27 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   private lastNonZeroVolume = 1;
   private isSeeking = false;
 
+  // --- X-28: proactive playback-URL renewal state ---
+  private readonly renewalTimer = new PlaybackRenewalTimer();
+  /** The manifest URL actually passed to `shakaPlayer.load()` for the current episode — the base
+   * every renewal diffs against, since Shaka keeps resolving segment/sub-playlist URIs from it. */
+  private originalManifestUrl: string | null = null;
+  /** Current stale→fresh URL prefix swap applied by the Shaka network request filter, or `null`
+   * before the first successful renewal (requests pass through unchanged). */
+  private authPrefixRewrite: AuthPrefixRewrite | null = null;
+  /** Bumped on every new `loadMedia()` call so a renewal response that lands after the learner
+   * has already switched episodes (or the component was destroyed) is discarded. */
+  private renewalVersion = 0;
+  /** The `expiresAtUtc` the currently-armed renewal timer is scheduled against — either the
+   * initial `expiresAtUtc` input or the latest successfully-renewed session's. Kept so a failed
+   * renewal attempt (see `renewPlaybackUrl`) can re-arm a retry against the same deadline without
+   * needing a fresh one (which is exactly the thing that just failed to arrive). */
+  private currentExpiresAtUtc: string | null = null;
+  /** Set after the first renewal failure in the current cycle so a second consecutive failure
+   * gives up instead of retrying forever — see `renewPlaybackUrl`. Cleared on every successful
+   * renewal and every fresh `resetRenewalSchedule()` (new episode/manual retry). */
+  private renewalFailedOnce = false;
+
   constructor() {
     // Reload media whenever `src` changes after the view is initialized — mirrors the previous
     // ngOnChanges behavior. This effect's first run happens before ngAfterViewInit sets
@@ -191,6 +226,8 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cleanupTimers();
+    this.renewalTimer.stop();
+    ++this.renewalVersion; // discard any in-flight renewal response that lands after destroy
     this.destroyShakaPlayer();
   }
 
@@ -264,6 +301,14 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
         },
       });
 
+      // X-28: rewrite any outgoing request that still carries the stale auth-URL prefix to use
+      // the freshest one renewed so far. Registered once per shaka.Player instance (which persists
+      // across episode switches — see loadMedia()), and reads authPrefixRewrite by closure so it
+      // always applies whatever the latest renewal computed, without needing to re-register.
+      player.getNetworkingEngine()?.registerRequestFilter((_type, request) => {
+        request.uris = rewriteRequestUris(request.uris, this.authPrefixRewrite);
+      });
+
       // Listen for Shaka events
       player.addEventListener('error', (event: unknown) => {
         const errorDetail = (event as { detail?: unknown }).detail || event;
@@ -301,6 +346,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
 
     this.playbackError.set(null);
     this.showFreePreviewCta.set(false);
+    this.resetRenewalSchedule(url);
 
     if (!this.shakaPlayer || this.isInitializingPlayer) {
       this.pendingMediaUrl = url;
@@ -326,6 +372,85 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
         this.playbackError.set(mapShakaPlaybackError(err));
       }
     });
+  }
+
+  /**
+   * X-28: (re)arms proactive renewal for the manifest just handed to `loadMedia()`. Called for
+   * every `loadMedia()` invocation — including the pending-player re-entrant call during initial
+   * load, and a manual `retryPlayback()` — so restarting the countdown a few milliseconds early is
+   * harmless, and a retry after a renewal failure naturally gets a fresh timer again instead of
+   * being left permanently unrenewed.
+   */
+  private resetRenewalSchedule(url: string): void {
+    ++this.renewalVersion;
+    this.renewalTimer.stop();
+    this.originalManifestUrl = url;
+    this.authPrefixRewrite = null;
+    this.currentExpiresAtUtc = null;
+    this.renewalFailedOnce = false;
+
+    const expiresAtUtc = this.expiresAtUtc();
+    if (!this.isBrowser || !expiresAtUtc) return; // no known expiry (e.g. tests) — nothing to schedule
+
+    this.armRenewalTimer(expiresAtUtc);
+  }
+
+  private armRenewalTimer(expiresAtUtc: string): void {
+    this.currentExpiresAtUtc = expiresAtUtc;
+    const version = this.renewalVersion;
+    this.renewalTimer.schedule(expiresAtUtc, () => this.renewPlaybackUrl(version));
+  }
+
+  /** Re-fetches the playback session and, on success, swaps the fresh signed-URL prefix into the
+   * Shaka network request filter (no `player.load()` — see playback-url-renewal.ts for why a
+   * request filter is required instead of just re-fetching the manifest) and reschedules the next
+   * renewal. On failure: a revoked entitlement (401/403 — the access itself is gone, not a
+   * transient hiccup) surfaces the error overlay immediately, same as before. Any other failure
+   * (network blip, 5xx) is treated as transient and gets exactly one automatic retry — re-arming
+   * against the SAME `expiresAtUtc` (there's no fresh one to use) computes a near-immediate delay
+   * via `computeRenewalDelayMs()`'s floor, since we're already past the renewal margin — so
+   * playback is never interrupted by a single failed attempt. Only a second consecutive failure
+   * gives up and surfaces the overlay; the learner can still retry manually from there, which
+   * re-arms the schedule through `loadMedia()`. */
+  private renewPlaybackUrl(version: number): void {
+    const episodeId = this.episodeId();
+    const baseUrl = this.originalManifestUrl;
+    if (!episodeId || !baseUrl) return;
+
+    this.learningApi
+      .getPlaybackSession(episodeId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (session) => {
+          if (version !== this.renewalVersion) return; // stale: episode switched or destroyed since
+          const freshUrl = session.manifestUrl || session.playbackUrl;
+          if (!freshUrl) {
+            // A 200 without a usable URL is a failed renewal, not a no-op — same retry-once-then-overlay path.
+            this.onRenewalFailure(null);
+            return;
+          }
+          this.renewalFailedOnce = false;
+          this.authPrefixRewrite = computeAuthPrefixRewrite(baseUrl, freshUrl);
+          this.armRenewalTimer(session.expiresAtUtc);
+        },
+        error: (err: unknown) => {
+          if (version !== this.renewalVersion) return;
+          this.onRenewalFailure(err);
+        },
+      });
+  }
+
+  private onRenewalFailure(err: unknown): void {
+    const status = (err as { status?: number } | null)?.status;
+    const isEntitlementRevoked = status === 401 || status === 403;
+    if (!isEntitlementRevoked && !this.renewalFailedOnce && this.currentExpiresAtUtc) {
+      this.renewalFailedOnce = true;
+      this.armRenewalTimer(this.currentExpiresAtUtc);
+      return;
+    }
+
+    this.renewalTimer.stop();
+    this.playbackError.set(mapPlaybackRenewalError(err, (key) => this.translation.t(key)));
   }
 
   private destroyShakaPlayer(): void {

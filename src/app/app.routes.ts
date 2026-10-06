@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -111,6 +112,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/account-privacy/account-privacy-page').then((m) => m.AccountPrivacyPage),
       },
+      // Instructor application (any signed-in user). The same wizard also lives at /instructor/onboarding,
+      // but that route sits behind the instructor roleGuard — useless to the learners who need to apply.
+      {
+        path: 'become-instructor',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/instructor/onboarding/instructor-onboarding-page').then((m) => m.InstructorOnboardingPage),
+      },
       // Cart (P3-20) — Cart page with local storage persistence
       {
         path: 'cart',
@@ -203,10 +212,11 @@ export const routes: Routes = [
       },
     ],
   },
-  // Instructor Studio (P4-20 .. P4-24) — CSR + authGuard
+  // Instructor Studio (P4-20 .. P4-24) — CSR + authGuard + roleGuard
   {
     path: 'instructor',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Instructor', 'Admin', 'SuperAdmin'] },
     loadComponent: () =>
       import('./layouts/instructor-layout/instructor-layout').then((m) => m.InstructorLayout),
     children: [
@@ -252,10 +262,11 @@ export const routes: Routes = [
       },
     ],
   },
-  // Admin CMS & Ops (P6-20 .. P6-23) — CSR + authGuard
+  // Admin CMS & Ops (P6-20 .. P6-23) — CSR + authGuard + roleGuard
   {
     path: 'admin',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SuperAdmin'] },
     loadComponent: () =>
       import('./layouts/admin-layout/admin-layout').then((m) => m.AdminLayout),
     children: [

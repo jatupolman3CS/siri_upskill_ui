@@ -73,6 +73,24 @@ describe('AuthService', () => {
     expect(service.hasRole('Learner')).toBe(true);
   });
 
+  it('offers the instructor studio and admin area only to the roles the route guards allow', () => {
+    service.setAccessToken(makeMockJwt('usr-learner', 'Learner'));
+    expect(service.canUseInstructorStudio()).toBe(false);
+    expect(service.isAdmin()).toBe(false);
+
+    service.setAccessToken(makeMockJwt('usr-instructor', 'Instructor'));
+    expect(service.canUseInstructorStudio()).toBe(true);
+    expect(service.isAdmin()).toBe(false);
+
+    service.setAccessToken(makeMockJwt('usr-admin', 'Admin'));
+    expect(service.canUseInstructorStudio()).toBe(true);
+    expect(service.isAdmin()).toBe(true);
+
+    service.setAccessToken(makeMockJwt('usr-super', 'SuperAdmin'));
+    expect(service.canUseInstructorStudio()).toBe(true);
+    expect(service.isAdmin()).toBe(true);
+  });
+
   it('initSession restores session when refresh succeeds', async () => {
     const fakeToken = makeMockJwt('usr-refreshed-001', 'Learner');
     vi.spyOn(authApi, 'refresh').mockReturnValue(of({

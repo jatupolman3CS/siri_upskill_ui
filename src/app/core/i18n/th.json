@@ -172,6 +172,7 @@
     "blog": "บทความ",
     "learningPaths": "เส้นทางการเรียน",
     "instructor": "สตูดิโอผู้สอน",
+    "becomeInstructor": "สอนกับเรา",
     "devices": "อุปกรณ์ที่เข้าสู่ระบบ",
     "signOut": "ออกจากระบบ",
     "notifications": "การแจ้งเตือน",
@@ -288,7 +289,14 @@
       "buyButton": "ซื้อคอร์สนี้",
       "buyComingSoon": "ระบบชำระเงินจะเปิดให้บริการเร็ว ๆ นี้",
       "accessDurationLifetime": "เข้าถึงได้ตลอดชีพ",
-      "accessDurationDays": "เข้าถึงได้ {{days}} วันหลังซื้อ"
+      "accessDurationDays": "เข้าถึงได้ {{days}} วันหลังซื้อ",
+      "syllabusSummary": "{{sections}} เซกชัน · {{episodes}} บทเรียน · รวม {{duration}}",
+      "previewCardBadge": "ดูตัวอย่างฟรี {{count}} บท",
+      "previewCardAriaLabel": "เล่นตัวอย่างฟรี {{count}} บทเรียนของคอร์สนี้",
+      "guaranteeMultiDevice": "เรียนได้บนมือถือและคอมพิวเตอร์",
+      "guaranteeCertificate": "ใบรับรองเมื่อเรียนจบ",
+      "guaranteeRefund": "รับประกันคืนเงินภายใน 30 วัน",
+      "requirementsSidebarHeading": "ความต้องการพื้นฐาน"
     }
   },
   "blog": {
@@ -369,6 +377,10 @@
       "missingTokenBody": "ลิงก์นี้ไม่มีโทเคนยืนยัน กรุณาใช้ลิงก์จากอีเมลยืนยันของคุณ หรือสมัครสมาชิกใหม่อีกครั้ง",
       "backToRegister": "กลับไปหน้าสมัครสมาชิก"
     },
+    "google": {
+      "signingIn": "กำลังเข้าสู่ระบบด้วย Google...",
+      "orRegisterWithEmail": "หรือสมัครด้วยอีเมล"
+    },
     "login": {
       "pageTitle": "เข้าสู่ระบบ",
       "pageDescription": "เข้าสู่ระบบบัญชี SIRI UpSkill ของคุณ",
@@ -440,10 +452,18 @@
       "promptpay": "Thai QR Payment (PromptPay)",
       "promptpayDesc": "สแกนจ่ายผ่านแอปธนาคารทุกแห่ง ยืนยันอัตโนมัติ",
       "card": "บัตรเครดิต / เดบิต",
-      "cardDesc": "Visa, Mastercard (เร็ว ๆ นี้)",
+      "cardDesc": "Visa, Mastercard",
       "installment": "ผ่อนชำระ 0%",
       "installmentDesc": "ผ่อน 0% สูงสุด 10 เดือน (เร็ว ๆ นี้)",
       "comingSoon": "เร็ว ๆ นี้"
+    },
+    "card": {
+      "enterDetails": "กรอกข้อมูลบัตร",
+      "payButton": "ชำระเงินด้วยบัตร",
+      "processing": "กำลังตรวจสอบการชำระเงิน...",
+      "resuming": "กำลังตรวจสอบสถานะการชำระเงิน...",
+      "loadFailed": "ไม่สามารถโหลดระบบชำระเงินได้ กรุณาตรวจสอบการเชื่อมต่อหรือปิดตัวบล็อกโฆษณาแล้วลองใหม่",
+      "paymentFailed": "การชำระเงินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
     },
     "qr": {
       "scanPrompt": "สแกนด้วยแอปธนาคารของคุณ",
@@ -475,7 +495,8 @@
       "vatIncluded": "รวม VAT 7% แล้ว",
       "payButton": "ชำระเงิน {{amount}}",
       "processing": "กำลังดำเนินการ...",
-      "guarantee": "รับประกันคืนเงินภายใน 30 วัน หากคอร์สไม่ตรงตามที่คาดหวัง"
+      "guarantee": "รับประกันคืนเงินภายใน 30 วัน หากคอร์สไม่ตรงตามที่คาดหวัง",
+      "statementDescriptor": "รายการที่ปรากฏบนใบแจ้งยอดบัตร/แอปธนาคารของคุณจะแสดงชื่อผู้รับเงินเป็น STRIPE PAYMENTS (THAILAND) LTD"
     },
     "error": {
       "orderNotFound": "ไม่พบคำสั่งซื้อที่ระบุ",
@@ -484,6 +505,12 @@
     }
   },
   "learn": {
+    "renewalError": {
+      "expiredTitle": "สิทธิ์การรับชมหมดอายุ",
+      "expiredMessage": "สิทธิ์การเข้าถึงบทเรียนนี้ถูกเพิกถอนหรือหมดอายุระหว่างการรับชม กรุณารีเฟรชหน้าเว็บเพื่อตรวจสอบสิทธิ์อีกครั้ง",
+      "failedTitle": "ไม่สามารถต่ออายุสิทธิ์การรับชมได้",
+      "failedMessage": "เกิดปัญหาขณะต่ออายุลิงก์วิดีโอ กรุณากดลองใหม่ หรือรีเฟรชหน้าเว็บเพื่อรับชมต่อ"
+    },
     "pageTitle": "ห้องเรียนออนไลน์ | SIRI UpSkill",
     "pageDescription": "เรียนรู้ออนไลน์พร้อมระบบบันทึกความก้าวหน้าอัตโนมัติ",
     "backToCourse": "กลับหน้ารายละเอียดคอร์ส",

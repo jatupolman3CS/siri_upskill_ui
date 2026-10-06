@@ -46,6 +46,15 @@ export interface CreatePaymentCommand {
   readonly method: PaymentMethod;
 }
 
+/** `GET /api/commerce/payments/config` (`P11-09`) — the Stripe publishable key plus the
+ * operational on/off switch for which payment methods are enabled right now. `enabledMethods`
+ * can in theory be empty (misconfiguration) — callers must handle that by hiding every method
+ * tab rather than assuming at least one entry, per the contract's §3. */
+export interface PaymentConfigResponse {
+  readonly publishableKey: string;
+  readonly enabledMethods: readonly PaymentMethod[];
+}
+
 export interface CreateOrderCommand {
   readonly courseIds: readonly string[];
   readonly promoCode?: string;

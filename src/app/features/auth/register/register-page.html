@@ -32,6 +32,8 @@
       </div>
     }
 
+    <app-google-sign-in class="animate-fade-in-up" mode="signup" dividerKey="auth.google.orRegisterWithEmail" />
+
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="animate-fade-in-up stagger-1 flex flex-col gap-5">
       <app-input
         formControlName="email"

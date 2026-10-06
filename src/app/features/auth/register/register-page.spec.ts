@@ -27,6 +27,9 @@ describe('RegisterPage', () => {
   });
 
   afterEach(() => {
+    // The embedded Google sign-in button asks the API which providers are enabled; these suites
+    // are about the e-mail form, so that lookup is just dropped.
+    httpMock.match('/api/auth/oauth-clients');
     httpMock.verify();
   });
 

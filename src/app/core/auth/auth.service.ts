@@ -150,6 +150,12 @@ export class AuthService {
     };
   });
 
+  /** Mirrors the `/instructor` route's roleGuard (Instructor, Admin, SuperAdmin) so menus only offer the studio to people who can open it. */
+  readonly canUseInstructorStudio = computed(() => this.hasRole('Instructor') || this.hasRole('Admin'));
+
+  /** Mirrors the `/admin` route's roleGuard (Admin, SuperAdmin). */
+  readonly isAdmin = computed(() => this.hasRole('Admin'));
+
   private refreshInFlight$: Observable<string | null> | null = null;
 
   constructor() {

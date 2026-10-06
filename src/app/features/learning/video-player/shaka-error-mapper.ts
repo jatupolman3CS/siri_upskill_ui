@@ -125,3 +125,31 @@ export function mapShakaPlaybackError(error: unknown): PlaybackErrorInfo {
     isRecoverable: true,
   };
 }
+
+/**
+ * Maps an X-28 playback-URL renewal failure (an HTTP error from re-fetching the playback session
+ * before the current signed URL expires) to the same `PlaybackErrorInfo` shape as
+ * `mapShakaPlaybackError` above, so the video player's existing error overlay handles both
+ * uniformly. Kept separate from `mapShakaPlaybackError` because the input here is an
+ * `HttpErrorResponse` (typed `unknown` to avoid this framework-agnostic error-mapping file taking
+ * a dependency on `@angular/common/http`), not a Shaka/native media error. `translate` is injected
+ * (the player passes `TranslationService.t`) so this file stays framework-agnostic while the
+ * user-facing text lives in th.json/en.json.
+ */
+export function mapPlaybackRenewalError(error: unknown, translate: (key: string) => string): PlaybackErrorInfo {
+  const httpError = error as { status?: number } | null;
+
+  if (httpError?.status === 401 || httpError?.status === 403) {
+    return {
+      title: translate('learn.renewalError.expiredTitle'),
+      message: translate('learn.renewalError.expiredMessage'),
+      isRecoverable: true,
+    };
+  }
+
+  return {
+    title: translate('learn.renewalError.failedTitle'),
+    message: translate('learn.renewalError.failedMessage'),
+    isRecoverable: true,
+  };
+}

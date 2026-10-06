@@ -9,6 +9,7 @@ import {
   CreatePaymentCommand,
   FlashSaleResponse,
   OrderDetailResponse,
+  PaymentConfigResponse,
   PaymentResponse,
   PromoCodeValidationResponse,
   RefundResponse,
@@ -43,6 +44,11 @@ export class CommerceApiService extends ApiService {
 
   getPayment(paymentId: string): Observable<PaymentResponse> {
     return this.get<PaymentResponse>(`/commerce/payments/${encodeURIComponent(paymentId)}`);
+  }
+
+  /** `GET /api/commerce/payments/config` — publishable key + enabled payment methods (`P11-09`). */
+  getPaymentConfig(): Observable<PaymentConfigResponse> {
+    return this.get<PaymentConfigResponse>('/commerce/payments/config');
   }
 
   validatePromoCode(command: ValidatePromoCodeCommand): Observable<PromoCodeValidationResponse> {

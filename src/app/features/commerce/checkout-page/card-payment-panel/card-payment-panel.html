@@ -1,0 +1,45 @@
+<div class="space-y-4">
+  <h3 class="text-base font-semibold text-[var(--color-text,#0F172A)]">
+    {{ 'checkout.card.enterDetails' | translate }}
+  </h3>
+
+  @if (state() === 'loading') {
+    <app-skeleton variant="block" height="12rem" />
+  } @else if (state() === 'loadFailed') {
+    <div class="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+      <ng-icon name="phosphorWarningCircle" class="mt-0.5 flex-none text-lg" />
+      <span>{{ 'checkout.card.loadFailed' | translate }}</span>
+    </div>
+  }
+
+  <!--
+    The Stripe Payment Element mount target must stay a stable, always-present DOM node — it is
+    mounted into exactly once (in initializeStripe()) and never re-created. Hiding it with
+    [hidden] instead of removing it via @if/@switch avoids the same class of bug CourseDetailPage
+    hit with its accordion's aria-controls target (P1-22): a referenced element that disappears
+    from the DOM breaks whatever holds a reference to it, here Stripe's own mounted Element.
+  -->
+  <div
+    #cardElementContainer
+    [hidden]="state() === 'loading' || state() === 'loadFailed'"
+    class="min-h-[12rem] rounded-xl border border-[var(--color-border,#E2E8F0)] p-4"
+  ></div>
+
+  @if (isReady()) {
+    <app-button
+      type="button"
+      variant="primary"
+      size="lg"
+      [fullWidth]="true"
+      [disabled]="isSubmitting()"
+      (click)="submit()"
+    >
+      @if (isSubmitting()) {
+        <app-spinner size="sm" color="white" />
+        <span>{{ 'checkout.card.processing' | translate }}</span>
+      } @else {
+        <span>{{ 'checkout.card.payButton' | translate }}</span>
+      }
+    </app-button>
+  }
+</div>

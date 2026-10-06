@@ -67,11 +67,16 @@
         <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">สตูดิโอ & แอดมิน</h3>
         <ul class="space-y-2 text-xs text-[var(--color-text-muted)]">
           <li>
-            <a routerLink="/instructor" class="hover:text-[var(--color-primary)] transition">สตูดิโอสำหรับผู้สอน</a>
+            <a
+              [routerLink]="authService.canUseInstructorStudio() ? '/instructor' : '/become-instructor'"
+              class="hover:text-[var(--color-primary)] transition"
+            >{{ (authService.canUseInstructorStudio() ? 'nav.instructor' : 'nav.becomeInstructor') | translate }}</a>
           </li>
-          <li>
-            <a routerLink="/admin" class="hover:text-[var(--color-primary)] transition">ศูนย์ควบคุมผู้ดูแลระบบ</a>
-          </li>
+          @if (authService.isAdmin()) {
+            <li>
+              <a routerLink="/admin" class="hover:text-[var(--color-primary)] transition">ศูนย์ควบคุมผู้ดูแลระบบ</a>
+            </li>
+          }
         </ul>
       </div>
     </div>

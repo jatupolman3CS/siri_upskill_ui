@@ -40,6 +40,18 @@ export interface LoginResponse {
   readonly accessTokenExpiresAtUtc: string;
 }
 
+// ---- Google sign-in (Features/GoogleLogin/Command.cs, OAuthClientsResponse.cs) --------------
+
+/** `idToken` is the `credential` Google Identity Services returns; the backend verifies it. */
+export interface GoogleLoginRequest {
+  readonly idToken: string;
+}
+
+/** `GET /api/auth/oauth-clients` — a provider that is switched off on the server is `null`. */
+export interface OAuthClientsResponse {
+  readonly google: { readonly clientId: string } | null;
+}
+
 // ---- Refresh (Features/Refresh/Response.cs) --------------------------------------
 
 export interface RefreshResponse {
@@ -140,11 +152,20 @@ export interface SecurityAuditExportDto {
   readonly ipAddress: string | null;
 }
 
+export interface ExternalLoginExportDto {
+  readonly provider: string;
+  readonly providerEmail: string;
+  readonly linkedAtUtc: string;
+  readonly lastLoginAtUtc: string;
+}
+
 export interface DataExportResponse {
   readonly exportedAtUtc: string;
   readonly profile: UserExportDto;
   readonly sessions: readonly UserSessionExportDto[];
   readonly securityAudits: readonly SecurityAuditExportDto[];
+  /** Sign-in providers (e.g. Google) linked to the account; absent from older API builds. */
+  readonly externalLogins?: readonly ExternalLoginExportDto[];
 }
 
 export interface AnonymizeAccountRequest {

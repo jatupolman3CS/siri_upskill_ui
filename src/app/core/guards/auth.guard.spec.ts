@@ -29,6 +29,14 @@ describe('authGuard', () => {
     expect(router.serializeUrl(result as UrlTree)).toBe(router.serializeUrl(expectedTree));
   });
 
+  it('remembers the requested page as returnUrl so login can bring the visitor back', () => {
+    const result = TestBed.runInInjectionContext(() => authGuard({} as never, { url: '/my-courses?tab=progress' } as never));
+
+    const router = TestBed.inject(Router);
+    const expectedTree = router.createUrlTree(['/login'], { queryParams: { returnUrl: '/my-courses?tab=progress' } });
+    expect(router.serializeUrl(result as UrlTree)).toBe(router.serializeUrl(expectedTree));
+  });
+
   it('allows activation once an access token is present', () => {
     accessTokenStore.set('a-real-looking-token');
 

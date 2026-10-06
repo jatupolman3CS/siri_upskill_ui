@@ -79,6 +79,6 @@ async function loginViaUi(context: BrowserContext, email: string, password: stri
   await page.getByLabel('อีเมล').fill(email);
   await page.getByLabel('รหัสผ่าน', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'เข้าสู่ระบบ' }).click();
-  await page.waitForURL('**/account/devices');
+  await page.waitForURL('**/my-courses'); // a learner's home after sign-in
   await page.close();
 }

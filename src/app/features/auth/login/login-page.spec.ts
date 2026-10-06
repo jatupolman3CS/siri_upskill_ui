@@ -7,9 +7,9 @@ import { provideRouter } from '@angular/router';
 import { errorInterceptor } from '../../../core/http/error.interceptor';
 import { LoginPage } from './login-page';
 
-/** Stub target for the post-login `router.navigateByUrl('/account/devices')` call — a real route
- *  must exist for that navigation to resolve instead of rejecting with NG04002, but this suite has
- *  no reason to actually load the real (lazy, authenticated) `DevicesPage` to prove it. */
+/** Stub target for the post-login `router.navigateByUrl('/my-courses')` call (a learner's home) — a
+ *  real route must exist for that navigation to resolve instead of rejecting with NG04002, but this
+ *  suite has no reason to actually load the real (lazy, authenticated) page to prove it. */
 @Component({ selector: 'app-devices-stub', template: '' })
 class DevicesStubPage {}
 
@@ -33,7 +33,7 @@ describe('LoginPage', () => {
       providers: [
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
-        provideRouter([{ path: 'account/devices', component: DevicesStubPage }]),
+        provideRouter([{ path: 'my-courses', component: DevicesStubPage }]),
       ],
     });
     fixture = TestBed.createComponent(LoginPage);
@@ -42,6 +42,9 @@ describe('LoginPage', () => {
   });
 
   afterEach(() => {
+    // The embedded Google sign-in button asks the API which providers are enabled; these suites
+    // are about the e-mail form, so that lookup is just dropped.
+    httpMock.match('/api/auth/oauth-clients');
     httpMock.verify();
   });
 

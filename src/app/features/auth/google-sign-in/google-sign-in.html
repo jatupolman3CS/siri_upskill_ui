@@ -1,0 +1,32 @@
+@if (clientId()) {
+  <div class="flex flex-col gap-3">
+    <div
+      #buttonHost
+      class="flex min-h-11 w-full justify-center"
+      [class.pointer-events-none]="submitting()"
+      [class.opacity-60]="submitting()"
+      [attr.aria-busy]="submitting()"
+    ></div>
+
+    @if (submitting()) {
+      <p class="text-center text-sm text-[var(--color-text-muted)]" aria-live="polite">
+        {{ 'auth.google.signingIn' | translate }}
+      </p>
+    }
+
+    @if (errorMessage(); as message) {
+      <p role="alert" class="text-center text-sm text-[var(--color-danger)]">{{ message }}</p>
+    }
+
+    @if (dividerKey(); as key) {
+      <div class="relative mt-1 flex items-center justify-center">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-[var(--color-border)]"></div>
+        </div>
+        <span class="relative bg-[var(--color-bg)] px-3 text-xs font-semibold text-[var(--color-text-muted)]">
+          {{ key | translate }}
+        </span>
+      </div>
+    }
+  </div>
+}

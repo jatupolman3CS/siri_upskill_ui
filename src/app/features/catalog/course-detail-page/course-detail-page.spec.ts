@@ -305,6 +305,74 @@ describe('CourseDetailPage', () => {
     expect(harness.routeNativeElement?.textContent).toContain('No reviews yet for this course');
   });
 
+  it('shows a clickable preview card with a "N free preview lesson(s)" badge when the course has a free-preview episode', async () => {
+    const courseWithThumbnail: CourseDetailResponse = { ...COURSE, thumbnailUrl: 'https://cdn.example.test/thumb.jpg' };
+    await navigate('/courses/python-for-beginners');
+    await flushCourse(courseWithThumbnail);
+    await flushCategories();
+
+    // COURSE has exactly one isFreePreview episode ("Welcome") — the preview card badge/aria-label
+    // must reflect that real count (1), not a hardcoded/fabricated number.
+    const previewLink = harness.routeNativeElement?.querySelector('a[aria-label*="free preview"]') as HTMLAnchorElement | null;
+    expect(previewLink).not.toBeNull();
+    expect(previewLink?.getAttribute('href')).toBe('/learn/python-for-beginners');
+    expect(previewLink?.textContent).toContain('1 free preview lesson(s)');
+  });
+
+  it('shows a plain, non-clickable thumbnail (no preview badge) when the course has no free-preview episodes', async () => {
+    const courseWithoutPreview: CourseDetailResponse = {
+      ...COURSE,
+      thumbnailUrl: 'https://cdn.example.test/thumb.jpg',
+      sections: COURSE.sections.map((section) => ({
+        ...section,
+        episodes: section.episodes.map((episode) => ({ ...episode, isFreePreview: false })),
+      })),
+    };
+    await navigate('/courses/python-for-beginners');
+    await flushCourse(courseWithoutPreview);
+    await flushCategories();
+
+    expect(harness.routeNativeElement?.querySelector('a[aria-label*="free preview"]')).toBeNull();
+    expect(harness.routeNativeElement?.querySelector('img[alt=""]')).not.toBeNull();
+  });
+
+  it('shows the section/lesson/duration summary above the syllabus accordion', async () => {
+    await navigate('/courses/python-for-beginners');
+    await flushCourse(COURSE);
+    await flushCategories();
+
+    // COURSE: 2 sections, episodeCount 3, totalDurationSeconds 5400 (1h 30m).
+    expect(harness.routeNativeElement?.textContent).toContain('2 sections · 3 lessons · 1h 30m total');
+  });
+
+  it('shows all four guarantee items (access, multi-device, certificate, refund) in the desktop sidebar', async () => {
+    await navigate('/courses/python-for-beginners');
+    await flushCourse(COURSE);
+    await flushCategories();
+
+    const asideText = harness.routeNativeElement?.querySelector('aside')?.textContent ?? '';
+    expect(asideText).toContain('Lifetime access'); // COURSE.accessDurationDays is null
+    expect(asideText).toContain('Learn on mobile and desktop');
+    expect(asideText).toContain('Certificate on completion');
+    expect(asideText).toContain('30-day money-back guarantee');
+  });
+
+  it('renders requirements in a dedicated sidebar card (desktop) as well as the main-column copy kept for mobile', async () => {
+    await navigate('/courses/python-for-beginners');
+    await flushCourse(COURSE);
+    await flushCategories();
+
+    const aside = harness.routeNativeElement?.querySelector('aside');
+    expect(aside?.textContent).toContain('Requirements');
+    expect(aside?.textContent).toContain('A computer');
+
+    // Main-column copy (mobile) still exists as a separate <section>, not removed.
+    const mainSections = Array.from(harness.routeNativeElement?.querySelectorAll('section') ?? []);
+    const mainRequirementsSection = mainSections.find((section) => section.textContent?.includes('A computer'));
+    expect(mainRequirementsSection).toBeTruthy();
+    expect(mainRequirementsSection?.classList.contains('lg:hidden')).toBe(true);
+  });
+
   it('shows a not-found state (with a link back to /courses) on a 404, not the generic error state', async () => {
     await navigate('/courses/does-not-exist');
     await flushCourse(null, 'does-not-exist', 404);

@@ -51,6 +51,8 @@
               [isFreePreview]="!isEnrolled() && (currentEpisode()?.isFreePreview ?? false)"
               [courseTitle]="course()?.title"
               [courseSlug]="course()?.slug"
+              [episodeId]="currentEpisodeId() ?? undefined"
+              [expiresAtUtc]="playbackSession()!.expiresAtUtc"
               (progressHeartbeat)="onHeartbeat($event)"
               (videoEnded)="onVideoEnded()"
               (buyCourseClicked)="buyCourse()"

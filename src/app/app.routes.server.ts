@@ -35,6 +35,10 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'account/privacy', renderMode: RenderMode.Client },
   { path: 'account/orders', renderMode: RenderMode.Client },
   { path: 'cart', renderMode: RenderMode.Client },
+  // authGuard route: the server render never has the in-memory access token, so under SSR the guard
+  // would send every visitor (signed in or not) to /login.
+  { path: 'wishlist', renderMode: RenderMode.Client },
+  { path: 'become-instructor', renderMode: RenderMode.Client },
   { path: 'checkout', renderMode: RenderMode.Client },
   { path: 'checkout/**', renderMode: RenderMode.Client },
   { path: 'my-courses', renderMode: RenderMode.Client },

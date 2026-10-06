@@ -1,9 +1,12 @@
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal } from '@angular/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { VideoPlayer } from './video-player';
 import { mapShakaPlaybackError } from './shaka-error-mapper';
+import { AuthPrefixRewrite, PLAYBACK_RENEWAL_MARGIN_MS } from './playback-url-renewal';
 
 /**
  * `VideoPlayer`'s `videoElementRef`/`playerContainerRef` are `viewChild()` signals and its state
@@ -27,6 +30,10 @@ interface VideoPlayerInternals {
   readonly duration: WritableSignal<number>;
   readonly showResumePrompt: WritableSignal<boolean>;
   readonly showFreePreviewCta: WritableSignal<boolean>;
+  readonly playbackError: WritableSignal<{ readonly title: string; readonly message: string } | null>;
+  readonly originalManifestUrl: string | null;
+  readonly authPrefixRewrite: AuthPrefixRewrite | null;
+  readonly renewalVersion: number;
 }
 
 function internals(component: VideoPlayer): VideoPlayerInternals {
@@ -36,15 +43,23 @@ function internals(component: VideoPlayer): VideoPlayerInternals {
 describe('VideoPlayer Component', () => {
   let fixture: ComponentFixture<VideoPlayer>;
   let component: VideoPlayer;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [VideoPlayer],
+      providers: [provideHttpClient(withFetch()), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VideoPlayer);
     component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    vi.useRealTimers();
   });
 
   it('should create the video player component', () => {
@@ -199,6 +214,149 @@ describe('VideoPlayer Component', () => {
     component.ngAfterViewInit();
 
     expect(loadSpy).toHaveBeenCalledWith('https://video.example.com/manifest.mpd');
+  });
+
+  describe('X-28: proactive playback-URL renewal', () => {
+    const originalUrl =
+      'https://cdn.example.com/bcdn_token=OLD&expires=1000&token_path=%2Fep-1%2F/ep-1/playlist.m3u8';
+
+    function primeEpisode(now: number, ttlMs = 5 * 60_000): void {
+      fixture.componentRef.setInput('src', originalUrl);
+      fixture.componentRef.setInput('episodeId', 'episode-1');
+      fixture.componentRef.setInput('expiresAtUtc', new Date(now + ttlMs).toISOString());
+    }
+
+    it('fires a renewal call before expiry and swaps the auth prefix without a full reload', async () => {
+      vi.useFakeTimers();
+      const now = Date.now();
+      primeEpisode(now);
+      const loadMediaSpy = vi.spyOn(internals(component), 'loadMedia');
+
+      component.ngAfterViewInit();
+
+      // Not yet due — well before the renewal margin kicks in ahead of the 5-minute expiry.
+      await vi.advanceTimersByTimeAsync(60_000);
+      httpMock.expectNone('/api/media/playback/episode-1');
+
+      // Past the renewal margin ahead of expiry — the renewal call fires.
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - PLAYBACK_RENEWAL_MARGIN_MS - 60_000);
+      const req = httpMock.expectOne('/api/media/playback/episode-1');
+      expect(req.request.method).toBe('GET');
+
+      const freshUrl =
+        'https://cdn.example.com/bcdn_token=NEW&expires=2000&token_path=%2Fep-1%2F/ep-1/playlist.m3u8';
+      req.flush({ manifestUrl: freshUrl, expiresAtUtc: new Date(now + 10 * 60_000).toISOString() });
+
+      expect(internals(component).authPrefixRewrite).toEqual({
+        oldPrefix: 'https://cdn.example.com/bcdn_token=OLD&expires=1000',
+        newPrefix: 'https://cdn.example.com/bcdn_token=NEW&expires=2000',
+      });
+      // The renewal never reloads via the fresh URL — position/state-preserving prefix swap only,
+      // not a `player.load()` of the newly issued manifest (which would restart playback).
+      expect(loadMediaSpy).not.toHaveBeenCalledWith(freshUrl);
+      expect(internals(component).playbackError()).toBeNull();
+    });
+
+    it('reschedules another renewal after a successful one, using the freshly returned expiry', async () => {
+      vi.useFakeTimers();
+      const now = Date.now();
+      primeEpisode(now);
+      component.ngAfterViewInit();
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - PLAYBACK_RENEWAL_MARGIN_MS);
+      httpMock
+        .expectOne('/api/media/playback/episode-1')
+        .flush({ manifestUrl: originalUrl, expiresAtUtc: new Date(Date.now() + 5 * 60_000).toISOString() });
+
+      // A second renewal fires 5 more minutes later (minus the margin) — the schedule didn't stop.
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - PLAYBACK_RENEWAL_MARGIN_MS - 1);
+      httpMock.expectNone('/api/media/playback/episode-1');
+      await vi.advanceTimersByTimeAsync(1);
+      httpMock.expectOne('/api/media/playback/episode-1').flush({
+        manifestUrl: originalUrl,
+        expiresAtUtc: new Date(Date.now() + 5 * 60_000).toISOString(),
+      });
+    });
+
+    it('does not leak the renewal timer after the component is destroyed', async () => {
+      vi.useFakeTimers();
+      const now = Date.now();
+      primeEpisode(now);
+      component.ngAfterViewInit();
+
+      fixture.destroy();
+
+      await vi.advanceTimersByTimeAsync(10 * 60_000);
+      httpMock.expectNone('/api/media/playback/episode-1');
+    });
+
+    it('surfaces the error overlay and stops the renewal loop when a renewal request fails', async () => {
+      vi.useFakeTimers();
+      const now = Date.now();
+      primeEpisode(now);
+      component.ngAfterViewInit();
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - PLAYBACK_RENEWAL_MARGIN_MS);
+      httpMock.expectOne('/api/media/playback/episode-1').flush(null, { status: 403, statusText: 'Forbidden' });
+
+      const error = internals(component).playbackError();
+      expect(error).not.toBeNull();
+      expect(error?.title).toContain('สิทธิ์การรับชม');
+
+      // No further renewal is attempted automatically — the learner must retry manually.
+      await vi.advanceTimersByTimeAsync(10 * 60_000);
+      httpMock.expectNone('/api/media/playback/episode-1');
+    });
+
+    it('retries once after a transient renewal failure without interrupting playback, then succeeds', async () => {
+      vi.useFakeTimers();
+      const now = Date.now();
+      primeEpisode(now);
+      component.ngAfterViewInit();
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - PLAYBACK_RENEWAL_MARGIN_MS);
+      httpMock.expectOne('/api/media/playback/episode-1').flush(null, { status: 0, statusText: 'Unknown Error' });
+
+      // A single transient failure (network blip, 5xx — not a revoked entitlement) must not
+      // interrupt playback with the blocking error overlay.
+      expect(internals(component).playbackError()).toBeNull();
+
+      // The retry fires almost immediately — computeRenewalDelayMs()'s floor kicks in because
+      // it's re-armed against the same (already-past-margin) expiresAtUtc — rather than the timer
+      // permanently giving up after just one failure.
+      await vi.advanceTimersByTimeAsync(1_000);
+      const freshUrl =
+        'https://cdn.example.com/bcdn_token=NEW&expires=2000&token_path=%2Fep-1%2F/ep-1/playlist.m3u8';
+      httpMock
+        .expectOne('/api/media/playback/episode-1')
+        .flush({ manifestUrl: freshUrl, expiresAtUtc: new Date(Date.now() + 5 * 60_000).toISOString() });
+
+      expect(internals(component).playbackError()).toBeNull();
+      expect(internals(component).authPrefixRewrite).toEqual({
+        oldPrefix: 'https://cdn.example.com/bcdn_token=OLD&expires=1000',
+        newPrefix: 'https://cdn.example.com/bcdn_token=NEW&expires=2000',
+      });
+    });
+
+    it('gives up and surfaces the error overlay after a second consecutive transient failure', async () => {
+      vi.useFakeTimers();
+      const now = Date.now();
+      primeEpisode(now);
+      component.ngAfterViewInit();
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - PLAYBACK_RENEWAL_MARGIN_MS);
+      httpMock.expectOne('/api/media/playback/episode-1').flush(null, { status: 0, statusText: 'Unknown Error' });
+      expect(internals(component).playbackError()).toBeNull();
+
+      await vi.advanceTimersByTimeAsync(1_000);
+      httpMock.expectOne('/api/media/playback/episode-1').flush(null, { status: 0, statusText: 'Unknown Error' });
+
+      expect(internals(component).playbackError()).not.toBeNull();
+
+      // No third attempt — the retry budget (one) is spent, so the timer gives up for good.
+      await vi.advanceTimersByTimeAsync(10 * 60_000);
+      httpMock.expectNone('/api/media/playback/episode-1');
+    });
   });
 });
 

@@ -172,6 +172,7 @@
     "blog": "Blog",
     "learningPaths": "Learning Paths",
     "instructor": "Instructor Studio",
+    "becomeInstructor": "Teach with us",
     "devices": "Signed-in devices",
     "signOut": "Sign out",
     "notifications": "Notifications",
@@ -288,7 +289,14 @@
       "buyButton": "Buy this course",
       "buyComingSoon": "Payment will be available soon",
       "accessDurationLifetime": "Lifetime access",
-      "accessDurationDays": "{{days}} days of access after purchase"
+      "accessDurationDays": "{{days}} days of access after purchase",
+      "syllabusSummary": "{{sections}} sections · {{episodes}} lessons · {{duration}} total",
+      "previewCardBadge": "{{count}} free preview lesson(s)",
+      "previewCardAriaLabel": "Play {{count}} free preview lesson(s) for this course",
+      "guaranteeMultiDevice": "Learn on mobile and desktop",
+      "guaranteeCertificate": "Certificate on completion",
+      "guaranteeRefund": "30-day money-back guarantee",
+      "requirementsSidebarHeading": "Requirements"
     }
   },
   "blog": {
@@ -369,6 +377,10 @@
       "missingTokenBody": "This link is missing its confirmation token. Please use the link from your confirmation email, or sign up again.",
       "backToRegister": "Back to sign up"
     },
+    "google": {
+      "signingIn": "Signing in with Google...",
+      "orRegisterWithEmail": "or sign up with email"
+    },
     "login": {
       "pageTitle": "Log in",
       "pageDescription": "Log in to your SIRI UpSkill account.",
@@ -440,10 +452,18 @@
       "promptpay": "Thai QR Payment (PromptPay)",
       "promptpayDesc": "Scan to pay with any banking app. Instant auto-confirmation.",
       "card": "Credit / Debit Card",
-      "cardDesc": "Visa, Mastercard (Coming soon)",
+      "cardDesc": "Visa, Mastercard",
       "installment": "0% Installments",
       "installmentDesc": "0% up to 10 months (Coming soon)",
       "comingSoon": "Coming soon"
+    },
+    "card": {
+      "enterDetails": "Enter card details",
+      "payButton": "Pay with card",
+      "processing": "Confirming your payment...",
+      "resuming": "Checking your payment status...",
+      "loadFailed": "Could not load the payment form. Check your connection or disable any ad blocker, then try again.",
+      "paymentFailed": "Payment was not successful. Please try again."
     },
     "qr": {
       "scanPrompt": "Scan with your mobile banking app",
@@ -475,7 +495,8 @@
       "vatIncluded": "Includes 7% VAT",
       "payButton": "Pay {{amount}}",
       "processing": "Processing...",
-      "guarantee": "30-day money-back guarantee if the course does not meet expectations"
+      "guarantee": "30-day money-back guarantee if the course does not meet expectations",
+      "statementDescriptor": "Your card statement / banking app will show the payee as STRIPE PAYMENTS (THAILAND) LTD"
     },
     "error": {
       "orderNotFound": "Order not found",
@@ -484,6 +505,12 @@
     }
   },
   "learn": {
+    "renewalError": {
+      "expiredTitle": "Viewing access expired",
+      "expiredMessage": "Your access to this lesson was revoked or expired while watching. Please refresh the page to check your access again.",
+      "failedTitle": "Could not renew viewing access",
+      "failedMessage": "Something went wrong while renewing the video link. Press retry, or refresh the page to keep watching."
+    },
     "pageTitle": "Classroom | SIRI UpSkill",
     "pageDescription": "Online learning classroom with automatic progress tracking",
     "backToCourse": "Back to Course",

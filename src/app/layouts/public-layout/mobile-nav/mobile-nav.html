@@ -95,21 +95,23 @@
             {{ 'nav.myCourses' | translate }}
           </a>
           <a
-            routerLink="/instructor"
+            [routerLink]="authService.canUseInstructorStudio() ? '/instructor' : '/become-instructor'"
             (click)="requestClose()"
             class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
               hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           >
-            {{ 'nav.instructor' | translate }}
+            {{ (authService.canUseInstructorStudio() ? 'nav.instructor' : 'nav.becomeInstructor') | translate }}
           </a>
-          <a
-            routerLink="/admin"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-bold text-rose-600 dark:text-rose-400
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            ผู้ดูแลระบบ (Admin CMS)
-          </a>
+          @if (authService.isAdmin()) {
+            <a
+              routerLink="/admin"
+              (click)="requestClose()"
+              class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-bold text-rose-600 dark:text-rose-400
+                hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              ผู้ดูแลระบบ (Admin CMS)
+            </a>
+          }
           <a
             routerLink="/account/orders"
             (click)="requestClose()"

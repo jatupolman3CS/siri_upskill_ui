@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,21 +6,22 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { of } from 'rxjs';
 import {
   phosphorArrowRight,
+  phosphorArrowUUpLeft,
   phosphorBookOpen,
   phosphorCaretDown,
   phosphorCertificate,
   phosphorCheck,
-  phosphorCheckCircle,
   phosphorClock,
+  phosphorDevices,
+  phosphorEye,
   phosphorHeart,
+  phosphorInfinity,
   phosphorPlayCircle,
-  phosphorReceipt,
-  phosphorSealCheck,
   phosphorShoppingCart,
   phosphorStar,
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
-import { phosphorHeartFill } from '@ng-icons/phosphor-icons/fill';
+import { phosphorHeartFill, phosphorPlayFill } from '@ng-icons/phosphor-icons/fill';
 
 import { CategoryTreeNode } from '../data/category-api.models';
 import { CategoryApiService } from '../data/category-api.service';
@@ -47,7 +48,7 @@ import { CartStore } from '../../commerce/cart/cart-store.service';
  */
 @Component({
   selector: 'app-course-detail-page',
-  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, DurationPipe, DatePipe, NgIcon, Breadcrumb, Button, Skeleton],
+  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, DurationPipe, DatePipe, NgIcon, NgOptimizedImage, Breadcrumb, Button, Skeleton],
   templateUrl: './course-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -55,17 +56,19 @@ import { CartStore } from '../../commerce/cart/cart-store.service';
     DatePipe,
     provideIcons({
       phosphorArrowRight,
+      phosphorArrowUUpLeft,
       phosphorBookOpen,
       phosphorCaretDown,
       phosphorCertificate,
       phosphorCheck,
-      phosphorCheckCircle,
       phosphorClock,
+      phosphorDevices,
+      phosphorEye,
       phosphorHeart,
       phosphorHeartFill,
+      phosphorInfinity,
       phosphorPlayCircle,
-      phosphorReceipt,
-      phosphorSealCheck,
+      phosphorPlayFill,
       phosphorShoppingCart,
       phosphorStar,
       phosphorUsers,

@@ -18,6 +18,7 @@ import { Button } from '../../../shared/button/button';
 import { InputField } from '../../../shared/input/input';
 import { AuthApiService } from '../data/auth-api.service';
 import { fieldError } from '../data/field-error.util';
+import { GoogleSignIn } from '../google-sign-in/google-sign-in';
 import { validationMessage } from '../validation-message.util';
 
 /** Mirrors `RegisterValidator`'s exact rules (`Features/Register/Validator.cs`) so the UI catches
@@ -60,7 +61,7 @@ interface RegisterForm {
  */
 @Component({
   selector: 'app-register-page',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputField, Button],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputField, Button, GoogleSignIn],
   templateUrl: './register-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

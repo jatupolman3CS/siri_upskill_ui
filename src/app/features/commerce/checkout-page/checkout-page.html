@@ -87,26 +87,54 @@
                 </div>
               </button>
 
-              <!-- Credit/Debit Card (Disabled, Coming Soon) -->
-              <div
-                class="w-full p-4 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 opacity-60 flex items-center gap-4 cursor-not-allowed"
-              >
-                <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex-none"></div>
-                <ng-icon name="phosphorCreditCard" class="text-2xl text-slate-400 flex-none" />
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span class="font-semibold text-sm text-slate-600">
-                      {{ 'checkout.methods.card' | translate }}
-                    </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-200 text-slate-600">
-                      {{ 'checkout.methods.comingSoon' | translate }}
-                    </span>
+              <!-- Credit/Debit Card — active once `GET /commerce/payments/config`'s enabledMethods
+                   includes 'Card' (contract P11-09 §4.1), a "coming soon" card otherwise (same
+                   markup as before this task, unchanged for anyone Card isn't enabled for yet). -->
+              @if (isCardMethodEnabled()) {
+                <button
+                  type="button"
+                  (click)="setMethod('Card')"
+                  [class.border-[var(--color-primary,#DB2777)]]="selectedMethod() === 'Card'"
+                  [class.bg-[var(--color-primary-subtle,#FDF2F8)]]="selectedMethod() === 'Card'"
+                  [class.border-[var(--color-border,#E2E8F0)]]="selectedMethod() !== 'Card'"
+                  class="btn-tactile w-full text-left p-4 rounded-xl border flex items-center gap-4 transition-all hover:bg-slate-50 cursor-pointer"
+                >
+                  <div class="w-5 h-5 rounded-full border-2 border-[var(--color-primary,#DB2777)] flex items-center justify-center flex-none">
+                    @if (selectedMethod() === 'Card') {
+                      <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-primary,#DB2777)] animate-pop-in"></div>
+                    }
                   </div>
-                  <div class="text-xs text-slate-400 mt-0.5">
-                    {{ 'checkout.methods.cardDesc' | translate }}
+                  <ng-icon name="phosphorCreditCard" class="text-2xl text-[var(--color-primary,#DB2777)] flex-none" />
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm text-[var(--color-text,#0F172A)]">
+                      {{ 'checkout.methods.card' | translate }}
+                    </div>
+                    <div class="text-xs text-[var(--color-text-muted,#64748B)] mt-0.5">
+                      {{ 'checkout.methods.cardDesc' | translate }}
+                    </div>
+                  </div>
+                </button>
+              } @else {
+                <div
+                  class="w-full p-4 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 opacity-60 flex items-center gap-4 cursor-not-allowed"
+                >
+                  <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex-none"></div>
+                  <ng-icon name="phosphorCreditCard" class="text-2xl text-slate-400 flex-none" />
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-sm text-slate-600">
+                        {{ 'checkout.methods.card' | translate }}
+                      </span>
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-200 text-slate-600">
+                        {{ 'checkout.methods.comingSoon' | translate }}
+                      </span>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-0.5">
+                      {{ 'checkout.methods.cardDesc' | translate }}
+                    </div>
                   </div>
                 </div>
-              </div>
+              }
 
               <!-- Installment (Disabled, Coming Soon) -->
               <div
@@ -130,7 +158,20 @@
               </div>
             </div>
 
-            <!-- QR Code Display Area -->
+            <!-- Resuming after a Stripe 3DS full-page redirect, no payment() loaded in THIS page
+                 instance yet (fresh reload — contract §4.3's "sessionStorage had no id" branch). -->
+            @if (isResumingAfterRedirect()) {
+              <div class="animate-fade-in-up mt-6 pt-6 border-t border-[var(--color-border,#E2E8F0)]">
+                <div class="flex items-center gap-3 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 p-6">
+                  <app-spinner size="sm" color="primary" />
+                  <span class="text-sm text-[var(--color-text,#0F172A)]">
+                    {{ 'checkout.card.resuming' | translate }}
+                  </span>
+                </div>
+              </div>
+            }
+
+            <!-- Payment Display Area — QR (PromptPay) or the Stripe Payment Element (Card) -->
             @if (payment(); as p) {
               <div class="animate-fade-in-up mt-6 pt-6 border-t border-[var(--color-border,#E2E8F0)]">
                 @if (paymentPollStatus() === 'succeeded') {
@@ -144,12 +185,41 @@
                   <div class="animate-pop-in p-6 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-3">
                     <ng-icon name="phosphorWarningCircle" class="text-5xl text-rose-600 mx-auto" />
                     <h3 class="text-lg font-bold text-rose-900">
-                      {{ 'checkout.qr.expired' | translate }}
+                      {{ (p.method === 'Card' ? 'checkout.card.paymentFailed' : 'checkout.qr.expired') | translate }}
                     </h3>
                     <app-button variant="primary" size="sm" (click)="initiatePayment()">
                       {{ 'checkout.error.retry' | translate }}
                     </app-button>
                   </div>
+                } @else if (p.method === 'Card') {
+                  @if (currentStep() === 'card_processing') {
+                    <div class="flex items-center gap-3 rounded-xl border border-[var(--color-border,#E2E8F0)] bg-slate-50 p-6">
+                      <app-spinner size="sm" color="primary" />
+                      <span class="text-sm text-[var(--color-text,#0F172A)]">
+                        {{ 'checkout.card.processing' | translate }}
+                      </span>
+                    </div>
+                  } @else {
+                    @defer (on immediate) {
+                      <app-card-payment-panel
+                        [clientSecret]="p.clientSecret ?? ''"
+                        [paymentId]="p.id"
+                        [publishableKey]="paymentConfig()?.publishableKey ?? ''"
+                        [returnUrl]="cardReturnUrl()"
+                        (paymentError)="onCardPaymentError($event)"
+                        (confirmedInline)="onCardConfirmedInline()"
+                      />
+                    } @loading (minimum 150ms) {
+                      <app-skeleton variant="block" height="14rem" />
+                    } @placeholder {
+                      <app-skeleton variant="block" height="14rem" />
+                    } @error {
+                      <div class="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                        <ng-icon name="phosphorWarningCircle" class="mt-0.5 flex-none text-lg" />
+                        <span>{{ 'checkout.card.loadFailed' | translate }}</span>
+                      </div>
+                    }
+                  }
                 } @else {
                   <div class="flex flex-col sm:flex-row items-center gap-6">
                     <!-- QR Box -->
@@ -191,6 +261,7 @@
                 }
               </div>
             }
+
           </div>
 
           <!-- e-Tax Invoice Card -->
@@ -328,7 +399,7 @@
 
           <!-- Action Button -->
           <div class="pt-2">
-            @if (!payment()) {
+            @if (!payment() && !isResumingAfterRedirect()) {
               <app-button
                 variant="primary"
                 size="lg"
@@ -351,13 +422,19 @@
             <ng-icon name="phosphorShieldCheck" class="text-base text-emerald-500 flex-none mt-0.5" />
             <span>{{ 'checkout.summary.guarantee' | translate }}</span>
           </div>
+
+          <!-- Statement descriptor disclosure (docs/PAYMENT.md) — Stripe processes both PromptPay
+               and Card, so this must show unconditionally, not gated on `selectedMethod()`. -->
+          <p class="text-[11px] text-[var(--color-text-muted,#64748B)] text-center">
+            {{ 'checkout.summary.statementDescriptor' | translate }}
+          </p>
         </div>
       </div>
     }
   </div>
 
   <!-- Sticky Bottom Bar for Mobile -->
-  @if (!payment() && !isLoadingOrder() && !orderError()) {
+  @if (!payment() && !isLoadingOrder() && !orderError() && !isResumingAfterRedirect()) {
     <div class="animate-slide-in-up fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border,#E2E8F0)] bg-white p-4 shadow-lg lg:hidden">
       <div class="flex items-center justify-between gap-4">
         <div>
