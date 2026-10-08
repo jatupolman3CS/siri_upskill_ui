@@ -116,6 +116,10 @@
       "btnCancel": "Cancel",
       "btnConfirmReject": "Confirm Return",
       "submitting": "Submitting..."
+    },
+    "payouts": {
+      "subtitle": "Process instructor revenue share (standard split: instructor {{percent}} / platform {{platformPercent}}, with payment fees deducted before the split) and approve refund requests.",
+      "createBatchHint": "Includes successfully paid orders that have passed the hold period of {{holdDays}} days, applies {{withholdingPercent}} withholding tax, and uses the {{minAmount}} minimum payout condition."
     }
   },
   "contact": {
@@ -879,11 +883,21 @@
       "historyEmptyDescription": "Your first payout will show up here once it's processed.",
       "bankAccountErrorHeading": "Couldn't load bank account details",
       "bankAccountErrorDescription": "Something went wrong while loading your bank account details. Please try again.",
+      "policyIntro": "Your revenue share is {{percent}} · An admin creates a payout batch after the hold period of {{holdDays}} days, once your accumulated balance reaches {{minAmount}}",
+      "bankAccountHint": "This account is used to transfer your revenue share.",
+      "withholdingHeader": "Withholding tax ({{withholdingPercent}})",
+      "netHeader": "Net transfer ({{percent}} share)",
       "status": {
         "pending": "Pending",
         "transferred": "Transferred",
         "failed": "Failed"
       }
+    },
+    "onboarding": {
+      "payoutAccountNote": "Your revenue share is transferred to this account when an admin creates a payout batch, after the hold period of {{holdDays}} days and once your accumulated balance reaches {{minAmount}}.",
+      "termsHeading": "Standard instructor revenue share: {{percent}}",
+      "termsRevenueShare": "1. Instructors receive {{percent}} and the platform receives {{platformPercent}} of course sales, after payment fees are deducted.",
+      "termsWithholding": "2. Regular payouts are subject to {{withholdingPercent}} withholding tax under Thai law, and a Form 50 Tawi withholding certificate is issued at the end of each year."
     },
     "dashboard": {
       "pageTitle": "Instructor dashboard | SIRI UpSkill Studio",
@@ -944,6 +958,11 @@
         "Archived": "Archived",
         "unknown": "Unknown status"
       }
+    }
+  },
+  "payout": {
+    "policy": {
+      "reload": "Couldn't load the policy figures — try again"
     }
   },
   "orders": {

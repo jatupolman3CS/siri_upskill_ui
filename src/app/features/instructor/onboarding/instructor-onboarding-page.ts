@@ -24,6 +24,8 @@ import {
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { PayoutApiService } from '../../payout/data/payout-api.service';
+import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
+import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 
@@ -40,10 +42,12 @@ export interface MyInstructorProfileDto {
 
 @Component({
   selector: 'app-instructor-onboarding-page',
-  imports: [CommonModule, FormsModule, RouterLink, NgIcon, Spinner],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, Spinner, PayoutPolicyText],
   templateUrl: './instructor-onboarding-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    // One `GET /api/payout/policy` per page load, shared by the payout-account note and the terms box.
+    PayoutPolicyStore,
     provideIcons({
       phosphorUser,
       phosphorBank,

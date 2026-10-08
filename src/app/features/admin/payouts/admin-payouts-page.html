@@ -6,7 +6,7 @@
         รอบจ่ายเงิน & คิวคำขอคืนเงิน (Finance & Payouts)
       </h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">
-        ประมวลผลส่วนแบ่งรายได้ผู้สอน (สูตร Q4: 70/30 หักค่าธรรมเนียมก่อนแบ่ง) และอนุมัติคำขอคืนเงิน
+        <app-payout-policy-text messageKey="admin.payouts.subtitle" skeletonWidth="80%" />
       </p>
     </div>
 
@@ -384,7 +384,7 @@
               class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
             />
             <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
-              ระบบจะตัดยอดคำสั่งซื้อที่ชำระสำเร็จและพ้นระยะเวลา Hold 14 วัน คำนวณภาษีหัก ณ ที่จ่าย 3% และยอดขั้นต่ำ ฿500
+              <app-payout-policy-text messageKey="admin.payouts.createBatchHint" skeletonWidth="100%" />
             </p>
           </div>
 

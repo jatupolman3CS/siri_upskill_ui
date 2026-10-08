@@ -1,12 +1,27 @@
+import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import localeTh from '@angular/common/locales/th';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
-import { InstructorEarningsSummary, InstructorPayoutAccount } from '../../payout/data/payout-api.models';
+import { InstructorEarningsSummary, InstructorPayoutAccount, PayoutPolicy } from '../../payout/data/payout-api.models';
 import { InstructorEarningsPage } from './instructor-earnings-page';
+
+registerLocaleData(localeTh);
+
+// Deliberately NOT the old hardcoded 70 / 3 / 500 / 14 so a stray literal can never pass as a server value.
+const POLICY: PayoutPolicy = {
+  revenueSharePercent: 80,
+  platformSharePercent: 20,
+  withholdingTaxPercent: 5,
+  minimumPayoutAmount: 750,
+  holdDays: 21,
+};
+
+const OLD_POLICY_LITERALS = ['วันที่ 5', '1 และ 16', 'สิ้นเดือน', 'ประจำเดือน', '70%', '70/30', 'Net 70'];
 
 const EARNINGS_SUMMARY: InstructorEarningsSummary = {
   cumulativeEarnings: 52000,
@@ -133,6 +148,17 @@ describe('InstructorEarningsPage', () => {
     await settle();
   }
 
+  async function flushPolicy(response: PayoutPolicy = POLICY, status = 200): Promise<void> {
+    const req = httpMock.expectOne((r) => r.url === '/api/payout/policy');
+    expect(req.request.method).toBe('GET');
+    if (status === 200) {
+      req.flush(response);
+    } else {
+      req.flush({ title: 'Server Error' }, { status, statusText: 'Error' });
+    }
+    await settle();
+  }
+
   function findButtonByText(text: string): HTMLButtonElement | undefined {
     return Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
       (b) => b.textContent?.trim() === text,
@@ -141,6 +167,7 @@ describe('InstructorEarningsPage', () => {
 
   it('shows loading skeletons and no fabricated figures before either request resolves', async () => {
     await navigate();
+    await flushPolicy();
 
     expect(harness.routeNativeElement?.querySelectorAll('[aria-busy="true"]').length).toBeGreaterThan(0);
     const text = harness.routeNativeElement?.textContent ?? '';
@@ -156,6 +183,7 @@ describe('InstructorEarningsPage', () => {
 
   it('renders real earnings figures, bank account details, and history once both requests resolve', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings();
     await flushAccount();
 
@@ -172,6 +200,7 @@ describe('InstructorEarningsPage', () => {
 
   it('shows a distinct status badge per payout row reflecting its real status, not a hardcoded "paid" label for every row', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings(EARNINGS_SUMMARY_WITH_MIXED_STATUSES);
     await flushAccount();
 
@@ -194,6 +223,7 @@ describe('InstructorEarningsPage', () => {
 
   it('shows an empty-history state (not fabricated rows) when the summary has no payout history yet', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings(EMPTY_EARNINGS_SUMMARY);
     await flushAccount();
 
@@ -203,6 +233,7 @@ describe('InstructorEarningsPage', () => {
 
   it('shows an error state (not fabricated numbers) when the earnings summary fetch fails; retry re-fetches real data', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings(EARNINGS_SUMMARY, 500);
     await flushAccount();
 
@@ -224,6 +255,7 @@ describe('InstructorEarningsPage', () => {
 
   it('shows a bank-account error state (not fabricated bank info) when the payout-account fetch fails; retry re-fetches', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings();
     await flushAccount(PAYOUT_ACCOUNT, 500);
 
@@ -246,6 +278,7 @@ describe('InstructorEarningsPage', () => {
 
   it('reflects a saved bank account immediately from the real server response, not a locally-fabricated guess', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings();
     await flushAccount();
 
@@ -283,6 +316,7 @@ describe('InstructorEarningsPage', () => {
 
   it('keeps saveBankAccount()\'s own client-side validation error message on an incomplete form (unchanged pre-existing behavior)', async () => {
     await navigate();
+    await flushPolicy();
     await flushEarnings();
     await flushAccount();
 
@@ -294,5 +328,91 @@ describe('InstructorEarningsPage', () => {
 
     const text = harness.routeNativeElement?.textContent ?? '';
     expect(text).toContain('กรุณากรอกข้อมูลบัญชีธนาคารให้ครบถ้วน');
+  });
+
+  describe('revenue policy copy (GET /api/payout/policy)', () => {
+    it('renders the server numbers in the header copy and the table headers (English)', async () => {
+      await navigate();
+      await flushPolicy();
+      await flushEarnings();
+      await flushAccount();
+
+      const text = harness.routeNativeElement?.textContent ?? '';
+      expect(text).toContain('Your revenue share is 80%');
+      expect(text).toContain('hold period of 21 days');
+      expect(text).toContain('reaches ฿750.00');
+      expect(text).toContain('Withholding tax (5%)');
+      expect(text).toContain('Net transfer (80% share)');
+      // The server-config numbers that are NOT in play must not be shown either.
+      expect(text).not.toContain('Withholding tax (3%)');
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+    });
+
+    it('renders the server numbers in Thai and states no payout date or cycle anywhere', async () => {
+      TestBed.inject(TranslationService).setLocale('th');
+      await navigate();
+      await flushPolicy();
+      await flushEarnings();
+      await flushAccount();
+
+      const text = harness.routeNativeElement?.textContent ?? '';
+      expect(text).toContain('ส่วนแบ่งรายได้ 80% ให้กับผู้สอน');
+      expect(text).toContain('ผู้ดูแลระบบจะสร้างรอบจ่ายหลังพ้นระยะ hold 21 วัน เมื่อยอดสะสมถึง ฿750.00');
+      expect(text).toContain('ภาษี หัก ณ ที่จ่าย (5%)');
+      expect(text).toContain('ยอดโอนสุทธิ (Net 80%)');
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+    });
+
+    it('shows a skeleton and "—" placeholders, never a number, while the policy is still loading', async () => {
+      await navigate();
+      // Earnings + account resolve, the policy request is deliberately left pending.
+      await flushEarnings();
+      await flushAccount();
+
+      const root = harness.routeNativeElement as HTMLElement;
+      const text = root.textContent ?? '';
+      expect(text).not.toContain('80%');
+      expect(text).not.toContain('Your revenue share is');
+      expect(text).toContain('Withholding tax (—)');
+      expect(text).toContain('Net transfer (— share)');
+      expect(root.querySelector('app-payout-policy-text[aria-busy="true"]')).not.toBeNull();
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+
+      await flushPolicy();
+      expect(root.textContent).toContain('Your revenue share is 80%');
+    });
+
+    it('shows "—" instead of any number when the policy request fails, and a retry refetches the real values', async () => {
+      await navigate();
+      await flushPolicy(POLICY, 500);
+      await flushEarnings();
+      await flushAccount();
+
+      const root = harness.routeNativeElement as HTMLElement;
+      let text = root.textContent ?? '';
+      expect(text).not.toContain('80%');
+      expect(text).toContain('Withholding tax (—)');
+      expect(text).toContain('Net transfer (— share)');
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+
+      const retry = findButtonByText("Couldn't load the policy figures — try again");
+      expect(retry).toBeTruthy();
+      retry?.click();
+      await settle();
+      await flushPolicy();
+
+      text = root.textContent ?? '';
+      expect(text).toContain('Your revenue share is 80%');
+      expect(text).toContain('Withholding tax (5%)');
+      expect(findButtonByText("Couldn't load the policy figures — try again")).toBeUndefined();
+    });
   });
 });

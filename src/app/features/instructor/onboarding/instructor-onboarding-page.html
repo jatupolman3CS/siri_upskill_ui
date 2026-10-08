@@ -160,7 +160,7 @@
           <div class="border-b border-[var(--color-border)] pb-4">
             <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 2: บัญชีธนาคารสำหรับรับเงินส่วนแบ่ง</h2>
             <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
-              ระบบจะโอนเงินส่วนแบ่งคอร์สเรียนเข้าบัญชีนี้ทุกวันที่ 1 และ 16 ของเดือน
+              <app-payout-policy-text messageKey="instructor.onboarding.payoutAccountNote" />
             </p>
           </div>
 
@@ -235,10 +235,10 @@
           <div class="rounded-2xl bg-[var(--color-bg)] p-4 text-xs text-[var(--color-text-muted)] space-y-2 border border-[var(--color-border)]">
             <div class="flex items-center gap-2 font-bold text-[var(--color-text)]">
               <ng-icon name="phosphorShieldCheck" class="text-emerald-600 text-base" />
-              <span>ส่วนแบ่งรายได้มาตรฐาน 70% สำหรับผู้สอน (Revenue Share)</span>
+              <span><app-payout-policy-text messageKey="instructor.onboarding.termsHeading" skeletonWidth="12rem" /></span>
             </div>
-            <p>1. ผู้สอนจะได้รับส่วนแบ่งรายได้สุทธิ 70% จากยอดจำหน่ายคอร์สเรียนหลังหักค่าธรรมเนียมระบบและภาษี</p>
-            <p>2. การจ่ายเงินรอบปกติจะหักภาษี ณ ที่จ่าย 3% ตามกฎหมายไทย และออกหนังสือรับรอง 50 ทวิ ให้ทุกสิ้นปี</p>
+            <p><app-payout-policy-text messageKey="instructor.onboarding.termsRevenueShare" [retryable]="false" skeletonWidth="90%" /></p>
+            <p><app-payout-policy-text messageKey="instructor.onboarding.termsWithholding" [retryable]="false" skeletonWidth="80%" /></p>
             <p>3. คอร์สเรียนจะต้องเป็นเนื้อหาที่เป็นลิขสิทธิ์ของผู้สอนเองและไม่ละเมิดทรัพย์สินทางปัญญาของบุคคลอื่น</p>
           </div>
 

@@ -66,6 +66,21 @@ export interface InstructorEarningsSummary {
   readonly history: readonly PayoutHistoryItem[];
 }
 
+/**
+ * `GET /api/payout/policy` — server-owned revenue-policy figures. `revenueSharePercent` is the caller's
+ * own instructor share (or the system default for non-instructors/admins); the rest come from server
+ * config. All percentages are whole-number percents (70 means 70%), not fractions. There is
+ * deliberately NO payout date/cycle field: the backend has none (an admin creates a payout batch once
+ * the hold period has passed and the instructor's balance reaches `minimumPayoutAmount`).
+ */
+export interface PayoutPolicy {
+  readonly revenueSharePercent: number;
+  readonly platformSharePercent: number;
+  readonly withholdingTaxPercent: number;
+  readonly minimumPayoutAmount: number;
+  readonly holdDays: number;
+}
+
 export interface BatchExportResponse {
   readonly batchId: string;
   readonly periodKey: string;

@@ -4,7 +4,7 @@
     <div>
       <h1 class="text-2xl font-extrabold text-[var(--color-text)]">รายได้และรอบการจ่ายเงิน (Instructor Earnings)</h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">
-        ส่วนแบ่งรายได้ 70% ให้กับผู้สอน · ระบบตัดรอบทุกสิ้นเดือนและโอนเงินภายในวันที่ 5 ของเดือนถัดไป
+        <app-payout-policy-text messageKey="instructor.earnings.policyIntro" />
       </p>
     </div>
   </div>
@@ -70,7 +70,7 @@
         </div>
         <div>
           <h2 class="text-sm font-bold text-[var(--color-text)]">บัญชีธนาคารสำหรับรับเงินโอน</h2>
-          <p class="text-xs text-[var(--color-text-muted)]">ข้อมูลนี้ใช้สำหรับโอนส่วนแบ่งรายได้ประจำเดือน</p>
+          <p class="text-xs text-[var(--color-text-muted)]">{{ 'instructor.earnings.bankAccountHint' | translate }}</p>
         </div>
       </div>
 
@@ -218,8 +218,8 @@
               <tr>
                 <th class="px-6 py-3">รอบบัญชี</th>
                 <th class="px-6 py-3">ยอดขายรวม (Gross)</th>
-                <th class="px-6 py-3">ภาษี หัก ณ ที่จ่าย (3%)</th>
-                <th class="px-6 py-3">ยอดโอนสุทธิ (Net 70%)</th>
+                <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.withholdingHeader" [inline]="true" /></th>
+                <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.netHeader" [inline]="true" /></th>
                 <th class="px-6 py-3">สถานะ</th>
                 <th class="px-6 py-3 text-right">เอกสาร</th>
               </tr>

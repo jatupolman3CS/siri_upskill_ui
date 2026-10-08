@@ -116,6 +116,10 @@
       "btnCancel": "ยกเลิก",
       "btnConfirmReject": "ยืนยันการส่งกลับแก้ไข",
       "submitting": "กำลังส่งข้อมูล..."
+    },
+    "payouts": {
+      "subtitle": "ประมวลผลส่วนแบ่งรายได้ผู้สอน (ส่วนแบ่งมาตรฐาน ผู้สอน {{percent}} / แพลตฟอร์ม {{platformPercent}} โดยหักค่าธรรมเนียมการชำระเงินก่อนแบ่ง) และอนุมัติคำขอคืนเงิน",
+      "createBatchHint": "ระบบจะตัดยอดคำสั่งซื้อที่ชำระสำเร็จและพ้นระยะ hold {{holdDays}} วัน คำนวณภาษีหัก ณ ที่จ่าย {{withholdingPercent}} และใช้เงื่อนไขยอดขั้นต่ำ {{minAmount}}"
     }
   },
   "contact": {
@@ -879,11 +883,21 @@
       "historyEmptyDescription": "เมื่อมีการโอนเงินรอบแรก ประวัติจะแสดงที่นี่",
       "bankAccountErrorHeading": "โหลดข้อมูลบัญชีธนาคารไม่สำเร็จ",
       "bankAccountErrorDescription": "เกิดข้อผิดพลาดระหว่างโหลดข้อมูลบัญชีธนาคาร กรุณาลองใหม่อีกครั้ง",
+      "policyIntro": "ส่วนแบ่งรายได้ {{percent}} ให้กับผู้สอน · ผู้ดูแลระบบจะสร้างรอบจ่ายหลังพ้นระยะ hold {{holdDays}} วัน เมื่อยอดสะสมถึง {{minAmount}}",
+      "bankAccountHint": "ข้อมูลนี้ใช้สำหรับโอนส่วนแบ่งรายได้ของคุณ",
+      "withholdingHeader": "ภาษี หัก ณ ที่จ่าย ({{withholdingPercent}})",
+      "netHeader": "ยอดโอนสุทธิ (Net {{percent}})",
       "status": {
         "pending": "รอโอน",
         "transferred": "โอนเงินแล้ว",
         "failed": "โอนไม่สำเร็จ"
       }
+    },
+    "onboarding": {
+      "payoutAccountNote": "ระบบจะโอนเงินส่วนแบ่งเข้าบัญชีนี้เมื่อผู้ดูแลระบบสร้างรอบจ่ายหลังพ้นระยะ hold {{holdDays}} วัน และยอดสะสมของคุณถึง {{minAmount}}",
+      "termsHeading": "ส่วนแบ่งรายได้มาตรฐาน {{percent}} สำหรับผู้สอน (Revenue Share)",
+      "termsRevenueShare": "1. ผู้สอนจะได้รับส่วนแบ่งรายได้ {{percent}} และแพลตฟอร์มได้รับ {{platformPercent}} จากยอดจำหน่ายคอร์สเรียนหลังหักค่าธรรมเนียมการชำระเงิน",
+      "termsWithholding": "2. การจ่ายเงินรอบปกติจะหักภาษี ณ ที่จ่าย {{withholdingPercent}} ตามกฎหมายไทย และออกหนังสือรับรอง 50 ทวิ ให้ทุกสิ้นปี"
     },
     "dashboard": {
       "pageTitle": "แดชบอร์ดผู้สอน | SIRI UpSkill Studio",
@@ -944,6 +958,11 @@
         "Archived": "เก็บถาวร",
         "unknown": "ไม่ทราบสถานะ"
       }
+    }
+  },
+  "payout": {
+    "policy": {
+      "reload": "โหลดตัวเลขเงื่อนไขไม่สำเร็จ — ลองใหม่"
     }
   },
   "orders": {

@@ -9,6 +9,7 @@ import {
   InstructorPayoutAccount,
   PayoutBatchItem,
   PayoutHistoryItem,
+  PayoutPolicy,
   RevenueSplitItem,
 } from './payout-api.models';
 
@@ -22,6 +23,11 @@ export interface PagedResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class PayoutApiService {
   private readonly http = inject(HttpClient);
+
+  // Any authenticated user (instructor, applicant, admin) — the figures are caller-aware server-side.
+  getPayoutPolicy(): Observable<PayoutPolicy> {
+    return this.http.get<PayoutPolicy>('/api/payout/policy');
+  }
 
   // Instructor
   getMyRevenueSplits(page = 1, pageSize = 50): Observable<PagedResponse<RevenueSplitItem>> {

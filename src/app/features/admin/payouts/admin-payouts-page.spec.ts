@@ -9,9 +9,21 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { PagedPendingRefunds } from './data/admin-refunds-api.models';
 import { AdminPayoutsPage } from './admin-payouts-page';
 import { PagedResponse } from '../../payout/data/payout-api.service';
-import { PayoutBatchItem } from '../../payout/data/payout-api.models';
+import { PayoutBatchItem, PayoutPolicy } from '../../payout/data/payout-api.models';
 
 registerLocaleData(localeTh);
+
+// Deliberately NOT the old hardcoded 70 / 3 / 500 / 14 so a stray literal can never pass as a server value.
+const POLICY: PayoutPolicy = {
+  revenueSharePercent: 80,
+  platformSharePercent: 20,
+  withholdingTaxPercent: 5,
+  minimumPayoutAmount: 750,
+  holdDays: 21,
+};
+
+const OLD_POLICY_LITERALS = ['70/30', 'Q4', 'Hold 14', 'หัก ณ ที่จ่าย 3%', '฿500', 'วันที่ 5', '1 และ 16'];
+const RETRY_LABEL = 'โหลดตัวเลขเงื่อนไขไม่สำเร็จ — ลองใหม่';
 
 const MOCK_BATCHES: PagedResponse<PayoutBatchItem> = {
   items: [
@@ -90,7 +102,24 @@ describe('AdminPayoutsPage', () => {
     return component;
   }
 
-  function flushInitialRequests(): void {
+  function flushPolicy(response: PayoutPolicy = POLICY, status = 200): void {
+    const req = httpMock.expectOne('/api/payout/policy');
+    expect(req.request.method).toBe('GET');
+    if (status === 200) {
+      req.flush(response);
+    } else {
+      req.flush({ title: 'Server Error' }, { status, statusText: 'Error' });
+    }
+  }
+
+  /** `policy: 'pending'` leaves the policy request open so a test can assert the loading state. */
+  function flushInitialRequests(policy: 'ok' | 'error' | 'pending' = 'ok'): void {
+    if (policy === 'ok') {
+      flushPolicy();
+    } else if (policy === 'error') {
+      flushPolicy(POLICY, 500);
+    }
+
     const batchesReq = httpMock.expectOne((r) => r.url === '/api/payout/admin/batches');
     expect(batchesReq.request.method).toBe('GET');
     batchesReq.flush(MOCK_BATCHES);
@@ -214,5 +243,80 @@ describe('AdminPayoutsPage', () => {
 
     const text = harness.routeNativeElement?.textContent ?? '';
     expect(text).toContain('สร้างรอบการจ่ายเงินงวด 2026-08 เรียบร้อยแล้ว');
+  });
+
+  describe('revenue policy copy (GET /api/payout/policy)', () => {
+    function openCreateBatchModal(): Promise<void> {
+      const createBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find((b) =>
+        b.textContent?.includes('เปิดรอบจ่ายเงินใหม่'),
+      );
+      expect(createBtn).toBeDefined();
+      createBtn?.click();
+      return settle();
+    }
+
+    it('renders the server numbers in the header and the create-batch hint, with no invented policy literals', async () => {
+      await navigate();
+      flushInitialRequests();
+      await settle();
+
+      let text = harness.routeNativeElement?.textContent ?? '';
+      expect(text).toContain('ผู้สอน 80% / แพลตฟอร์ม 20%');
+
+      await openCreateBatchModal();
+
+      text = harness.routeNativeElement?.textContent ?? '';
+      expect(text).toContain('พ้นระยะ hold 21 วัน');
+      expect(text).toContain('ภาษีหัก ณ ที่จ่าย 5%');
+      expect(text).toContain('ยอดขั้นต่ำ ฿750.00');
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+    });
+
+    it('shows a skeleton and no policy number while the policy request is pending', async () => {
+      await navigate();
+      flushInitialRequests('pending');
+      await settle();
+
+      const root = harness.routeNativeElement as HTMLElement;
+      let text = root.textContent ?? '';
+      expect(text).not.toContain('80%');
+      expect(text).not.toContain('แพลตฟอร์ม');
+      expect(root.querySelector('app-payout-policy-text[aria-busy="true"]')).not.toBeNull();
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+
+      flushPolicy();
+      await settle();
+      text = root.textContent ?? '';
+      expect(text).toContain('ผู้สอน 80% / แพลตฟอร์ม 20%');
+      expect(root.querySelector('app-payout-policy-text[aria-busy="true"]')).toBeNull();
+    });
+
+    it('shows "—" instead of any number when the policy request fails; retry refetches the real values', async () => {
+      await navigate();
+      flushInitialRequests('error');
+      await settle();
+
+      const root = harness.routeNativeElement as HTMLElement;
+      let text = root.textContent ?? '';
+      expect(text).toContain('ผู้สอน — / แพลตฟอร์ม —');
+      expect(text).not.toContain('80%');
+      for (const literal of OLD_POLICY_LITERALS) {
+        expect(text).not.toContain(literal);
+      }
+
+      const retry = Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.trim() === RETRY_LABEL);
+      expect(retry).toBeDefined();
+      retry?.click();
+      await settle();
+      flushPolicy();
+      await settle();
+
+      text = root.textContent ?? '';
+      expect(text).toContain('ผู้สอน 80% / แพลตฟอร์ม 20%');
+    });
   });
 });

@@ -28,6 +28,8 @@ import {
 import { PendingRefundItem } from './data/admin-refunds-api.models';
 import { PayoutBatchItem, RevenueSplitItem } from '../../payout/data/payout-api.models';
 import { PayoutApiService } from '../../payout/data/payout-api.service';
+import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
+import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
@@ -35,11 +37,13 @@ import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-payouts-page',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, Skeleton, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, Skeleton, Spinner, PayoutPolicyText],
   templateUrl: './admin-payouts-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     CurrencyPipe,
+    // One `GET /api/payout/policy` per page load, shared by the header copy and the create-batch hint.
+    PayoutPolicyStore,
     provideIcons({
       phosphorCurrencyDollar,
       phosphorPlus,

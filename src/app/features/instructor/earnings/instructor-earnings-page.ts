@@ -16,6 +16,8 @@ import {
 
 import { InstructorPayoutAccount } from '../../payout/data/payout-api.models';
 import { PayoutApiService } from '../../payout/data/payout-api.service';
+import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
+import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
@@ -41,7 +43,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
  */
 @Component({
   selector: 'app-instructor-earnings-page',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, EmptyState, Skeleton],
+  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, EmptyState, Skeleton, PayoutPolicyText],
   templateUrl: './instructor-earnings-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -53,6 +55,8 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
     // actually rendered with real navigation (previously masked because the page always short-circuited
     // straight to its hardcoded fake defaults without ever really being exercised end-to-end).
     CurrencyPipe,
+    // One `GET /api/payout/policy` per page load, shared by the header copy and the table headers.
+    PayoutPolicyStore,
     provideIcons({
       phosphorCurrencyDollar,
       phosphorBank,
@@ -136,7 +140,7 @@ export class InstructorEarningsPage implements OnInit {
   ngOnInit(): void {
     this.seoService.set({
       title: 'รายได้และรอบการจ่ายเงิน | Instructor Studio',
-      description: 'สรุปรายได้ ส่วนแบ่ง 70/30 และประวัติการรับเงิน',
+      description: 'สรุปรายได้ ส่วนแบ่งรายได้ และประวัติการรับเงิน',
       path: '/instructor/earnings',
       robots: 'noindex',
     });
