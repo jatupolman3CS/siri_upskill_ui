@@ -3,7 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
-export type InputFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search' | 'url';
+export type InputFieldType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'search' | 'url' | 'date' | 'time';
 
 let nextInputId = 0;
 

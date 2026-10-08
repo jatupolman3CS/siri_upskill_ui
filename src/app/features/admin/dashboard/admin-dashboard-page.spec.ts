@@ -93,6 +93,20 @@ describe('AdminDashboardPage', () => {
     expect(harness.routeNativeElement?.querySelector('a[href="/admin/payouts"]')).not.toBeNull();
   });
 
+  it('shows a neutral label, not the word "null" or a made-up title, for a top course whose title cannot be resolved', async () => {
+    await navigate();
+    httpMock.expectOne('/api/analytics/admin/dashboard/summary').flush({
+      ...MOCK_SUMMARY,
+      topCourses30Days: [{ courseId: 'c-gone', courseTitle: null, totalRevenue: 4200, totalEnrollments: 3, totalViews: 90 }],
+    });
+    await settle();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('ไม่พบชื่อคอร์ส');
+    expect(text).toContain('4,200');
+    expect(text).not.toContain('null');
+  });
+
   it('renders error banner and allows retry when API fails', async () => {
     await navigate();
     const req = httpMock.expectOne('/api/analytics/admin/dashboard/summary');

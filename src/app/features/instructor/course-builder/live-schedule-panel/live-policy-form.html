@@ -1,0 +1,35 @@
+<form
+  class="flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5"
+  [attr.aria-label]="'live.builder.policy.heading' | translate"
+  (submit)="submit($event)"
+  novalidate
+>
+  <div>
+    <h3 class="text-base font-semibold text-[var(--color-text)]">{{ 'live.builder.policy.heading' | translate }}</h3>
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'live.builder.policy.help' | translate }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <app-input type="date" [label]="'live.builder.policy.deadlineDate' | translate" [formControl]="form.controls.deadlineDate" />
+    <app-input type="time" [label]="'live.builder.policy.deadlineTime' | translate" [formControl]="form.controls.deadlineTime" />
+    <app-input
+      type="number"
+      [label]="'live.builder.policy.maxSeats' | translate"
+      [helperText]="'live.builder.policy.seatsUsed' | translate: { count: seatsUsed() }"
+      [formControl]="form.controls.maxSeats"
+    />
+  </div>
+
+  @if (fieldErrorKey(); as key) {
+    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ key | translate }}</p>
+  }
+  @if (problemText(); as text) {
+    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ text }}</p>
+  }
+
+  <div>
+    <app-button type="submit" size="sm" variant="secondary" [loading]="busy()" [disabled]="busy()">
+      {{ 'live.builder.policy.save' | translate }}
+    </app-button>
+  </div>
+</form>

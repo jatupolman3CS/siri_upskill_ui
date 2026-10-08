@@ -7,11 +7,6 @@ export const environment = {
    */
   apiUrl: 'https://api-siriupskill.siristudiophoto.com/',
   /** Optional fallback; prefer `GET /api/auth/oauth-clients` from the API. */
- googleOAuthClientId:
+  googleOAuthClientId:
     '5881672938-464ssnfcb78tou755dkf7jvmhvbkf68v.apps.googleusercontent.com',
-  /** DEV-BYPASS: never on in a production build — real sign-in only. */
-  devAuth: {
-    bypass: false,
-    role: 'buyer' as 'buyer' | 'seller' | 'admin',
-  },
 };

@@ -27,6 +27,12 @@ export interface OrderDetailResponse {
   readonly createdAtUtc?: string;
   readonly paidAtUtc?: string;
   readonly expiresAtUtc?: string;
+  /**
+   * Mirrors `OrderResponse.PaymentId` (list, detail, create, cancel): the order's succeeded payment — the id
+   * `POST /api/commerce/refunds` needs as `paymentId`. `null` while there is no succeeded payment (unpaid,
+   * free, or otherwise nothing to refund); callers must not offer a refund then. Never substitute the order id.
+   */
+  readonly paymentId?: string | null;
 }
 
 export interface PaymentResponse {
@@ -84,12 +90,15 @@ export interface TaxInvoiceResponse {
   readonly buyerName: string;
   readonly invoiceNo: string;
   readonly issuedAtUtc: string;
-  readonly pdfStorageKey?: string;
+  /** `null` until a PDF has been stored — never treat it as a URL; the receipt PDF is fetched from the receipt endpoint. */
+  readonly pdfStorageKey?: string | null;
   readonly status: TaxInvoiceStatus;
 }
 
+/** Mirrors `RequestRefundCommand(Guid PaymentId, decimal Amount, string Reason)` — `amount` is required by the API. */
 export interface RequestRefundCommand {
   readonly paymentId: string;
+  readonly amount: number;
   readonly reason: string;
 }
 

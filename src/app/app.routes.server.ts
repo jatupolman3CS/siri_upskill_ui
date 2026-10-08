@@ -42,6 +42,9 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'checkout', renderMode: RenderMode.Client },
   { path: 'checkout/**', renderMode: RenderMode.Client },
   { path: 'my-courses', renderMode: RenderMode.Client },
+  // Live room join (P11): authGuard route whose only job is one server-gated POST that reveals the room link — it must
+  // never run during SSR/prefetch (every call is a logged "link revealed" event), so it is client-rendered only.
+  { path: 'live/:sessionId/join', renderMode: RenderMode.Client },
   { path: 'learn/**', renderMode: RenderMode.Client },
   { path: 'instructor/**', renderMode: RenderMode.Client },
   { path: 'admin/**', renderMode: RenderMode.Client },

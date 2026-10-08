@@ -1,0 +1,104 @@
+<section class="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)]">
+  <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4 sm:px-6">
+    <h2 class="text-base font-semibold text-[var(--color-text)]">{{ 'instructor.dashboard.courses.heading' | translate }}</h2>
+    <a
+      routerLink="/instructor/courses"
+      class="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary)]
+        hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'instructor.dashboard.courses.viewAll' | translate }}
+      <ng-icon name="phosphorArrowRight" aria-hidden="true" />
+    </a>
+  </div>
+
+  @if (rows().length === 0) {
+    <app-empty-state
+      [heading]="'instructor.dashboard.courses.emptyHeading' | translate"
+      [description]="'instructor.dashboard.courses.emptyDescription' | translate"
+    >
+      <a
+        emptyStateAction
+        routerLink="/instructor/courses/new"
+        class="inline-flex h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
+          hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'instructor.dashboard.createCourse' | translate }}
+      </a>
+    </app-empty-state>
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[40rem] text-left text-sm text-[var(--color-text)]">
+        <caption class="sr-only">{{ 'instructor.dashboard.courses.heading' | translate }}</caption>
+        <thead class="bg-[var(--color-surface-muted)] text-xs text-[var(--color-text-muted)]">
+          <tr>
+            <th scope="col" class="px-5 py-3 font-semibold sm:px-6">{{ 'instructor.dashboard.courses.column.course' | translate }}</th>
+            <th scope="col" class="px-3 py-3 font-semibold">{{ 'instructor.dashboard.courses.column.price' | translate }}</th>
+            <th scope="col" class="px-3 py-3 font-semibold">{{ 'instructor.dashboard.courses.column.students' | translate }}</th>
+            <th scope="col" class="px-3 py-3 font-semibold">{{ 'instructor.dashboard.courses.column.rating' | translate }}</th>
+            <th scope="col" class="px-3 py-3 font-semibold">{{ 'instructor.dashboard.courses.column.status' | translate }}</th>
+            <th scope="col" class="px-5 py-3 text-right font-semibold sm:px-6">{{ 'instructor.dashboard.courses.column.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--color-border)]">
+          @for (row of rows(); track row.course.courseId) {
+            <tr>
+              <td class="px-5 py-3 sm:px-6">
+                <div class="flex items-center gap-3">
+                  <div class="relative h-10 w-16 shrink-0 overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
+                    @if (row.course.thumbnailUrl) {
+                      <img [ngSrc]="row.course.thumbnailUrl | mediaUrl" alt="" fill class="object-cover" />
+                    }
+                  </div>
+                  <div class="min-w-0">
+                    <p class="max-w-xs truncate font-semibold">{{ row.course.title }}</p>
+                    @if (row.isLive) {
+                      <p class="text-xs text-[var(--color-text-muted)]">
+                        {{ 'live.catalog.format.' + row.course.deliveryFormat | translate }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              </td>
+              <td class="px-3 py-3 font-semibold">{{ row.course.price | currencyThb }}</td>
+              <td class="px-3 py-3">{{ 'instructor.dashboard.courses.studentCount' | translate: { count: row.course.enrollmentCount } }}</td>
+              <td class="px-3 py-3">
+                @if (row.rating; as rating) {
+                  <span class="inline-flex items-center gap-1">
+                    <ng-icon name="phosphorStar" aria-hidden="true" class="text-[var(--color-accent)]" />
+                    {{ rating }}
+                    <span class="text-xs text-[var(--color-text-muted)]">({{ row.course.ratingCount | number }})</span>
+                  </span>
+                } @else {
+                  <span class="text-[var(--color-text-muted)]">{{ 'instructor.dashboard.courses.noReviews' | translate }}</span>
+                }
+              </td>
+              <td class="px-3 py-3"><app-status-chip [view]="row.status" /></td>
+              <td class="px-5 py-3 text-right sm:px-6">
+                <div class="inline-flex items-center gap-1">
+                  @if (row.isPublished) {
+                    <a
+                      [routerLink]="['/courses', row.course.slug]"
+                      [attr.aria-label]="'instructor.dashboard.courses.view' | translate"
+                      class="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)] transition-colors
+                        hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                    >
+                      <ng-icon name="phosphorEye" aria-hidden="true" class="text-lg" />
+                    </a>
+                  }
+                  <a
+                    [routerLink]="['/instructor/courses', row.course.courseId, 'builder']"
+                    class="inline-flex h-11 items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 text-sm font-medium text-[var(--color-text)]
+                      transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                  >
+                    <ng-icon name="phosphorPencilSimple" aria-hidden="true" />
+                    {{ 'instructor.dashboard.courses.edit' | translate }}
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

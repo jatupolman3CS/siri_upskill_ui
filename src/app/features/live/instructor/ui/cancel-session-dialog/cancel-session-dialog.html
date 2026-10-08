@@ -1,0 +1,47 @@
+<app-modal
+  [(open)]="open"
+  [titleText]="'live.instructor.cancel.title' | translate"
+  [closeOnOverlayClick]="false"
+>
+  <form class="flex flex-col gap-3" (submit)="$event.preventDefault(); submit()" novalidate>
+    <p class="text-sm">{{ 'live.instructor.cancel.body' | translate: { title: sessionTitle() } }}</p>
+
+    <div>
+      <label [for]="fieldId" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+        {{ 'live.instructor.cancel.reasonLabel' | translate }}
+        <span aria-hidden="true" class="text-[var(--color-danger)]">*</span>
+      </label>
+      <textarea
+        [id]="fieldId"
+        rows="3"
+        [attr.maxlength]="maxLength"
+        [formControl]="reason"
+        [attr.aria-invalid]="showRequiredError() ? 'true' : null"
+        [attr.aria-describedby]="fieldId + '-hint'"
+        (blur)="touched.set(true)"
+        class="block w-full rounded-[var(--radius-md)] border bg-[var(--color-bg)] px-3.5 py-2.5 text-base text-[var(--color-text)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="showRequiredError() ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)]'"
+      ></textarea>
+      @if (showRequiredError()) {
+        <p role="alert" class="mt-1.5 text-sm text-[var(--color-danger)]">{{ 'live.instructor.cancel.reasonRequired' | translate }}</p>
+      }
+      <p [id]="fieldId + '-hint'" class="mt-1.5 text-sm text-[var(--color-text-muted)]">
+        {{ 'live.instructor.cancel.reasonHint' | translate: { count: reason.value.length, max: maxLength } }}
+      </p>
+    </div>
+
+    @if (problemText(); as text) {
+      <p role="alert" class="text-sm text-[var(--color-danger)]">{{ text }}</p>
+    }
+  </form>
+
+  <div modalFooter class="flex gap-3">
+    <app-button variant="secondary" [disabled]="busy()" (click)="open.set(false)">
+      {{ 'live.instructor.cancel.keep' | translate }}
+    </app-button>
+    <app-button variant="danger" [loading]="busy()" [disabled]="busy()" (click)="submit()">
+      {{ 'live.instructor.cancel.confirm' | translate }}
+    </app-button>
+  </div>
+</app-modal>

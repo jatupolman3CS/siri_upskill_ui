@@ -1,0 +1,72 @@
+<form
+  class="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--color-primary)] bg-[var(--color-surface)] p-4 sm:p-5"
+  [attr.aria-label]="(isEditing() ? 'live.builder.form.editHeading' : 'live.builder.form.addHeading') | translate"
+  (submit)="submit($event)"
+  novalidate
+>
+  <h3 class="text-base font-semibold text-[var(--color-text)]">
+    {{ (isEditing() ? 'live.builder.form.editHeading' : 'live.builder.form.addHeading') | translate }}
+  </h3>
+
+  <app-input
+    [label]="'live.builder.form.title' | translate"
+    [required]="true"
+    [errorMessage]="showError('title')"
+    [formControl]="form.controls.title"
+  />
+
+  <div>
+    <label [for]="descriptionId" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+      {{ 'live.builder.form.description' | translate }}
+    </label>
+    <textarea
+      [id]="descriptionId"
+      rows="2"
+      maxlength="2000"
+      [formControl]="form.controls.description"
+      class="block w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-base text-[var(--color-text)]
+        focus-visible:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    ></textarea>
+  </div>
+
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <app-input
+      type="date"
+      [label]="'live.builder.form.date' | translate"
+      [required]="true"
+      [errorMessage]="showError('date')"
+      [formControl]="form.controls.date"
+    />
+    <app-input
+      type="time"
+      [label]="'live.builder.form.startTime' | translate"
+      [required]="true"
+      [errorMessage]="showError('startTime')"
+      [formControl]="form.controls.startTime"
+    />
+    <app-input
+      type="time"
+      [label]="'live.builder.form.endTime' | translate"
+      [required]="true"
+      [errorMessage]="showError('endTime')"
+      [formControl]="form.controls.endTime"
+    />
+  </div>
+  <p class="-mt-2 text-sm text-[var(--color-text-muted)]">{{ 'live.builder.form.timeHint' | translate }}</p>
+
+  @if (timeErrorKey(); as key) {
+    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ key | translate }}</p>
+  }
+  @if (problemText(); as text) {
+    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ text }}</p>
+  }
+
+  <div class="flex flex-wrap gap-3">
+    <app-button type="submit" [loading]="busy()" [disabled]="busy()">
+      {{ (isEditing() ? 'live.builder.form.saveChanges' : 'live.builder.form.add') | translate }}
+    </app-button>
+    <app-button variant="secondary" [disabled]="busy()" (click)="closed.emit()">
+      {{ 'live.builder.form.close' | translate }}
+    </app-button>
+  </div>
+</form>

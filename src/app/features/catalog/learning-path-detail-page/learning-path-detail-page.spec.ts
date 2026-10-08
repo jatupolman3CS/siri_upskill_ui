@@ -2,9 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { LearningPathApiService } from '../data/learning-path-api.service';
 import { LearningPathDetailPage } from './learning-path-detail-page';
 
@@ -72,5 +73,41 @@ describe('LearningPathDetailPage', () => {
     expect(text).toContain('Fullstack .NET & Angular Developer');
     expect(text).toContain('C# 14 & .NET 10 Web API Mastery');
     expect(text).toContain('Angular 22 Signals & Modern Architecture');
+  });
+
+  it('builds JSON-LD URLs from the runtime origin, never a hardcoded domain', () => {
+    const origin = document.location.origin;
+    const jsonLd = document.head.querySelector('script[data-seo-json-ld]')?.textContent ?? '';
+    expect(jsonLd).toContain(`${origin}/learning-paths/fullstack-dotnet-angular`);
+    expect(jsonLd).toContain(`${origin}/courses/csharp-dotnet-webapi-mastery`);
+    expect(jsonLd).not.toContain('siri.in.th');
+  });
+});
+
+describe('LearningPathDetailPage when the path cannot be loaded', () => {
+  it('shows the localized not-found heading instead of a hardcoded or server-supplied string', async () => {
+    await TestBed.configureTestingModule({
+      imports: [LearningPathDetailPage],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => 'gone' } } },
+        },
+      ],
+    }).compileComponents();
+    TestBed.inject(TranslationService).setLocale('en');
+    vi.spyOn(TestBed.inject(LearningPathApiService), 'getLearningPathBySlug').mockReturnValue(
+      throwError(() => ({ error: { detail: 'Server wording that must not leak' } })),
+    );
+
+    const fixture = TestBed.createComponent(LearningPathDetailPage);
+    fixture.detectChanges();
+
+    const heading = fixture.nativeElement.querySelector('h2') as HTMLElement;
+    expect(heading.textContent?.trim()).toBe('Learning Path Not Found');
+    expect(fixture.nativeElement.textContent).not.toContain('Server wording that must not leak');
   });
 });

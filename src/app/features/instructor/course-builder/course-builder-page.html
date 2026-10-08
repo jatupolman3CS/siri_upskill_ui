@@ -184,6 +184,20 @@
         {{ 'instructor.builder.tabs.curriculum' | translate }}
       </button>
 
+      @if (courseId()) {
+        <button
+          type="button"
+          (click)="activeTab.set('live')"
+          class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
+          [class.bg-[var(--color-primary)]]="activeTab() === 'live'"
+          [class.text-white]="activeTab() === 'live'"
+          [class.text-[var(--color-text-muted)]]="activeTab() !== 'live'"
+          [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'live'"
+        >
+          {{ 'live.builder.tab' | translate }}
+        </button>
+      }
+
       <button
         type="button"
         (click)="activeTab.set('publish')"
@@ -815,6 +829,11 @@
           }
         </div>
       </div>
+    }
+
+    <!-- Live schedule (P11) — only for a saved course: sessions attach to a real course id. -->
+    @if (activeTab() === 'live' && courseId(); as liveCourseId) {
+      <app-live-schedule-panel [courseId]="liveCourseId" />
     }
 
     <!-- Tab 3: Publish -->

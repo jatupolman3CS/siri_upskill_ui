@@ -13,6 +13,8 @@
   <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
     <!-- Filters sidebar -->
     <aside class="animate-fade-in-up stagger-2 flex flex-col gap-6">
+      <app-course-format-filter [selected]="format()" [facets]="formatFacets()" (selectedChange)="setFormat($event)" />
+
       <section>
         <h2 class="mb-3 text-sm font-semibold text-[var(--color-text)]">{{ 'catalog.filters.categoryHeading' | translate }}</h2>
         <ul class="flex flex-col gap-1">
@@ -142,9 +144,11 @@
                        container's aspect ratio is (frontend.md requires NgOptimizedImage on every image). -->
                   <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105" />
                 }
+                <app-course-format-badge class="absolute left-2 top-2" [format]="course.deliveryFormat" />
               </div>
               <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">{{ course.title }}</h3>
               <p class="text-sm text-[var(--color-text-muted)]">{{ course.instructorDisplayName }}</p>
+              <app-course-next-session [startsAtUtc]="course.nextStartsAtUtc" />
               @if (course.ratingCount > 0) {
                 <p class="text-sm text-[var(--color-text)]">
                   {{ 'catalog.ratingSummary' | translate: { rating: course.ratingAverage, count: course.ratingCount } }}

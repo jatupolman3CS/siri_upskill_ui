@@ -1,8 +1,11 @@
 import { Component, signal } from '@angular/core';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { buildTestAccessToken } from '../../../core/auth/testing/test-jwt';
 import { CategoryTreeNode } from '../../../features/catalog/data/category-api.models';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { MobileNav } from './mobile-nav';
@@ -72,7 +75,11 @@ describe('MobileNav', () => {
     document.body.style.overflow = '';
     TestBed.configureTestingModule({
       imports: [MobileNavTestHost],
-      providers: [provideRouter([{ path: '**', component: MobileNavTestHost }])],
+      providers: [
+        provideRouter([{ path: '**', component: MobileNavTestHost }]),
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting(),
+      ],
     });
     fixture = TestBed.createComponent(MobileNavTestHost);
     host = fixture.componentInstance;
@@ -87,6 +94,7 @@ describe('MobileNav', () => {
 
   afterEach(() => {
     authService.clearSession();
+    TestBed.inject(HttpTestingController).verify();
   });
 
   function openDrawer(): void {
@@ -190,9 +198,42 @@ describe('MobileNav', () => {
 
     buttonNamed('Sign out')?.click();
     fixture.detectChanges();
+    TestBed.inject(HttpTestingController)
+      .match('/api/identity/logout')
+      .forEach((req) => req.flush({ message: 'ok' }));
 
     expect(authService.isAuthenticated()).toBe(false);
     expect(host.open()).toBe(false);
+  });
+
+  it('offers guests the application wizard next to Log in / Sign up, but no account links', () => {
+    openDrawer();
+
+    expect(linkNamed('Teach with us')?.getAttribute('href')).toBe('/become-instructor');
+    expect(linkNamed('Order History')).toBeFalsy();
+  });
+
+  it('shows a signed-in user their profile and the same account links as the header menu — never Log in / Sign up', async () => {
+    authService.setAccessToken(buildTestAccessToken({ userId: 'user-drawer-1', roles: ['Learner'] }));
+    TestBed.tick();
+    TestBed.inject(HttpTestingController).expectOne('/api/identity/me').flush({
+      id: 'user-drawer-1',
+      email: 'anna@example.test',
+      displayName: 'Anna Lee',
+      avatarUrl: null,
+      roles: ['Learner'],
+    });
+    await fixture.whenStable();
+    TestBed.tick();
+    openDrawer();
+
+    expect(dialogEl()?.textContent).toContain('Anna Lee');
+    expect(dialogEl()?.textContent).toContain('anna@example.test');
+    for (const label of ['My Courses', 'Order History', 'Wishlist', 'Signed-in devices', 'Teach with us']) {
+      expect(linkNamed(label)).toBeTruthy();
+    }
+    expect(linkNamed('Log in')).toBeFalsy();
+    expect(linkNamed('Sign up')).toBeFalsy();
   });
 
   it('renders every root category, and a category with no children has no expand toggle', () => {

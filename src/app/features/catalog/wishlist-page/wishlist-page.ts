@@ -58,7 +58,7 @@ export class WishlistPage implements OnInit {
       title: item.title,
       price: item.price,
       thumbnailUrl: item.thumbnailUrl,
-      instructorName: item.instructorName,
+      instructorName: item.instructorName ?? undefined,
     });
   }
 

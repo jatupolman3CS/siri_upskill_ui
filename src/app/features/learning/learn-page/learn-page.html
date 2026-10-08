@@ -59,8 +59,16 @@
             />
           } @else if (playbackError()) {
             <div class="animate-fade-in aspect-video w-full flex flex-col items-center justify-center rounded-[var(--radius-xl)] bg-zinc-900 text-zinc-400 p-6 text-center">
-              <span class="text-sm font-medium text-zinc-200 mb-3">{{ playbackError() }}</span>
-              @if (!isEnrolled()) {
+              <span class="text-sm font-medium text-zinc-200 mb-3" role="alert">{{ playbackError() }}</span>
+              @if (playbackRetryable()) {
+                <button
+                  type="button"
+                  (click)="retryPlayback()"
+                  class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition"
+                >
+                  {{ 'catalog.retryButton' | translate }}
+                </button>
+              } @else if (!isEnrolled()) {
                 <button
                   type="button"
                   (click)="buyCourse()"
@@ -194,6 +202,23 @@
             </div>
           </button>
 
+          @if (liveTabVisible()) {
+          <button
+            type="button"
+            (click)="activeTab.set('live')"
+            class="rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            [class.border-[var(--color-primary)]]="activeTab() === 'live'"
+            [class.text-[var(--color-primary)]]="activeTab() === 'live'"
+            [class.border-transparent]="activeTab() !== 'live'"
+            [class.text-[var(--color-text-muted)]]="activeTab() !== 'live'"
+          >
+            <div class="flex items-center gap-1.5">
+              <ng-icon name="phosphorBroadcast" />
+              <span>{{ 'live.tab.label' | translate }}</span>
+            </div>
+          </button>
+          }
+
           @if (isEnrolled()) {
           <button
             type="button"
@@ -297,6 +322,17 @@
                 </div>
               }
             </div>
+          }
+
+          <!-- Live Tab (hybrid / live courses, enrolled learners only) -->
+          @if (activeTab() === 'live' && liveTabVisible()) {
+            @if (course(); as liveCourse) {
+              <app-live-tab
+                [courseId]="liveCourse.id"
+                [courseSlug]="liveCourse.slug"
+                (unavailable)="onLiveTabUnavailable()"
+              />
+            }
           }
 
           <!-- Quiz Tab -->

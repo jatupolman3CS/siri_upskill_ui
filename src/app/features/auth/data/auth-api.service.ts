@@ -13,6 +13,7 @@ import {
   LoginRequest,
   LoginResponse,
   LogoutResponse,
+  MeResponse,
   OAuthClientsResponse,
   RefreshResponse,
   RegisterRequest,
@@ -53,6 +54,11 @@ export class AuthApiService extends ApiService {
 
   refresh(): Observable<RefreshResponse> {
     return this.post<RefreshResponse>('/identity/refresh', {}, { withCredentials: true });
+  }
+
+  /** The signed-in caller's profile (name, email, avatar) — answers 401 when there is no session. */
+  getMe(): Observable<MeResponse> {
+    return this.get<MeResponse>('/identity/me');
   }
 
   logout(): Observable<LogoutResponse> {

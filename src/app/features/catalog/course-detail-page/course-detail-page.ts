@@ -41,6 +41,8 @@ import { Breadcrumb, BreadcrumbItem } from '../../../shared/breadcrumb/breadcrum
 import { Button } from '../../../shared/button/button';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { CartStore } from '../../commerce/cart/cart-store.service';
+import { CourseLiveSchedule } from './course-live/course-live-schedule';
+import { CourseLiveSummary } from './course-live/course-live-summary';
 
 /**
  * `/courses/:slug` (task P1-22) — the destination every course card (`CoursesPage`, P1-21) and
@@ -48,7 +50,7 @@ import { CartStore } from '../../commerce/cart/cart-store.service';
  */
 @Component({
   selector: 'app-course-detail-page',
-  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, DurationPipe, DatePipe, NgIcon, NgOptimizedImage, Breadcrumb, Button, Skeleton],
+  imports: [RouterLink, TranslatePipe, CurrencyThbPipe, DurationPipe, DatePipe, NgIcon, NgOptimizedImage, Breadcrumb, Button, Skeleton, CourseLiveSchedule, CourseLiveSummary],
   templateUrl: './course-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -144,15 +146,18 @@ export class CourseDetailPage {
     stream: ({ params }) => this.courseApi.getCourseDetail(params),
   });
 
+  // Reviews are secondary content: a failed reviews fetch (or a failed course fetch, which this params
+  // reads) must degrade to "no reviews", never throw. `.value()` throws while a resource is in the error
+  // state, so every read below goes through `hasValue()` first.
   protected readonly reviewsResource = rxResource({
-    params: () => this.courseResource.value()?.id,
+    params: () => (this.courseResource.hasValue() ? this.courseResource.value().id : undefined),
     stream: ({ params: courseId }) => {
       if (!courseId) return of(null);
       return this.courseApi.getCourseReviews(courseId, 1, 20);
     },
   });
 
-  protected readonly reviewsSummary = computed(() => this.reviewsResource.value());
+  protected readonly reviewsSummary = computed(() => (this.reviewsResource.hasValue() ? this.reviewsResource.value() : undefined));
   protected readonly reviews = computed(() => this.reviewsSummary()?.items ?? []);
 
   protected readonly ratingDistribution = computed(() => {

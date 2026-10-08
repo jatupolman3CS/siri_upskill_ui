@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorCaretDown } from '@ng-icons/phosphor-icons/regular';
+import { phosphorCaretDown, phosphorSquaresFour } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryTreeNode } from '../../../features/catalog/data/category-api.models';
-import { resolveCategoryIconName } from '../../../features/catalog/category-icon';
+import { CATEGORY_ICONS, resolveCategoryIconName } from '../../../features/catalog/category-icon';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 
@@ -44,7 +44,7 @@ import { TranslationService } from '../../../core/i18n/translation.service';
   templateUrl: './category-mega-menu.html',
   styleUrl: './category-mega-menu.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons({ phosphorCaretDown })],
+  providers: [provideIcons({ phosphorCaretDown, phosphorSquaresFour, ...CATEGORY_ICONS })],
 })
 export class CategoryMegaMenu {
   readonly categories = input.required<readonly CategoryTreeNode[]>();

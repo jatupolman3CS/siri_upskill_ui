@@ -73,9 +73,11 @@
 
               <!-- Course Info -->
               <div class="p-5">
-                <p class="text-xs font-medium text-[var(--color-text-muted,#64748B)] mb-1">
-                  {{ item.instructorName }}
-                </p>
+                @if (item.instructorName) {
+                  <p class="text-xs font-medium text-[var(--color-text-muted,#64748B)] mb-1">
+                    {{ item.instructorName }}
+                  </p>
+                }
                 <h3 class="line-clamp-2 text-base font-bold text-[var(--color-text,#0F172A)] group-hover:text-[var(--color-primary,#DB2777)] transition-colors">
                   <a [routerLink]="['/courses', item.slug]">{{ item.title }}</a>
                 </h3>

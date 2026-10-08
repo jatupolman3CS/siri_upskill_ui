@@ -158,6 +158,23 @@
               </div>
             </div>
 
+            <!-- A failed payment attempt (provider outage, rejected request, inline card error). The pay button
+                 (or the card panel itself) is the retry; the explicit button here saves hunting for it. -->
+            @if (paymentError(); as message) {
+              <div
+                class="animate-fade-in mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+                role="alert"
+              >
+                <ng-icon name="phosphorWarningCircle" class="flex-none text-lg" aria-hidden="true" />
+                <span class="min-w-0 flex-1">{{ message }}</span>
+                @if (!payment()) {
+                  <app-button variant="secondary" size="sm" [disabled]="isCreatingPayment()" (click)="initiatePayment()">
+                    {{ 'checkout.error.retry' | translate }}
+                  </app-button>
+                }
+              </div>
+            }
+
             <!-- Resuming after a Stripe 3DS full-page redirect, no payment() loaded in THIS page
                  instance yet (fresh reload — contract §4.3's "sessionStorage had no id" branch). -->
             @if (isResumingAfterRedirect()) {

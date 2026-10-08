@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -14,7 +13,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-bottom-mobile-nav',
-  imports: [CommonModule, RouterLink, RouterLinkActive, NgIcon, TranslatePipe],
+  imports: [RouterLink, RouterLinkActive, NgIcon, TranslatePipe],
   templateUrl: './bottom-mobile-nav.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

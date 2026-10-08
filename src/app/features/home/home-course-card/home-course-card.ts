@@ -9,6 +9,8 @@ import { CourseSearchResultItem } from '../../catalog/data/course-api.models';
 import { WishlistStore } from '../../catalog/data/wishlist.store';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { CourseFormatBadge } from '../../live/ui/course-format-badge/course-format-badge';
+import { CourseNextSession } from '../../live/ui/course-format-badge/course-next-session';
 
 /**
  * Compact course card for the home page's "แนะนำ"/"ใหม่" sections (task P1-23) — a smaller sibling of
@@ -20,7 +22,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
  */
 @Component({
   selector: 'app-home-course-card',
-  imports: [CommonModule, RouterLink, TranslatePipe, CurrencyThbPipe, NgIcon, NgOptimizedImage],
+  imports: [CommonModule, RouterLink, TranslatePipe, CurrencyThbPipe, NgIcon, NgOptimizedImage, CourseFormatBadge, CourseNextSession],
   templateUrl: './home-course-card.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CurrencyPipe, provideIcons({ phosphorStar, phosphorHeart, phosphorHeartFill })],

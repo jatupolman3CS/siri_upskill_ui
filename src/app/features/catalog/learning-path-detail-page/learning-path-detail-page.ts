@@ -51,12 +51,13 @@ export class LearningPathDetailPage implements OnInit {
 
   protected readonly path = signal<LearningPathDetail | null>(null);
   protected readonly isLoading = signal(true);
-  protected readonly error = signal<string | null>(null);
+  /** True once the path cannot be shown; the template owns the (localized) wording, never a string set here. */
+  protected readonly error = signal(false);
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) {
-      this.error.set('ไม่พบเส้นทางการเรียนที่ระบุ');
+      this.error.set(true);
       this.isLoading.set(false);
       return;
     }
@@ -68,7 +69,7 @@ export class LearningPathDetailPage implements OnInit {
 
         const items = res.courses.map((c, index) => ({
           name: c.title,
-          url: `https://upskill.siri.in.th/courses/${c.slug}`,
+          url: this.seoService.absoluteUrl(`/courses/${c.slug}`),
           position: index + 1,
         }));
 
@@ -80,14 +81,14 @@ export class LearningPathDetailPage implements OnInit {
             buildLearningPathJsonLd({
               name: res.title,
               description: res.description || '',
-              url: `https://upskill.siri.in.th/learning-paths/${res.slug}`,
+              url: this.seoService.absoluteUrl(`/learning-paths/${res.slug}`),
               items,
             }),
           ],
         });
       },
-      error: (err) => {
-        this.error.set(err?.error?.detail || 'ไม่พบเส้นทางการเรียนที่ระบุ');
+      error: () => {
+        this.error.set(true);
         this.isLoading.set(false);
       },
     });

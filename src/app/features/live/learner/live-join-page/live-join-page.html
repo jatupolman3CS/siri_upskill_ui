@@ -1,0 +1,117 @@
+@let s = state();
+
+<div class="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
+  <section
+    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-[var(--shadow-md)] sm:p-8"
+    aria-labelledby="live-join-heading"
+  >
+    <div
+      class="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]"
+      aria-hidden="true"
+    >
+      @if (s.kind === 'checking') {
+        <span
+          class="inline-block h-8 w-8 animate-spin rounded-full border-[3px] border-[var(--color-border)] border-t-[var(--color-primary)] motion-reduce:animate-none"
+        ></span>
+      } @else {
+        <ng-icon [name]="view().icon" size="2rem" [class]="view().tone" />
+      }
+    </div>
+
+    <h1
+      #heading
+      id="live-join-heading"
+      tabindex="-1"
+      class="mx-auto mt-5 w-fit rounded-[var(--radius-sm)] px-3 py-1 text-xl font-bold text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] sm:text-2xl"
+    >
+      {{ view().heading | translate }}
+    </h1>
+
+    <!-- The single polite announcement for a screen change. Countdowns live outside it on purpose. -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="mt-2 space-y-1 text-sm text-[var(--color-text-muted)]">
+      <p>{{ view().body | translate }}</p>
+      @if (s.kind === 'roomNotReady') {
+        <p>
+          {{
+            (s.exhausted ? 'live.join.roomNotReady.gaveUp' : 'live.join.roomNotReady.attempt')
+              | translate: { attempt: s.attempt, max: maxAttempts }
+          }}
+        </p>
+      }
+    </div>
+
+    <div class="mt-5 flex flex-col items-center gap-3">
+      @if (s.kind === 'notOpen') {
+        @if (s.opensAtUtc) {
+          <p class="text-sm text-[var(--color-text)]">
+            {{ 'live.join.notOpen.opensAt' | translate: { dateTime: (s.opensAtUtc | bangkokDate: 'dateTime') ?? '' } }}
+          </p>
+          <p class="text-2xl font-bold text-[var(--color-text)]">
+            <app-live-countdown [targetUtc]="s.opensAtUtc" [offsetMs]="s.offsetMs" />
+          </p>
+        }
+      }
+
+      @if (s.kind === 'redirecting' && meetUrl(); as url) {
+        <a
+          [href]="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          (click)="cancelAutoRedirect()"
+          class="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+        >
+          <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="h-5 w-5" />
+          {{ 'live.join.redirecting.openRoom' | translate }}
+        </a>
+      }
+
+      @if (s.kind === 'ended') {
+        @if (s.recordingEpisodeId && s.courseSlug) {
+          <a
+            [routerLink]="['/learn', s.courseSlug, s.recordingEpisodeId]"
+            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+          >
+            {{ 'live.join.ended.watchReplay' | translate }}
+          </a>
+        } @else {
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'live.join.ended.noReplay' | translate }}</p>
+        }
+      }
+
+      @if (retryable()) {
+        <app-button (click)="retry()">{{ 'live.join.retry' | translate }}</app-button>
+      }
+
+      @if (s.kind === 'notFoundOrNoAccess' || s.kind === 'ended' || s.kind === 'cancelled') {
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <a
+            routerLink="/my-courses"
+            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+          >
+            {{ 'live.join.goMyCourses' | translate }}
+          </a>
+          @if (s.kind === 'notFoundOrNoAccess') {
+            <a
+              routerLink="/courses"
+              class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+            >
+              {{ 'live.join.browseCourses' | translate }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (isEntering()) {
+    <div class="mt-4 space-y-3 text-left">
+      <p
+        class="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+      >
+        <ng-icon name="phosphorShieldWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+        <span>{{ 'live.join.forwardWarning' | translate }}</span>
+      </p>
+      <app-live-refund-notice />
+    </div>
+  }
+</div>

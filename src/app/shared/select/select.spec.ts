@@ -45,6 +45,13 @@ describe('SelectField + formControlName', () => {
     expect(nativeSelect.value).toBe('a');
   });
 
+  it('shows an initial value that is NOT the first option (the options render after the value binding)', () => {
+    const second = TestBed.createComponent(SelectTestHost);
+    second.componentInstance.form.get('category')?.setValue('b');
+    second.detectChanges();
+    expect((second.nativeElement.querySelector('select') as HTMLSelectElement).value).toBe('b');
+  });
+
   it('reflects a later programmatic setValue into the view', () => {
     host.form.get('category')?.setValue('b');
     fixture.detectChanges();

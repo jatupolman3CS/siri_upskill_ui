@@ -54,10 +54,13 @@ import { CategoryApiService } from '../../catalog/data/category-api.service';
 import { CourseApiService } from '../../catalog/data/course-api.service';
 import { MediaApiService } from '../../media/data/media-api.service';
 import { MediaAssetResponse } from '../../media/data/media-api.models';
+import { notConfiguredMessageKey } from '../../../core/http/provider-errors';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { LiveSubmitIssues } from '../../live/data/live-submit-issues.service';
+import { LiveSchedulePanel } from './live-schedule-panel/live-schedule-panel';
 
 export interface BuilderEpisode {
   id: string;
@@ -109,6 +112,7 @@ export type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'conflict' | 
     NgIcon,
     TranslatePipe,
     Spinner,
+    LiveSchedulePanel,
   ],
   templateUrl: './course-builder-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -142,7 +146,8 @@ export class CourseBuilderPage implements OnInit {
   private readonly seoService = inject(SeoService);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly activeTab = signal<'basic' | 'curriculum' | 'publish'>('basic');
+  protected readonly activeTab = signal<'basic' | 'curriculum' | 'publish' | 'live'>('basic');
+  private readonly liveIssues = inject(LiveSubmitIssues);
   protected readonly isLoading = signal(false);
   protected readonly saveSuccess = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -172,12 +177,13 @@ export class CourseBuilderPage implements OnInit {
   protected readonly categories = signal<CategoryTreeNode[]>([]);
 
   // Form Fields
-  protected readonly courseTitle = signal('หลักสูตรใหม่');
+  // A new course starts blank: nothing the instructor did not type may be saved into the real draft.
+  protected readonly courseTitle = signal('');
   protected readonly courseSubtitle = signal('');
   protected readonly courseDescription = signal('');
   protected readonly categoryId = signal<string>('');
-  protected readonly coursePrice = signal<number>(1490);
-  protected readonly comparePrice = signal<number | null>(2990);
+  protected readonly coursePrice = signal<number>(0);
+  protected readonly comparePrice = signal<number | null>(null);
   protected readonly courseLevel = signal<CourseLevel>('Beginner');
   protected readonly thumbnailUrl = signal<string>('');
   protected readonly seoTitle = signal<string>('');
@@ -196,16 +202,8 @@ export class CourseBuilderPage implements OnInit {
   private readonly episodeIdAliases = new Map<string, string>();
 
   // Curriculum Sections
-  protected readonly sections = signal<BuilderSection[]>([
-    {
-      id: 'sec-temp-1',
-      title: 'บทนำและภาพรวม',
-      episodes: [
-        { id: 'ep-temp-1', title: '1. ยินดีต้อนรับสู่หลักสูตร', durationSeconds: 0, isFreePreview: true },
-        { id: 'ep-temp-2', title: '2. แนะนำเครื่องมือที่ต้องใช้', durationSeconds: 0, isFreePreview: false },
-      ],
-    },
-  ]);
+  // Empty by default (a loaded course replaces it from the server): the instructor adds the first section.
+  protected readonly sections = signal<BuilderSection[]>([]);
 
   protected readonly sectionDropListIds = computed(() => {
     return this.sections().map((_, idx) => `ep-drop-list-${idx}`);
@@ -213,8 +211,8 @@ export class CourseBuilderPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'Course Studio Builder | SIRI UpSkill',
-      description: 'เครื่องมือสร้างและจัดการหลักสูตร',
+      title: this.translationService.t('instructor.builder.pageTitle'),
+      description: this.translationService.t('instructor.builder.pageDescription'),
       path: '/instructor/courses/builder',
       robots: 'noindex',
     });
@@ -595,11 +593,11 @@ export class CourseBuilderPage implements OnInit {
       ...list,
       {
         id: `sec-temp-${Date.now()}`,
-        title: `ส่วนที่ ${count}: หัวข้อการเรียนรู้ใหม่`,
+        title: this.translationService.t('instructor.builder.curriculum.sectionLabel', { index: count }),
         episodes: [
           {
             id: `ep-temp-${Date.now()}`,
-            title: `บทเรียนที่ 1`,
+            title: this.translationService.t('instructor.builder.curriculum.episodeLabel', { index: 1 }),
             durationSeconds: 0,
             isFreePreview: false,
           },
@@ -643,7 +641,7 @@ export class CourseBuilderPage implements OnInit {
             ...sec.episodes,
             {
               id: `ep-temp-${Date.now()}`,
-              title: `บทเรียนที่ ${newEpNum}`,
+              title: this.translationService.t('instructor.builder.curriculum.episodeLabel', { index: newEpNum }),
               durationSeconds: 0,
               isFreePreview: false,
             },
@@ -935,7 +933,12 @@ export class CourseBuilderPage implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       ).subscribe({
         next: (asset) => this.applyEpisodeAsset(episode.id, asset),
-        error: () => this.updateEpisodeMedia(episode.id, { videoStatus: 'failed', errorMessage: 'instructor.builder.upload.transferFailed' }),
+        // A 503 "video provider not configured" is an outage the instructor can only wait out — say so instead of
+        // blaming their connection; the row's retry button stays available either way.
+        error: (error: unknown) => this.updateEpisodeMedia(episode.id, {
+          videoStatus: 'failed',
+          errorMessage: notConfiguredMessageKey(error) ?? 'instructor.builder.upload.transferFailed',
+        }),
       }));
   }
 
@@ -1062,9 +1065,9 @@ export class CourseBuilderPage implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (asset) => this.applyTrailerAsset(asset),
-      error: () => {
+      error: (error: unknown) => {
         this.trailerStatus.set('failed');
-        this.trailerError.set('instructor.builder.upload.transferFailed');
+        this.trailerError.set(notConfiguredMessageKey(error) ?? 'instructor.builder.upload.transferFailed');
       },
     }));
   }
@@ -1082,6 +1085,12 @@ export class CourseBuilderPage implements OnInit {
   // --- Save / Publish Pipelines (Clean RxJS switchMap) ---
 
   public saveCourse(): void {
+    if (!this.courseTitle().trim()) {
+      this.errorMessage.set('instructor.builder.validation.titleRequired');
+      this.saveStatus.set('error');
+      return;
+    }
+
     if (!this.categoryId()) {
       this.errorMessage.set('instructor.builder.validation.categoryRequired');
       this.saveStatus.set('error');
@@ -1106,9 +1115,6 @@ export class CourseBuilderPage implements OnInit {
         .pipe(
           switchMap((created) => {
             this.courseId.set(created.id);
-            this.router.navigate(['/instructor/courses', created.id, 'builder'], {
-              replaceUrl: true,
-            });
             return this.courseApi.getCourseBuilder(created.id);
           }),
           switchMap((builder) => {
@@ -1124,6 +1130,7 @@ export class CourseBuilderPage implements OnInit {
               now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             );
             setTimeout(() => this.saveSuccess.set(false), 3000);
+            this.openCourseRoute();
           }),
           catchError((err) => {
             if (err?.status === 409) {
@@ -1153,6 +1160,7 @@ export class CourseBuilderPage implements OnInit {
             now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           );
           setTimeout(() => this.saveSuccess.set(false), 3000);
+          this.openCourseRoute();
         }),
         catchError((err) => {
           if (err?.status === 409) {
@@ -1170,6 +1178,19 @@ export class CourseBuilderPage implements OnInit {
       .subscribe();
   }
 
+  /**
+   * Moves a freshly created course from `/instructor/courses/new` to its own builder URL. `courses/new` and
+   * `courses/:id/builder` are separate route configs, so this swaps in a NEW component instance: it cancels every
+   * `takeUntilDestroyed` pipe of this one and reloads the form from the server. It must therefore only run once
+   * the typed state is persisted (never before `saveCurrentState` finishes), or subtitle, description and
+   * curriculum typed on the "new" screen are silently lost. A no-op when the URL already names the course.
+   */
+  private openCourseRoute(): void {
+    const id = this.courseId();
+    if (!id || this.route.snapshot.paramMap.get('id') === id) return;
+    void this.router.navigate(['/instructor/courses', id, 'builder'], { replaceUrl: true });
+  }
+
   public readonly mediaReadyForReview = computed(() => {
     const episodes = this.sections().flatMap((section) => section.episodes);
     return episodes.length > 0 && episodes.every((episode) => episode.mediaAssetId && episode.videoStatus === 'ready') &&
@@ -1178,6 +1199,12 @@ export class CourseBuilderPage implements OnInit {
   });
 
   public publishCourse(): void {
+    if (!this.courseTitle().trim()) {
+      this.errorMessage.set('instructor.builder.validation.titleRequired');
+      this.saveStatus.set('error');
+      return;
+    }
+
     if (!this.categoryId()) {
       this.errorMessage.set('instructor.builder.validation.categoryRequired');
       this.saveStatus.set('error');
@@ -1227,6 +1254,11 @@ export class CourseBuilderPage implements OnInit {
               this.isConflict.set(true);
               this.saveStatus.set('conflict');
               this.errorMessage.set('instructor.builder.concurrencyConflict');
+            } else if (this.liveIssues.capture(err)) {
+              // A Live course whose sessions have no meeting room is refused: show the live tab, which marks them.
+              this.saveStatus.set('error');
+              this.errorMessage.set('live.builder.meetingsNotReady');
+              this.activeTab.set('live');
             } else {
               this.saveStatus.set('error');
               this.errorMessage.set('instructor.builder.saveFailed');
@@ -1254,6 +1286,10 @@ export class CourseBuilderPage implements OnInit {
             this.isConflict.set(true);
             this.saveStatus.set('conflict');
             this.errorMessage.set('instructor.builder.concurrencyConflict');
+          } else if (this.liveIssues.capture(err)) {
+            this.saveStatus.set('error');
+            this.errorMessage.set('live.builder.meetingsNotReady');
+            this.activeTab.set('live');
           } else {
             this.saveStatus.set('error');
             this.errorMessage.set('instructor.builder.saveFailed');

@@ -1,0 +1,114 @@
+<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
+  <header>
+    <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'live.instructor.sessions.heading' | translate }}</h1>
+    <p class="mt-1 text-[var(--color-text-muted)]">{{ 'live.instructor.sessions.subheading' | translate }}</p>
+  </header>
+
+  <div role="group" [attr.aria-label]="'live.instructor.sessions.scopeLabel' | translate" class="flex flex-wrap gap-2">
+    @for (option of scopes; track option) {
+      <button
+        type="button"
+        (click)="setScope(option)"
+        [attr.aria-pressed]="scope() === option"
+        class="min-h-11 cursor-pointer rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="
+          scope() === option
+            ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+            : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'
+        "
+      >
+        {{ 'live.instructor.sessions.scope.' + option | translate }}
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex flex-col gap-3" role="status" [attr.aria-label]="'common.loading' | translate">
+      @for (row of skeletonRows; track row) {
+        <app-skeleton variant="block" height="7rem" radius="lg" />
+      }
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'live.instructor.sessions.errorHeading' | translate"
+      [description]="'live.instructor.sessions.errorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="retry()">{{ 'live.instructor.sessions.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (result(); as list) {
+    @if (rows().length === 0) {
+      <app-empty-state
+        [heading]="'live.instructor.sessions.emptyHeading' | translate"
+        [description]="('live.instructor.sessions.empty.' + scope()) | translate"
+      >
+        <a
+          emptyStateAction
+          routerLink="/instructor/courses"
+          class="inline-flex h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
+            hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          {{ 'live.instructor.sessions.goToCourses' | translate }}
+        </a>
+      </app-empty-state>
+    } @else {
+      <p class="text-sm text-[var(--color-text-muted)]" aria-live="polite">
+        {{ 'live.instructor.sessions.count' | translate: { count: list.totalCount } }}
+      </p>
+      <ul class="flex flex-col gap-3">
+        @for (row of rows(); track row.item.sessionId) {
+          <li>
+            <a
+              [routerLink]="['/instructor/sessions', row.item.sessionId]"
+              class="block rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-sm)] transition-colors
+                hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] sm:p-5"
+            >
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-xs text-[var(--color-text-muted)] sm:text-sm">{{ row.item.courseTitle }}</p>
+                  <h2 class="break-words text-base font-semibold text-[var(--color-text)] sm:text-lg">{{ row.item.title }}</h2>
+                  <p class="mt-1 text-sm text-[var(--color-text)]">
+                    <app-bangkok-time-range [startsAtUtc]="row.item.startsAtUtc" [endsAtUtc]="row.item.endsAtUtc" />
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <app-live-status-badge [state]="row.item.displayState" />
+                  @if (row.meeting; as meetingView) {
+                    <app-status-chip [view]="meetingView" />
+                  }
+                </div>
+              </div>
+
+              <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--color-text-muted)]">
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
+                  <span class="inline-flex items-center gap-1.5">
+                    <ng-icon name="phosphorUsers" aria-hidden="true" />
+                    {{ 'live.instructor.sessions.attendance' | translate: { joined: row.item.joinedLearners, expected: row.item.expectedLearners } }}
+                  </span>
+                  @if (row.item.recordingEpisodeId) {
+                    <span class="inline-flex items-center gap-1.5">
+                      <ng-icon name="phosphorFilmStrip" aria-hidden="true" />
+                      {{ 'live.instructor.sessions.hasRecording' | translate }}
+                    </span>
+                  }
+                  @if (row.item.cancelReason) {
+                    <span>{{ 'live.instructor.sessions.cancelReason' | translate: { reason: row.item.cancelReason } }}</span>
+                  }
+                </div>
+                <span class="inline-flex items-center gap-1 font-medium text-[var(--color-primary)]">
+                  {{ 'live.instructor.sessions.open' | translate }}
+                  <ng-icon name="phosphorCaretRight" aria-hidden="true" />
+                </span>
+              </div>
+            </a>
+          </li>
+        }
+      </ul>
+
+      @if (list.totalPages > 1) {
+        <div class="flex justify-center">
+          <app-pagination [currentPage]="list.page" [totalPages]="list.totalPages" (currentPageChange)="goToPage($event)" />
+        </div>
+      }
+    }
+  }
+</div>

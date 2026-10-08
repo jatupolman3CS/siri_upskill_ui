@@ -5,16 +5,19 @@ import {
   DestroyRef,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeft,
   phosphorBookOpen,
+  phosphorBroadcast,
   phosphorCertificate,
   phosphorChatCircleDots,
   phosphorCheckCircle,
@@ -26,6 +29,7 @@ import {
   phosphorThumbsUp,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { LiveTab } from '../../live/learner/live-tab/live-tab';
 import { CurriculumSidebar } from '../curriculum-sidebar/curriculum-sidebar';
 import { QuizTakingComponent } from '../quiz-taking/quiz-taking.component';
 import { AssignmentSubmissionComponent } from '../assignment-submission/assignment-submission.component';
@@ -43,9 +47,12 @@ import { CourseDetailEpisode, CourseDetailResponse } from '../../catalog/data/co
 import { CourseApiService } from '../../catalog/data/course-api.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { DurationPipe } from '../../../core/i18n/duration.pipe';
+import { notConfiguredMessageKey } from '../../../core/http/provider-errors';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-learn-page',
@@ -59,6 +66,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
     QuizTakingComponent,
     AssignmentSubmissionComponent,
     EpisodeAttachmentsComponent,
+    LiveTab,
     TranslatePipe,
     DurationPipe,
     Spinner,
@@ -69,6 +77,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
     provideIcons({
       phosphorArrowLeft,
       phosphorBookOpen,
+      phosphorBroadcast,
       phosphorInfo,
       phosphorChatCircleDots,
       phosphorFileText,
@@ -87,6 +96,8 @@ export class LearnPage implements OnInit {
   private readonly courseApi = inject(CourseApiService);
   private readonly learningApi = inject(LearningApiService);
   private readonly seoService = inject(SeoService);
+  private readonly toast = inject(ToastService);
+  private readonly translation = inject(TranslationService);
   private readonly destroyRef = inject(DestroyRef);
   private courseLoadVersion = 0;
   private playbackLoadVersion = 0;
@@ -102,13 +113,37 @@ export class LearnPage implements OnInit {
   protected readonly episodeProgress = signal<EpisodeProgressResponse | null>(null);
   protected readonly episodeProgressMap = signal<Map<string, EpisodeProgressResponse>>(new Map());
 
-  protected readonly activeTab = signal<'curriculum' | 'overview' | 'quiz' | 'assignment' | 'resources' | 'qa'>('overview');
+  protected readonly activeTab = signal<'curriculum' | 'overview' | 'live' | 'quiz' | 'assignment' | 'resources' | 'qa'>('overview');
   protected readonly discussions = signal<readonly DiscussionItem[]>([]);
   protected readonly isSubmittingQuestion = signal(false);
   protected readonly newQuestionBody = signal('');
   protected readonly upvotedDiscussionIds = signal<Set<string>>(new Set());
 
   protected readonly isEnrolled = computed<boolean>(() => this.enrollmentId() !== null);
+
+  /** Set when the Live tab reports "no active enrollment" (404) so the tab is hidden quietly. */
+  private readonly liveTabUnavailable = signal(false);
+
+  /** The "Live" tab exists only for enrolled learners of a course that is not purely on-demand (appendix §F, FE-2). */
+  protected readonly liveTabVisible = computed<boolean>(
+    () =>
+      this.isEnrolled() &&
+      (this.course()?.deliveryFormat ?? 'OnDemand') !== 'OnDemand' &&
+      !this.liveTabUnavailable(),
+  );
+
+  /** `?tab=live` deep link (e.g. from the "next session" chip on /my-courses). */
+  private readonly tabParam = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('tab'))), {
+    initialValue: null,
+  });
+
+  constructor() {
+    effect(() => {
+      if (this.tabParam() === 'live' && this.liveTabVisible()) {
+        this.activeTab.set('live');
+      }
+    });
+  }
 
   protected readonly currentEpisode = computed<CourseDetailEpisode | null>(() => {
     const c = this.course();
@@ -135,7 +170,11 @@ export class LearnPage implements OnInit {
 
       if (slug) {
         if (this.course()?.slug === slug) {
-          if (episodeId && episodeId !== this.currentEpisodeId()) this.selectEpisode(episodeId, false);
+          if (episodeId && episodeId !== this.currentEpisodeId()) {
+            // e.g. a "Watch replay" link from the Live tab: show the episode, not the schedule it was clicked in.
+            if (this.activeTab() === 'live') this.activeTab.set('overview');
+            this.selectEpisode(episodeId, false);
+          }
         } else {
           this.loadCourse(slug, episodeId);
         }
@@ -147,6 +186,7 @@ export class LearnPage implements OnInit {
     const version = ++this.courseLoadVersion;
     ++this.playbackLoadVersion;
     this.course.set(null);
+    this.liveTabUnavailable.set(false);
     this.enrollmentId.set(null);
     this.courseProgress.set(null);
     this.certificate.set(null);
@@ -160,7 +200,7 @@ export class LearnPage implements OnInit {
         if (version !== this.courseLoadVersion) return;
         this.course.set(courseData);
         this.seoService.set({
-          title: `ห้องเรียน: ${courseData.title} | SIRI UpSkill`,
+          title: this.translation.t('learn.courseSeoTitle', { title: courseData.title }),
           description: courseData.subtitle ?? courseData.description ?? '',
           path: `/learn/${slug}`,
           robots: 'noindex',
@@ -262,14 +302,27 @@ export class LearnPage implements OnInit {
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: () => {
+      error: (error: unknown) => {
+        // "Certificates not available yet" is a server-side outage, not a reason to bounce to another page.
+        const notConfiguredKey = notConfiguredMessageKey(error);
+        if (notConfiguredKey) {
+          this.toast.error(this.translation.t(notConfiguredKey));
+          return;
+        }
         window.open(cert.verifyUrl || `/certificates/verify/${cert.verifyCode}`, '_blank');
       },
     });
   }
 
   protected readonly playbackError = signal<string | null>(null);
+  /** True when the failure is a server-side outage (video provider not set up), where pressing "try again" can help. */
+  protected readonly playbackRetryable = signal(false);
   protected readonly isLoadingPlayback = signal<boolean>(false);
+
+  protected retryPlayback(): void {
+    const episodeId = this.currentEpisodeId();
+    if (episodeId) this.selectEpisode(episodeId, false);
+  }
 
   protected selectEpisode(episodeId: string, updateUrl = true): void {
     if (!this.allEpisodes().some((episode) => episode.id === episodeId)) return;
@@ -277,7 +330,9 @@ export class LearnPage implements OnInit {
     this.currentEpisodeId.set(episodeId);
     this.playbackSession.set(null);
 
-    if (this.activeTab() === 'curriculum') {
+    // Picking an episode from the sidebar leaves the Live tab. Programmatic selections (`updateUrl === false`, e.g. the
+    // initial episode once enrollment has loaded) must not: they would otherwise undo a `?tab=live` deep link.
+    if (this.activeTab() === 'curriculum' || (updateUrl && this.activeTab() === 'live')) {
       this.activeTab.set('overview');
     }
 
@@ -288,17 +343,21 @@ export class LearnPage implements OnInit {
     // Load playback session
     this.isLoadingPlayback.set(true);
     this.playbackError.set(null);
+    this.playbackRetryable.set(false);
     this.learningApi.getPlaybackSession(episodeId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (session) => {
         if (version !== this.playbackLoadVersion) return;
         this.playbackSession.set(session);
         this.isLoadingPlayback.set(false);
       },
-      error: () => {
+      error: (error: unknown) => {
         if (version !== this.playbackLoadVersion) return;
         this.playbackSession.set(null);
         this.isLoadingPlayback.set(false);
-        this.playbackError.set('ไม่สามารถเข้าถึงวิดีโอนี้ได้ กรุณาลงทะเบียนเรียนหรือตรวจสอบสิทธิ์การเข้าถึงของคุณ');
+        // A 503 "video provider not configured" is an outage, not a missing enrollment — say so and offer a retry.
+        const notConfiguredKey = notConfiguredMessageKey(error);
+        this.playbackRetryable.set(notConfiguredKey !== null);
+        this.playbackError.set(this.translation.t(notConfiguredKey ?? 'learn.playbackNoAccess'));
       },
     });
 
@@ -422,6 +481,14 @@ export class LearnPage implements OnInit {
         this.selectEpisode(nextEpisode.id);
       }
       // If not enrolled and next episode is locked, stay on current preview and let player show CTA
+    }
+  }
+
+  /** The Live tab got a 404 (no active enrollment): hide it quietly and fall back to the overview. */
+  protected onLiveTabUnavailable(): void {
+    this.liveTabUnavailable.set(true);
+    if (this.activeTab() === 'live') {
+      this.activeTab.set('overview');
     }
   }
 

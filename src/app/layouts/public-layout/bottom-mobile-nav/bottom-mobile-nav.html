@@ -1,5 +1,5 @@
 <nav
-  aria-label="Mobile Bottom Navigation"
+  [attr.aria-label]="'nav.bottomNavLabel' | translate"
   class="fixed bottom-0 left-0 right-0 z-40 block lg:hidden border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur shadow-lg pb-safe"
 >
   <div class="grid h-14 grid-cols-4 items-center">
@@ -21,7 +21,7 @@
       class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
     >
       <ng-icon name="phosphorMagnifyingGlass" class="text-xl" />
-      <span>{{ 'catalog.heading' | translate }}</span>
+      <span>{{ 'nav.courses' | translate }}</span>
     </a>
 
     <!-- My Courses (Learn) -->
@@ -34,14 +34,22 @@
       <span>{{ 'nav.myCourses' | translate }}</span>
     </a>
 
-    <!-- Account / Orders -->
-    <a
-      [routerLink]="auth.isAuthenticated() ? '/account/orders' : '/login'"
-      routerLinkActive="text-[var(--color-primary)]"
-      class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
-    >
-      <ng-icon name="phosphorReceipt" class="text-xl" />
-      <span>{{ (auth.isAuthenticated() ? 'nav.orders' : 'nav.login') | translate }}</span>
-    </a>
+    <!-- Orders for signed-in users, Sign in for guests. Neutral until the session restore has finished
+         (SSR, and the browser's first paint), so neither state flashes to the wrong person. -->
+    @if (!auth.sessionResolved()) {
+      <span aria-hidden="true" class="flex flex-col items-center justify-center gap-1.5">
+        <span class="size-5 rounded-full bg-[var(--color-surface-muted)]"></span>
+        <span class="h-2 w-8 rounded-full bg-[var(--color-surface-muted)]"></span>
+      </span>
+    } @else {
+      <a
+        [routerLink]="auth.isAuthenticated() ? '/account/orders' : '/login'"
+        routerLinkActive="text-[var(--color-primary)]"
+        class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+      >
+        <ng-icon [name]="auth.isAuthenticated() ? 'phosphorReceipt' : 'phosphorUser'" class="text-xl" />
+        <span>{{ (auth.isAuthenticated() ? 'nav.orders' : 'nav.login') | translate }}</span>
+      </a>
+    }
   </div>
 </nav>

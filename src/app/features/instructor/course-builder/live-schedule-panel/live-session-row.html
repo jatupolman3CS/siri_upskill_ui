@@ -1,0 +1,92 @@
+<article
+  class="rounded-[var(--radius-lg)] border bg-[var(--color-surface)] p-4"
+  [class]="highlighted() ? 'border-2 border-[var(--color-warning)]' : 'border-[var(--color-border)]'"
+  [attr.aria-label]="session().title"
+>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h3 class="break-words text-base font-semibold text-[var(--color-text)]" [class.line-through]="isCancelled()">
+        {{ session().title }}
+      </h3>
+      <p class="mt-1 text-sm text-[var(--color-text)]">
+        <app-bangkok-time-range [startsAtUtc]="session().startsAtUtc" [endsAtUtc]="session().endsAtUtc" />
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      @if (state(); as current) {
+        <app-live-status-badge [state]="current" />
+      }
+      @if (!isCancelled() && roomView(); as view) {
+        <app-status-chip [view]="view" />
+      }
+    </div>
+  </div>
+
+  @if (isCancelled() && session().cancelReason) {
+    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+      {{ 'live.builder.row.cancelReason' | translate: { reason: session().cancelReason ?? '' } }}
+    </p>
+  }
+
+  @if (highlighted()) {
+    <p
+      role="alert"
+      class="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)] p-3 text-sm text-[var(--color-text)]"
+    >
+      <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--color-warning)]" />
+      <span>{{ 'live.builder.row.notReady' | translate }}</span>
+    </p>
+  }
+
+  @if (!isCancelled() && !isEnded()) {
+    @if (meeting(); as summary) {
+      <div class="mt-3">
+        <app-live-meeting-actions
+          [sessionId]="session().id"
+          [meeting]="summary"
+          [googleConfigured]="googleConfigured()"
+          [returnPath]="returnPath()"
+          (meetingChange)="changed.emit()"
+        />
+      </div>
+    }
+  }
+
+  @if (isEnded()) {
+    <div class="mt-3 flex flex-col gap-1">
+      <p class="text-sm text-[var(--color-text-muted)]">
+        {{ (session().recordingEpisodeId ? 'live.builder.row.hasRecording' : 'live.builder.row.noRecording') | translate }}
+      </p>
+      <app-live-recording-uploader
+        [courseId]="courseId()"
+        [sessionId]="session().id"
+        [sessionTitle]="session().title"
+        [hasRecording]="session().recordingEpisodeId !== null"
+        (attached)="changed.emit()"
+      />
+    </div>
+  }
+
+  <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--color-border)] pt-3">
+    @if (canEdit()) {
+      <app-button size="sm" variant="secondary" (click)="editRequested.emit(session())">
+        <ng-icon leading name="phosphorPencilSimple" aria-hidden="true" />
+        {{ 'live.builder.row.edit' | translate }}
+      </app-button>
+    }
+    @if (canCancel()) {
+      <app-button size="sm" variant="secondary" (click)="cancelRequested.emit(session())">
+        <ng-icon leading name="phosphorXCircle" aria-hidden="true" />
+        {{ 'live.builder.row.cancel' | translate }}
+      </app-button>
+    }
+    <a
+      [routerLink]="['/instructor/sessions', session().id]"
+      class="ml-auto inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] px-2 text-sm font-medium text-[var(--color-primary)] hover:underline
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'live.builder.row.details' | translate }}
+      <ng-icon name="phosphorCaretRight" aria-hidden="true" />
+    </a>
+  </div>
+</article>

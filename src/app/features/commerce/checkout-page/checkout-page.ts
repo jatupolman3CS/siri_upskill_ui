@@ -30,6 +30,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
+import { notConfiguredMessageKey } from '../../../core/http/provider-errors';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -205,7 +206,7 @@ export class CheckoutPage {
       this.loadOrder(id);
     } else {
       this.isLoadingOrder.set(false);
-      this.orderError.set('ไม่พบคำสั่งซื้อ กรุณาสร้างคำสั่งซื้อจากตะกร้าสินค้า');
+      this.orderError.set(this.translation.t('checkout.error.orderMissing'));
       this.router.navigate(['/cart']);
     }
 
@@ -299,11 +300,7 @@ export class CheckoutPage {
         },
         error: (err: ApiError) => {
           this.isCreatingPayment.set(false);
-          this.paymentError.set(
-            err.message
-              ? this.translation.t(err.message)
-              : this.translation.t('checkout.error.createPaymentFailed')
-          );
+          this.paymentError.set(this.paymentFailureMessage(err));
         },
       });
     } else if (o.status === 'Paid') {
@@ -355,13 +352,18 @@ export class CheckoutPage {
         },
         error: (err: ApiError) => {
           this.isCreatingPayment.set(false);
-          this.paymentError.set(
-            err.message
-              ? this.translation.t(err.message)
-              : this.translation.t('checkout.error.createPaymentFailed')
-          );
+          this.paymentError.set(this.paymentFailureMessage(err));
         },
       });
+  }
+
+  /** A server-side "payment provider not configured" outage gets its own plain-words message; anything else keeps the server's text. */
+  private paymentFailureMessage(err: ApiError): string {
+    const notConfiguredKey = notConfiguredMessageKey(err);
+    if (notConfiguredKey) {
+      return this.translation.t(notConfiguredKey);
+    }
+    return err.message ? this.translation.t(err.message) : this.translation.t('checkout.error.createPaymentFailed');
   }
 
   public applyPromoCode(): void {

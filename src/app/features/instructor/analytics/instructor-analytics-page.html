@@ -180,8 +180,8 @@
               @for (student of students(); track student.id) {
                 <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
                   <td class="px-6 py-4">
-                    <p class="font-bold text-[var(--color-text)]">{{ student.name }}</p>
-                    <p class="text-xs text-[var(--color-text-muted)] font-mono">{{ student.email }}</p>
+                    <p class="font-bold text-[var(--color-text)]">{{ student.name ?? ('live.roster.unknownName' | translate) }}</p>
+                    <p class="text-xs text-[var(--color-text-muted)] font-mono">{{ student.email ?? '—' }}</p>
                   </td>
                   <td class="px-6 py-4 text-xs font-medium text-[var(--color-text)] truncate max-w-xs">
                     {{ student.courseTitle }}
@@ -198,7 +198,11 @@
                     </div>
                   </td>
                   <td class="px-6 py-4 text-xs text-[var(--color-text-muted)]">
-                    {{ student.lastActiveAtUtc | date: 'dd/MM/yyyy HH:mm' }}
+                    @if (student.lastActiveAtUtc) {
+                      {{ student.lastActiveAtUtc | date: 'dd/MM/yyyy HH:mm' }}
+                    } @else {
+                      {{ 'instructor.analytics.neverActive' | translate }}
+                    }
                   </td>
                 </tr>
               }

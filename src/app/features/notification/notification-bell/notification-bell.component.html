@@ -6,14 +6,15 @@
     [attr.aria-expanded]="isOpen()"
     [attr.aria-label]="'nav.notifications' | translate"
     aria-haspopup="dialog"
-    class="relative flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)]
-      hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2
-      focus-visible:ring-[var(--color-focus-ring)] transition-colors duration-150"
+    class="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[var(--color-border)]
+      bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-200 ease-out
+      hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
   >
     <ng-icon name="phosphorBell" class="text-xl" />
     @if (unreadCount() > 0) {
       <span
-        class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-error)] px-1 text-[10px] font-bold text-white shadow-sm"
+        class="absolute -right-1 -top-1 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[11px] font-bold leading-none text-[var(--color-primary-foreground)]"
       >
         {{ unreadCount() > 9 ? '9+' : unreadCount() }}
       </span>
@@ -26,7 +27,7 @@
       role="dialog"
       aria-label="Notifications"
       class="absolute right-0 z-50 mt-2 w-80 sm:w-96 rounded-[var(--radius-lg)] border border-[var(--color-border)]
-        bg-[var(--color-surface)] shadow-[var(--shadow-xl)] animate-in fade-in zoom-in-95 duration-150 overflow-hidden"
+        bg-[var(--color-surface)] shadow-[var(--shadow-lg)] animate-in fade-in zoom-in-95 duration-150 overflow-hidden"
     >
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3 bg-[var(--color-surface-muted)]">

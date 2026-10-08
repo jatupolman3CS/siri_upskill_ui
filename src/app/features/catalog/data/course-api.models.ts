@@ -1,4 +1,5 @@
 import { PagedResult } from '../../../core/http/paged-result.model';
+import type { DeliveryFormat, IsoUtc, LiveDisplayState } from '../../live/data/live.models';
 
 /** Mirrors `Siri.Modules.Catalog.Domain.CourseLevel` — string-backed enum, serialized as its member
  * name (global `JsonStringEnumConverter`, `Program.cs`). */
@@ -23,6 +24,8 @@ export interface SearchCoursesQuery {
   readonly sort?: CourseSearchSort;
   readonly page?: number;
   readonly pageSize?: number;
+  /** `format` filter (P11-07): `OnDemand` | `Live` | `Hybrid`. */
+  readonly format?: DeliveryFormat;
 }
 
 /** Mirrors `CourseSearchResultItem`. */
@@ -46,6 +49,16 @@ export interface CourseSearchResultItem {
   readonly instructorDisplayName: string;
   readonly categoryId: string;
   readonly isWishlisted?: boolean;
+  /** P11-07. Absent on older responses — treat a missing value as `OnDemand`. */
+  readonly deliveryFormat?: DeliveryFormat;
+  /** Start of the next upcoming live session (UTC); `null` for on-demand courses or when none is scheduled. */
+  readonly nextStartsAtUtc?: IsoUtc | null;
+}
+
+/** Mirrors `FormatFacet` (P11-07). */
+export interface FormatFacet {
+  readonly format: DeliveryFormat;
+  readonly count: number;
 }
 
 /** Mirrors `CategoryFacet`. */
@@ -74,6 +87,7 @@ export interface CourseSearchFacets {
   readonly categories: readonly CategoryFacet[];
   readonly levels: readonly LevelFacet[];
   readonly instructors?: readonly InstructorFacet[];
+  readonly formats?: readonly FormatFacet[];
 }
 
 /** Mirrors `SearchCoursesResponse`. */
@@ -108,6 +122,26 @@ export interface CourseDetailSection {
   readonly episodes: readonly CourseDetailEpisode[];
 }
 
+/** Mirrors `CourseDetailLiveSession` (P11-07). */
+export interface CourseDetailLiveSession {
+  readonly id: string;
+  readonly title: string;
+  readonly startsAtUtc: IsoUtc;
+  readonly endsAtUtc: IsoUtc;
+  /** Computed on the server — never recomputed in the browser. */
+  readonly displayState: LiveDisplayState;
+  readonly hasRecording: boolean;
+}
+
+/** Mirrors `CourseDetailLiveSchedule` (P11-07). */
+export interface CourseDetailLiveSchedule {
+  readonly timezone: string;
+  readonly upcomingCount: number;
+  readonly pastCount: number;
+  readonly nextStartsAtUtc: IsoUtc | null;
+  readonly sessions: readonly CourseDetailLiveSession[];
+}
+
 /** Mirrors `CourseDetailResponse` (`GET /api/catalog/courses/{slug}`, task P1-07). */
 export interface CourseDetailResponse {
   readonly id: string;
@@ -136,6 +170,11 @@ export interface CourseDetailResponse {
   readonly requirements: readonly string[];
   readonly sections: readonly CourseDetailSection[];
   readonly isWishlisted?: boolean;
+  /** `OnDemand` | `Live` | `Hybrid` (P11-07). Absent on older responses — treat a missing value as `OnDemand`. */
+  readonly deliveryFormat?: DeliveryFormat;
+  /** Public live schedule (P11-07) — `null` for on-demand courses. Carries NO room link; the room is only ever
+   * revealed through the Live module's join endpoint after an entitlement check. */
+  readonly liveSchedule?: CourseDetailLiveSchedule | null;
 }
 
 /** Mirrors `Siri.Modules.Catalog.Domain.CourseStatus`. */
@@ -354,7 +393,8 @@ export interface WishlistCourseItemResponse {
   readonly price: number;
   readonly comparePrice: number | null;
   readonly currency: string;
-  readonly instructorName: string;
+  /** `null` when the instructor profile cannot be resolved — callers omit the line, never invent a name. */
+  readonly instructorName: string | null;
   readonly ratingAverage: number;
   readonly ratingCount: number;
   readonly wishlistedAtUtc: string;
@@ -372,7 +412,8 @@ export interface CourseReviewItemResponse {
   readonly id: string;
   readonly courseId: string;
   readonly userId: string;
-  readonly userName: string;
+  /** `null` when the reviewer's account can no longer be resolved — never substitute a made-up name. */
+  readonly userName: string | null;
   readonly rating: number;
   readonly comment: string | null;
   readonly createdAtUtc: string;

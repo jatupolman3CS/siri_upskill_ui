@@ -12,9 +12,11 @@
     (click)="toggle()"
     [attr.aria-expanded]="open()"
     [attr.aria-controls]="panelId"
-    class="flex min-h-11 items-center gap-1.5 rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-      hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    class="flex h-11 cursor-pointer items-center gap-2 rounded-full bg-[var(--color-surface-muted)] px-4 text-sm font-semibold
+      text-[var(--color-primary-hover)] transition-colors duration-200 ease-out hover:bg-[var(--color-border)]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
   >
+    <ng-icon name="phosphorSquaresFour" aria-hidden="true" class="text-base" />
     {{ 'nav.categories' | translate }}
     <ng-icon
       name="phosphorCaretDown"

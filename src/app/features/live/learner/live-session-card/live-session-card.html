@@ -1,0 +1,109 @@
+<article
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-sm)] sm:p-5"
+  [attr.aria-labelledby]="'live-session-title-' + session().id"
+>
+  <header class="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+    <h4
+      [id]="'live-session-title-' + session().id"
+      class="min-w-0 text-base font-bold text-[var(--color-text)]"
+      [class.line-through]="isCancelled()"
+      [class.text-[var(--color-text-muted)]]="isCancelled()"
+    >
+      {{ session().title }}
+    </h4>
+    <app-live-status-badge [state]="session().displayState" />
+  </header>
+
+  @if (session().description) {
+    <p class="mt-1.5 text-sm text-[var(--color-text-muted)]">{{ session().description }}</p>
+  }
+
+  <p class="mt-3 flex items-start gap-2 text-sm text-[var(--color-text)]">
+    <ng-icon name="phosphorCalendarBlank" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-text-muted)]" />
+    <span [class.line-through]="isCancelled()">
+      {{
+        'live.tab.sessionTime'
+          | translate
+            : {
+                date: (session().startsAtUtc | bangkokDate: 'weekdayDate') ?? '',
+                start: (session().startsAtUtc | bangkokDate: 'time') ?? '',
+                end: (session().endsAtUtc | bangkokDate: 'time') ?? ''
+              }
+      }}
+    </span>
+  </p>
+
+  @if (isUpcoming()) {
+    <p class="mt-2 flex items-start gap-2 text-sm text-[var(--color-text)]">
+      <ng-icon name="phosphorClock" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-text-muted)]" />
+      <span>
+        {{ 'live.tab.opensAt' | translate: { dateTime: (session().joinOpensAtUtc | bangkokDate: 'shortDateTime') ?? '' } }}
+        <span class="text-[var(--color-text-muted)]">
+          ·
+          {{ 'live.tab.opensIn' | translate }}
+          <app-live-countdown class="font-semibold text-[var(--color-text)]" [targetUtc]="session().joinOpensAtUtc" [offsetMs]="offsetMs()" />
+        </span>
+      </span>
+    </p>
+  }
+
+  @if (isLive()) {
+    <p class="mt-2 flex items-start gap-2 text-sm font-semibold text-[var(--color-text)]">
+      <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-success)]" />
+      <span>{{ 'live.tab.roomOpen' | translate }}</span>
+    </p>
+    @if (!session().roomReady) {
+      <p class="mt-2 flex items-start gap-2 text-sm text-[var(--color-text)]">
+        <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+        <span>{{ 'live.tab.roomNotReady' | translate }}</span>
+      </p>
+    }
+  }
+
+  @if (isCancelled()) {
+    <p class="mt-2 flex items-start gap-2 text-sm text-[var(--color-text)]">
+      <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-danger)]" />
+      <span>
+        @if (session().cancelReason) {
+          {{ 'live.tab.cancelledWithReason' | translate: { reason: session().cancelReason ?? '' } }}
+        } @else {
+          {{ 'live.tab.cancelled' | translate }}
+        }
+      </span>
+    </p>
+  }
+
+  @if (isEnded() && !session().hasRecording) {
+    <p class="mt-2 flex items-start gap-2 text-sm text-[var(--color-text-muted)]">
+      <ng-icon name="phosphorHourglass" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0" />
+      <span>{{ 'live.tab.awaitingRecording' | translate }}</span>
+    </p>
+  }
+
+  @if (session().inviteStatus === 'Invited' && canAddToCalendar()) {
+    <p class="mt-2 text-sm text-[var(--color-text-muted)]">{{ 'live.tab.inviteSent' | translate }}</p>
+  }
+
+  @if (canAddToCalendar() || (isEnded() && session().hasRecording && session().recordingEpisodeId)) {
+    <div class="mt-4 flex flex-wrap items-center gap-2">
+      @if (canAddToCalendar()) {
+        <app-button size="sm" [disabled]="!session().canJoin" (click)="onJoin()">
+          <ng-icon leading name="phosphorVideoCamera" aria-hidden="true" class="h-5 w-5" />
+          {{ 'live.tab.joinButton' | translate }}
+        </app-button>
+        <app-button size="sm" variant="secondary" [loading]="calendarBusy()" (click)="addToCalendar.emit(session().id)">
+          <ng-icon leading name="phosphorCalendarPlus" aria-hidden="true" class="h-5 w-5" />
+          {{ 'live.tab.addToCalendar' | translate }}
+        </app-button>
+      } @else {
+        <a
+          [routerLink]="['/learn', courseSlug(), session().recordingEpisodeId]"
+          class="inline-flex h-11 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        >
+          <ng-icon name="phosphorPlayCircle" aria-hidden="true" class="h-5 w-5" />
+          {{ 'live.tab.watchReplay' | translate }}
+        </a>
+      }
+    </div>
+  }
+</article>

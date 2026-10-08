@@ -7,8 +7,7 @@ import { AuthService } from '../auth/auth.service';
  * Functional route guard for routes restricted to specific user roles.
  * Expects allowed roles configured in route data: { roles: ['Admin', 'SuperAdmin'] }.
  *
- * Reads roles directly from AuthService.currentUser()?.roles, which handles both
- * real JWT authentication and dev bypass/mock mode seamlessly.
+ * Reads roles directly from AuthService.currentUser()?.roles, i.e. the roles in the access token.
  *
  * If the authenticated user does not have an allowed role, redirects to '/'.
  */

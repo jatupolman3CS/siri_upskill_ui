@@ -1,88 +1,51 @@
-<footer class="border-t border-[var(--color-border)] bg-[var(--color-surface)]">
-  <div class="mx-auto max-w-6xl px-4 py-12">
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
-      <!-- Col 1: Brand & Tagline -->
-      <div class="space-y-3 lg:col-span-1">
-        <a routerLink="/" class="text-lg font-black tracking-tight text-[var(--color-primary)]">
-          {{ 'common.appName' | translate }}
-        </a>
-        <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-          {{ 'footer.tagline' | translate }}
-        </p>
+<!-- Bottom padding on small screens clears the fixed bottom mobile nav (h-14 + safe area). -->
+<footer class="border-t border-[var(--color-border)] bg-[var(--color-surface)] pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+  <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8">
+    <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+      <div class="max-w-sm space-y-3">
+        <app-brand-logo [showSubtitle]="false" />
+        <p class="text-sm leading-relaxed text-[var(--color-text-muted)]">{{ 'footer.tagline' | translate }}</p>
       </div>
 
-      <!-- Col 2: Learning -->
-      <div class="space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">การเรียนรู้</h3>
-        <ul class="space-y-2 text-xs text-[var(--color-text-muted)]">
-          <li>
-            <a routerLink="/courses" class="hover:text-[var(--color-primary)] transition">คอร์สเรียนทั้งหมด</a>
-          </li>
-          <li>
-            <a routerLink="/my-courses" class="hover:text-[var(--color-primary)] transition">คอร์สของฉัน</a>
-          </li>
-          <li>
-            <a routerLink="/certificates/verify" class="hover:text-[var(--color-primary)] transition">ตรวจสอบใบรับรอง</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Col 3: Community & Help -->
-      <div class="space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">ช่วยเหลือ & ชุมชน</h3>
-        <ul class="space-y-2 text-xs text-[var(--color-text-muted)]">
-          <li>
-            <a routerLink="/faq" class="hover:text-[var(--color-primary)] transition">คำถามที่พบบ่อย (FAQ)</a>
-          </li>
-          <li>
-            <a routerLink="/contact" class="hover:text-[var(--color-primary)] transition">ติดต่อเรา (Contact)</a>
-          </li>
-          <li>
-            <a routerLink="/blog" class="hover:text-[var(--color-primary)] transition">บทความ & ข่าวสาร</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Col 4: Legal & PDPA -->
-      <div class="space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">กฎหมาย & ความเป็นส่วนตัว</h3>
-        <ul class="space-y-2 text-xs text-[var(--color-text-muted)]">
-          <li>
-            <a routerLink="/terms" class="hover:text-[var(--color-primary)] transition">ข้อกำหนดการใช้งาน</a>
-          </li>
-          <li>
-            <a routerLink="/privacy" class="hover:text-[var(--color-primary)] transition">นโยบายความเป็นส่วนตัว</a>
-          </li>
-          <li>
-            <a routerLink="/refund-policy" class="hover:text-[var(--color-primary)] transition">นโยบายการคืนเงิน</a>
-          </li>
-          <li>
-            <a routerLink="/account/privacy" class="hover:text-[var(--color-primary)] transition">จัดการข้อมูลส่วนบุคคล (PDPA)</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Col 5: Portals -->
-      <div class="space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">สตูดิโอ & แอดมิน</h3>
-        <ul class="space-y-2 text-xs text-[var(--color-text-muted)]">
-          <li>
-            <a
-              [routerLink]="authService.canUseInstructorStudio() ? '/instructor' : '/become-instructor'"
-              class="hover:text-[var(--color-primary)] transition"
-            >{{ (authService.canUseInstructorStudio() ? 'nav.instructor' : 'nav.becomeInstructor') | translate }}</a>
-          </li>
-          @if (authService.isAdmin()) {
+      <nav [attr.aria-label]="'footer.linksLabel' | translate">
+        <ul class="flex flex-wrap gap-x-6">
+          @for (link of links; track link.id) {
             <li>
-              <a routerLink="/admin" class="hover:text-[var(--color-primary)] transition">ศูนย์ควบคุมผู้ดูแลระบบ</a>
+              <a
+                [routerLink]="link.path"
+                class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
+                  transition-colors duration-200 ease-out hover:text-[var(--color-primary-hover)]
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              >
+                {{ link.labelKey | translate }}
+              </a>
             </li>
           }
         </ul>
-      </div>
+      </nav>
     </div>
 
-    <div class="mt-12 border-t border-[var(--color-border)] pt-6 text-center text-xs text-[var(--color-text-muted)]">
-      <p>{{ 'footer.copyright' | translate: { year: year } }}</p>
+    <div
+      class="flex flex-col gap-1 border-t border-[var(--color-border)] pt-4 md:flex-row md:items-center md:justify-between"
+    >
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'footer.copyright' | translate: { year: year } }}</p>
+
+      <nav [attr.aria-label]="'footer.legalLabel' | translate">
+        <ul class="flex flex-wrap gap-x-5">
+          @for (link of legalLinks; track link.id) {
+            <li>
+              <a
+                [routerLink]="link.path"
+                class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm text-[var(--color-text-muted)]
+                  transition-colors duration-200 ease-out hover:text-[var(--color-primary-hover)]
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              >
+                {{ link.labelKey | translate }}
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
     </div>
   </div>
 </footer>

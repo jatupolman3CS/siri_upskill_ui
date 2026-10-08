@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { Component } from '@angular/core';
+import { Component, ErrorHandler } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
@@ -303,6 +303,65 @@ describe('CourseDetailPage', () => {
     await flushCategories();
 
     expect(harness.routeNativeElement?.textContent).toContain('No reviews yet for this course');
+  });
+
+  it('keeps showing the course when only the reviews fetch fails (resource().value() throws in the error state)', async () => {
+    await navigate('/courses/python-for-beginners');
+    const req = httpMock.expectOne((r) => r.url === '/api/catalog/courses/python-for-beginners');
+    req.flush(COURSE);
+    await settle();
+    const reviewsReq = httpMock.expectOne((r) => r.url === `/api/catalog/courses/${COURSE.id}/reviews`);
+    reviewsReq.flush({ title: 'Server Error' }, { status: 500, statusText: 'Error' });
+    await flushCategories();
+    await settle();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('Python for Beginners');
+    expect(text).toContain('No reviews yet for this course');
+  });
+
+  it('shows a neutral label, never a made-up name, for a review whose author cannot be resolved', async () => {
+    await navigate('/courses/python-for-beginners');
+    httpMock.expectOne((r) => r.url === '/api/catalog/courses/python-for-beginners').flush(COURSE);
+    await settle();
+    await flushReviews(
+      {
+        averageRating: 4,
+        ratingCount: 2,
+        distribution: { star5: 0, star4: 2, star3: 0, star2: 0, star1: 0 },
+        items: [
+          { id: 'r-1', courseId: COURSE.id, userId: 'u-1', userName: 'Real Reviewer', rating: 4, comment: 'Great', createdAtUtc: '2026-10-01T00:00:00Z' },
+          { id: 'r-2', courseId: COURSE.id, userId: 'u-2', userName: null, rating: 4, comment: 'Also great', createdAtUtc: '2026-10-02T00:00:00Z' },
+        ],
+        totalCount: 2,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+      },
+      COURSE.id,
+    );
+    await flushCategories();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('Real Reviewer');
+    expect(text).toContain('Learner');
+    expect(text).toContain('Also great');
+    expect(text).not.toContain('null');
+  });
+
+  it('does not read the course value while it is in the error state (no stray ResourceValueError from the reviews params)', async () => {
+    const errors: unknown[] = [];
+    const handler = TestBed.inject(ErrorHandler);
+    vi.spyOn(handler, 'handleError').mockImplementation((e: unknown) => {
+      errors.push(e);
+    });
+    await navigate('/courses/python-for-beginners');
+    await flushCourse(null, 'python-for-beginners', 500);
+    await flushCategories();
+    TestBed.flushEffects();
+    await settle();
+
+    expect(errors).toEqual([]);
   });
 
   it('shows a clickable preview card with a "N free preview lesson(s)" badge when the course has a free-preview episode', async () => {

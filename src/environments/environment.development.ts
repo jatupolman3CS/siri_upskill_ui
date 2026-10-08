@@ -11,11 +11,4 @@ export const environment = {
   /** Public client id; the API's `GET /api/auth/oauth-clients` takes precedence when set. */
   googleOAuthClientId:
     '5881672938-464ssnfcb78tou755dkf7jvmhvbkf68v.apps.googleusercontent.com',
-  /**
-   * Use the real authentication flow by default. UI development bypass is opt-in only.
-   */
-  devAuth: {
-    bypass: false,
-    role: 'buyer' as 'buyer' | 'seller' | 'admin',
-  },
 };

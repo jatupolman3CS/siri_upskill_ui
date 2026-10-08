@@ -1,0 +1,98 @@
+<section class="space-y-5" [attr.aria-busy]="status() === 'loading' ? 'true' : null">
+  @switch (status()) {
+    @case ('loading') {
+      <p class="sr-only" role="status">{{ 'live.tab.loading' | translate }}</p>
+      <div class="space-y-3">
+        @for (slot of skeletonSlots; track slot) {
+          <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+            <app-skeleton variant="text" width="55%" height="1.25rem" />
+            <div class="mt-3 space-y-2">
+              <app-skeleton variant="text" width="75%" />
+              <app-skeleton variant="text" width="45%" />
+            </div>
+            <app-skeleton variant="block" width="9rem" height="2.75rem" class="mt-4" />
+          </div>
+        }
+      </div>
+    }
+
+    @case ('error') {
+      <div
+        role="alert"
+        class="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center"
+      >
+        <ng-icon name="phosphorWarning" aria-hidden="true" class="h-8 w-8 text-[var(--color-danger)]" />
+        <div>
+          <p class="text-base font-semibold text-[var(--color-text)]">{{ 'live.tab.errorHeading' | translate }}</p>
+          <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'live.tab.errorDescription' | translate }}</p>
+        </div>
+        <app-button variant="secondary" size="sm" (click)="reload()">
+          <ng-icon leading name="phosphorArrowClockwise" aria-hidden="true" class="h-5 w-5" />
+          {{ 'live.tab.retry' | translate }}
+        </app-button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (data(); as response) {
+        @if (!response.hasAttendedAnySession) {
+          <app-live-refund-notice />
+        }
+
+        @if (refreshFailed()) {
+          <div
+            role="alert"
+            class="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--color-warning)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+          >
+            <span class="flex items-center gap-2">
+              <ng-icon name="phosphorWarning" aria-hidden="true" class="h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+              {{ 'live.tab.refreshFailed' | translate }}
+            </span>
+            <app-button variant="ghost" size="sm" (click)="reload()">{{ 'live.tab.retry' | translate }}</app-button>
+          </div>
+        }
+
+        @if (response.sessions.length === 0) {
+          <app-empty-state [heading]="'live.tab.emptyHeading' | translate" [description]="'live.tab.emptyDescription' | translate" />
+        } @else {
+          @if (upcoming().length > 0) {
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
+                {{ 'live.tab.groupUpcoming' | translate }}
+              </h3>
+              <ul class="space-y-3">
+                @for (session of upcoming(); track session.id) {
+                  <li>
+                    <app-live-session-card
+                      [session]="session"
+                      [courseSlug]="courseSlug()"
+                      [offsetMs]="offsetMs()"
+                      [calendarBusy]="calendarBusyId() === session.id"
+                      (join)="join($event)"
+                      (addToCalendar)="addToCalendar($event)"
+                    />
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (past().length > 0) {
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
+                {{ 'live.tab.groupPast' | translate }}
+              </h3>
+              <ul class="space-y-3">
+                @for (session of past(); track session.id) {
+                  <li>
+                    <app-live-session-card [session]="session" [courseSlug]="courseSlug()" [offsetMs]="offsetMs()" />
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        }
+      }
+    }
+  }
+</section>

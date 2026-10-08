@@ -1,0 +1,67 @@
+<section aria-labelledby="course-live-schedule-heading">
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <h2 id="course-live-schedule-heading" class="text-lg font-semibold text-[var(--color-text)]">
+      {{ 'live.catalog.scheduleHeading' | translate }}
+    </h2>
+    <span
+      class="inline-flex items-center rounded-[var(--radius-full)] border border-[color-mix(in_srgb,var(--color-primary)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text)]"
+    >
+      {{ 'live.catalog.format.' + format() | translate }}
+    </span>
+  </div>
+
+  <p class="text-sm text-[var(--color-text)]">{{ 'live.catalog.formatDescription.' + format() | translate }}</p>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+    {{ 'live.catalog.summary' | translate: { upcoming: schedule().upcomingCount, past: schedule().pastCount } }}
+  </p>
+
+  @if (schedule().sessions.length === 0) {
+    <p class="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm text-[var(--color-text-muted)]">
+      {{ 'live.catalog.noSessions' | translate }}
+    </p>
+  } @else {
+    <ul class="mt-4 flex flex-col divide-y divide-[var(--color-border)] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
+      @for (session of visibleSessions(); track session.id) {
+        <li class="flex flex-col gap-2 bg-[var(--color-surface)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div class="min-w-0">
+            <p
+              class="break-words font-medium text-[var(--color-text)]"
+              [class.line-through]="session.displayState === 'Cancelled'"
+            >
+              {{ session.title }}
+            </p>
+            <p class="mt-0.5 text-sm text-[var(--color-text-muted)]">
+              <app-bangkok-time-range [startsAtUtc]="session.startsAtUtc" [endsAtUtc]="session.endsAtUtc" />
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            @if (session.hasRecording) {
+              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-muted)]">
+                <ng-icon name="phosphorFilmStrip" aria-hidden="true" class="text-sm" />
+                {{ 'live.catalog.hasRecording' | translate }}
+              </span>
+            }
+            <app-live-status-badge [state]="session.displayState" />
+          </div>
+        </li>
+      }
+    </ul>
+
+    @if (hiddenCount() > 0) {
+      <button
+        type="button"
+        (click)="toggle()"
+        [attr.aria-expanded]="expanded()"
+        class="mt-2 min-h-11 cursor-pointer rounded-[var(--radius-md)] px-2 text-sm font-semibold text-[var(--color-primary)] hover:underline
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ (expanded() ? 'live.catalog.showLess' : 'live.catalog.showMore') | translate: { count: hiddenCount() } }}
+      </button>
+    }
+  }
+
+  <p class="mt-3 flex items-start gap-1.5 text-xs text-[var(--color-text-muted)]">
+    <ng-icon name="phosphorLockKey" aria-hidden="true" class="mt-0.5 shrink-0 text-sm" />
+    {{ 'live.catalog.accessNote' | translate }}
+  </p>
+</section>

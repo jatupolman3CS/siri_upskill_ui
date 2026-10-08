@@ -1,0 +1,64 @@
+<section
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6"
+  [attr.aria-label]="'live.instructor.room.heading' | translate"
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+      <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="text-xl" />
+      {{ 'live.instructor.room.heading' | translate }}
+    </h2>
+    <app-status-chip [view]="view()" />
+  </div>
+
+  @if (providerKey(); as key) {
+    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+      {{ 'live.instructor.room.provider' | translate }}: {{ key | translate }}
+      @if (detail().meeting.lastSyncAtUtc; as syncedAt) {
+        · {{ 'live.instructor.room.lastSync' | translate }} {{ syncedAt | bangkokDate }}
+      }
+    </p>
+  }
+
+  @if (roomUrl(); as url) {
+    <div class="mt-4">
+      <p class="mb-1.5 text-sm font-medium text-[var(--color-text)]">{{ 'live.instructor.room.linkLabel' | translate }}</p>
+      <p
+        class="break-all rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm text-[var(--color-text)]"
+      >
+        {{ url }}
+      </p>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <a
+          [href]="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex h-11 items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
+            transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        >
+          <ng-icon name="phosphorArrowSquareOut" aria-hidden="true" />
+          {{ 'live.instructor.room.open' | translate }}
+          <span class="sr-only">({{ 'live.instructor.room.opensNewTab' | translate }})</span>
+        </a>
+        <app-button size="sm" variant="secondary" (click)="copyLink()">
+          <ng-icon leading name="phosphorCopy" aria-hidden="true" />
+          {{ 'live.instructor.room.copy' | translate }}
+        </app-button>
+      </div>
+      <p class="mt-3 text-sm text-[var(--color-text-muted)]">{{ 'live.instructor.room.ownerOnly' | translate }}</p>
+    </div>
+  } @else if (detail().meeting.hasMeetingLink) {
+    <p class="mt-4 text-sm text-[var(--color-text-muted)]">{{ 'live.instructor.room.linkUnavailable' | translate }}</p>
+  }
+
+  @if (canManage()) {
+    <div class="mt-4">
+      <app-live-meeting-actions
+        [sessionId]="detail().sessionId"
+        [meeting]="detail().meeting"
+        [googleConfigured]="googleConfigured()"
+        [returnPath]="returnPath()"
+        (meetingChange)="meetingChange.emit($event)"
+      />
+    </div>
+  }
+</section>

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArticle,
+  phosphorChalkboardTeacher,
   phosphorCreditCard,
   phosphorCurrencyDollar,
   phosphorEnvelopeSimple,
@@ -13,21 +14,25 @@ import {
   phosphorList,
   phosphorSignOut,
   phosphorTag,
-  phosphorUser,
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../core/auth/auth.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { UserAvatar } from '../../shared/user-avatar/user-avatar';
+import { StudioMobileNav } from '../studio-mobile-nav/studio-mobile-nav';
+import { ADMIN_NAV_LINKS, ADMIN_SWITCH_LINKS } from './admin-nav';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgIcon],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgIcon, TranslatePipe, UserAvatar, StudioMobileNav],
   templateUrl: './admin-layout.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     provideIcons({
       phosphorHouse,
       phosphorGraduationCap,
+      phosphorChalkboardTeacher,
       phosphorUsers,
       phosphorTag,
       phosphorImage,
@@ -36,11 +41,19 @@ import { AuthService } from '../../core/auth/auth.service';
       phosphorCurrencyDollar,
       phosphorCreditCard,
       phosphorEnvelopeSimple,
-      phosphorUser,
       phosphorSignOut,
     }),
   ],
 })
 export class AdminLayout {
   protected readonly auth = inject(AuthService);
+
+  /** The sidebar and the mobile drawer both render this one list. */
+  protected readonly navLinks = ADMIN_NAV_LINKS;
+
+  /** Header actions that are hidden on small screens, repeated in the drawer so they stay reachable. */
+  protected readonly switchLinks = ADMIN_SWITCH_LINKS;
+
+  /** Below `md` the sidebar is hidden; this opens the drawer that carries the same entries. */
+  protected readonly menuOpen = signal(false);
 }

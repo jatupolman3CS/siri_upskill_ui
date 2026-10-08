@@ -1,11 +1,13 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom, map, of, throwError, timer } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { AuthApiService } from '../../features/auth/data/auth-api.service';
 import { accessTokenStore } from '../http/access-token.store';
+import { buildTestAccessToken } from './testing/test-jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -13,13 +15,7 @@ describe('AuthService', () => {
   let httpMock: HttpTestingController;
 
   function makeMockJwt(userId: string, role: string): string {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
-      sub: userId,
-      role: [role],
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    })).replace(/=/g, '');
-    return `${header}.${payload}.sig`;
+    return buildTestAccessToken({ userId, roles: [role] });
   }
 
   beforeEach(() => {
@@ -28,7 +24,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         AuthApiService,
-        provideHttpClient(),
+        provideHttpClient(withFetch()),
         provideHttpClientTesting(),
       ],
     });
@@ -59,9 +55,67 @@ describe('AuthService', () => {
       id: 'usr-real-001',
       roles: ['Admin'],
       role: 'Admin',
+      email: undefined,
+      displayName: undefined,
+      avatarUrl: undefined,
     });
     expect(service.hasRole('Admin')).toBe(true);
     expect(service.hasRole('Instructor')).toBe(false);
+  });
+
+  it('merges the /me profile (name, email, avatar) into currentUser once it has loaded, keeping token roles', async () => {
+    service.setAccessToken(makeMockJwt('usr-profile-001', 'Instructor'));
+    TestBed.tick();
+    httpMock.expectOne('/api/identity/me').flush({
+      id: 'usr-profile-001',
+      email: 'somchai@example.test',
+      displayName: 'Somchai Jaidee',
+      avatarUrl: 'https://cdn.example.test/a.png',
+      roles: ['Learner'],
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.currentUser()).toEqual({
+      id: 'usr-profile-001',
+      roles: ['Instructor'],
+      role: 'Instructor',
+      email: 'somchai@example.test',
+      displayName: 'Somchai Jaidee',
+      avatarUrl: 'https://cdn.example.test/a.png',
+    });
+  });
+
+  it('keeps currentUser usable from the token alone when the /me fetch fails', async () => {
+    service.setAccessToken(makeMockJwt('usr-profile-002', 'Learner'));
+    TestBed.tick();
+    httpMock.expectOne('/api/identity/me').flush({ title: 'Server Error' }, { status: 500, statusText: 'Error' });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.currentUser()?.id).toBe('usr-profile-002');
+    expect(service.currentUser()?.displayName).toBeUndefined();
+  });
+
+  it('drops the profile again when the session is cleared', async () => {
+    service.setAccessToken(makeMockJwt('usr-profile-003', 'Learner'));
+    TestBed.tick();
+    httpMock.expectOne('/api/identity/me').flush({
+      id: 'usr-profile-003',
+      email: 'a@example.test',
+      displayName: 'Anna',
+      avatarUrl: null,
+      roles: ['Learner'],
+    });
+    await Promise.resolve();
+    TestBed.tick();
+    expect(service.currentUser()?.displayName).toBe('Anna');
+
+    service.clearSession();
+    TestBed.tick();
+
+    expect(service.currentUser()).toBeNull();
   });
 
   it('SuperAdmin hasRole grants all roles', () => {
@@ -104,6 +158,15 @@ describe('AuthService', () => {
     expect(service.isInitialized()).toBe(true);
     expect(service.isAuthenticated()).toBe(true);
     expect(service.currentUser()?.id).toBe('usr-refreshed-001');
+  });
+
+  it('reports sessionResolved only in the browser and only once initSession has finished', async () => {
+    expect(service.sessionResolved()).toBe(false);
+
+    vi.spyOn(authApi, 'refresh').mockReturnValue(throwError(() => new Error('401 Unauthorized')));
+    await firstValueFrom(service.initSession());
+
+    expect(service.sessionResolved()).toBe(true);
   });
 
   it('initSession handles refresh failure gracefully without throwing', async () => {
@@ -156,5 +219,27 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(false);
     expect(service.currentUser()).toBeNull();
     expect(logoutCalled).toBe(true);
+  });
+});
+
+describe('AuthService on the server (SSR)', () => {
+  beforeEach(() => {
+    accessTokenStore.set(null);
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting(),
+        { provide: PLATFORM_ID, useValue: 'server' },
+      ],
+    });
+  });
+
+  it('never reports sessionResolved, because only the browser can restore the refresh-cookie session', async () => {
+    const service = TestBed.inject(AuthService);
+
+    await firstValueFrom(service.initSession());
+
+    expect(service.isInitialized()).toBe(true);
+    expect(service.sessionResolved()).toBe(false);
   });
 });

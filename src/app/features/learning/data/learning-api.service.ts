@@ -2,6 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
 
+import { restoreBlobProblem } from '../../../core/http/provider-errors';
+
 import {
   AssignmentItem,
   AssignmentSubmissionItem,
@@ -105,15 +107,15 @@ export class LearningApiService {
   }
 
   downloadCertificatePdf(certificateId: string): Observable<Blob> {
-    return this.http.get(`/api/learning/certificates/${certificateId}/download`, {
-      responseType: 'blob',
-    });
+    return this.http
+      .get(`/api/learning/certificates/${certificateId}/download`, { responseType: 'blob' })
+      .pipe(restoreBlobProblem());
   }
 
   downloadCertificatePdfByVerifyCode(verifyCode: string): Observable<Blob> {
-    return this.http.get(`/api/learning/certificates/verify/${encodeURIComponent(verifyCode)}/download`, {
-      responseType: 'blob',
-    });
+    return this.http
+      .get(`/api/learning/certificates/verify/${encodeURIComponent(verifyCode)}/download`, { responseType: 'blob' })
+      .pipe(restoreBlobProblem());
   }
 
   verifyCertificate(verifyCode: string): Observable<CertificateVerificationResponse> {

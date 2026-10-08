@@ -226,13 +226,21 @@
                     <span>{{ 'orders.card.startLearning' | translate }}</span>
                   </a>
 
-                  <button
-                    type="button"
-                    (click)="openRefundModal(order)"
-                    class="btn-tactile inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition px-2 py-1"
-                  >
-                    <span>{{ 'orders.card.requestRefund' | translate }}</span>
-                  </button>
+                  @if (order.paymentId) {
+                    <button
+                      type="button"
+                      (click)="openRefundModal(order)"
+                      class="btn-tactile inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition px-2 py-1"
+                    >
+                      <span>{{ 'orders.card.requestRefund' | translate }}</span>
+                    </button>
+                  } @else {
+                    <!-- No succeeded payment on this order (e.g. free) — nothing the server could refund. -->
+                    <p class="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] px-2 py-1">
+                      <ng-icon name="phosphorInfo" aria-hidden="true" />
+                      <span>{{ 'orders.card.refundUnavailable' | translate }}</span>
+                    </p>
+                  }
                 }
               </div>
             </div>
@@ -437,6 +445,38 @@
           <div class="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-danger)]">
             <ng-icon name="phosphorWarning" />
             <span>{{ refundError()! | translate }}</span>
+          </div>
+        }
+
+        @if (refundLiveBlock(); as liveBlock) {
+          <div
+            role="alert"
+            class="space-y-2 rounded-xl border border-[var(--color-warning)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-text)]"
+          >
+            <p class="flex items-start gap-1.5 font-semibold">
+              <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-warning)]" />
+              <span>{{ 'live.errors.refundLiveAttended' | translate }}</span>
+            </p>
+            @if (liveBlock.blockedCourseTitles.length > 0) {
+              <div>
+                <p class="text-[var(--color-text-muted)]">{{ 'live.errors.refundBlockedCourses' | translate }}</p>
+                <ul class="mt-1 list-disc space-y-0.5 ps-5">
+                  @for (title of liveBlock.blockedCourseTitles; track title) {
+                    <li>{{ title }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            @if (liveBlock.maxRefundableAmount > 0) {
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <span class="text-[var(--color-text-muted)]">
+                  {{ 'live.errors.refundMaxRefundable' | translate: { amount: (liveBlock.maxRefundableAmount | currencyThb) ?? '' } }}
+                </span>
+                <app-button variant="secondary" size="sm" [loading]="refundSubmitting()" (click)="requestMaxRefundable()">
+                  {{ 'live.errors.refundRequestMax' | translate }}
+                </app-button>
+              </div>
+            }
           </div>
         }
 

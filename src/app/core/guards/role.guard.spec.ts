@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, provideRouter, Router, UrlTree } from '@angular
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthService } from '../auth/auth.service';
+import { buildTestAccessToken } from '../auth/testing/test-jwt';
 import { accessTokenStore } from '../http/access-token.store';
 import { roleGuard } from './role.guard';
 
@@ -19,15 +20,7 @@ describe('roleGuard', () => {
   } as unknown as ActivatedRouteSnapshot;
 
   function makeTestJwt(roles: string[]): string {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(
-      JSON.stringify({
-        sub: 'usr-test-001',
-        role: roles,
-        exp: Math.floor(Date.now() / 1000) + 3600,
-      })
-    ).replace(/=/g, '');
-    return `${header}.${payload}.sig`;
+    return buildTestAccessToken({ userId: 'usr-test-001', roles });
   }
 
   beforeEach(() => {
@@ -38,70 +31,13 @@ describe('roleGuard', () => {
 
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
-    authService.isBypassActive.set(false);
-    authService.currentMockRole.set('Guest');
   });
 
   afterEach(() => {
     accessTokenStore.set(null);
-    authService.isBypassActive.set(false);
-    authService.currentMockRole.set('Guest');
   });
 
-  describe('in bypass mode (devAuth.bypass)', () => {
-    beforeEach(() => {
-      authService.isBypassActive.set(true);
-    });
-
-    it('redirects to / when a Learner visits /admin', () => {
-      authService.currentMockRole.set('Learner');
-
-      const result = TestBed.runInInjectionContext(() => roleGuard(adminRoute, {} as never));
-
-      expect(result).not.toBe(true);
-      const expectedTree = router.createUrlTree(['/']);
-      expect(router.serializeUrl(result as UrlTree)).toBe(router.serializeUrl(expectedTree));
-    });
-
-    it('allows access when an Admin visits /admin', () => {
-      authService.currentMockRole.set('Admin');
-
-      const result = TestBed.runInInjectionContext(() => roleGuard(adminRoute, {} as never));
-
-      expect(result).toBe(true);
-    });
-
-    it('allows access when an Instructor visits /instructor', () => {
-      authService.currentMockRole.set('Instructor');
-
-      const result = TestBed.runInInjectionContext(() => roleGuard(instructorRoute, {} as never));
-
-      expect(result).toBe(true);
-    });
-
-    it('redirects to / when a Learner visits /instructor', () => {
-      authService.currentMockRole.set('Learner');
-
-      const result = TestBed.runInInjectionContext(() => roleGuard(instructorRoute, {} as never));
-
-      expect(result).not.toBe(true);
-      const expectedTree = router.createUrlTree(['/']);
-      expect(router.serializeUrl(result as UrlTree)).toBe(router.serializeUrl(expectedTree));
-    });
-
-    it('allows access when SuperAdmin visits /admin or /instructor', () => {
-      authService.currentMockRole.set('SuperAdmin');
-
-      expect(TestBed.runInInjectionContext(() => roleGuard(adminRoute, {} as never))).toBe(true);
-      expect(TestBed.runInInjectionContext(() => roleGuard(instructorRoute, {} as never))).toBe(true);
-    });
-  });
-
-  describe('in real token mode (JWT from API)', () => {
-    beforeEach(() => {
-      authService.isBypassActive.set(false);
-    });
-
+  describe('with the roles carried by the access token', () => {
     it('redirects to / when authenticated user lacks required admin role', () => {
       accessTokenStore.set(makeTestJwt(['Learner']));
 
@@ -126,6 +62,23 @@ describe('roleGuard', () => {
       const result = TestBed.runInInjectionContext(() => roleGuard(instructorRoute, {} as never));
 
       expect(result).toBe(true);
+    });
+
+    it('redirects to / when a Learner visits /instructor', () => {
+      accessTokenStore.set(makeTestJwt(['Learner']));
+
+      const result = TestBed.runInInjectionContext(() => roleGuard(instructorRoute, {} as never));
+
+      expect(result).not.toBe(true);
+      const expectedTree = router.createUrlTree(['/']);
+      expect(router.serializeUrl(result as UrlTree)).toBe(router.serializeUrl(expectedTree));
+    });
+
+    it('allows access when SuperAdmin visits /admin or /instructor', () => {
+      accessTokenStore.set(makeTestJwt(['SuperAdmin']));
+
+      expect(TestBed.runInInjectionContext(() => roleGuard(adminRoute, {} as never))).toBe(true);
+      expect(TestBed.runInInjectionContext(() => roleGuard(instructorRoute, {} as never))).toBe(true);
     });
 
     it('redirects to / when visitor has no token', () => {

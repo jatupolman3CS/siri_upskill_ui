@@ -18,7 +18,7 @@
       [attr.aria-labelledby]="titleId"
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
-      class="app-mobile-nav-panel flex h-full w-full max-w-xs flex-col gap-6 overflow-y-auto bg-[var(--color-bg)] p-6 shadow-[var(--shadow-lg)]"
+      class="app-mobile-nav-panel flex h-full w-full max-w-xs flex-col gap-4 overflow-y-auto bg-[var(--color-bg)] p-6 shadow-[var(--shadow-lg)]"
     >
       <div class="flex items-center justify-between gap-4">
         <h2 [id]="titleId" class="text-lg font-semibold text-[var(--color-text)]">
@@ -28,7 +28,7 @@
           type="button"
           (click)="requestClose()"
           [attr.aria-label]="'nav.closeMenu' | translate"
-          class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)]
+          class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full
             text-[var(--color-text-muted)] transition-colors duration-200 ease-out
             hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
@@ -37,146 +37,115 @@
         </button>
       </div>
 
-      <nav [attr.aria-label]="'nav.mainNavLabel' | translate" class="flex flex-col gap-2">
-        <a
-          routerLink="/"
-          routerLinkActive="text-[var(--color-primary)]"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="requestClose()"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.home' | translate }}
-        </a>
-
-        <a
-          routerLink="/blog"
-          routerLinkActive="text-[var(--color-primary)]"
-          (click)="requestClose()"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.blog' | translate }}
-        </a>
-
-        <a
-          routerLink="/cart"
-          routerLinkActive="text-[var(--color-primary)]"
-          (click)="requestClose()"
-          class="flex min-h-11 items-center justify-between rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          <div class="flex items-center gap-2.5">
-            <ng-icon name="phosphorShoppingCart" class="text-lg" />
-            <span>{{ 'nav.cart' | translate }}</span>
+      @if (authService.isAuthenticated()) {
+        <div class="flex items-center gap-3 rounded-[var(--radius-lg)] bg-[var(--color-surface)] p-3">
+          <app-user-avatar size="lg" [name]="user()?.displayName" [src]="user()?.avatarUrl" />
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-[var(--color-text)]">
+              {{ user()?.displayName ?? ('nav.accountFallbackName' | translate) }}
+            </p>
+            @if (user()?.email; as email) {
+              <p class="truncate text-xs text-[var(--color-text-muted)]">{{ email }}</p>
+            }
           </div>
-          @if (cartStore.itemCount() > 0) {
-            <span class="rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-xs font-bold text-[var(--color-primary-foreground)]">
-              {{ cartStore.itemCount() }}
-            </span>
-          }
-        </a>
+        </div>
+      }
+
+      <nav [attr.aria-label]="'nav.mainNavLabel' | translate" class="flex flex-col gap-1">
+        @for (link of navLinks; track link.id) {
+          <a
+            [routerLink]="link.path"
+            [queryParams]="link.queryParams"
+            routerLinkActive="font-semibold text-[var(--color-primary-hover)]"
+            ariaCurrentWhenActive="page"
+            [routerLinkActiveOptions]="link.activeOptions ?? { exact: link.exact }"
+            (click)="requestClose()"
+            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
+              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            {{ link.labelKey | translate }}
+          </a>
+        }
 
         @if (categories().length > 0) {
-          <div class="flex flex-col gap-1 border-t border-[var(--color-border)] pt-2">
+          <div class="mt-1 flex flex-col gap-1 border-t border-[var(--color-border)] pt-2">
             @for (category of categories(); track category.id) {
               <app-category-accordion-item [category]="category" (linkClick)="requestClose()" />
             }
           </div>
         }
 
-        @if (authService.isAuthenticated()) {
-          <a
-            routerLink="/my-courses"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-semibold text-[var(--color-primary)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ 'nav.myCourses' | translate }}
-          </a>
-          <a
-            [routerLink]="authService.canUseInstructorStudio() ? '/instructor' : '/become-instructor'"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ (authService.canUseInstructorStudio() ? 'nav.instructor' : 'nav.becomeInstructor') | translate }}
-          </a>
-          @if (authService.isAdmin()) {
+        <div class="mt-1 flex flex-col gap-1 border-t border-[var(--color-border)] pt-2">
+          @if (authService.isAuthenticated()) {
+            @for (item of accountItems(); track item.id) {
+              <a
+                [routerLink]="item.route"
+                (click)="requestClose()"
+                class="flex min-h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 text-base text-[var(--color-text)]
+                  hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              >
+                <ng-icon [name]="item.icon" aria-hidden="true" class="text-lg text-[var(--color-text-muted)]" />
+                {{ item.labelKey | translate }}
+              </a>
+            }
+            <button
+              type="button"
+              (click)="signOut()"
+              class="flex min-h-11 cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-3 text-left text-base
+                text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none
+                focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <ng-icon name="phosphorSignOut" aria-hidden="true" class="text-lg text-[var(--color-danger)]" />
+              {{ 'nav.signOut' | translate }}
+            </button>
+          } @else {
             <a
-              routerLink="/admin"
+              routerLink="/become-instructor"
               (click)="requestClose()"
-              class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-bold text-rose-600 dark:text-rose-400
+              class="flex min-h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 text-base text-[var(--color-text)]
                 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
-              ผู้ดูแลระบบ (Admin CMS)
+              <ng-icon name="phosphorChalkboardTeacher" aria-hidden="true" class="text-lg text-[var(--color-text-muted)]" />
+              {{ 'nav.becomeInstructor' | translate }}
             </a>
+            <div class="mt-2 grid grid-cols-2 gap-2">
+              <a
+                routerLink="/login"
+                (click)="requestClose()"
+                class="flex h-11 items-center justify-center rounded-full border border-[var(--color-border)] text-sm font-medium
+                  text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none
+                  focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              >
+                {{ 'nav.login' | translate }}
+              </a>
+              <a
+                routerLink="/register"
+                (click)="requestClose()"
+                class="flex h-11 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold
+                  text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-none
+                  focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              >
+                {{ 'nav.register' | translate }}
+              </a>
+            </div>
           }
-          <a
-            routerLink="/account/orders"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ 'nav.orders' | translate }}
-          </a>
-          <a
-            routerLink="/account/devices"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ 'nav.devices' | translate }}
-          </a>
-          <button
-            type="button"
-            (click)="signOut()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-left text-base font-medium text-[var(--color-danger)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ 'nav.signOut' | translate }}
-          </button>
-        } @else {
-          <a
-            routerLink="/login"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-text)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ 'nav.login' | translate }}
-          </a>
-          <a
-            routerLink="/register"
-            (click)="requestClose()"
-            class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-base font-medium text-[var(--color-primary)]
-              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            {{ 'nav.register' | translate }}
-          </a>
-        }
+        </div>
       </nav>
 
       <div class="mt-auto flex items-center gap-2 border-t border-[var(--color-border)] pt-4">
-        <button
-          type="button"
-          (click)="setLocale('th')"
-          [attr.aria-current]="translation.locale() === 'th' ? 'true' : null"
-          [class.font-semibold]="translation.locale() === 'th'"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-sm text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.languageThai' | translate }}
-        </button>
-        <button
-          type="button"
-          (click)="setLocale('en')"
-          [attr.aria-current]="translation.locale() === 'en' ? 'true' : null"
-          [class.font-semibold]="translation.locale() === 'en'"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-sm text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.languageEnglish' | translate }}
-        </button>
+        @for (option of languages; track option.locale) {
+          <button
+            type="button"
+            (click)="setLocale(option.locale)"
+            [attr.aria-current]="translation.locale() === option.locale ? 'true' : null"
+            [class.font-semibold]="translation.locale() === option.locale"
+            [class.bg-[var(--color-surface-muted)]]="translation.locale() === option.locale"
+            class="flex min-h-11 cursor-pointer items-center rounded-full px-4 text-sm text-[var(--color-text)]
+              hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            {{ option.labelKey | translate }}
+          </button>
+        }
       </div>
     </div>
   </div>

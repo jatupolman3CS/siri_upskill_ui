@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
+import { buildTestAccessToken } from '../../../core/auth/testing/test-jwt';
 import { accessTokenStore } from '../../../core/http/access-token.store';
 import { GoogleIdentityApi, GoogleIdentityService } from '../../../core/auth/google-identity.service';
 import { errorInterceptor } from '../../../core/http/error.interceptor';
@@ -12,10 +13,17 @@ import { GoogleSignIn } from './google-sign-in';
 @Component({ selector: 'app-stub', template: '' })
 class StubPage {}
 
-/** Builds an unsigned JWT-shaped string; the app only decodes the payload for roles. */
+/** Unsigned but properly formed access token; the app only decodes the payload (user id, roles). */
 function fakeAccessToken(roles: string[]): string {
-  const encode = (value: object) => btoa(JSON.stringify(value)).replace(/=/g, '');
-  return `${encode({ alg: 'none' })}.${encode({ sub: 'user-1', role: roles })}.sig`;
+  return buildTestAccessToken({ userId: 'user-1', roles });
+}
+
+/** Signing in makes `CurrentUserStore` fetch the profile — answer it so the stable-wait below can finish. */
+function answerProfile(httpMock: HttpTestingController): void {
+  TestBed.tick();
+  httpMock
+    .expectOne('/api/identity/me')
+    .flush({ id: 'user-1', email: 'u@example.test', displayName: 'User One', avatarUrl: null, roles: [] });
 }
 
 interface RenderCall {
@@ -140,6 +148,7 @@ describe('GoogleSignIn', () => {
     expect(request.request.withCredentials).toBe(true);
 
     request.flush({ accessToken: fakeAccessToken(['Learner']), accessTokenExpiresAtUtc: '2026-10-06T12:15:00Z' });
+    answerProfile(httpMock);
     await settle();
 
     expect(accessTokenStore.token()).not.toBeNull();
@@ -154,6 +163,7 @@ describe('GoogleSignIn', () => {
     httpMock
       .expectOne('/api/identity/external-login/google')
       .flush({ accessToken: fakeAccessToken(['Admin']), accessTokenExpiresAtUtc: '2026-10-06T12:15:00Z' });
+    answerProfile(httpMock);
     await settle();
 
     expect(navigate).toHaveBeenCalledWith('/admin');

@@ -1,0 +1,63 @@
+<div class="flex flex-col gap-3">
+  <div class="flex flex-wrap items-center gap-3">
+    <input
+      #fileInput
+      type="file"
+      accept="video/*"
+      class="sr-only"
+      tabindex="-1"
+      aria-hidden="true"
+      (change)="onFileSelected($event)"
+    />
+    <app-button
+      size="sm"
+      [variant]="hasRecording() ? 'secondary' : 'primary'"
+      [disabled]="busy()"
+      (click)="fileInput.click()"
+    >
+      <ng-icon leading name="phosphorUploadSimple" aria-hidden="true" />
+      {{ (hasRecording() ? 'live.instructor.recording.replace' : 'live.instructor.recording.upload') | translate }}
+    </app-button>
+    @if (canRetryAttach()) {
+      <app-button size="sm" variant="secondary" (click)="retryAttach()">
+        {{ 'live.instructor.recording.retryAttach' | translate }}
+      </app-button>
+    }
+  </div>
+
+  <div aria-live="polite" class="text-sm text-[var(--color-text)]">
+    @switch (stage()) {
+      @case ('uploading') {
+        <div class="flex flex-col gap-1.5">
+          <span>{{ 'live.instructor.recording.uploading' | translate: { percent: progress() } }}</span>
+          <div
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="progress()"
+            [attr.aria-label]="'live.instructor.recording.progressLabel' | translate"
+            class="h-2 w-full max-w-sm overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]"
+          >
+            <div
+              class="h-full origin-left rounded-[var(--radius-full)] bg-[var(--color-primary)] transition-transform duration-200 ease-out motion-reduce:transition-none"
+              [style.transform]="'scaleX(' + progress() / 100 + ')'"
+            ></div>
+          </div>
+        </div>
+      }
+      @case ('processing') {
+        <span>{{ 'live.instructor.recording.processing' | translate }}</span>
+      }
+      @case ('attaching') {
+        <span>{{ 'live.instructor.recording.attaching' | translate }}</span>
+      }
+    }
+  </div>
+
+  @if (errorText(); as text) {
+    <p role="alert" class="flex items-start gap-1.5 text-sm text-[var(--color-danger)]">
+      <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-base" />
+      <span>{{ text }}</span>
+    </p>
+  }
+</div>

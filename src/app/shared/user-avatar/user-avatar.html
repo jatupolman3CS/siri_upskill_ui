@@ -1,0 +1,12 @@
+<span
+  class="relative flex items-center justify-center overflow-hidden rounded-full bg-[var(--color-primary)] font-semibold
+    text-[var(--color-primary-foreground)] {{ boxClass() }}"
+>
+  @if (showImage()) {
+    <img [ngSrc]="src() ?? ''" fill alt="" class="object-cover" (error)="onImageError()" />
+  } @else if (initials()) {
+    {{ initials() }}
+  } @else {
+    <ng-icon name="phosphorUser" class="text-[1.25em]" />
+  }
+</span>

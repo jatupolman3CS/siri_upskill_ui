@@ -1,204 +1,50 @@
-<header class="sticky top-0 z-30 h-16 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
-  <div class="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4">
-    <a
-      routerLink="/"
-      class="rounded-[var(--radius-sm)] text-lg font-bold text-[var(--color-primary)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-    >
-      {{ 'common.appName' | translate }}
-    </a>
+<!-- Slim top strip: tagline + language dropdown (desktop chrome; the drawer has its own language toggle). -->
+<div class="hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] md:block">
+  <div class="mx-auto flex h-9 max-w-6xl items-center justify-between gap-4 px-4">
+    <p class="truncate text-[13px] text-[var(--color-text-muted)]">{{ 'nav.tagline' | translate }}</p>
+    <app-language-menu />
+  </div>
+</div>
 
-    <nav [attr.aria-label]="'nav.mainNavLabel' | translate" class="hidden md:flex md:items-center md:gap-6">
-      <a
-        routerLink="/"
-        routerLinkActive="text-[var(--color-primary)]"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-          hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-      >
-        {{ 'nav.home' | translate }}
-      </a>
-      <app-category-mega-menu [categories]="categories()" />
-      <a
-        routerLink="/blog"
-        routerLinkActive="text-[var(--color-primary)]"
-        class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-          hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-      >
-        {{ 'nav.blog' | translate }}
-      </a>
-      <a
-        routerLink="/learning-paths"
-        routerLinkActive="text-[var(--color-primary)]"
-        class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-          hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-      >
-        {{ 'nav.learningPaths' | translate }}
-      </a>
-    </nav>
+<header class="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
+  <div class="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 md:h-[4.5rem] md:gap-4">
+    <app-brand-logo class="shrink-0" />
 
-    <div class="hidden items-center gap-3 md:flex">
-      <div class="flex items-center gap-1 border-r border-[var(--color-border)] pr-3">
-        <button
-          type="button"
-          (click)="setLocale('th')"
-          [attr.aria-current]="translation.locale() === 'th' ? 'true' : null"
-          [class.font-semibold]="translation.locale() === 'th'"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-2 text-sm text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.languageThai' | translate }}
-        </button>
-        <button
-          type="button"
-          (click)="setLocale('en')"
-          [attr.aria-current]="translation.locale() === 'en' ? 'true' : null"
-          [class.font-semibold]="translation.locale() === 'en'"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-2 text-sm text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.languageEnglish' | translate }}
-        </button>
-      </div>
-
-      <!-- Wishlist Link Desktop -->
-      <a
-        routerLink="/wishlist"
-        aria-label="สิ่งที่อยากได้"
-        class="relative flex min-h-11 items-center justify-center rounded-[var(--radius-md)] px-2.5 text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
-      >
-        <ng-icon name="phosphorHeart" class="text-xl" />
-        @if (wishlistStore.count() > 0) {
-          <span
-            class="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm"
-          >
-            {{ wishlistStore.count() }}
-          </span>
-        }
-      </a>
-
-      <!-- Cart Link Desktop -->
-      <a
-        routerLink="/cart"
-        [attr.aria-label]="'nav.cart' | translate"
-        class="relative flex min-h-11 items-center justify-center rounded-[var(--radius-md)] px-2.5 text-[var(--color-text)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
-      >
-        <ng-icon name="phosphorShoppingCart" class="text-xl" />
-        @if (cartStore.itemCount() > 0) {
-          <span
-            class="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-[var(--color-primary-foreground)] shadow-sm"
-          >
-            {{ cartStore.itemCount() }}
-          </span>
-        }
-      </a>
-
-      @if (authService.isAuthenticated()) {
-        <app-notification-bell />
-        <a
-          routerLink="/my-courses"
-          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-primary)]
-            hover:text-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.myCourses' | translate }}
-        </a>
-        <a
-          [routerLink]="authService.canUseInstructorStudio() ? '/instructor' : '/become-instructor'"
-          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-            hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ (authService.canUseInstructorStudio() ? 'nav.instructor' : 'nav.becomeInstructor') | translate }}
-        </a>
-        @if (authService.isAdmin()) {
-          <a
-            routerLink="/admin"
-            class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-bold text-rose-600 dark:text-rose-400
-              hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            ผู้ดูแลระบบ (Admin)
-          </a>
-        }
-        <a
-          routerLink="/account/orders"
-          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-            hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.orders' | translate }}
-        </a>
-        <a
-          routerLink="/account/devices"
-          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-            hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.devices' | translate }}
-        </a>
-        <button
-          type="button"
-          (click)="signOut()"
-          class="flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-sm font-medium text-[var(--color-text)]
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          {{ 'nav.signOut' | translate }}
-        </button>
-      } @else {
-        <a
-          routerLink="/login"
-          class="inline-flex h-11 select-none items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-3
-            text-sm font-medium text-[var(--color-primary)] transition-colors duration-200 ease-out
-            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2
-            focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {{ 'nav.login' | translate }}
-        </a>
-        <a
-          routerLink="/register"
-          class="inline-flex h-11 select-none items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-3
-            text-sm font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)]
-            transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
-            focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {{ 'nav.register' | translate }}
-        </a>
-      }
+    <div class="hidden min-w-0 flex-1 md:block">
+      <app-header-search />
     </div>
 
-    <div class="flex items-center gap-1 md:hidden">
-      <!-- Mobile Wishlist Button -->
+    <div class="ml-auto flex items-center gap-1 md:ml-0 md:gap-2">
       <a
-        routerLink="/wishlist"
-        aria-label="สิ่งที่อยากได้"
-        class="relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [routerLink]="instructorCta().route"
+        class="mr-1 hidden h-11 items-center gap-2 rounded-full bg-[var(--color-primary)] px-5 text-sm font-semibold
+          text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] transition-colors duration-200 ease-out
+          hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2
+          focus-visible:ring-offset-[var(--color-bg)] lg:flex"
       >
-        <ng-icon name="phosphorHeart" class="text-xl" />
-        @if (wishlistStore.count() > 0) {
-          <span
-            class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white"
-          >
-            {{ wishlistStore.count() }}
-          </span>
-        }
+        <ng-icon name="phosphorChalkboardTeacher" aria-hidden="true" class="text-lg" />
+        {{ instructorCta().labelKey | translate }}
       </a>
 
-      <!-- Mobile Cart Button -->
-      <a
-        routerLink="/cart"
-        [attr.aria-label]="'nav.cart' | translate"
-        class="relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-      >
-        <ng-icon name="phosphorShoppingCart" class="text-xl" />
-        @if (cartStore.itemCount() > 0) {
-          <span
-            class="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[9px] font-bold text-[var(--color-primary-foreground)]"
-          >
-            {{ cartStore.itemCount() }}
-          </span>
-        }
-      </a>
+      <app-header-icon-link
+        class="hidden md:block"
+        route="/wishlist"
+        icon="phosphorHeart"
+        [label]="wishlistLabel()"
+        [count]="wishlistStore.count()"
+      />
+      <app-header-icon-link class="hidden lg:block" route="/account/orders" icon="phosphorPackage" [label]="ordersLabel()" />
+      <app-header-icon-link route="/cart" icon="phosphorShoppingCart" [label]="cartLabel()" [count]="cartStore.itemCount()" />
 
       @if (authService.isAuthenticated()) {
         <app-notification-bell />
       }
+
+      <div class="ml-1 flex items-center">
+        <app-header-auth />
+      </div>
+
       <button
         type="button"
         (click)="mobileNavOpen.set(true)"
@@ -206,14 +52,46 @@
         [attr.aria-controls]="mobileNavPanelId"
         aria-haspopup="dialog"
         [attr.aria-label]="'nav.openMenu' | translate"
-        class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius-md)]
-          text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-xl text-[var(--color-text)]
+          transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)] focus-visible:outline-none
+          focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] lg:hidden"
       >
         <ng-icon name="phosphorList" aria-hidden="true" />
       </button>
     </div>
   </div>
 
-  <app-mobile-nav [(open)]="mobileNavOpen" [categories]="categories()" />
+  <!-- Secondary nav row (lg+): Categories mega menu pill + primary links. -->
+  <nav
+    [attr.aria-label]="'nav.mainNavLabel' | translate"
+    class="hidden border-t border-[var(--color-border)] bg-[var(--color-surface)] lg:block"
+  >
+    <div class="mx-auto flex h-12 max-w-6xl items-center gap-1 px-4">
+      <app-category-mega-menu class="mr-2" [categories]="categories()" />
+      @for (link of navLinks; track link.id) {
+        <a
+          [routerLink]="link.path"
+          [queryParams]="link.queryParams"
+          routerLinkActive="font-semibold text-[var(--color-primary-hover)]"
+          ariaCurrentWhenActive="page"
+          [routerLinkActiveOptions]="link.activeOptions ?? { exact: link.exact }"
+          class="flex h-11 items-center rounded-full px-3 text-sm font-medium text-[var(--color-text)] transition-colors
+            duration-200 ease-out hover:text-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          {{ link.labelKey | translate }}
+        </a>
+      }
+    </div>
+  </nav>
+
 </header>
+
+<!-- Search sits on its own row below the sticky bar on small screens, scrolling away with the page. -->
+<div class="border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 pb-3 pt-1 md:hidden">
+  <app-header-search />
+</div>
+
+<!-- Outside <header> on purpose: the header is a z-30 stacking context, which would leave the fixed bottom
+     mobile nav (z-40) painting over the drawer's footer (language toggle, sign out). -->
+<app-mobile-nav [(open)]="mobileNavOpen" [categories]="categories()" />

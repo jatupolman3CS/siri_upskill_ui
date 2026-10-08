@@ -6,27 +6,55 @@
     {{ 'home.hero.subheading' | translate }}
   </p>
 
-  <div class="animate-fade-in-up stagger-2 mt-2 flex flex-col gap-3 sm:flex-row">
-    <a
-      routerLink="/register"
-      class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+  <!-- Guest CTAs (register/login) only for a confirmed guest; a signed-in visitor gets browse/my-courses
+       instead. Until the session restore has finished (SSR, first paint) this reserves the row's height
+       with nothing in it, so neither set of buttons flashes to the wrong person. -->
+  <div class="animate-fade-in-up stagger-2 mt-2 flex min-h-14 flex-col gap-3 sm:flex-row">
+    @if (auth.sessionResolved()) {
+      @if (auth.isAuthenticated()) {
+        <a
+          routerLink="/courses"
+          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
         text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
         transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
         focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-    >
-      {{ 'home.hero.ctaRegister' | translate }}
-    </a>
-    <a
-      routerLink="/login"
-      class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+        >
+          {{ 'nav.allCourses' | translate }}
+        </a>
+        <a
+          routerLink="/my-courses"
+          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
         text-base font-medium text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-surface)]
         transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
         focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-    >
-      {{ 'home.hero.ctaLogin' | translate }}
-    </a>
+        >
+          {{ 'nav.myCourses' | translate }}
+        </a>
+      } @else {
+        <a
+          routerLink="/register"
+          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+        text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
+        transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        >
+          {{ 'home.hero.ctaRegister' | translate }}
+        </a>
+        <a
+          routerLink="/login"
+          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+        text-base font-medium text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-surface)]
+        transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        >
+          {{ 'home.hero.ctaLogin' | translate }}
+        </a>
+      }
+    }
   </div>
 </div>
 
@@ -43,7 +71,7 @@
             เรียนต่อจากจุดเดิม
           </span>
           <h2 class="text-base font-bold text-[var(--color-text)] truncate">
-            {{ enroll.courseTitle || 'คอร์สเรียนของคุณ' }}
+            {{ enroll.courseTitle || ('myCourses.courseTitleUnavailable' | translate) }}
           </h2>
           <div class="mt-1.5 flex items-center gap-3">
             <div class="h-2 w-32 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">

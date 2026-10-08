@@ -95,7 +95,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           // If AuthService cannot be resolved (e.g. isolated unit testing), fall through
         }
 
-        if (authService && authService.isAuthenticated() && !authService.isBypassActive()) {
+        if (authService && authService.isAuthenticated()) {
           return authService.refreshToken().pipe(
             switchMap((newToken) => {
               if (!newToken) {

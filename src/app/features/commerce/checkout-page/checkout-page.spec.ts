@@ -254,6 +254,28 @@ describe('CheckoutPage', () => {
     expect(fixture.nativeElement.textContent).not.toContain('common.error');
   });
 
+  it('explains a payment-provider outage (503 payment.provider_not_configured) in plain words and offers a retry', () => {
+    component.initiatePayment();
+    httpMock.expectOne('/api/commerce/payments').flush(
+      { title: 'Payment provider is not configured.', status: 503, errorCode: 'payment.provider_not_configured' },
+      { status: 503, statusText: 'Service Unavailable' },
+    );
+    fixture.detectChanges();
+
+    const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
+    expect(alert).toBeTruthy();
+    expect(alert.textContent).toContain('ระบบชำระเงินยังไม่พร้อมใช้งานชั่วคราว');
+    expect(alert.textContent).not.toContain('not configured');
+
+    const retry = Array.from(alert.querySelectorAll('button')).find((b) => b.textContent?.includes('ลองใหม่อีกครั้ง'));
+    expect(retry).toBeTruthy();
+    retry?.click();
+    httpMock.expectOne('/api/commerce/payments').flush(SAMPLE_PAYMENT);
+    fixture.detectChanges();
+    expect(component.paymentError()).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')).toBeNull();
+  });
+
   it('hides the Card tab (still shows the fixed "coming soon" card, unchanged) when payments config does not include Card', () => {
     // Regression proof for P11-24: this fixture's beforeEach flushed PROMPTPAY_ONLY_CONFIG —
     // the Card option must render exactly as it always has, not as a clickable tab.
@@ -499,5 +521,27 @@ describe('CheckoutPage — resume after 3DS redirect (P11-24)', () => {
     expect(component.currentStep()).toBe('card_processing');
     expect(harness.routeNativeElement?.textContent).toContain('กำลังตรวจสอบสถานะการชำระเงิน');
     httpMock.expectNone('/api/commerce/payments/undefined');
+  });
+});
+
+describe('CheckoutPage without an order id', () => {
+  it('explains the missing order through i18n (not a hardcoded string) and sends the learner back to the cart', () => {
+    TestBed.configureTestingModule({
+      imports: [CheckoutPage],
+      providers: [
+        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClientTesting(),
+        provideRouter([{ path: 'cart', component: DummyCartComponent }]),
+      ],
+    });
+    TestBed.inject(TranslationService).setLocale('en');
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    const fixture = TestBed.createComponent(CheckoutPage);
+
+    expect(testAccess(fixture.componentInstance).orderError()).toBe('No order found. Please create an order from your cart.');
+    httpMock.expectOne('/api/commerce/payments/config').flush(PROMPTPAY_ONLY_CONFIG);
+    fixture.destroy();
+    httpMock.verify();
   });
 });

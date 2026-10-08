@@ -4,7 +4,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { phosphorCaretDown } from '@ng-icons/phosphor-icons/regular';
 
 import { CategoryTreeNode } from '../../../../features/catalog/data/category-api.models';
-import { resolveCategoryIconName } from '../../../../features/catalog/category-icon';
+import { CATEGORY_ICONS, resolveCategoryIconName } from '../../../../features/catalog/category-icon';
 import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../../core/i18n/translation.service';
 
@@ -30,7 +30,7 @@ import { TranslationService } from '../../../../core/i18n/translation.service';
   imports: [RouterLink, TranslatePipe, NgIcon, CategoryAccordionItem],
   templateUrl: './category-accordion-item.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons({ phosphorCaretDown })],
+  providers: [provideIcons({ phosphorCaretDown, ...CATEGORY_ICONS })],
 })
 export class CategoryAccordionItem {
   readonly category = input.required<CategoryTreeNode>();

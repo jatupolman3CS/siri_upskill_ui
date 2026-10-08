@@ -10,6 +10,8 @@
       <img [ngSrc]="course().thumbnailUrl!" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105" />
     }
 
+    <app-course-format-badge class="absolute left-2 top-2" [format]="course().deliveryFormat" />
+
     <button
       type="button"
       (click)="toggleWishlist($event)"
@@ -27,6 +29,7 @@
   </div>
   <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">{{ course().title }}</h3>
   <p class="text-sm text-[var(--color-text-muted)]">{{ course().instructorDisplayName }}</p>
+  <app-course-next-session [startsAtUtc]="course().nextStartsAtUtc" />
   @if (course().ratingCount > 0) {
     <p class="inline-flex items-center gap-1 text-sm text-[var(--color-text)]">
       <ng-icon name="phosphorStar" aria-hidden="true" class="text-[var(--color-accent)]" />

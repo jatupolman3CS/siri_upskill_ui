@@ -5,7 +5,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { AuthService } from '../../../core/auth/auth.service';
+import { buildTestAccessToken } from '../../../core/auth/testing/test-jwt';
 import { TranslationService } from '../../../core/i18n/translation.service';
+import { accessTokenStore } from '../../../core/http/access-token.store';
 import { CategoryTreeNode } from '../../catalog/data/category-api.models';
 import { CourseSearchResultItem, SearchCoursesResponse } from '../../catalog/data/course-api.models';
 import { BannerItem } from '../../cms/data/cms-api.models';
@@ -73,8 +76,10 @@ const EMPTY_RESPONSE = searchResponse([]);
 describe('HomePage', () => {
   let harness: RouterTestingHarness;
   let httpMock: HttpTestingController;
+  let auth: AuthService;
 
   beforeEach(async () => {
+    accessTokenStore.set(null);
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -84,11 +89,17 @@ describe('HomePage', () => {
       ],
     });
     TestBed.inject(TranslationService).setLocale('en');
+    auth = TestBed.inject(AuthService);
+    // The session restore (app initializer) has finished: whoever is browsing is now known.
+    auth.isInitialized.set(true);
     httpMock = TestBed.inject(HttpTestingController);
     harness = await RouterTestingHarness.create();
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    httpMock.verify();
+    accessTokenStore.set(null);
+  });
 
   async function settle(): Promise<void> {
     const flashRequests = httpMock.match((r) => r.url.includes('/api/commerce/flash-sales'));
@@ -155,13 +166,46 @@ describe('HomePage', () => {
     await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
   });
 
-  it('always renders the hero, even before any fetch resolves', async () => {
+  it('always renders the hero, even before any fetch resolves, with register/login CTAs for a guest', async () => {
     await navigate();
 
     const text = harness.routeNativeElement?.textContent ?? '';
     expect(text).toContain('Learn new skills. Grow your career.');
     expect(harness.routeNativeElement?.querySelector('a[href="/register"]')).not.toBeNull();
     expect(harness.routeNativeElement?.querySelector('a[href="/login"]')).not.toBeNull();
+
+    await flushBanners();
+    await flushCategories();
+    await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
+  });
+
+  it('shows neither the guest nor the signed-in CTAs until the session restore has finished', async () => {
+    auth.isInitialized.set(false);
+    await navigate();
+
+    expect(harness.routeNativeElement?.querySelector('a[href="/register"]')).toBeNull();
+    expect(harness.routeNativeElement?.querySelector('a[href="/login"]')).toBeNull();
+    expect(harness.routeNativeElement?.querySelector('a[href="/my-courses"]')).toBeNull();
+
+    await flushBanners();
+    await flushCategories();
+    await flushSearches(EMPTY_RESPONSE, EMPTY_RESPONSE);
+  });
+
+  it('never offers register/login to a signed-in visitor, only browse and my-courses', async () => {
+    accessTokenStore.set(buildTestAccessToken({ userId: 'user-home-1' }));
+    await navigate();
+    httpMock.match((r) => r.url === '/api/identity/me').forEach((req) =>
+      req.flush({ id: 'user-home-1', email: 'a@example.test', displayName: 'Anna', avatarUrl: null, roles: ['Learner'] }),
+    );
+    httpMock.match((r) => r.url.startsWith('/api/learning')).forEach((req) => req.flush({ items: [] }));
+    httpMock.match((r) => r.url === '/api/catalog/wishlist').forEach((req) => req.flush([]));
+    await settle();
+
+    expect(harness.routeNativeElement?.querySelector('a[href="/register"]')).toBeNull();
+    expect(harness.routeNativeElement?.querySelector('a[href="/login"]')).toBeNull();
+    expect(harness.routeNativeElement?.querySelector('a[href="/courses"]')).not.toBeNull();
+    expect(harness.routeNativeElement?.querySelector('a[href="/my-courses"]')).not.toBeNull();
 
     await flushBanners();
     await flushCategories();

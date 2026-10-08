@@ -1,0 +1,73 @@
+@if (errorHint(); as hintKey) {
+  <p class="mb-2 text-sm text-[var(--color-text-muted)]">{{ hintKey | translate }}</p>
+}
+
+<div class="flex flex-col gap-3">
+  @switch (needsAction()) {
+    @case ('Waiting') {
+      <app-spinner
+        size="sm"
+        color="muted"
+        [ariaLabel]="'live.instructor.meeting.waiting' | translate"
+        [label]="'live.instructor.actions.waitingHint' | translate"
+      />
+    }
+    @case ('ReconnectGoogle') {
+      @if (canConnect()) {
+        <div class="flex flex-wrap items-center gap-2">
+          <app-button size="sm" [loading]="busy() === 'connect'" [disabled]="busy() !== null" (click)="connectGoogle()">
+            <ng-icon leading name="phosphorPlugs" aria-hidden="true" />
+            {{ 'live.instructor.actions.reconnect' | translate }}
+          </app-button>
+        </div>
+      }
+    }
+    @case ('Retry') {
+      <div class="flex flex-wrap items-center gap-2">
+        <app-button size="sm" [loading]="busy() === 'resync'" [disabled]="busy() !== null" (click)="resync()">
+          <ng-icon leading name="phosphorArrowsClockwise" aria-hidden="true" />
+          {{ 'live.instructor.actions.resync' | translate }}
+        </app-button>
+      </div>
+    }
+  }
+
+  @if (canOfferPaste()) {
+    <div>
+      <app-button
+        size="sm"
+        variant="ghost"
+        [disabled]="busy() !== null"
+        (click)="togglePaste()"
+      >
+        <ng-icon leading name="phosphorLinkSimple" aria-hidden="true" />
+        {{ (showPaste() ? 'live.instructor.actions.hidePaste' : 'live.instructor.actions.pasteInstead') | translate }}
+      </app-button>
+    </div>
+  }
+
+  @if (showPaste()) {
+    <form class="flex flex-col gap-3 sm:flex-row sm:items-start" (submit)="submitLink($event)" novalidate>
+      <div class="min-w-0 flex-1">
+        <app-input
+          type="url"
+          autocomplete="off"
+          [label]="'live.instructor.actions.linkLabel' | translate"
+          [placeholder]="'live.instructor.actions.linkPlaceholder' | translate"
+          [helperText]="'live.instructor.actions.linkHelper' | translate"
+          [errorMessage]="linkError() ?? undefined"
+          [formControl]="linkControl"
+        />
+      </div>
+      <div class="sm:pt-[1.625rem]">
+        <app-button type="submit" [loading]="busy() === 'link'" [disabled]="busy() !== null">
+          {{ 'live.instructor.actions.saveLink' | translate }}
+        </app-button>
+      </div>
+    </form>
+  }
+
+  @if (problemText(); as text) {
+    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ text }}</p>
+  }
+</div>

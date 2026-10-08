@@ -17,6 +17,7 @@ import {
   phosphorUsers,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import {
   InstructorAnalyticsService,
@@ -30,7 +31,7 @@ export type StudentProgressItem = InstructorStudentProgress;
 
 @Component({
   selector: 'app-instructor-analytics-page',
-  imports: [CommonModule, FormsModule, NgIcon],
+  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe],
   templateUrl: './instructor-analytics-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -108,7 +109,7 @@ export class InstructorAnalyticsPage implements OnInit {
         .concat(
           this.students().map(
             (s) =>
-              `"${s.name}","${s.email}","${s.courseTitle}",${s.progressPercent}%,${s.completedEpisodes},${s.totalEpisodes},"${s.lastActiveAtUtc}"`
+              `"${s.name ?? ''}","${s.email ?? ''}","${s.courseTitle}",${s.progressPercent}%,${s.completedEpisodes},${s.totalEpisodes},"${s.lastActiveAtUtc ?? ''}"`
           )
         )
         .join('\n');

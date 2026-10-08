@@ -150,6 +150,15 @@
           </section>
         }
 
+        <!-- Live schedule (P11-21) — public `liveSchedule` only: no room link, no call to the Live module. -->
+        @if (course.liveSchedule; as liveSchedule) {
+          <app-course-live-schedule
+            class="animate-fade-in-up stagger-3"
+            [schedule]="liveSchedule"
+            [format]="course.deliveryFormat === 'Hybrid' ? 'Hybrid' : 'Live'"
+          />
+        }
+
         <!-- Syllabus accordion -->
         <section class="animate-fade-in-up stagger-4">
           <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-3 gap-1">
@@ -305,10 +314,16 @@
                   <div class="flex items-start justify-between gap-3 mb-2">
                     <div class="flex items-center gap-3">
                       <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-primary)]/10 font-bold text-[var(--color-primary)] text-sm">
-                        {{ instructorInitial(rev.userName || 'U') }}
+                        @if (rev.userName; as reviewerName) {
+                          {{ instructorInitial(reviewerName) }}
+                        } @else {
+                          <ng-icon name="phosphorUsers" aria-hidden="true" />
+                        }
                       </div>
                       <div>
-                        <p class="text-sm font-semibold text-[var(--color-text)]">{{ rev.userName || 'ผู้เรียน' }}</p>
+                        <p class="text-sm font-semibold text-[var(--color-text)]">
+                          {{ rev.userName || ('catalog.detail.reviewerUnknown' | translate) }}
+                        </p>
                         <span class="text-[11px] text-[var(--color-text-muted)]">
                           {{ rev.createdAtUtc | date: 'dd/MM/yyyy' }}
                         </span>
@@ -402,6 +417,12 @@
                the mockup's static copy does — some courses genuinely have a time-limited access window
                (see `accessDurationLabel()`), and claiming lifetime access for those would be exactly the
                kind of fabricated UI state this project's rules forbid. -->
+          @if (course.liveSchedule; as liveSchedule) {
+            <div class="border-t border-[var(--color-border)] pt-4">
+              <app-course-live-summary [schedule]="liveSchedule" [format]="course.deliveryFormat === 'Hybrid' ? 'Hybrid' : 'Live'" />
+            </div>
+          }
+
           <div class="border-t border-[var(--color-border)] pt-4 flex flex-col gap-2.5 text-xs text-[var(--color-text)]">
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
               <ng-icon name="phosphorInfinity" class="text-[var(--color-primary)] text-sm shrink-0" />

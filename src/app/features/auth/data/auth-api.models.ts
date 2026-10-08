@@ -59,6 +59,21 @@ export interface RefreshResponse {
   readonly accessTokenExpiresAtUtc: string;
 }
 
+// ---- Me (GET /api/identity/me) ---------------------------------------------------------
+
+/**
+ * The signed-in caller's own profile. `GET /api/identity/me` answers 401 when there is no session.
+ * The access token itself only carries `sub`/`sid`/roles, so display name, email and avatar come
+ * from here (see `CurrentUserStore`).
+ */
+export interface MeResponse {
+  readonly id: string;
+  readonly email: string;
+  readonly displayName: string;
+  readonly avatarUrl: string | null;
+  readonly roles: readonly string[];
+}
+
 // ---- Logout (Features/Logout/Response.cs) ----------------------------------------
 
 export interface LogoutResponse {

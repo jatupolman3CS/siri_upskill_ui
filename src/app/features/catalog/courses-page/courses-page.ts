@@ -4,9 +4,11 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
+import type { DeliveryFormat } from '../../live/data/live.models';
 import { CategoryTreeNode } from '../data/category-api.models';
 import { CategoryApiService } from '../data/category-api.service';
 import { SearchCoursesQuery, CourseSearchSort, SearchCoursesResponse } from '../data/course-api.models';
+import { CourseFormatFilter, parseDeliveryFormat } from './course-format-filter/course-format-filter';
 import { CourseApiService } from '../data/course-api.service';
 import { findCategoryBySlug } from '../category-tree.util';
 import { resolveCategoryIconName } from '../category-icon';
@@ -20,6 +22,8 @@ import { InputField } from '../../../shared/input/input';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { SelectField, SelectOption } from '../../../shared/select/select';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
+import { CourseFormatBadge } from '../../live/ui/course-format-badge/course-format-badge';
+import { CourseNextSession } from '../../live/ui/course-format-badge/course-next-session';
 import { SearchAutocompleteComponent } from '../search-autocomplete/search-autocomplete.component';
 
 const PAGE_SIZE = 20;
@@ -81,6 +85,9 @@ function toPositiveNumberOrNull(value: string | null): number | null {
     SelectField,
     Skeleton,
     SearchAutocompleteComponent,
+    CourseFormatBadge,
+    CourseNextSession,
+    CourseFormatFilter,
   ],
   templateUrl: './courses-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,6 +109,8 @@ export class CoursesPage {
   protected readonly searchText = computed(() => this.queryParamMap().get('q') ?? '');
   protected readonly categorySlug = computed(() => this.queryParamMap().get('category'));
   protected readonly instructorId = computed(() => this.queryParamMap().get('instructorId'));
+  /** Delivery format (OnDemand | Live | Hybrid) — the URL is its only source of truth, like every other filter here. */
+  protected readonly format = computed(() => parseDeliveryFormat(this.queryParamMap().get('format')));
   protected readonly level = computed(() => this.queryParamMap().get('level'));
   protected readonly minPrice = computed(() => toPositiveNumberOrNull(this.queryParamMap().get('minPrice')));
   protected readonly maxPrice = computed(() => toPositiveNumberOrNull(this.queryParamMap().get('maxPrice')));
@@ -114,6 +123,7 @@ export class CoursesPage {
       !!this.searchText() ||
       !!this.categorySlug() ||
       !!this.instructorId() ||
+      this.format() !== null ||
       !!this.level() ||
       this.minPrice() !== null ||
       this.maxPrice() !== null ||
@@ -153,6 +163,7 @@ export class CoursesPage {
         q: this.searchText() || undefined,
         categoryId: this.categoryId(),
         instructorId: this.instructorId() || undefined,
+        format: this.format() ?? undefined,
         level: (this.level() as SearchCoursesQuery['level']) ?? undefined,
         minPrice: this.minPrice() ?? undefined,
         maxPrice: this.maxPrice() ?? undefined,
@@ -259,9 +270,14 @@ export class CoursesPage {
   }
 
   protected readonly instructorFacets = computed(() => this.searchResult().facets.instructors ?? []);
+  protected readonly formatFacets = computed(() => this.searchResult().facets.formats);
 
   protected toggleCategory(slug: string): void {
     this.updateQueryParams({ category: this.categorySlug() === slug ? null : slug, page: null });
+  }
+
+  protected setFormat(format: DeliveryFormat | null): void {
+    this.updateQueryParams({ format, page: null });
   }
 
   protected toggleInstructor(id: string): void {

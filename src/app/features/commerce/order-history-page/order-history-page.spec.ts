@@ -1,8 +1,10 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
+import { errorInterceptor } from '../../../core/http/error.interceptor';
 import { PagedResult } from '../../../core/http/paged-result.model';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { OrderDetailResponse, TaxInvoiceResponse } from '../data/commerce-api.models';
@@ -21,6 +23,7 @@ const MOCK_ORDERS: PagedResult<OrderDetailResponse> = {
       status: 'Paid',
       createdAtUtc: '2026-08-25T10:00:00Z',
       paidAtUtc: '2026-08-25T10:05:00Z',
+      paymentId: 'pay-001',
       items: [
         {
           id: 'item-001',
@@ -210,14 +213,16 @@ describe('OrderHistoryPage', () => {
 
     const refundReq = httpMock.expectOne('/api/commerce/refunds');
     expect(refundReq.request.method).toBe('POST');
+    // The payment id, never the order id (`ord-001`) — the API's `paymentId` field is a Payments row.
     expect(refundReq.request.body).toEqual({
-      paymentId: 'ord-001',
+      paymentId: 'pay-001',
+      amount: 800,
       reason: 'Purchased wrong course by mistake',
     });
 
     refundReq.flush({
       id: 'ref-001',
-      paymentId: 'ord-001',
+      paymentId: 'pay-001',
       amount: 800,
       reason: 'Purchased wrong course by mistake',
       status: 'Pending',
@@ -230,5 +235,191 @@ describe('OrderHistoryPage', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Refund request submitted successfully');
+  });
+});
+
+describe('OrderHistoryPage refund blocked by live attendance (409 refund.live_attended)', () => {
+  let fixture: ComponentFixture<OrderHistoryPage>;
+  let httpMock: HttpTestingController;
+
+  function root(): HTMLElement {
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  function button(text: string): HTMLButtonElement | undefined {
+    return Array.from(root().querySelectorAll('button')).find((b) => b.textContent?.includes(text));
+  }
+
+  /** Opens the refund modal for the paid order and submits a reason; returns the refund request. */
+  function submitRefund() {
+    button('Request Refund')?.click();
+    fixture.detectChanges();
+    const textarea = root().querySelector('textarea') as HTMLTextAreaElement;
+    textarea.value = 'Not what I expected';
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    button('Submit Request')?.click();
+    fixture.detectChanges();
+    return httpMock.expectOne('/api/commerce/refunds');
+  }
+
+  function refuse(req: ReturnType<typeof submitRefund>, details: Record<string, unknown>): void {
+    req.flush(
+      { status: 409, errorCode: 'conflict', reason: 'refund.live_attended', title: 'Conflict', ...details },
+      { status: 409, statusText: 'Conflict' },
+    );
+    fixture.detectChanges();
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [OrderHistoryPage],
+      providers: [provideHttpClient(withFetch(), withInterceptors([errorInterceptor])), provideHttpClientTesting(), provideRouter([])],
+    });
+    fixture = TestBed.createComponent(OrderHistoryPage);
+    httpMock = TestBed.inject(HttpTestingController);
+    TestBed.inject(TranslationService).setLocale('en');
+    fixture.detectChanges();
+    httpMock.expectOne('/api/commerce/orders?page=1&pageSize=10').flush(MOCK_ORDERS);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('explains the refusal, lists the blocked courses and offers the maximum the server reported', () => {
+    refuse(submitRefund(), { blockedCourseTitles: ['Full-Stack Angular & .NET 10'], maxRefundableAmount: 300, blockedAmount: 500 });
+
+    const alert = root().querySelector('[role="alert"]') as HTMLElement;
+    expect(alert.textContent).toContain("You've joined a live session of a course in this order");
+    expect(alert.textContent).toContain('Full-Stack Angular & .NET 10');
+    expect(alert.textContent).toContain('Maximum refundable amount');
+    expect(alert.textContent).toContain('300');
+    expect(button('Request the maximum refund')).toBeDefined();
+    // The generic error message must not also appear.
+    expect(root().textContent).not.toContain('Unable to submit refund request');
+  });
+
+  it('requests exactly the server-reported maximum when that button is pressed', () => {
+    refuse(submitRefund(), { blockedCourseTitles: ['Full-Stack Angular & .NET 10'], maxRefundableAmount: 300, blockedAmount: 500 });
+
+    button('Request the maximum refund')?.click();
+    fixture.detectChanges();
+    const retry = httpMock.expectOne('/api/commerce/refunds');
+    expect(retry.request.body).toEqual({ paymentId: 'pay-001', amount: 300, reason: 'Not what I expected' });
+    retry.flush({
+      id: 'ref-002', paymentId: 'pay-001', amount: 300, reason: 'Not what I expected',
+      status: 'Pending', requestedAtUtc: '2026-08-25T12:00:00Z',
+    });
+    httpMock.expectOne('/api/commerce/orders?page=1&pageSize=10').flush(MOCK_ORDERS);
+    fixture.detectChanges();
+    expect(root().textContent).toContain('Refund request submitted successfully');
+  });
+
+  it('offers no retry when nothing at all is refundable', () => {
+    refuse(submitRefund(), { blockedCourseTitles: ['Full-Stack Angular & .NET 10'], maxRefundableAmount: 0, blockedAmount: 800 });
+    expect(root().querySelector('[role="alert"]')?.textContent).toContain("You've joined a live session");
+    expect(button('Request the maximum refund')).toBeUndefined();
+  });
+
+  it('keeps the generic error for any other failed refund', () => {
+    const req = submitRefund();
+    req.flush({ status: 400, title: 'Bad' }, { status: 400, statusText: 'Bad Request' });
+    fixture.detectChanges();
+    expect(root().querySelector('[role="alert"]')).toBeNull();
+    expect(root().textContent).toContain('Unable to submit refund request');
+  });
+
+  it('clears the notice when the modal is closed and reopened', () => {
+    refuse(submitRefund(), { blockedCourseTitles: [], maxRefundableAmount: 300, blockedAmount: 500 });
+    expect(root().querySelector('[role="alert"]')).not.toBeNull();
+    // The modal's own Cancel button (the order cards have unrelated buttons with similar labels).
+    const modal = (root().querySelector('textarea') as HTMLTextAreaElement).closest('app-modal') as HTMLElement;
+    Array.from(modal.querySelectorAll('button')).find((b) => b.textContent?.includes('Cancel'))?.click();
+    fixture.detectChanges();
+    button('Request Refund')?.click();
+    fixture.detectChanges();
+    expect(root().querySelector('[role="alert"]')).toBeNull();
+  });
+});
+
+describe('OrderHistoryPage paid order without a succeeded payment (paymentId null)', () => {
+  let fixture: ComponentFixture<OrderHistoryPage>;
+  let httpMock: HttpTestingController;
+
+  const FREE_ORDER: PagedResult<OrderDetailResponse> = {
+    items: [
+      {
+        id: 'ord-free',
+        orderNo: 'SU-260825-100',
+        subtotalAmount: 0,
+        discountAmount: 0,
+        taxAmount: 0,
+        totalAmount: 0,
+        currency: 'THB',
+        status: 'Paid',
+        createdAtUtc: '2026-08-25T10:00:00Z',
+        paidAtUtc: '2026-08-25T10:00:00Z',
+        paymentId: null,
+        items: [{ id: 'item-free', courseId: 'course-free', titleSnapshot: 'Free intro course', unitPrice: 0, lineTotal: 0 }],
+      },
+    ],
+    totalCount: 1,
+    page: 1,
+    pageSize: 10,
+    totalPages: 1,
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [OrderHistoryPage],
+      providers: [provideHttpClient(withFetch()), provideHttpClientTesting(), provideRouter([])],
+    });
+    fixture = TestBed.createComponent(OrderHistoryPage);
+    httpMock = TestBed.inject(HttpTestingController);
+    TestBed.inject(TranslationService).setLocale('en');
+    fixture.detectChanges();
+    httpMock.expectOne('/api/commerce/orders?page=1&pageSize=10').flush(FREE_ORDER);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('hides the refund action and says why instead', () => {
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('SU-260825-100');
+    expect(text).not.toContain('Request Refund');
+    expect(text).toContain('No payment to refund on this order');
+  });
+
+  it('never sends a refund request even if the modal is driven programmatically', () => {
+    const page = fixture.componentInstance as unknown as {
+      openRefundModal(order: OrderDetailResponse): void;
+      refundReason: { set(value: string): void };
+      submitRefund(): void;
+    };
+    page.openRefundModal(FREE_ORDER.items[0]);
+    page.refundReason.set('Because');
+    page.submitRefund();
+    httpMock.expectNone('/api/commerce/refunds');
+  });
+});
+
+describe('OrderHistoryPage document title', () => {
+  it('sets the translated title and description, never the raw i18n keys', () => {
+    TestBed.configureTestingModule({
+      imports: [OrderHistoryPage],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+    });
+    TestBed.inject(TranslationService).setLocale('en');
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    TestBed.createComponent(OrderHistoryPage).detectChanges();
+    httpMock.expectOne('/api/commerce/orders?page=1&pageSize=10').flush({ items: [], totalCount: 0, page: 1, pageSize: 10 });
+
+    expect(TestBed.inject(Title).getTitle()).toBe('Order History | SIRI UpSkill');
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
+      'View your order history, receipts, and payment statuses.',
+    );
+    httpMock.verify();
   });
 });

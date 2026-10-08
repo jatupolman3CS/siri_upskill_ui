@@ -11,10 +11,24 @@ body {
 }
 
 /* Keeps scroll-to/focus targets (skip link, focus-on-route-change, browser
-   "find in page") from landing underneath the sticky site header (h-16 =
-   4rem) — WCAG 2.2 focus-not-obscured. */
+   "find in page") from landing underneath the sticky site header — WCAG 2.2
+   focus-not-obscured. Pinned header height: 3.5rem on small screens (logo row
+   only — the search row scrolls away), 4.5rem from md (main row), 7.5rem from
+   lg (main row + secondary nav row), plus a little breathing room. */
 html {
   scroll-padding-top: 4rem;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 8rem;
+  }
 }
 
 /* iOS Safe Area insets */

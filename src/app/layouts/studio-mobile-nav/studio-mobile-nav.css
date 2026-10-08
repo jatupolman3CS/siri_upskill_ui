@@ -1,0 +1,28 @@
+/* Slide-in-from-left entrance only: transform/opacity, so it composites instead of triggering layout. The panel
+   unmounts immediately on close via `@if`, so there is no exit transition to gate behind prefers-reduced-motion. */
+@keyframes studio-mobile-nav-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes studio-mobile-nav-panel-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+.studio-mobile-nav-overlay {
+  animation: studio-mobile-nav-overlay-in 200ms ease-out;
+}
+
+.studio-mobile-nav-panel {
+  animation: studio-mobile-nav-panel-in 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-mobile-nav-overlay,
+  .studio-mobile-nav-panel {
+    animation: none;
+  }
+}

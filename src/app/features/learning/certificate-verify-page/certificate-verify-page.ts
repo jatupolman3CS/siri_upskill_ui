@@ -24,9 +24,12 @@ import {
 
 import { CertificateVerificationResponse } from '../data/learning-api.models';
 import { LearningApiService } from '../data/learning-api.service';
+import { notConfiguredMessageKey } from '../../../core/http/provider-errors';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-certificate-verify-page',
@@ -51,6 +54,8 @@ export class CertificateVerifyPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly learningApi = inject(LearningApiService);
   private readonly seoService = inject(SeoService);
+  private readonly toast = inject(ToastService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly searchCode = signal('');
   protected readonly isSearching = signal(false);
@@ -58,15 +63,14 @@ export class CertificateVerifyPage implements OnInit {
   protected readonly isNotFound = signal(false);
   protected readonly copied = signal(false);
 
+  // The public verify endpoint returns null for a name it cannot resolve (it must never substitute
+  // another value) — stay blank here and let the template show a neutral "not provided" label.
   protected readonly recipient = computed(() => {
     const cert = this.certificate();
-    return cert?.learnerName ?? cert?.recipientName ?? 'ผู้เรียน Siri UpSkill';
+    return cert?.learnerName ?? cert?.recipientName ?? '';
   });
 
-  protected readonly course = computed(() => {
-    const cert = this.certificate();
-    return cert?.courseTitle ?? 'คอร์สเรียนออนไลน์';
-  });
+  protected readonly course = computed(() => this.certificate()?.courseTitle ?? '');
 
   protected readonly serial = computed(() => {
     const cert = this.certificate();
@@ -80,8 +84,8 @@ export class CertificateVerifyPage implements OnInit {
       this.verify(code);
     } else {
       this.seoService.set({
-        title: 'ตรวจสอบใบประกาศนียบัตร | SIRI UpSkill',
-        description: 'ระบบตรวจสอบความถูกต้องของใบประกาศนียบัตรออนไลน์ SIRI UpSkill',
+        title: this.translation.t('certificateVerify.pageTitle'),
+        description: this.translation.t('certificateVerify.pageDescription'),
         path: '/certificates/verify',
       });
     }
@@ -131,7 +135,13 @@ export class CertificateVerifyPage implements OnInit {
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: () => {
+      error: (error: unknown) => {
+        // Server-side "certificates not available yet" is explained in plain words; re-pressing the button retries.
+        const notConfiguredKey = notConfiguredMessageKey(error);
+        if (notConfiguredKey) {
+          this.toast.error(this.translation.t(notConfiguredKey));
+          return;
+        }
         window.open(`/api/learning/certificates/verify/${encodeURIComponent(cert.verifyCode)}/download`, '_blank');
       },
     });
@@ -143,8 +153,8 @@ export class CertificateVerifyPage implements OnInit {
     this.certificate.set(null);
 
     this.seoService.set({
-      title: `ตรวจสอบใบประกาศนียบัตร: ${code} | SIRI UpSkill`,
-      description: 'ระบบตรวจสอบความถูกต้องของใบประกาศนียบัตรออนไลน์ SIRI UpSkill',
+      title: this.translation.t('certificateVerify.codePageTitle', { code }),
+      description: this.translation.t('certificateVerify.pageDescription'),
       path: `/certificates/verify/${code}`,
     });
 

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,9 +19,13 @@ import {
   phosphorReceipt,
 } from '@ng-icons/phosphor-icons/regular';
 
+import { notConfiguredMessageKey } from '../../../core/http/provider-errors';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { saveBlob } from '../../live/learner/save-blob';
 import { CommerceApiService } from '../data/commerce-api.service';
 import { LearningApiService } from '../../learning/data/learning-api.service';
 
@@ -35,7 +39,7 @@ export interface OrderSuccessSummary {
     title: string;
     slug: string;
     price: number;
-    thumbnailUrl: string;
+    thumbnailUrl: string | null;
   }[];
 }
 
@@ -62,15 +66,19 @@ export class OrderSuccessPage implements OnInit {
   private readonly router = inject(Router);
   private readonly learningApi = inject(LearningApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+  private readonly toast = inject(ToastService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly isLoading = signal(false);
+  protected readonly isDownloadingReceipt = signal(false);
   protected readonly order = signal<OrderSuccessSummary | null>(null);
   protected readonly loadError = signal(false);
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'ชำระเงินสำเร็จ | SIRI UpSkill',
-      description: 'ยืนยันคำสั่งซื้อและการลงทะเบียนเรียน',
+      title: this.translation.t('checkout.successPageTitle'),
+      description: this.translation.t('checkout.successPageDescription'),
       path: '/checkout/success',
       robots: 'noindex',
     });
@@ -95,7 +103,7 @@ export class OrderSuccessPage implements OnInit {
               title: i.titleSnapshot,
               slug: '',
               price: i.lineTotal,
-              thumbnailUrl: i.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600',
+              thumbnailUrl: i.thumbnailUrl || null,
             })),
           });
           this.isLoading.set(false);
@@ -120,19 +128,23 @@ export class OrderSuccessPage implements OnInit {
     }
   }
 
+  /**
+   * Downloads the server-rendered receipt PDF (`GET /api/commerce/orders/{id}/receipt`). A failure — including the
+   * server's "receipt seller details are not configured" 503 — is explained in plain words; pressing the button again
+   * is the retry.
+   */
   protected downloadReceipt(): void {
     const ord = this.order();
-    if (!ord) return;
-    this.commerceApi.getTaxInvoiceByOrderId(ord.orderId).subscribe({
-      next: (inv) => {
-        if (inv?.pdfStorageKey) {
-          window.open(inv.pdfStorageKey, '_blank');
-        } else {
-          alert('ยังไม่มีใบเสร็จรับเงินสำหรับคำสั่งซื้อนี้');
-        }
+    if (!ord || this.isDownloadingReceipt()) return;
+    this.isDownloadingReceipt.set(true);
+    this.commerceApi.downloadOrderReceiptPdf(ord.orderId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (blob) => {
+        saveBlob(this.document, blob, `receipt-${ord.orderNo}.pdf`);
+        this.isDownloadingReceipt.set(false);
       },
-      error: () => {
-        alert('ไม่สามารถดาวน์โหลดใบเสร็จรับเงินได้ กรุณาลองใหม่ภายหลัง');
+      error: (error: unknown) => {
+        this.isDownloadingReceipt.set(false);
+        this.toast.error(this.translation.t(notConfiguredMessageKey(error) ?? 'orders.receipt.downloadFailed'));
       },
     });
   }

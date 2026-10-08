@@ -1,0 +1,29 @@
+<form
+  role="search"
+  (submit)="submit($event)"
+  class="flex h-[3.25rem] w-full items-center gap-2 rounded-full border-2 border-[var(--color-primary)]/30
+    bg-[var(--color-bg)] pl-4 pr-0.5 transition-colors duration-200 ease-out
+    focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-focus-ring)]/30"
+>
+  <ng-icon name="phosphorMagnifyingGlass" aria-hidden="true" class="shrink-0 text-lg text-[var(--color-text-muted)]" />
+  <input
+    type="text"
+    inputmode="search"
+    enterkeyhint="search"
+    autocomplete="off"
+    [formControl]="searchControl"
+    [attr.aria-label]="'nav.searchLabel' | translate"
+    [placeholder]="'nav.searchPlaceholder' | translate"
+    class="h-full min-w-0 flex-1 bg-transparent text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]
+      focus:outline-none"
+  />
+  <button
+    type="submit"
+    class="flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--color-primary)] px-5 text-sm
+      font-semibold text-[var(--color-primary-foreground)] transition-colors duration-200 ease-out
+      hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+  >
+    {{ 'nav.searchButton' | translate }}
+  </button>
+</form>

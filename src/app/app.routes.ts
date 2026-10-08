@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
@@ -47,14 +48,17 @@ export const routes: Routes = [
           import('./features/catalog/wishlist-page/wishlist-page').then((m) => m.WishlistPage),
       },
       // Auth pages (P0-35) — unauthenticated flows against the real Identity API. See
-      // app.routes.server.ts for each route's SSR/CSR rendering decision and why.
+      // app.routes.server.ts for each route's SSR/CSR rendering decision and why. /register, /login and
+      // /forgot-password are guests-only (guestGuard): someone already signed in is sent to /.
       {
         path: 'register',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/register/register-page').then((m) => m.RegisterPage),
       },
       {
         path: 'login',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/login/login-page').then((m) => m.LoginPage),
       },
@@ -65,6 +69,7 @@ export const routes: Routes = [
       },
       {
         path: 'forgot-password',
+        canActivate: [guestGuard],
         loadComponent: () =>
           import('./features/auth/forgot-password/forgot-password-page').then((m) => m.ForgotPasswordPage),
       },
@@ -170,6 +175,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/learning/my-courses-page/my-courses-page').then((m) => m.MyCoursesPage),
       },
+      // Live room hand-off (P11) — the server-gated join; CSR + noindex (see app.routes.server.ts). The join call
+      // itself is made once from the page's afterNextRender(), never from a resolver, so a prefetch cannot trigger it.
+      {
+        path: 'live/:sessionId/join',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/live/learner/live-join-page/live-join-page').then((m) => m.LiveJoinPage),
+      },
       // Certificate Verification (P5-22) — Public credential verification
       {
         path: 'certificates/verify',
@@ -259,6 +272,22 @@ export const routes: Routes = [
         path: 'onboarding',
         loadComponent: () =>
           import('./features/instructor/onboarding/instructor-onboarding-page').then((m) => m.InstructorOnboardingPage),
+      },
+      // Live teaching (P11) — Google Calendar connection + live-session management.
+      {
+        path: 'live-settings',
+        loadComponent: () =>
+          import('./features/live/instructor/live-settings-page/live-settings-page').then((m) => m.LiveSettingsPage),
+      },
+      {
+        path: 'sessions',
+        loadComponent: () =>
+          import('./features/live/instructor/sessions-page/sessions-page').then((m) => m.SessionsPage),
+      },
+      {
+        path: 'sessions/:id',
+        loadComponent: () =>
+          import('./features/live/instructor/session-detail-page/session-detail-page').then((m) => m.SessionDetailPage),
       },
     ],
   },

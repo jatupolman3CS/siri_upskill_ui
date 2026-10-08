@@ -1,3 +1,5 @@
+import { phosphorCode, phosphorCoins, phosphorFolder, phosphorMegaphone } from '@ng-icons/phosphor-icons/regular';
+
 /**
  * Maps `CategoryTreeNode.iconKey` (a free-form string — the backend's `CreateCategoryValidator` only
  * caps its length, no allow-list) to a Phosphor icon name registered via `@ng-icons/phosphor-icons`.
@@ -10,6 +12,10 @@ const ICON_KEY_TO_NAME: Readonly<Record<string, string>> = {
   code: 'phosphorCode',
   coins: 'phosphorCoins',
 };
+
+/** The icon set `resolveCategoryIconName` can return — register it with `provideIcons(CATEGORY_ICONS)` wherever
+ *  a category icon is rendered, otherwise the glyph silently does not draw. */
+export const CATEGORY_ICONS = { phosphorMegaphone, phosphorCode, phosphorCoins, phosphorFolder };
 
 const FALLBACK_ICON_NAME = 'phosphorFolder';
 

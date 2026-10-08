@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -23,7 +24,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 
 export interface AnnouncementHistoryItem {
   id: string;
-  courseTitle: string;
+  courseId: string;
   title: string;
   message: string;
   sentAtUtc: string;
@@ -64,6 +65,13 @@ export class InstructorAnnouncementsPage implements OnInit {
 
   protected readonly announcements = signal<AnnouncementHistoryItem[]>([]);
 
+  /** History rows with the real title of their course. Resolved reactively because the courses list and
+   *  the history load in parallel; a course the list does not contain simply shows no title badge. */
+  protected readonly announcementRows = computed(() => {
+    const titles = new Map(this.courses().map((course) => [course.id, course.title]));
+    return this.announcements().map((item) => ({ ...item, courseTitle: titles.get(item.courseId) ?? null }));
+  });
+
   ngOnInit(): void {
     this.seoService.set({
       title: 'ส่งประกาศถึงผู้เรียน | Instructor Studio',
@@ -92,7 +100,7 @@ export class InstructorAnnouncementsPage implements OnInit {
           this.announcements.set(
             res.map((item) => ({
               id: item.id,
-              courseTitle: 'คอร์สของฉัน',
+              courseId: item.courseId,
               title: item.title,
               message: item.body,
               sentAtUtc: item.sentAtUtc ?? item.createdAtUtc,
@@ -124,10 +132,9 @@ export class InstructorAnnouncementsPage implements OnInit {
       })
       .subscribe({
         next: (created) => {
-          const course = this.courses().find((c) => c.id === this.selectedCourseId());
           const newAnn: AnnouncementHistoryItem = {
             id: created.id,
-            courseTitle: course?.title ?? 'คอร์สเรียน',
+            courseId: created.courseId,
             title: created.title,
             message: created.body,
             sentAtUtc: created.sentAtUtc ?? created.createdAtUtc,

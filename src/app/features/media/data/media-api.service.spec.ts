@@ -1,23 +1,24 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import type { UploadOptions } from 'tus-js-client';
+import { Upload, type UploadOptions } from 'tus-js-client';
 
 import { MediaApiService } from './media-api.service';
 import { MediaAssetResponse, MediaUploadSessionResponse } from './media-api.models';
 
-const tus = vi.hoisted(() => ({
+/**
+ * The real `Upload` class with `start`/`abort` spied on its prototype — NOT a module-level `vi.mock('tus-js-client')`.
+ * The Angular unit-test runner shares one module graph across spec files in a worker (`isolate: false`), so a module
+ * mock only applies if THIS file happens to be the first to load `media-api.service`; any other spec that reaches that
+ * service first (the live course-builder panel, the recording uploader, the course builder) silently ran the real TUS
+ * client here and failed `start`/`abort` roughly two full runs in three. Spying on the shared class works whichever
+ * file loaded it first.
+ */
+const tus = {
   options: undefined as UploadOptions | undefined,
   start: vi.fn(),
   abort: vi.fn(() => Promise.resolve()),
-}));
-vi.mock('tus-js-client', () => ({
-  Upload: class {
-    constructor(_file: File, options: UploadOptions) { tus.options = options; }
-    start = tus.start;
-    abort = tus.abort;
-  },
-}));
+};
 
 const ASSET: MediaAssetResponse = {
   id: 'asset-1', provider: 'BunnyStream', providerAssetId: 'bunny-1', playbackId: null,
@@ -32,6 +33,11 @@ describe('MediaApiService', () => {
   beforeEach(() => {
     tus.options = undefined;
     vi.clearAllMocks();
+    vi.spyOn(Upload.prototype, 'start').mockImplementation(function (this: Upload) {
+      tus.options = this.options;
+      tus.start();
+    });
+    vi.spyOn(Upload.prototype, 'abort').mockImplementation(() => tus.abort());
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -42,6 +48,7 @@ describe('MediaApiService', () => {
   afterEach(() => {
     httpMock.verify();
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('uses TUS authorization headers and reports completion only after server acknowledgement', () => {

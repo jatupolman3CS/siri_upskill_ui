@@ -36,6 +36,7 @@ import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
+import { type LiveRefundBlock, liveRefundBlockOf } from '../../live/data/live-errors';
 import { Button } from '../../../shared/button/button';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Modal } from '../../../shared/modal/modal';
@@ -125,6 +126,8 @@ export class OrderHistoryPage implements OnInit {
   protected readonly refundSubmitting = signal<boolean>(false);
   protected readonly refundSuccess = signal<boolean>(false);
   protected readonly refundError = signal<string | null>(null);
+  /** Set when the server refuses the refund because the learner already attended a live session (`P11-12`). */
+  protected readonly refundLiveBlock = signal<LiveRefundBlock | null>(null);
 
   protected readonly filteredOrders = computed(() => {
     let list = this.orders();
@@ -148,8 +151,8 @@ export class OrderHistoryPage implements OnInit {
 
   constructor() {
     setPageMeta({
-      title: 'orders.pageTitle',
-      description: 'orders.pageDescription',
+      title: this.translation.t('orders.pageTitle'),
+      description: this.translation.t('orders.pageDescription'),
       robots: 'noindex',
     });
   }
@@ -236,6 +239,7 @@ export class OrderHistoryPage implements OnInit {
     this.refundReason.set('');
     this.refundSuccess.set(false);
     this.refundError.set(null);
+    this.refundLiveBlock.set(null);
     this.refundModalOpen.set(true);
   }
 
@@ -245,27 +249,45 @@ export class OrderHistoryPage implements OnInit {
     this.refundReason.set('');
     this.refundSuccess.set(false);
     this.refundError.set(null);
+    this.refundLiveBlock.set(null);
   }
 
-  protected submitRefund(): void {
+  /** `amount` defaults to the whole order; the live-attendance notice offers the server's own maximum instead. */
+  protected submitRefund(amount?: number): void {
     const order = this.refundOrder();
     const reason = this.refundReason().trim();
-    if (!order || !reason) return;
+    // `paymentId` is the order's succeeded payment, never the order id; no payment means nothing to refund.
+    const paymentId = order?.paymentId;
+    if (!order || !paymentId || !reason) return;
 
     this.refundSubmitting.set(true);
     this.refundError.set(null);
+    this.refundLiveBlock.set(null);
 
-    this.commerceApi.requestRefund({ paymentId: order.id, reason }).subscribe({
+    this.commerceApi.requestRefund({ paymentId, amount: amount ?? order.totalAmount, reason }).subscribe({
       next: () => {
         this.refundSubmitting.set(false);
         this.refundSuccess.set(true);
         this.loadOrders(this.page());
       },
-      error: () => {
+      error: (error: unknown) => {
         this.refundSubmitting.set(false);
+        const liveBlock = liveRefundBlockOf(error);
+        if (liveBlock) {
+          this.refundLiveBlock.set(liveBlock);
+          return;
+        }
         this.refundError.set('orders.refund.errorMessage');
       },
     });
+  }
+
+  /** The refund request the server said it can accept: exactly the amount it reported as refundable. */
+  protected requestMaxRefundable(): void {
+    const block = this.refundLiveBlock();
+    if (block && block.maxRefundableAmount > 0) {
+      this.submitRefund(block.maxRefundableAmount);
+    }
   }
 
   protected formatDate(dateStr?: string): string {

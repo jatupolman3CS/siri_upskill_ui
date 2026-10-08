@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 
 import { ApiService } from '../../../core/http/api.service';
 import { PagedResult } from '../../../core/http/paged-result.model';
+import { restoreBlobProblem } from '../../../core/http/provider-errors';
 import {
   BundleResponse,
   CreateOrderCommand,
@@ -57,6 +58,13 @@ export class CommerceApiService extends ApiService {
 
   getTaxInvoiceByOrderId(orderId: string): Observable<TaxInvoiceResponse> {
     return this.get<TaxInvoiceResponse>(`/commerce/tax-invoices/by-order/${encodeURIComponent(orderId)}`);
+  }
+
+  /** `GET /api/commerce/orders/{orderId}/receipt` — the receipt PDF of the caller's own paid order. */
+  downloadOrderReceiptPdf(orderId: string): Observable<Blob> {
+    return this.http
+      .get(`${this.apiBaseUrl}/commerce/orders/${encodeURIComponent(orderId)}/receipt`, { responseType: 'blob' })
+      .pipe(restoreBlobProblem());
   }
 
   requestRefund(command: RequestRefundCommand): Observable<RefundResponse> {

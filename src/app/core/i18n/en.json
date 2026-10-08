@@ -2,9 +2,41 @@
   "common": {
     "appName": "SIRI UpSkill",
     "loading": "Loading...",
-    "error": "An error occurred. Please try again."
+    "error": "An error occurred. Please try again.",
+    "notConfigured": {
+      "receiptSeller": "Receipts are temporarily unavailable while our company details are being set up. Please try again later.",
+      "certificatePublicUrl": "Certificate downloads are temporarily unavailable. Please try again later.",
+      "payoutPayer": "Withholding tax certificates are temporarily unavailable. Please try again later or contact support.",
+      "attachmentScanner": "File uploads are temporarily unavailable because files cannot be checked for viruses right now. Please try again later.",
+      "paymentProvider": "Payments are temporarily unavailable and you have not been charged. Please try again later.",
+      "videoProvider": "Video uploads and playback are temporarily unavailable. Please try again later.",
+      "generic": "This feature is temporarily unavailable. Please try again later."
+    }
+  },
+  "studio": {
+    "nav": {
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "switchHeading": "Switch view"
+    }
   },
   "admin": {
+    "nav": {
+      "menuTitle": "Admin menu",
+      "dashboard": "System dashboard",
+      "moderation": "Course moderation",
+      "users": "Users & roles",
+      "marketing": "Marketing & discount codes",
+      "banners": "Banners",
+      "menus": "Navigation menus",
+      "posts": "Articles & news (CMS)",
+      "payouts": "Instructor payouts",
+      "payments": "Payments",
+      "contact": "Contact messages",
+      "toInstructor": "Instructor mode",
+      "toLearner": "Learner view",
+      "toHome": "Go to home page"
+    },
     "contactMessages": {
       "title": "Contact Messages",
       "description": "Manage and resolve user inquiries ({{count}} total)",
@@ -58,6 +90,9 @@
       "btnCancel": "Cancel",
       "btnSave": "Save",
       "saving": "Saving..."
+    },
+    "dashboard": {
+      "courseTitleUnavailable": "Course title unavailable"
     },
     "moderation": {
       "title": "Course Moderation Queue",
@@ -182,7 +217,24 @@
     "menuTitle": "Navigation menu",
     "skipToContent": "Skip to main content",
     "languageThai": "ไทย",
-    "languageEnglish": "English"
+    "languageEnglish": "English",
+    "courses": "Courses",
+    "tagline": "Practical, work-ready skills from expert instructors",
+    "brandSubtitle": "Online learning",
+    "searchLabel": "Search courses",
+    "searchPlaceholder": "Search courses, skills, or topics...",
+    "searchButton": "Search",
+    "languageMenuLabel": "Choose language",
+    "wishlist": "Wishlist",
+    "wishlistCount": "Wishlist ({{count}} items)",
+    "cartCount": "Cart ({{count}} items)",
+    "accountMenu": "My account menu",
+    "accountFallbackName": "My account",
+    "myLiveSessions": "My live sessions",
+    "privacyData": "Privacy & data (PDPA)",
+    "adminPanel": "Admin panel",
+    "bottomNavLabel": "Bottom navigation",
+    "account": "Account"
   },
   "notifications": {
     "heading": "Notifications",
@@ -196,7 +248,17 @@
   },
   "footer": {
     "tagline": "An online learning platform for building practical, work-ready skills.",
-    "copyright": "© {{year}} SIRI UpSkill. All rights reserved."
+    "copyright": "© {{year}} SIRI UpSkill. All rights reserved.",
+    "linksLabel": "Useful links",
+    "legalLabel": "Legal",
+    "courses": "Courses",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "verifyCertificate": "Verify a certificate",
+    "terms": "Terms of use",
+    "privacy": "Privacy policy",
+    "refundPolicy": "Refund policy"
   },
   "home": {
     "pageDescription": "SIRI UpSkill is an online learning platform — learn new skills from real instructors.",
@@ -286,6 +348,7 @@
       "instructorHeading": "Instructor",
       "reviewsHeading": "Reviews",
       "noReviewsYet": "No reviews yet for this course",
+      "reviewerUnknown": "Learner",
       "buyButton": "Buy this course",
       "buyComingSoon": "Payment will be available soon",
       "accessDurationLifetime": "Lifetime access",
@@ -306,6 +369,7 @@
     "errorHeading": "Couldn't load articles",
     "errorDescription": "Something went wrong while loading articles. Please try again.",
     "retryButton": "Try again",
+    "readingTime": "{{minutes}} min read",
     "detail": {
       "loadingLabel": "Loading article",
       "notFoundHeading": "Article not found",
@@ -390,7 +454,8 @@
       "submitting": "Logging in…",
       "forgotPasswordLink": "Forgot your password?",
       "registerPrompt": "Don't have an account?",
-      "registerLink": "Sign up"
+      "registerLink": "Sign up",
+      "orWithEmail": "Or log in with email"
     },
     "forgotPassword": {
       "pageTitle": "Forgot password",
@@ -444,6 +509,8 @@
   "checkout": {
     "pageTitle": "Checkout | SIRI UpSkill",
     "pageDescription": "Complete your course enrollment with PromptPay QR",
+    "successPageTitle": "Payment successful | SIRI UpSkill",
+    "successPageDescription": "Order confirmation and course enrollment",
     "heading": "Checkout",
     "itemCount": "Checkout · {{count}} course(s)",
     "paymentMethodHeading": "Payment Method",
@@ -500,6 +567,7 @@
     },
     "error": {
       "orderNotFound": "Order not found",
+      "orderMissing": "No order found. Please create an order from your cart.",
       "createPaymentFailed": "Failed to initiate payment. Please try again.",
       "retry": "Try again"
     }
@@ -512,7 +580,9 @@
       "failedMessage": "Something went wrong while renewing the video link. Press retry, or refresh the page to keep watching."
     },
     "pageTitle": "Classroom | SIRI UpSkill",
+    "courseSeoTitle": "Classroom: {{title}} | SIRI UpSkill",
     "pageDescription": "Online learning classroom with automatic progress tracking",
+    "playbackNoAccess": "You cannot access this video. Please enroll in the course or check your access rights.",
     "backToCourse": "Back to Course",
     "progress": "Progress",
     "completed": "Completed",
@@ -616,6 +686,7 @@
     }
   },
   "myCourses": {
+    "courseTitleUnavailable": "Course title unavailable",
     "pageTitle": "My Courses | SIRI UpSkill",
     "pageDescription": "All your enrolled courses, learning progress, and certificates",
     "heading": "My Courses",
@@ -636,6 +707,7 @@
   },
   "certificateVerify": {
     "pageTitle": "Verify Certificate | SIRI UpSkill",
+    "codePageTitle": "Verify Certificate: {{code}} | SIRI UpSkill",
     "pageDescription": "Online verification system for official SIRI UpSkill certificates",
     "heading": "Verify Certificate",
     "subheading": "Validate credential authenticity issued by SIRI UpSkill",
@@ -644,6 +716,7 @@
     "verifiedHeading": "This certificate is valid and authentic",
     "verifiedSubheading": "Issued officially by SIRI UpSkill Certificate Authority",
     "recipient": "Awarded To",
+    "notProvided": "Not provided",
     "course": "Course",
     "instructor": "Instructor",
     "issuedDate": "Issued On",
@@ -664,6 +737,20 @@
     "searching": "Searching..."
   },
   "instructor": {
+    "analytics": {
+      "neverActive": "Has not opened the course yet"
+    },
+    "nav": {
+      "menuTitle": "Instructor Studio menu",
+      "dashboard": "Dashboard",
+      "courses": "My courses",
+      "analytics": "Analytics",
+      "announcements": "Announcements",
+      "earnings": "Earnings & revenue share",
+      "toAdmin": "Admin mode",
+      "toLearner": "Switch to learner view",
+      "createCourse": "Create a new course"
+    },
     "builder": {
       "pageTitle": "Course Studio Builder | SIRI UpSkill",
       "pageDescription": "Course creation and curriculum management tool",
@@ -696,6 +783,7 @@
         "publish": "3. Review & Publish"
       },
       "validation": {
+        "titleRequired": "Please enter a course title before saving.",
         "categoryRequired": "Please select a course category before saving.",
         "mediaNotReady": "Upload a video for every lesson and wait for all lesson videos and the selected trailer to finish processing before submitting for review."
       },
@@ -796,6 +884,66 @@
         "transferred": "Transferred",
         "failed": "Failed"
       }
+    },
+    "dashboard": {
+      "pageTitle": "Instructor dashboard | SIRI UpSkill Studio",
+      "pageDescription": "An overview of your revenue, learners, courses and live sessions on SIRI UpSkill.",
+      "heading": "Studio overview",
+      "subheading": "Check your revenue, learners, courses and latest live sessions.",
+      "createCourse": "Create a new course",
+      "errorHeading": "Could not load the dashboard",
+      "errorDescription": "Check your internet connection and try again.",
+      "retry": "Try again",
+      "kpi": {
+        "revenue": "Net revenue in {{month}}",
+        "revenueChange": "{{percent}} vs last month",
+        "revenueNoBaseline": "No revenue last month to compare with",
+        "students": "Total learners",
+        "studentsNew": "+{{count}} in the last 7 days",
+        "courses": "Published courses",
+        "coursesOfTotal": "of {{total}} in total",
+        "rating": "Average rating",
+        "ratingCount": "from {{count}} review(s)",
+        "noReviews": "No reviews yet"
+      },
+      "live": {
+        "nextHeading": "Next live session",
+        "expected": "{{count}} learner(s) invited",
+        "roomNotReady": "This session has no usable room yet. Learners cannot join until a working room link exists.",
+        "manage": "Manage this session",
+        "fixRoom": "Set up this session’s room",
+        "noNext": "No upcoming live session.",
+        "allSessions": "Go to my live sessions",
+        "attendanceHeading": "Recent attendance",
+        "noAttendance": "No finished sessions to show attendance for yet.",
+        "joinedOfExpected": "Joined {{joined}}/{{expected}}"
+      },
+      "courses": {
+        "heading": "Your courses",
+        "viewAll": "View all",
+        "emptyHeading": "You have no courses yet",
+        "emptyDescription": "Create your first course to start teaching and earning on SIRI UpSkill.",
+        "column": {
+          "course": "Course",
+          "price": "Price",
+          "students": "Learners",
+          "rating": "Reviews",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "studentCount": "{{count}} learner(s)",
+        "noReviews": "No reviews yet",
+        "view": "View course page",
+        "edit": "Edit"
+      },
+      "status": {
+        "Draft": "Draft",
+        "InReview": "In review",
+        "Published": "Published",
+        "Rejected": "Rejected",
+        "Archived": "Archived",
+        "unknown": "Unknown status"
+      }
     }
   },
   "orders": {
@@ -829,7 +977,8 @@
       "hideDetails": "Hide Details",
       "startLearning": "Start Learning",
       "downloadReceipt": "Print / Download Receipt",
-      "requestRefund": "Request Refund"
+      "requestRefund": "Request Refund",
+      "refundUnavailable": "No payment to refund on this order"
     },
     "detail": {
       "title": "Order Details",
@@ -858,7 +1007,8 @@
       "vat": "VAT 7% (Included)",
       "total": "Total",
       "print": "Print Receipt",
-      "close": "Close"
+      "close": "Close",
+      "downloadFailed": "We couldn't download the receipt. Please try again."
     },
     "refund": {
       "modalTitle": "Request Order Refund",
@@ -880,6 +1030,452 @@
       "previous": "Previous",
       "next": "Next",
       "pageOf": "Page {{current}} of {{total}}"
+    }
+  },
+  "live": {
+    "instructor": {
+      "nav": {
+        "sessions": "Live sessions",
+        "liveSettings": "Google connection"
+      },
+      "meeting": {
+        "statusLabel": "Room status",
+        "waiting": "Creating room",
+        "pasteLink": "Waiting for link",
+        "reconnectGoogle": "Reconnect Google",
+        "retry": "Room creation failed",
+        "ready": "Room ready",
+        "removed": "Room removed",
+        "unavailable": "No room yet"
+      },
+      "meetingError": {
+        "conference_pending": "Google is still preparing the Meet room — we will retry automatically",
+        "google_account_unavailable": "No connected Google account found — reconnect or paste a link yourself",
+        "invalid_grant": "Google access expired or was revoked — reconnect to continue",
+        "unknown": "Could not create the room. Try again or paste a room link yourself"
+      },
+      "actions": {
+        "waitingHint": "The system is creating the room. This usually takes about a minute.",
+        "reconnect": "Reconnect Google",
+        "resync": "Try creating the room again",
+        "pasteInstead": "Paste a room link instead",
+        "hidePaste": "Hide the link field",
+        "linkLabel": "Meeting link",
+        "linkPlaceholder": "https://meet.google.com/abc-defg-hij",
+        "linkHelper": "Google Meet, Zoom and Microsoft Teams are supported (must start with https://). The link is never shown back — you can view it on the session details page only.",
+        "saveLink": "Save link",
+        "linkSaved": "Room link saved",
+        "resyncStarted": "Room creation requested. The system is working on it."
+      },
+      "provider": {
+        "GoogleMeet": "Google Meet (created automatically)",
+        "Manual": "A link you pasted",
+        "Logging": "Test system (not a real room)"
+      },
+      "sessions": {
+        "pageTitle": "My live sessions | SIRI UpSkill Studio",
+        "pageDescription": "View and manage all your live sessions, room status and attendance.",
+        "heading": "My live sessions",
+        "subheading": "See the live schedule across all your courses, room status and how many learners joined.",
+        "scopeLabel": "Time range",
+        "scope": {
+          "upcoming": "Upcoming",
+          "past": "Past",
+          "all": "All"
+        },
+        "count": "{{count}} session(s)",
+        "attendance": "{{joined}} of {{expected}} invited learners joined",
+        "hasRecording": "Recording attached",
+        "cancelReason": "Cancelled: {{reason}}",
+        "open": "View details",
+        "emptyHeading": "No live sessions yet",
+        "empty": {
+          "upcoming": "No upcoming sessions. Add live sessions in the course builder, on the “Live schedule” tab.",
+          "past": "No past sessions yet.",
+          "all": "You have not created any live sessions. Pick a course and set its format to Live or Hybrid to start."
+        },
+        "goToCourses": "Go to my courses",
+        "errorHeading": "Could not load your live sessions",
+        "errorDescription": "Check your internet connection and try again.",
+        "retry": "Try again"
+      },
+      "detail": {
+        "pageTitle": "Live session details | SIRI UpSkill Studio",
+        "pageDescription": "Room, status, attendance and recording for this live session.",
+        "back": "Back to my live sessions",
+        "cancel": "Cancel this session",
+        "cancelledHeading": "This session was cancelled",
+        "enrolled": "Eligible learners",
+        "expected": "Invited",
+        "joined": "Joined",
+        "notFoundHeading": "Session not found",
+        "notFoundDescription": "It may have been removed, or it is not yours.",
+        "errorHeading": "Could not load the session",
+        "errorDescription": "Check your internet connection and try again.",
+        "retry": "Try again"
+      },
+      "room": {
+        "heading": "Online room",
+        "provider": "Room source",
+        "lastSync": "Last sync",
+        "linkLabel": "Room link",
+        "open": "Open room",
+        "opensNewTab": "opens in a new tab",
+        "copy": "Copy link",
+        "copied": "Link copied",
+        "copyFailed": "Could not copy. Select the link text and copy it manually.",
+        "ownerOnly": "Only you, as the session owner, see this link — learners get it through the “Join class” button when the time comes. Do not share it.",
+        "linkUnavailable": "A room link is stored, but it is not safe to open from here — paste a new link to replace it."
+      },
+      "recording": {
+        "heading": "Recording",
+        "hasRecording": "This session has a recording. Learners can watch it again in the course.",
+        "noRecording": "No recording yet. Upload a video so learners who missed the session can catch up.",
+        "upload": "Upload recording",
+        "replace": "Replace recording",
+        "retryAttach": "Try attaching again",
+        "uploading": "Uploading {{percent}}%",
+        "progressLabel": "Upload progress",
+        "processing": "Uploaded. The video is being processed — this can take a moment.",
+        "attaching": "Attaching the recording to the session",
+        "attached": "Recording attached",
+        "watch": "Watch the recording in the classroom"
+      },
+      "cancel": {
+        "title": "Cancel live session",
+        "body": "The session “{{title}}” will be cancelled. Learners will see it as cancelled with the reason you give, and this cannot be undone.",
+        "reasonLabel": "Reason for cancelling",
+        "reasonRequired": "Please give a reason for cancelling.",
+        "reasonHint": "{{count}}/{{max}} characters — learners will see this text",
+        "keep": "Keep session",
+        "confirm": "Cancel session",
+        "done": "Session cancelled"
+      }
+    },
+    "google": {
+      "pageTitle": "Google Calendar connection | SIRI UpSkill Studio",
+      "pageDescription": "Manage the Google Calendar connection used to create live-session rooms automatically.",
+      "heading": "Google Calendar connection",
+      "subheading": "Connect your Google account so the platform can create Google Meet rooms and invite learners through calendar events.",
+      "loading": "Checking connection",
+      "loadErrorHeading": "Could not load the connection status",
+      "loadErrorDescription": "Check your internet connection and try again.",
+      "retry": "Try again",
+      "status": {
+        "label": "Status",
+        "connected": "Connected",
+        "notConnected": "Not connected",
+        "needsReconnect": "Needs reconnecting",
+        "notConfigured": "Not enabled"
+      },
+      "account": "Google account",
+      "connectedAt": "Connected on",
+      "lastValidated": "Last checked",
+      "connect": "Connect Google Calendar",
+      "reconnect": "Reconnect",
+      "disconnect": "Disconnect",
+      "connecting": "Taking you to Google...",
+      "permissions": {
+        "heading": "What we ask Google for",
+        "body": "The platform asks for access to your Google Calendar to create, update and delete only the events of live sessions created through this system, so the Google Meet room and calendar time always match your schedule.",
+        "revoke": "You can revoke access at any time, from the button below or from your Google account settings."
+      },
+      "notConfigured": {
+        "heading": "The administrator has not enabled this yet",
+        "body": "You can still teach live as usual: paste a meeting link (Google Meet, Zoom or Microsoft Teams) for each session on the session details page.",
+        "goToSessions": "Go to my live sessions"
+      },
+      "needsReconnect": {
+        "heading": "Reconnect Google",
+        "body": "The previous connection no longer works ({{reason}}). Rooms for upcoming sessions may not be created or updated until you reconnect.",
+        "affected": "{{count}} upcoming session(s) are waiting for a reconnect or for you to paste a link."
+      },
+      "revokedReason": {
+        "invalid_grant": "access expired or was revoked",
+        "user_disconnected": "you disconnected it",
+        "scope_missing": "not all permissions were granted",
+        "insufficient_scope": "not all permissions were granted"
+      },
+      "disconnectConfirm": {
+        "title": "Disconnect Google?",
+        "body": "Rooms already created keep working, but the platform will not be able to update or delete their Google Calendar events until you reconnect.",
+        "confirm": "Disconnect",
+        "cancel": "Keep connected"
+      },
+      "toast": {
+        "connected": "Google Calendar connected",
+        "disconnected": "Google disconnected"
+      },
+      "callbackError": {
+        "access_denied": "You did not allow calendar access, so the connection was not completed.",
+        "state_invalid": "The connection request expired or is invalid. Please start again.",
+        "scope_missing": "All calendar permissions must be allowed. Please reconnect.",
+        "no_refresh_token": "Google did not return long-lived access. Please reconnect and allow everything requested.",
+        "exchange_failed": "Could not complete the connection with Google. Please try again.",
+        "unknown": "Could not connect Google. Please try again."
+      }
+    },
+    "refundNotice": "Joining your first live session means this course can no longer be refunded, per the refund policy.",
+    "refundPolicyLink": "Read the refund policy",
+    "tab": {
+      "label": "Live",
+      "loading": "Loading the schedule…",
+      "emptyHeading": "No sessions scheduled yet",
+      "emptyDescription": "When the instructor schedules a live session it will appear here, and we'll send you a calendar invite.",
+      "errorHeading": "Couldn't load the schedule",
+      "errorDescription": "Check your connection and try again.",
+      "retry": "Try again",
+      "refreshFailed": "Couldn't refresh the schedule — what you see may be out of date.",
+      "groupUpcoming": "Upcoming",
+      "groupPast": "Past sessions",
+      "sessionTime": "{{date}} · {{start}}–{{end}}",
+      "opensAt": "Room opens {{dateTime}}",
+      "opensIn": "in",
+      "roomOpen": "The room is open — you can join now",
+      "roomNotReady": "The room isn't ready yet — the instructor is setting it up. Try again in a moment.",
+      "cancelled": "This session was cancelled",
+      "cancelledWithReason": "This session was cancelled: {{reason}}",
+      "awaitingRecording": "Waiting for the instructor to upload the recording",
+      "inviteSent": "A calendar invite has been sent to you",
+      "joinButton": "Join class",
+      "addToCalendar": "Add to calendar",
+      "watchReplay": "Watch replay",
+      "calendarError": "Couldn't download the calendar file. Please try again.",
+      "calendarUnavailable": "This session has ended or was cancelled, so it can't be added to a calendar."
+    },
+    "countdown": {
+      "daysHours": "{{days}}d {{hours}}h",
+      "hoursMinutes": "{{hours}}h {{minutes}}m",
+      "minutesSeconds": "{{minutes}}m {{seconds}}s",
+      "seconds": "{{seconds}}s"
+    },
+    "chip": {
+      "nextSession": "Next session: {{date}} {{time}}",
+      "liveNow": "Live now"
+    },
+    "join": {
+      "pageTitle": "Join live class",
+      "pageDescription": "Enter the live classroom for a course you're enrolled in.",
+      "checking": {
+        "heading": "Checking your access…",
+        "body": "One moment while we prepare your link to the classroom."
+      },
+      "redirecting": {
+        "heading": "Taking you to the classroom…",
+        "body": "If you aren't taken there automatically, use the button below.",
+        "openRoom": "Open the classroom"
+      },
+      "notOpen": {
+        "heading": "It's not time to join yet",
+        "body": "The room opens a little before class starts. Keep this page open and we'll take you in automatically when it does.",
+        "opensAt": "The room opens at {{dateTime}}"
+      },
+      "ended": {
+        "heading": "This live session has ended",
+        "body": "The classroom is closed.",
+        "watchReplay": "Watch replay",
+        "noReplay": "The recording isn't ready yet — the instructor will upload it later."
+      },
+      "cancelled": {
+        "heading": "This live session was cancelled",
+        "body": "The instructor cancelled this session. See the latest schedule in the course's Live tab."
+      },
+      "roomNotReady": {
+        "heading": "The classroom isn't ready yet",
+        "body": "The instructor is setting up the room. We'll retry automatically every 30 seconds.",
+        "attempt": "Attempt {{attempt}} of {{max}}",
+        "gaveUp": "The room still wasn't ready after {{max}} attempts. Please try again in a moment."
+      },
+      "notFound": {
+        "heading": "Session not found, or you don't have access",
+        "body": "Check that you're enrolled in this course with the account you're signed in to, and that your access hasn't expired."
+      },
+      "rateLimited": {
+        "heading": "Too many attempts",
+        "body": "Please wait a moment and try again."
+      },
+      "error": {
+        "heading": "Couldn't join the classroom",
+        "body": "Something unexpected went wrong. Please try again."
+      },
+      "retry": "Try again",
+      "goMyCourses": "Go to my courses",
+      "browseCourses": "Browse courses",
+      "forwardWarning": "Don't forward the classroom link — it only works for your account."
+    },
+    "errors": {
+      "notFoundOrNoAccess": "Session not found, or you don't have access.",
+      "cancelled": "This live session has been cancelled.",
+      "ended": "This live session has ended.",
+      "notOpenYet": "The classroom isn't open yet.",
+      "roomNotReady": "The classroom isn't ready yet. Please try again in a moment.",
+      "meetingsNotReady": "Some sessions don't have a room yet. Add a room to each before submitting for review.",
+      "googleNotConfigured": "Google connection isn't enabled on this platform yet. You can paste a room link yourself.",
+      "linkInvalid": "That link isn't valid — it must be an https link.",
+      "linkHostNotAllowed": "That link isn't on the allowed list. Only meet.google.com, zoom.us and teams.microsoft.com are accepted.",
+      "sessionTextContainsMeetingLink": "Don't put a meeting link in the title, description or cancellation reason — this text is public. Paste the room link into the \"Meeting link\" field instead.",
+      "sessionNotEditable": "This session can no longer be edited.",
+      "meetingNotResyncable": "This room can't be re-created right now.",
+      "sessionNotStarted": "This session hasn't started, so a recording can't be attached yet.",
+      "recordingAssetNotReady": "The video is still processing. Wait until it's ready, then try again.",
+      "recordingAssetInUse": "This video is already used elsewhere.",
+      "recordingEpisodeHasNoMedia": "The selected episode has no video yet.",
+      "recordingEpisodeInUse": "This episode is already the recording of another session.",
+      "rateLimited": "Too many requests. Please try again in a moment.",
+      "generic": "Something went wrong. Please try again.",
+      "refundLiveAttended": "You've joined a live session of a course in this order, so that course's share can't be refunded.",
+      "refundBlockedCourses": "Courses that can't be refunded:",
+      "refundMaxRefundable": "Maximum refundable amount: {{amount}}",
+      "refundRequestMax": "Request the maximum refund"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "live": "Live now",
+      "ended": "Ended",
+      "cancelled": "Cancelled"
+    },
+    "catalog": {
+      "bangkokTime": "Thailand time",
+      "format": {
+        "OnDemand": "Self-paced",
+        "Live": "Live",
+        "Hybrid": "Hybrid (live + video)"
+      },
+      "nav": "Live",
+      "badge": {
+        "Live": "Live",
+        "Hybrid": "Hybrid"
+      },
+      "filter": {
+        "heading": "Learning format"
+      },
+      "scheduleHeading": "Live schedule",
+      "formatDescription": {
+        "Live": "This course is taught live on the schedule below, in real time with the instructor. Enrolled learners join the classroom at each session’s time.",
+        "Hybrid": "This course combines self-paced videos you can watch any time with live sessions on the schedule below. If you miss a live session you can watch the recording once the instructor uploads it."
+      },
+      "summary": "{{upcoming}} upcoming · {{past}} past",
+      "noSessions": "The instructor has not scheduled any live sessions yet.",
+      "accessNote": "The classroom link is only shown to enrolled learners.",
+      "hasRecording": "Recording available",
+      "showMore": "Show {{count}} more",
+      "showLess": "Show fewer",
+      "nextSession": "Next session: {{when}}",
+      "noUpcoming": "No upcoming session scheduled.",
+      "replayCount": "Replay available for {{count}} session(s)"
+    },
+    "roster": {
+      "heading": "Attendance",
+      "filterLabel": "Filter attendance",
+      "filter": {
+        "all": "All",
+        "joined": "Joined",
+        "notJoined": "Not joined"
+      },
+      "note": "Emails are partly masked for privacy. “Joined” means the learner asked the platform for the room link — it does not prove they stayed for the whole session.",
+      "column": {
+        "name": "Name",
+        "email": "Email",
+        "invite": "Calendar invite",
+        "attendance": "Attendance"
+      },
+      "unknownName": "Unknown name",
+      "invite": {
+        "Pending": "Pending",
+        "Invited": "Invited",
+        "Cancelled": "Invite cancelled",
+        "Skipped": "Skipped"
+      },
+      "joined": "Joined",
+      "notJoined": "Not joined",
+      "joinCount": "{{count}} times",
+      "emptyHeading": "No one to show",
+      "empty": {
+        "all": "No learners are enrolled or invited for this session yet.",
+        "joined": "No learner has joined yet.",
+        "notJoined": "Every learner has joined."
+      },
+      "errorHeading": "Could not load the attendance list",
+      "errorDescription": "Check your internet connection and try again.",
+      "retry": "Try again"
+    },
+    "builder": {
+      "tab": "Live schedule",
+      "heading": "Live schedule",
+      "subheading": "Set how the course is taught, its live sessions and online rooms. All times are Thailand time.",
+      "errorHeading": "Could not load the live schedule",
+      "errorDescription": "Check your internet connection and try again.",
+      "retry": "Try again",
+      "onDemandNote": "This course is self-paced. Choose “Live” or “Hybrid” to add live sessions.",
+      "meetingsNotReady": "Cannot submit for review — some live sessions have no meeting room. Open the “Live schedule” tab to fix the sessions that are marked.",
+      "format": {
+        "label": "Teaching format",
+        "hint": "Choose “Live” or “Hybrid” to turn on this course’s live schedule.",
+        "lockedHint": "Cancel every session that has not started yet before switching back to self-paced.",
+        "saved": "Teaching format changed"
+      },
+      "google": {
+        "connectHeading": "Connect Google Calendar",
+        "reconnectHeading": "Reconnect Google Calendar",
+        "connectBody": "Let the platform create Google Meet rooms and invite learners through calendar events — or paste a meeting link yourself.",
+        "manualOnly": "The administrator has not enabled the Google connection yet — paste a meeting link for each session yourself.",
+        "limitsHeading": "Google limits to be aware of",
+        "limitsBody": "Participant limits and meeting length depend on the plan of your own Google account (for example a free Gmail account supports about 100 people and up to 60 minutes). The platform cannot raise that limit.",
+        "admitTip": "We recommend setting the room to “host must admit” so people who are not enrolled cannot walk in."
+      },
+      "sync": {
+        "label": "Send learners’ emails to Google to invite them to the event",
+        "help": "Learners’ emails are sent to Google so they are invited to the event (learners do not see each other’s emails). You can leave this off — the platform still sends its own invitation emails. Above 150 learners it is switched off automatically.",
+        "on": "On",
+        "off": "Off"
+      },
+      "sessions": {
+        "heading": "Live sessions",
+        "add": "Add a session",
+        "empty": "No live sessions yet. Choose “Add a session” to create the first one.",
+        "roomsMissing": "{{count}} session(s) have no usable room yet. Every session needs a room before the course can be submitted for review."
+      },
+      "form": {
+        "addHeading": "Add a live session",
+        "editHeading": "Edit live session",
+        "title": "Session title",
+        "description": "Description (optional)",
+        "date": "Date",
+        "startTime": "Start time",
+        "endTime": "End time",
+        "timeHint": "Enter Thailand time (UTC+7). A session must last 15 minutes to 8 hours. An end time at or before the start time means it ends the next day.",
+        "required": "This field is required",
+        "add": "Add session",
+        "saveChanges": "Save changes",
+        "close": "Close form",
+        "created": "Live session added",
+        "updated": "Live session saved",
+        "errorTime": "Invalid time range. The start must be in the future and the session must last 15 minutes to 8 hours.",
+        "errorLength": "A session must last 15 minutes to 8 hours.",
+        "errorConflict": "This time overlaps another session of the course, or the session can no longer be edited."
+      },
+      "row": {
+        "cancelReason": "Cancelled: {{reason}}",
+        "notReady": "This session has no usable meeting room, so the course cannot be submitted for review — set up the room (connect Google or paste a link) and submit again.",
+        "hasRecording": "Recording attached",
+        "noRecording": "This session has ended. Upload the recording so learners who missed it can watch it later.",
+        "edit": "Edit",
+        "cancel": "Cancel session",
+        "details": "View details"
+      },
+      "policy": {
+        "heading": "Enrollment window",
+        "help": "Optional — leave empty for no enrollment deadline or seat limit.",
+        "deadlineDate": "Enrollment closes on",
+        "deadlineTime": "Closing time",
+        "maxSeats": "Maximum seats",
+        "seatsUsed": "{{count}} seat(s) used",
+        "save": "Save enrollment window",
+        "saved": "Enrollment window saved",
+        "errorDeadline": "Enter both the date and the time the enrollment closes.",
+        "errorSeats": "Seats must be a whole number of 1 or more.",
+        "errorInvalid": "Invalid values (for example fewer seats than are already used)."
+      }
     }
   }
 }

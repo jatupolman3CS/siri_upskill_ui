@@ -29,12 +29,13 @@ import {
 import { AdminDashboardSummaryResponse } from './data/admin-dashboard-api.models';
 import { AdminDashboardApiService } from './data/admin-dashboard-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 
 @Component({
   selector: 'app-admin-dashboard-page',
-  imports: [CommonModule, RouterLink, NgIcon, CurrencyThbPipe, Skeleton],
+  imports: [CommonModule, RouterLink, NgIcon, CurrencyThbPipe, TranslatePipe, Skeleton],
   templateUrl: './admin-dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

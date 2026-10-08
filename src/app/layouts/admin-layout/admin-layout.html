@@ -1,145 +1,90 @@
 <div class="flex h-screen flex-col bg-[var(--color-bg)] overflow-hidden select-none">
   <!-- Top Header Bar -->
-  <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-6">
-    <div class="flex items-center gap-4">
-      <a routerLink="/" class="text-lg font-extrabold tracking-tight text-[var(--color-primary)]">
+  <header class="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:px-6">
+    <div class="flex min-w-0 items-center gap-2 md:gap-4">
+      <!-- Below md the sidebar is hidden: this opens the drawer that carries the same navigation. -->
+      <button
+        type="button"
+        (click)="menuOpen.set(true)"
+        aria-haspopup="dialog"
+        aria-controls="studio-mobile-nav-panel"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-label]="'studio.nav.openMenu' | translate"
+        class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[var(--color-text)] transition
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] md:hidden"
+      >
+        <ng-icon name="phosphorList" class="text-xl" aria-hidden="true" />
+      </button>
+
+      <a routerLink="/" class="truncate text-lg font-extrabold tracking-tight text-[var(--color-primary)]">
         SIRI UpSkill <span class="text-xs font-semibold uppercase tracking-wider text-rose-500 ml-1">Admin</span>
       </a>
-      <span class="rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold text-rose-600">
+      <span class="hidden rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold text-rose-600 lg:inline-flex">
         ผู้ดูแลระบบ (Admin)
       </span>
     </div>
 
-    <!-- Right Header Actions -->
-    <div class="flex items-center gap-3">
+    <!-- Right Header Actions (hidden below md; the drawer repeats these links) -->
+    <div class="hidden items-center gap-3 md:flex">
       <a
         routerLink="/instructor"
         class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 transition hover:bg-indigo-500/20"
       >
-        <span>โหมดผู้สอน (Instructor)</span>
+        <span>{{ 'admin.nav.toInstructor' | translate }}</span>
       </a>
 
       <a
         routerLink="/my-courses"
         class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-500/20"
       >
-        <span>มุมมองผู้เรียน</span>
+        <span>{{ 'admin.nav.toLearner' | translate }}</span>
       </a>
 
       <a
         routerLink="/"
         class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)]/80"
       >
-        <span>ไปยังหน้าแรก</span>
+        <span>{{ 'admin.nav.toHome' | translate }}</span>
       </a>
     </div>
   </header>
+
+  <app-studio-mobile-nav
+    [(open)]="menuOpen"
+    titleKey="admin.nav.menuTitle"
+    [items]="navLinks"
+    [extraItems]="switchLinks"
+  />
 
   <!-- Admin Shell: Sidebar + Content Outlet -->
   <div class="flex flex-1 min-h-0 overflow-hidden">
     <!-- Left Navigation Sidebar -->
     <aside class="w-64 shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col justify-between p-4 hidden md:flex">
-      <nav class="space-y-1">
-        <a
-          routerLink="/admin"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorHouse" class="text-lg" />
-          <span>แดชบอร์ดระบบ</span>
-        </a>
-
-        <a
-          routerLink="/admin/courses"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorGraduationCap" class="text-lg" />
-          <span>อนุมัติคอร์ส (Moderation)</span>
-        </a>
-
-        <a
-          routerLink="/admin/users"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorUsers" class="text-lg" />
-          <span>ผู้ใช้และสิทธิ์ (Users)</span>
-        </a>
-
-        <a
-          routerLink="/admin/marketing"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorTag" class="text-lg" />
-          <span>การตลาด & โค้ดส่วนลด (Marketing)</span>
-        </a>
-
-        <a
-          routerLink="/admin/banners"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorImage" class="text-lg" />
-          <span>จัดการแบนเนอร์ (Banners)</span>
-        </a>
-
-        <a
-          routerLink="/admin/menus"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorList" class="text-lg" />
-          <span>จัดการเมนูนำทาง (Menus)</span>
-        </a>
-
-        <a
-          routerLink="/admin/posts"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorArticle" class="text-lg" />
-          <span>บทความ & ข่าวสาร (CMS)</span>
-        </a>
-
-        <a
-          routerLink="/admin/payouts"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorCurrencyDollar" class="text-lg" />
-          <span>รอบจ่ายเงินผู้สอน (Payouts)</span>
-        </a>
-
-        <a
-          routerLink="/admin/payments"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorCreditCard" class="text-lg" />
-          <span>รายการชำระเงิน (Payments)</span>
-        </a>
-
-        <a
-          routerLink="/admin/contact-messages"
-          routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
-          class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-        >
-          <ng-icon name="phosphorEnvelopeSimple" class="text-lg" />
-          <span>ข้อความติดต่อ (Contact)</span>
-        </a>
+      <nav [attr.aria-label]="'admin.nav.menuTitle' | translate" class="space-y-1">
+        @for (item of navLinks; track item.id) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
+            ariaCurrentWhenActive="page"
+            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
+          >
+            <ng-icon [name]="item.icon" class="text-lg" aria-hidden="true" />
+            <span>{{ item.labelKey | translate }}</span>
+          </a>
+        }
       </nav>
 
       <div class="border-t border-[var(--color-border)] pt-4">
         <div class="flex items-center gap-3 px-2">
-          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 font-bold">
-            <ng-icon name="phosphorUser" />
-          </div>
+          <app-user-avatar [name]="auth.currentUser()?.displayName" [src]="auth.currentUser()?.avatarUrl" />
           <div class="min-w-0 flex-1">
-            <p class="text-xs font-bold text-[var(--color-text)] truncate">ผู้ดูแลระบบ</p>
-            <p class="text-[10px] text-[var(--color-text-muted)] truncate">admin&#64;siriupskill.com</p>
+            <p class="text-xs font-bold text-[var(--color-text)] truncate">
+              {{ auth.currentUser()?.displayName ?? ('nav.accountFallbackName' | translate) }}
+            </p>
+            @if (auth.currentUser()?.email; as email) {
+              <p class="text-[10px] text-[var(--color-text-muted)] truncate">{{ email }}</p>
+            }
           </div>
         </div>
       </div>

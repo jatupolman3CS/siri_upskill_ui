@@ -101,6 +101,19 @@ describe('BlogListPage', () => {
     expect(link).not.toBeNull();
   });
 
+  it('derives the reading time from the post body and omits it when there is no readable text', async () => {
+    await navigate();
+    await flushPosts({
+      ...ONE_POST_RESPONSE,
+      items: [POST, { ...POST, id: 'post-2', slug: 'no-body', title: 'No body post', contentHtml: '<p>&nbsp;</p>' }],
+      totalCount: 2,
+    });
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text.match(/1 min read/g)?.length).toBe(1);
+    expect(text).not.toContain('5 min read');
+  });
+
   it('shows a real error state (not fabricated posts) on failure, and retry re-fetches the real list', async () => {
     await navigate();
     await flushPosts(EMPTY_RESPONSE, 500);

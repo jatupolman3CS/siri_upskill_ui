@@ -10,11 +10,12 @@
       <section class="animate-pop-in rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-sm" aria-live="polite">
         <h1 class="text-xl font-semibold text-[var(--color-text)]">{{ 'auth.common.successHeading' | translate }}</h1>
         <p class="mt-2 text-[var(--color-text)]">{{ resultMessage() }}</p>
+        <!-- Someone who is already signed in (confirmed in the same browser) has nothing to log in to. -->
         <a
-          routerLink="/login"
+          [routerLink]="auth.isAuthenticated() ? '/my-courses' : '/login'"
           class="btn-tactile mt-6 inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2"
         >
-          {{ 'auth.common.goToLogin' | translate }}
+          {{ (auth.isAuthenticated() ? 'nav.myCourses' : 'auth.common.goToLogin') | translate }}
         </a>
       </section>
     }

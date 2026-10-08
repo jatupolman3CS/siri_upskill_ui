@@ -1,0 +1,84 @@
+<!--
+  tabindex="-1": not a tab stop — it only exists so the template linter accepts the Escape handler on a
+  wrapper that holds real interactive content (Escape bubbles up from the button or any focused item).
+-->
+<div class="relative" tabindex="-1" (keydown.escape)="onEscape()">
+  <button
+    #triggerButton
+    type="button"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="open() ? panelId : null"
+    [attr.aria-label]="'nav.accountMenu' | translate"
+    (click)="toggle()"
+    (keydown.arrowdown)="openFromKeyboard($event)"
+    class="relative z-50 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[var(--color-border)]
+      transition-colors duration-200 ease-out hover:border-[var(--color-primary)]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2
+      focus-visible:ring-offset-[var(--color-bg)]"
+  >
+    <app-user-avatar [name]="user()?.displayName" [src]="user()?.avatarUrl" />
+  </button>
+
+  @if (open()) {
+    <div role="presentation" class="fixed inset-0 z-40" (click)="close()"></div>
+
+    <div
+      class="app-account-menu-panel absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden
+        rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] shadow-[var(--shadow-lg)]"
+    >
+      <div class="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+        <app-user-avatar size="lg" [name]="user()?.displayName" [src]="user()?.avatarUrl" />
+        <div class="min-w-0">
+          <p class="truncate text-sm font-semibold text-[var(--color-text)]">
+            {{ user()?.displayName ?? ('nav.accountFallbackName' | translate) }}
+          </p>
+          @if (user()?.email; as email) {
+            <p class="truncate text-xs text-[var(--color-text-muted)]">{{ email }}</p>
+          }
+        </div>
+      </div>
+
+      <ul
+        [id]="panelId"
+        role="menu"
+        [attr.aria-label]="'nav.accountMenu' | translate"
+        appMenuNavigation
+        (tabOut)="close()"
+        class="p-1"
+      >
+        @for (item of items(); track item.id) {
+          <li role="none">
+            <a
+              role="menuitem"
+              tabindex="-1"
+              [routerLink]="item.route"
+              (click)="close()"
+              class="flex min-h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 text-sm text-[var(--color-text)]
+                hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset
+                focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <ng-icon [name]="item.icon" aria-hidden="true" class="text-lg text-[var(--color-text-muted)]" />
+              {{ item.labelKey | translate }}
+            </a>
+          </li>
+        }
+        <li role="separator" class="my-1 border-t border-[var(--color-border)]"></li>
+        <li role="none">
+          <button
+            type="button"
+            role="menuitem"
+            tabindex="-1"
+            (click)="signOut()"
+            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-3 text-left text-sm
+              text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:outline-none
+              focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            <ng-icon name="phosphorSignOut" aria-hidden="true" class="text-lg text-[var(--color-danger)]" />
+            {{ 'nav.signOut' | translate }}
+          </button>
+        </li>
+      </ul>
+    </div>
+  }
+</div>

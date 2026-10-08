@@ -1,14 +1,15 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpRequest, provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpTestingController, TestRequest, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { of, Subject, Subscription } from 'rxjs';
+import { of, Subject, Subscription, throwError } from 'rxjs';
 
+import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { CategoryTreeNode } from '../../catalog/data/category-api.models';
-import { CourseBuilderResponse } from '../../catalog/data/course-api.models';
+import { AutosaveCourseCommand, CourseBuilderResponse } from '../../catalog/data/course-api.models';
 import { BuilderEpisode, BuilderSection, CourseBuilderPage } from './course-builder-page';
 import { MediaApiService, UploadProgressEvent } from '../../media/data/media-api.service';
 import { MediaAssetResponse } from '../../media/data/media-api.models';
@@ -107,6 +108,9 @@ describe('CourseBuilderPage', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([
+          // Same two entries app.routes.ts has: "new" and "edit" are SEPARATE route configs, so going from one to
+          // the other destroys the component instead of reusing it.
+          { path: 'instructor/courses/new', component: CourseBuilderPage },
           { path: 'instructor/courses/:id/builder', component: CourseBuilderPage },
           { path: 'instructor', component: CourseBuilderPage },
         ]),
@@ -417,10 +421,63 @@ describe('CourseBuilderPage', () => {
     expect(component['sections']().length).toBe(3);
   });
 
+  it('starts a new course blank: no starter title, price, or curriculum in the form or the autosave payload', async () => {
+    const component = await navigate('/instructor/courses/new/builder');
+    flushCategories();
+    await settle();
+
+    expect(component['courseTitle']()).toBe('');
+    expect(component['coursePrice']()).toBe(0);
+    expect(component['comparePrice']()).toBeNull();
+    expect(component['sections']()).toEqual([]);
+    const command = component.buildAutosaveCommand();
+    expect(command.sections).toEqual([]);
+    expect(command.comparePrice).toBeNull();
+    httpMock.expectNone('/api/catalog/instructor/courses');
+  });
+
+  it('shows the empty curriculum state with an add-section action, and adds a localized section from it', async () => {
+    const component = await navigate('/instructor/courses/new/builder');
+    flushCategories();
+    component['activeTab'].set('curriculum');
+    await settle();
+
+    const root = harness.routeNativeElement as HTMLElement;
+    expect(root.textContent).toContain('No sections yet.');
+    const addButtons = () =>
+      Array.from(root.querySelectorAll('button')).filter((b) => b.textContent?.includes('Add Section'));
+    expect(addButtons().length).toBe(2);
+
+    addButtons()[addButtons().length - 1].click();
+    await settle();
+
+    expect(root.textContent).not.toContain('No sections yet.');
+    expect(component['sections']().length).toBe(1);
+    expect(component['sections']()[0].title).toBe('Section 1');
+    expect(component['sections']()[0].episodes.map((e) => e.title)).toEqual(['Lesson 1']);
+  });
+
+  it('blocks saveCourse and publishCourse with a title error when the title is empty', async () => {
+    const component = await navigate('/instructor/courses/new/builder');
+    flushCategories();
+    await settle();
+    component['categoryId'].set('cat-web');
+
+    component.saveCourse();
+    expect(component.saveStatus()).toBe('error');
+    expect(component['errorMessage']()).toBe('instructor.builder.validation.titleRequired');
+
+    component['courseTitle'].set('   ');
+    component.publishCourse();
+    expect(component['errorMessage']()).toBe('instructor.builder.validation.titleRequired');
+    httpMock.expectNone('/api/catalog/instructor/courses');
+  });
+
   it('blocks saveCourse and shows validation error when categoryId is empty', async () => {
     const component = await navigate('/instructor/courses/new/builder');
     flushCategories();
     await settle();
+    component['courseTitle'].set('Typed title');
 
     expect(component['categoryId']()).toBe('');
     component.saveCourse();
@@ -465,7 +522,8 @@ describe('CourseBuilderPage', () => {
     flushCategories();
     await settle();
 
-    // Select category first
+    // Fill the required fields the instructor would type: nothing is pre-filled
+    component['courseTitle'].set('My typed title');
     component['categoryId'].set('cat-web');
 
     component.saveCourse();
@@ -474,9 +532,10 @@ describe('CourseBuilderPage', () => {
     // 1. POST create course
     const createReq = httpMock.expectOne((r) => r.url === '/api/catalog/instructor/courses');
     expect(createReq.request.method).toBe('POST');
+    expect(createReq.request.body.title).toBe('My typed title');
     createReq.flush({
       id: '00000000-0000-0000-0000-000000000099',
-      title: 'หลักสูตรใหม่',
+      title: 'My typed title',
     });
     await settle();
 
@@ -494,6 +553,7 @@ describe('CourseBuilderPage', () => {
     const autosaveReq = httpMock.expectOne((r) => r.url === '/api/catalog/instructor/courses/00000000-0000-0000-0000-000000000099/autosave');
     expect(autosaveReq.request.method).toBe('PUT');
     expect(autosaveReq.request.body.rowVersion).toBe('AAAAAAAACAA=');
+    expect(autosaveReq.request.body.sections).toEqual([]);
     autosaveReq.flush({
       courseId: '00000000-0000-0000-0000-000000000099',
       rowVersion: 'AAAAAAAACAE=',
@@ -504,6 +564,146 @@ describe('CourseBuilderPage', () => {
     expect(component['courseId']()).toBe('00000000-0000-0000-0000-000000000099');
     expect(component['rowVersion']()).toBe('AAAAAAAACAE=');
     expect(component.saveStatus()).toBe('saved');
+  });
+
+  describe('saving a brand-new course (production route layout: /instructor/courses/new -> /:id/builder)', () => {
+    const NEW_ID = '00000000-0000-0000-0000-000000000099';
+    const AUTOSAVE_URL = `/api/catalog/instructor/courses/${NEW_ID}/autosave`;
+    const BUILDER_URL = `/api/catalog/instructor/courses/${NEW_ID}/builder`;
+
+    interface ApiAnswer {
+      readonly body: object;
+      readonly status?: number;
+    }
+
+    /**
+     * Plays the API for the whole flow: answers every open request, in rounds, until the page has been quiet for two
+     * rounds. Cancelled requests (the leftover of a pipe whose component was destroyed) are skipped, so a cancelled
+     * save shows up as a request that never went out — exactly what the real network log showed.
+     */
+    async function drainApi(answer: (req: TestRequest) => ApiAnswer): Promise<HttpRequest<unknown>[]> {
+      const sent: HttpRequest<unknown>[] = [];
+      let quiet = 0;
+      for (let round = 0; round < 15 && quiet < 2; round++) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        harness.detectChanges();
+        TestBed.flushEffects();
+        const open = httpMock.match(() => true).filter((req) => !req.cancelled);
+        quiet = open.length === 0 ? quiet + 1 : 0;
+        for (const req of open) {
+          sent.push(req.request);
+          const { body, status } = answer(req);
+          if (status) req.flush(body, { status, statusText: 'error' });
+          else req.flush(body);
+        }
+      }
+      return sent;
+    }
+
+    /** A tiny fake server: it only ever returns what a PUT autosave stored, like the real backend. */
+    function fakeServer(stored: AutosaveCourseCommand[], failAutosave: () => boolean): (req: TestRequest) => ApiAnswer {
+      return (req) => {
+        const { method, url } = req.request;
+        if (method === 'GET' && url === '/api/catalog/categories') return { body: CATEGORIES };
+        if (method === 'POST' && url === '/api/catalog/instructor/courses') {
+          return { body: { id: NEW_ID, title: 'My typed title' } };
+        }
+        if (method === 'GET' && url === BUILDER_URL) {
+          const last = stored.at(-1);
+          return {
+            body: {
+              ...BUILDER_COURSE,
+              id: NEW_ID,
+              title: last?.title ?? 'My typed title',
+              subtitle: last?.subtitle ?? null,
+              description: last?.description ?? null,
+              outcomes: last?.outcomes ?? [],
+              requirements: last?.requirements ?? [],
+              sections: [],
+              rowVersion: 'AAAAAAAACAA=',
+            } satisfies CourseBuilderResponse,
+          };
+        }
+        if (method === 'PUT' && url === AUTOSAVE_URL) {
+          if (failAutosave()) return { body: { code: 'boom' }, status: 500 };
+          stored.push(req.request.body as AutosaveCourseCommand);
+          return { body: { courseId: NEW_ID, rowVersion: 'AAAAAAAACAE=', updatedAtUtc: '2026-08-25T00:00:00Z' } };
+        }
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      };
+    }
+
+    async function openNewCourseAndType(): Promise<CourseBuilderPage> {
+      const component = await navigate('/instructor/courses/new');
+      flushCategories();
+      await settle();
+      component['courseTitle'].set('My typed title');
+      component['categoryId'].set('cat-web');
+      component['courseSubtitle'].set('Typed subtitle');
+      component['courseDescription'].set('Typed description');
+      component['outcomes'].set(['Typed outcome']);
+      component['requirements'].set(['Typed requirement']);
+      return component;
+    }
+
+    const autosaves = (sent: readonly HttpRequest<unknown>[]) =>
+      sent.filter((r) => r.method === 'PUT' && r.url === AUTOSAVE_URL);
+
+    it('sends subtitle, description and the other typed fields in the follow-up PUT, then lands on the reloaded course', async () => {
+      const component = await openNewCourseAndType();
+      const stored: AutosaveCourseCommand[] = [];
+
+      component.saveCourse();
+      const sent = await drainApi(fakeServer(stored, () => false));
+
+      expect(sent.filter((r) => r.method === 'POST' && r.url === '/api/catalog/instructor/courses')).toHaveLength(1);
+      const puts = autosaves(sent);
+      expect(puts).toHaveLength(1);
+      expect(puts[0].body).toMatchObject({
+        title: 'My typed title',
+        subtitle: 'Typed subtitle',
+        description: 'Typed description',
+        outcomes: ['Typed outcome'],
+        requirements: ['Typed requirement'],
+        categoryId: 'cat-web',
+      });
+
+      // The PUT must go out BEFORE the route swap: the reloaded component's GET is the last thing on the wire.
+      const builderGets = sent.filter((r) => r.method === 'GET' && r.url === BUILDER_URL);
+      expect(sent.indexOf(puts[0])).toBeLessThan(sent.indexOf(builderGets[builderGets.length - 1]));
+
+      // What the instructor sees after the route swap is read back from the server and still has the typed text.
+      expect(TestBed.inject(Router).url).toBe(`/instructor/courses/${NEW_ID}/builder`);
+      const root = harness.routeNativeElement as HTMLElement;
+      expect((root.querySelector('#builderCourseSubtitle') as HTMLInputElement).value).toBe('Typed subtitle');
+      expect((root.querySelector('#builderCourseDescription') as HTMLTextAreaElement).value).toBe('Typed description');
+    });
+
+    it('stays on the form when the follow-up save fails, then a retry updates the same course instead of creating another', async () => {
+      const component = await openNewCourseAndType();
+      const stored: AutosaveCourseCommand[] = [];
+      let failAutosave = true;
+      const server = fakeServer(stored, () => failAutosave);
+
+      component.saveCourse();
+      const first = await drainApi(server);
+
+      // Nothing was persisted, so the route must NOT swap: that would reload the blank server copy over the form.
+      expect(autosaves(first)).toHaveLength(1);
+      expect(component.saveStatus()).toBe('error');
+      expect(TestBed.inject(Router).url).toBe('/instructor/courses/new');
+      expect(component['courseSubtitle']()).toBe('Typed subtitle');
+      expect(component['courseId']()).toBe(NEW_ID);
+
+      failAutosave = false;
+      component.saveCourse();
+      const second = await drainApi(server);
+
+      expect(second.filter((r) => r.method === 'POST' && r.url === '/api/catalog/instructor/courses')).toHaveLength(0);
+      expect(autosaves(second)).toHaveLength(1);
+      expect(stored.at(-1)).toMatchObject({ subtitle: 'Typed subtitle', description: 'Typed description' });
+      expect(TestBed.inject(Router).url).toBe(`/instructor/courses/${NEW_ID}/builder`);
+    });
   });
 
   it('formats duration correctly in MM:SS and HH:MM:SS', async () => {
@@ -545,6 +745,7 @@ describe('CourseBuilderPage', () => {
     const component = await navigate('/instructor/courses/new/builder');
     flushCategories();
     await settle();
+    component.addSection();
     const episode = component['sections']()[0].episodes[0];
     const cancelEpisode = vi.fn();
     component['mediaOperations'].set(episode.id, new Subscription(cancelEpisode));
@@ -565,10 +766,15 @@ describe('CourseBuilderPage', () => {
     const component = await navigate('/instructor/courses/new/builder');
     flushCategories();
     await settle();
+    component['courseTitle'].set('Typed title');
     component['categoryId'].set('cat-web');
     component.publishCourse();
     expect(component['errorMessage']()).toBe('instructor.builder.validation.mediaNotReady');
     httpMock.expectNone('/api/catalog/instructor/courses');
+
+    // An empty curriculum can never be reviewed; add the first lesson the instructor would create.
+    component.addSection();
+    expect(component.mediaReadyForReview()).toBe(false);
 
     component['sections'].update((sections) => sections.map((section) => ({
       ...section, episodes: section.episodes.map((episode) => ({ ...episode, mediaAssetId: 'asset', videoStatus: 'ready' })),
@@ -606,5 +812,56 @@ describe('CourseBuilderPage', () => {
     expect(component['trailerStatus']()).toBe('none');
     const updatedCommand = component.buildAutosaveCommand();
     expect(updatedCommand.trailerMediaAssetId).toBeNull();
+  });
+
+  describe('when the server reports the video provider is not configured (503 video.provider_not_configured)', () => {
+    function fileEvent(): Event {
+      const event = new Event('change');
+      Object.defineProperty(event, 'target', { value: {
+        files: [new File(['video'], 'lesson.webm', { type: 'video/webm' })], value: 'lesson.webm',
+      } });
+      return event;
+    }
+
+    function failCreateAsset(status: number, code?: string): void {
+      vi.spyOn(TestBed.inject(MediaApiService), 'createAsset')
+        .mockReturnValue(throwError(() => new ApiError(status, 'Server title', code)));
+    }
+
+    it('shows the plain-words outage message on the lesson, not the "check your connection" one', async () => {
+      const component = await navigate(`/instructor/courses/${BUILDER_COURSE.id}/builder`);
+      flushCategories();
+      flushBuilderCourse();
+      failCreateAsset(503, 'video.provider_not_configured');
+
+      component.onEpisodeVideoSelected(0, 0, fileEvent());
+
+      const episode = component['sections']()[0].episodes[0];
+      expect(episode.videoStatus).toBe('failed');
+      expect(episode.errorMessage).toBe('common.notConfigured.videoProvider');
+    });
+
+    it('shows the same message on the trailer', async () => {
+      const component = await navigate(`/instructor/courses/${BUILDER_COURSE.id}/builder`);
+      flushCategories();
+      flushBuilderCourse();
+      failCreateAsset(503, 'video.provider_not_configured');
+
+      component.onTrailerSelected(fileEvent());
+
+      expect(component['trailerStatus']()).toBe('failed');
+      expect(component['trailerError']()).toBe('common.notConfigured.videoProvider');
+    });
+
+    it('keeps the generic transfer-failed message for any other failure', async () => {
+      const component = await navigate(`/instructor/courses/${BUILDER_COURSE.id}/builder`);
+      flushCategories();
+      flushBuilderCourse();
+      failCreateAsset(500);
+
+      component.onEpisodeVideoSelected(0, 0, fileEvent());
+
+      expect(component['sections']()[0].episodes[0].errorMessage).toBe('instructor.builder.upload.transferFailed');
+    });
   });
 });

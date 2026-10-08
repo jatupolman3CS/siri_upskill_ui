@@ -12,6 +12,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CmsApiService } from '../../cms/data/cms-api.service';
+import { ReadingMinutesPipe } from '../reading-time.pipe';
 import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -31,7 +32,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
  */
 @Component({
   selector: 'app-blog-detail-page',
-  imports: [CommonModule, RouterLink, NgIcon, TranslatePipe, EmptyState, Skeleton],
+  imports: [CommonModule, RouterLink, NgIcon, TranslatePipe, ReadingMinutesPipe, EmptyState, Skeleton],
   templateUrl: './blog-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

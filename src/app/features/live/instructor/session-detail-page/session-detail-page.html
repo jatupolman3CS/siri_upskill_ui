@@ -1,0 +1,137 @@
+<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
+  <a
+    routerLink="/instructor/sessions"
+    class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary)]
+      hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    <ng-icon name="phosphorArrowLeft" aria-hidden="true" />
+    {{ 'live.instructor.detail.back' | translate }}
+  </a>
+
+  @if (isLoading()) {
+    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'common.loading' | translate">
+      <app-skeleton variant="text" width="40%" />
+      <app-skeleton variant="block" height="2.5rem" radius="md" />
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+    </div>
+  } @else if (notFound()) {
+    <app-empty-state
+      [heading]="'live.instructor.detail.notFoundHeading' | translate"
+      [description]="'live.instructor.detail.notFoundDescription' | translate"
+    >
+      <a
+        emptyStateAction
+        routerLink="/instructor/sessions"
+        class="inline-flex h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
+          hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'live.instructor.detail.back' | translate }}
+      </a>
+    </app-empty-state>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'live.instructor.detail.errorHeading' | translate"
+      [description]="'live.instructor.detail.errorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'live.instructor.detail.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (detail(); as d) {
+    <header class="flex flex-col gap-3">
+      <p class="text-sm text-[var(--color-text-muted)]">{{ d.courseTitle }}</p>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <h1 class="min-w-0 break-words text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ d.title }}</h1>
+        @if (canCancel()) {
+          <app-button variant="secondary" (click)="cancelOpen.set(true)">
+            <ng-icon leading name="phosphorXCircle" aria-hidden="true" />
+            {{ 'live.instructor.detail.cancel' | translate }}
+          </app-button>
+        }
+      </div>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--color-text)]">
+        <app-live-status-badge [state]="d.displayState" />
+        <app-bangkok-time-range [startsAtUtc]="d.startsAtUtc" [endsAtUtc]="d.endsAtUtc" />
+      </div>
+      @if (d.description) {
+        <p class="whitespace-pre-line text-[var(--color-text)]">{{ d.description }}</p>
+      }
+    </header>
+
+    @if (isCancelled()) {
+      <section
+        class="rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--color-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-5"
+      >
+        <h2 class="flex items-center gap-2 text-base font-semibold text-[var(--color-text)]">
+          <ng-icon name="phosphorProhibit" aria-hidden="true" class="text-lg text-[var(--color-danger)]" />
+          {{ 'live.instructor.detail.cancelledHeading' | translate }}
+        </h2>
+        @if (d.cancelReason) {
+          <p class="mt-1 text-sm text-[var(--color-text)]">{{ d.cancelReason }}</p>
+        }
+      </section>
+    }
+
+    <dl class="grid grid-cols-3 gap-3">
+      <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.enrolled' | translate }}</dt>
+        <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.enrolledCount }}</dd>
+      </div>
+      <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.expected' | translate }}</dt>
+        <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.expectedLearners }}</dd>
+      </div>
+      <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.joined' | translate }}</dt>
+        <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.joinedLearners }}</dd>
+      </div>
+    </dl>
+
+    @if (!isCancelled()) {
+      <app-live-session-room-card [detail]="d" [googleConfigured]="googleConfigured()" (meetingChange)="reload()" />
+    }
+
+    @if (isEnded()) {
+      <section
+        class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6"
+        [attr.aria-label]="'live.instructor.recording.heading' | translate"
+      >
+        <h2 class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+          <ng-icon name="phosphorFilmStrip" aria-hidden="true" class="text-xl" />
+          {{ 'live.instructor.recording.heading' | translate }}
+        </h2>
+        <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+          {{ (d.recordingEpisodeId ? 'live.instructor.recording.hasRecording' : 'live.instructor.recording.noRecording') | translate }}
+        </p>
+        <div class="mt-4 flex flex-col gap-3">
+          <app-live-recording-uploader
+            [courseId]="d.courseId"
+            [sessionId]="d.sessionId"
+            [sessionTitle]="d.title"
+            [hasRecording]="d.recordingEpisodeId !== null"
+            (attached)="reload()"
+          />
+          @if (d.recordingEpisodeId; as episodeId) {
+            <a
+              [routerLink]="['/learn', d.courseSlug, episodeId]"
+              class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary)]
+                hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <ng-icon name="phosphorPlayCircle" aria-hidden="true" />
+              {{ 'live.instructor.recording.watch' | translate }}
+            </a>
+          }
+        </div>
+      </section>
+    }
+
+    <app-live-session-roster [sessionId]="d.sessionId" />
+
+    <app-live-cancel-session-dialog
+      [(open)]="cancelOpen"
+      [courseId]="d.courseId"
+      [sessionId]="d.sessionId"
+      [sessionTitle]="d.title"
+      (cancelled)="reload()"
+    />
+  }
+</div>

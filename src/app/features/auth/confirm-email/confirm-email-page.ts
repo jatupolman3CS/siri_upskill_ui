@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, afterNextRender, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
+import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -39,6 +40,7 @@ type ConfirmState = 'loading' | 'success' | 'error' | 'missingToken';
 export class ConfirmEmailPage {
   private readonly authApi = inject(AuthApiService);
   private readonly route = inject(ActivatedRoute);
+  protected readonly auth = inject(AuthService);
   protected readonly translation = inject(TranslationService);
 
   protected readonly state = signal<ConfirmState>('loading');

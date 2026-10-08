@@ -44,11 +44,14 @@
           <ng-icon name="phosphorCalendar" />
           <span>{{ article.publishedAtUtc | date: 'dd MMMM yyyy' }}</span>
         </span>
-        <span aria-hidden="true">·</span>
-        <span class="flex items-center gap-1">
-          <ng-icon name="phosphorClock" />
-          <span>อ่าน 5 นาที</span>
-        </span>
+        @let readingMinutes = article.contentHtml | readingMinutes;
+        @if (readingMinutes) {
+          <span aria-hidden="true">·</span>
+          <span class="flex items-center gap-1">
+            <ng-icon name="phosphorClock" />
+            <span>{{ 'blog.readingTime' | translate: { minutes: readingMinutes } }}</span>
+          </span>
+        }
       </div>
 
       <h1 class="text-3xl font-extrabold text-[var(--color-text)] sm:text-4xl leading-tight">

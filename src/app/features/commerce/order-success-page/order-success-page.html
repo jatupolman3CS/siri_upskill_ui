@@ -46,7 +46,9 @@
             <div class="card-hover flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-bg)] p-4">
               <div class="flex items-center gap-4 w-full sm:w-auto">
                 <div class="h-16 w-24 overflow-hidden rounded-xl bg-zinc-900 shrink-0">
-                  <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover" />
+                  @if (course.thumbnailUrl) {
+                    <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover" />
+                  }
                 </div>
                 <div class="min-w-0 flex-1">
                   <h3 class="text-xs sm:text-sm font-bold text-[var(--color-text)] line-clamp-1">{{ course.title }}</h3>
@@ -71,6 +73,7 @@
         <button
           type="button"
           (click)="downloadReceipt()"
+          [disabled]="isDownloadingReceipt()"
           class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
         >
           <ng-icon name="phosphorFilePdf" class="text-base text-rose-500" />

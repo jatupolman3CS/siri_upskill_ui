@@ -196,7 +196,13 @@
               @for (course of data.topCourses30Days; track course.courseId; let idx = $index) {
                 <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
                   <td class="py-3 px-4 font-bold text-[var(--color-text-muted)]">{{ idx + 1 }}</td>
-                  <td class="py-3 px-4 font-semibold text-[var(--color-text)]">{{ course.courseTitle }}</td>
+                  <td class="py-3 px-4 font-semibold text-[var(--color-text)]">
+                    @if (course.courseTitle) {
+                      {{ course.courseTitle }}
+                    } @else {
+                      <span class="font-normal italic text-[var(--color-text-muted)]">{{ 'admin.dashboard.courseTitleUnavailable' | translate }}</span>
+                    }
+                  </td>
                   <td class="py-3 px-4 text-right font-black text-emerald-600">{{ course.totalRevenue | currencyThb }}</td>
                   <td class="py-3 px-4 text-right font-medium">{{ course.totalEnrollments | number }} คน</td>
                   <td class="py-3 px-4 text-right font-medium text-[var(--color-text-muted)]">{{ course.totalViews | number }}</td>

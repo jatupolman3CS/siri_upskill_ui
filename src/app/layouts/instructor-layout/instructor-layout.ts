@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -7,18 +7,26 @@ import {
   phosphorBookOpen,
   phosphorChartBar,
   phosphorCurrencyDollar,
+  phosphorGoogleLogo,
+  phosphorGraduationCap,
   phosphorHouse,
+  phosphorList,
   phosphorMegaphone,
   phosphorPlusCircle,
   phosphorSignOut,
-  phosphorUser,
+  phosphorVideoCamera,
 } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../core/auth/auth.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { UserAvatar } from '../../shared/user-avatar/user-avatar';
+import { StudioMobileNav } from '../studio-mobile-nav/studio-mobile-nav';
+import { StudioNavLink } from '../studio-mobile-nav/studio-nav-link';
+import { INSTRUCTOR_ADMIN_SWITCH_LINK, INSTRUCTOR_NAV_LINKS, INSTRUCTOR_SWITCH_LINKS } from './instructor-nav';
 
 @Component({
   selector: 'app-instructor-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgIcon],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgIcon, TranslatePipe, UserAvatar, StudioMobileNav],
   templateUrl: './instructor-layout.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -27,14 +35,28 @@ import { AuthService } from '../../core/auth/auth.service';
       phosphorBookOpen,
       phosphorChartBar,
       phosphorCurrencyDollar,
+      phosphorGoogleLogo,
+      phosphorGraduationCap,
+      phosphorList,
       phosphorMegaphone,
       phosphorPlusCircle,
+      phosphorVideoCamera,
       phosphorArrowLeft,
-      phosphorUser,
       phosphorSignOut,
     }),
   ],
 })
 export class InstructorLayout {
   protected readonly auth = inject(AuthService);
+
+  /** The sidebar and the mobile drawer both render this one list. */
+  protected readonly navLinks = INSTRUCTOR_NAV_LINKS;
+
+  /** Below `md` the sidebar is hidden; this opens the drawer that carries the same entries. */
+  protected readonly menuOpen = signal(false);
+
+  /** Header actions that are hidden on small screens, repeated in the drawer so they stay reachable. */
+  protected readonly switchLinks = computed<readonly StudioNavLink[]>(() =>
+    this.auth.isAdmin() ? [INSTRUCTOR_ADMIN_SWITCH_LINK, ...INSTRUCTOR_SWITCH_LINKS] : INSTRUCTOR_SWITCH_LINKS,
+  );
 }

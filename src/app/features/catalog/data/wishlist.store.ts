@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -20,10 +20,21 @@ export class WishlistStore {
   public readonly isLoading = this._isLoading.asReadonly();
   public readonly count = computed(() => this._items().length);
 
+  /** Id of whoever is signed in (null for a guest) — the wishlist belongs to that person, so it is
+   *  (re)loaded when it changes and dropped on sign-out instead of lingering in the header badge. */
+  private readonly sessionUserId = computed(() => this.auth.currentUser()?.id ?? null);
+
   constructor() {
-    if (this.auth.isAuthenticated()) {
-      this.loadWishlist();
-    }
+    effect(() => {
+      const userId = this.sessionUserId();
+      untracked(() => (userId ? this.loadWishlist() : this.reset()));
+    });
+  }
+
+  private reset(): void {
+    this._items.set([]);
+    this._wishlistIds.set(new Set());
+    this._isLoading.set(false);
   }
 
   loadWishlist(): void {
@@ -63,7 +74,7 @@ export class WishlistStore {
     this._wishlistIds.set(updated);
   }
 
-  toggleWishlist(course: { id: string; slug?: string; title?: string; price?: number; thumbnailUrl?: string | null; instructorName?: string }): void {
+  toggleWishlist(course: { id: string; slug?: string; title?: string; price?: number; thumbnailUrl?: string | null; instructorName?: string | null }): void {
     if (!this.auth.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
@@ -99,7 +110,8 @@ export class WishlistStore {
         price: course.price ?? 0,
         comparePrice: null,
         currency: 'THB',
-        instructorName: course.instructorName || 'ผู้สอน',
+        // Unknown stays null — never invent a name; callers pass the real one when they have it.
+        instructorName: course.instructorName || null,
         ratingAverage: 0,
         ratingCount: 0,
         wishlistedAtUtc: new Date().toISOString(),
