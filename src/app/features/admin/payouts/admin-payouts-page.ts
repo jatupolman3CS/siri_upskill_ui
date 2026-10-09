@@ -9,14 +9,18 @@ import {
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  phosphorArrowCounterClockwise,
   phosphorCalendar,
   phosphorChartPieSlice,
   phosphorCheckCircle,
+  phosphorClock,
   phosphorCurrencyDollar,
   phosphorDownloadSimple,
+  phosphorHandCoins,
   phosphorMagnifyingGlass,
   phosphorPlay,
   phosphorPlus,
+  phosphorQuestion,
   phosphorReceipt,
   phosphorWarning,
   phosphorXCircle,
@@ -26,18 +30,20 @@ import {
   AdminRefundsApiService,
 } from './data/admin-refunds-api.service';
 import { PendingRefundItem } from './data/admin-refunds-api.models';
-import { PayoutBatchItem, RevenueSplitItem } from '../../payout/data/payout-api.models';
+import { PayoutBatchItem, REVENUE_SPLIT_STATUSES, RevenueSplitItem, RevenueSplitStatus } from '../../payout/data/payout-api.models';
 import { PayoutApiService } from '../../payout/data/payout-api.service';
 import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
 import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
+import { payoutBatchStatusBadge, revenueSplitStatusBadge } from '../../payout/ui/payout-status-badges';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-payouts-page',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, Skeleton, Spinner, PayoutPolicyText],
+  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Skeleton, Spinner, PayoutPolicyText],
   templateUrl: './admin-payouts-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -56,6 +62,11 @@ import { Spinner } from '../../../shared/spinner/spinner';
       phosphorPlay,
       phosphorChartPieSlice,
       phosphorMagnifyingGlass,
+      // Status badges (payout-status-badges.ts)
+      phosphorClock,
+      phosphorHandCoins,
+      phosphorArrowCounterClockwise,
+      phosphorQuestion,
     }),
   ],
 })
@@ -78,7 +89,11 @@ export class AdminPayoutsPage implements OnInit {
   protected readonly revenueSplits = signal<RevenueSplitItem[]>([]);
   protected readonly totalSplits = signal(0);
   protected readonly isLoadingSplits = signal(false);
-  protected readonly splitFilterStatus = signal('All');
+  protected readonly splitFilterStatus = signal<RevenueSplitStatus | 'All'>('All');
+  /** The only `status` values `GET /api/payout/admin/revenue-splits` accepts — the filter `<option>`s come from here. */
+  protected readonly splitStatusOptions = REVENUE_SPLIT_STATUSES.map((value) => ({ value, badge: revenueSplitStatusBadge(value) }));
+  protected readonly batchStatusBadge = payoutBatchStatusBadge;
+  protected readonly splitStatusBadge = revenueSplitStatusBadge;
   protected readonly splitSearchInstructor = signal('');
 
   // Refunds State

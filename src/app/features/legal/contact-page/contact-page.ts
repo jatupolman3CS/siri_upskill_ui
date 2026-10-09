@@ -1,20 +1,29 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorBriefcase, phosphorEnvelopeSimple, phosphorShieldCheck } from '@ng-icons/phosphor-icons/regular';
+
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ContactApiService } from '../data/contact-api.service';
+import { LEGAL_CONTACT_EMAILS } from '../legal-contact';
 
 @Component({
   selector: 'app-contact-page',
-  imports: [FormsModule, TranslatePipe, Spinner],
+  imports: [FormsModule, TranslatePipe, Spinner, NgIcon],
   templateUrl: './contact-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons({ phosphorEnvelopeSimple, phosphorShieldCheck, phosphorBriefcase })],
 })
 export class ContactPage {
   private readonly toast = inject(ToastService);
   private readonly contactApi = inject(ContactApiService);
+  private readonly translation = inject(TranslationService);
+
+  protected readonly emails = LEGAL_CONTACT_EMAILS;
 
   readonly isSubmitting = signal(false);
   readonly submitted = signal(false);
@@ -28,14 +37,14 @@ export class ContactPage {
 
   constructor() {
     setPageMeta({
-      title: 'ติดต่อเรา (Contact Us) | SiriUpSkill',
-      description: 'ช่องทางการติดต่อทีมงานและฝ่ายบริการลูกค้า SiriUpSkill',
+      title: `${this.translation.t('contact.pageTitle')} · ${this.translation.t('common.appName')}`,
+      description: this.translation.t('contact.pageDescription'),
     });
   }
 
   sendMessage(): void {
     if (!this.name.trim() || !this.email.trim() || !this.message.trim()) {
-      this.toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      this.toast.error(this.translation.t('contact.validationRequired'));
       return;
     }
 
@@ -54,11 +63,11 @@ export class ContactPage {
         next: () => {
           this.isSubmitting.set(false);
           this.submitted.set(true);
-          this.toast.success('ข้อความของคุณถูกส่งเรียบร้อยแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด');
+          this.toast.success(this.translation.t('contact.successToast'));
         },
         error: (err) => {
           this.isSubmitting.set(false);
-          const msg = err?.error?.detail || err?.error?.message || 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง';
+          const msg = err?.error?.detail || err?.error?.message || this.translation.t('contact.sendFailed');
           this.errorMessage.set(msg);
           this.toast.error(msg);
         },

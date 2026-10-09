@@ -59,9 +59,12 @@ describe('MeetingActions (needsAction -> UI)', () => {
 
   it('Waiting -> only a status message (no inputs, no buttons)', () => {
     const root = render(summary('Waiting'));
-    expect(root.textContent).toContain('creating the room');
+    expect(root.textContent).toContain('Preparing the room for this session');
+    expect(root.textContent).toContain('updates by itself');
+    expect(root.querySelector('[role="status"]')).not.toBeNull();
     expect(root.querySelector('input')).toBeNull();
     expect(root.querySelector('button')).toBeNull();
+    expect(root.querySelector('a')).toBeNull();
   });
 
   it('None -> renders nothing actionable', () => {
@@ -98,6 +101,42 @@ describe('MeetingActions (needsAction -> UI)', () => {
     // the field was cleared and the link is not echoed anywhere in the component
     expect(input.value).toBe('');
     expect(root.textContent).not.toContain('meet.google.com/abc-defg-hij');
+  });
+
+  it('PasteLink -> a 2-step helper: open Meet in a new tab, then paste the link into the field', () => {
+    const root = render(summary('PasteLink', { syncStatus: 'AwaitingLink' }));
+
+    expect(root.textContent).toContain('Set up the room yourself in 2 steps');
+    const steps = root.querySelectorAll('ol > li');
+    expect(steps.length).toBe(2);
+
+    // Step 1: exactly one safe external link to Google's "new meeting" entry point.
+    const anchors = Array.from(root.querySelectorAll('a'));
+    expect(anchors.length).toBe(1);
+    const createMeet = anchors[0];
+    expect(createMeet.textContent).toContain('Create a Google Meet room');
+    expect(createMeet.getAttribute('href')).toBe('https://meet.google.com/new');
+    expect(createMeet.getAttribute('target')).toBe('_blank');
+    expect(createMeet.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(steps[0].contains(createMeet)).toBe(true);
+
+    // Zoom / Teams are plain text hints only — no extra buttons or links.
+    expect(steps[0].textContent).toContain('Zoom or Microsoft Teams');
+    expect(steps[0].textContent).toContain('zoom.us');
+    expect(steps[0].textContent).toContain('teams.microsoft.com');
+
+    // Step 2: the instruction, the field and the accepted-hosts note.
+    expect(steps[1].textContent).toContain('copy its link and paste it in this field');
+    expect(steps[1].querySelector('input[type="url"]')).not.toBeNull();
+    expect(steps[1].textContent).toContain('meet.google.com, zoom.us, teams.microsoft.com');
+  });
+
+  it('PasteLink -> Thai copy for the helper', () => {
+    TestBed.inject(TranslationService).setLocale('th');
+    const root = render(summary('PasteLink', { syncStatus: 'AwaitingLink' }));
+    expect(root.textContent).toContain('สร้างห้อง Google Meet');
+    expect(root.textContent).toContain('สร้างห้องแล้วคัดลอกลิงก์มาวางที่ช่องนี้');
+    expect(root.textContent).toContain('meet.google.com, zoom.us, teams.microsoft.com');
   });
 
   it('PasteLink -> a non-https link is rejected on the client without calling the API', () => {
@@ -142,6 +181,19 @@ describe('MeetingActions (needsAction -> UI)', () => {
     const root = render(summary('ReconnectGoogle', { syncStatus: 'NeedsReconnect' }), false);
     expect(button(root, 'Reconnect Google')).toBeUndefined();
     expect(button(root, 'Paste a room link instead')).toBeDefined();
+  });
+
+  it('opting into manual paste after a failure reveals the same 2-step helper', () => {
+    const root = render(summary('Retry', { syncStatus: 'Failed' }));
+    expect(root.querySelector('a[href="https://meet.google.com/new"]')).toBeNull();
+
+    (button(root, 'Paste a room link instead') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const createMeet = root.querySelector('a[href="https://meet.google.com/new"]');
+    expect(createMeet).not.toBeNull();
+    expect(createMeet?.getAttribute('target')).toBe('_blank');
+    expect(root.querySelector('input[type="url"]')).not.toBeNull();
   });
 
   it('Retry -> a resync button; clicking it POSTs and emits the new summary', () => {

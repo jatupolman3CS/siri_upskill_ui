@@ -1,49 +1,43 @@
 <div class="animate-fade-in mx-auto max-w-4xl px-4 py-12 space-y-8">
   <header class="animate-fade-in-down space-y-2 border-b border-[var(--color-border)] pb-6">
     <h1 class="text-3xl font-black tracking-tight text-[var(--color-text)]">
-      ข้อกำหนดและเงื่อนไขการใช้บริการ (Terms of Service)
+      {{ 'legal.terms.title' | translate }}
     </h1>
-    <p class="text-xs text-[var(--color-text-muted)]">
-      อัปเดตล่าสุด: 27 สิงหาคม 2569
-    </p>
   </header>
 
   <article class="animate-fade-in-up stagger-1 prose prose-neutral dark:prose-invert max-w-none text-xs sm:text-sm text-[var(--color-text)] leading-relaxed space-y-6">
     <section class="space-y-2">
-      <h2 class="text-base font-bold text-[var(--color-text)]">1. บทนำและข้อตกลงทั่วไป</h2>
-      <p>
-        ยินดีต้อนรับสู่ <strong>SiriUpSkill</strong> แพลตฟอร์มการเรียนรู้ออนไลน์ระดับมืออาชีพ โดยการเข้าถึงหรือใช้งานเว็บไซต์และบริการของเรา ถือว่าท่านได้อ่าน ทำความเข้าใจ และตกลงที่จะผูกพันตามข้อกำหนดและเงื่อนไขเหล่านี้ทั้งหมด
-      </p>
+      <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.terms.s1.heading' | translate }}</h2>
+      <p>{{ 'legal.terms.s1.p1' | translate }}</p>
     </section>
 
     <section class="space-y-2">
-      <h2 class="text-base font-bold text-[var(--color-text)]">2. การลงทะเบียนและบัญชีผู้ใช้</h2>
+      <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.terms.s2.heading' | translate }}</h2>
       <ul class="list-disc pl-5 space-y-1 text-[var(--color-text-muted)]">
-        <li>ผู้ใช้งานต้องให้อีเมลและข้อมูลที่ถูกต้อง ครบถ้วน และเป็นจริงในการสมัคร</li>
-        <li>ท่านมีหน้าที่รับผิดชอบในการรักษาความลับของรหัสผ่านและการเข้าถึงบัญชีของตนเอง</li>
-        <li>ห้ามแบ่งปันบัญชีผู้ใช้หรือเข้าสู่ระบบพร้อมกันเกินขีดจำกัดอุปกรณ์ที่กำหนด (Concurrent Session Protection)</li>
+        <li>{{ 'legal.terms.s2.b1' | translate }}</li>
+        <li>{{ 'legal.terms.s2.b2' | translate }}</li>
+        <li>{{ 'legal.terms.s2.b3' | translate }}</li>
       </ul>
     </section>
 
     <section class="space-y-2">
-      <h2 class="text-base font-bold text-[var(--color-text)]">3. ทรัพย์สินทางปัญญาและลิขสิทธิ์เนื้อหา</h2>
+      <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.terms.s3.heading' | translate }}</h2>
+      <p>{{ 'legal.terms.s3.p1' | translate }}</p>
+      <p>{{ 'legal.terms.s3.p2' | translate }}</p>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.terms.s4.heading' | translate }}</h2>
+      <p>{{ 'legal.terms.s4.p1' | translate }}</p>
       <p>
-        เนื้อหา วิดีโอ เอกสารประกอบ แบบทดสอบ และโค้ดตัวอย่างทั้งหมดบน SiriUpSkill เป็นทรัพย์สินทางปัญญาของผู้สอนและ SiriUpSkill ห้ามมิให้ทำซ้ำ ดัดแปลง เผยแพร่ บันทึกหน้าจอ หรือแจกจ่ายต่อบุคคลภายนอกโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร
+        {{ 'legal.terms.s4.p2' | translate }}
+        <a routerLink="/refund-policy" class="text-[var(--color-primary)] underline">{{ 'legal.terms.s4.refundLink' | translate }}</a>
       </p>
     </section>
 
     <section class="space-y-2">
-      <h2 class="text-base font-bold text-[var(--color-text)]">4. การชำระเงินและนโยบายการคืนเงิน</h2>
-      <p>
-        การชำระเงินสามารถทำได้ผ่านบัตรเครดิต/เดบิต และพร้อมเพย์ (PromptPay QR) โดยมีการออกใบกำกับภาษีเต็มรูปแบบตามที่ระบุ ทั้งนี้ การขอคืนเงินจะเป็นไปตาม <a routerLink="/refund-policy" class="text-[var(--color-primary)] underline">นโยบายการคืนเงิน (Refund Policy)</a>
-      </p>
-    </section>
-
-    <section class="space-y-2">
-      <h2 class="text-base font-bold text-[var(--color-text)]">5. กฎระเบียบชุมชนและข้อห้าม</h2>
-      <p>
-        ผู้ใช้งานต้องไม่กระทำการใดๆ ที่เป็นการละเมิดความปลอดภัยของระบบ พยายามเจาะระบบ ส่งมัลแวร์ หรือโพสต์ข้อความที่ไม่สุภาพ ก่อกวน หรือละเมิดกฎหมายในพื้นที่กระดานสนทนาและ Q&A
-      </p>
+      <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.terms.s5.heading' | translate }}</h2>
+      <p>{{ 'legal.terms.s5.p1' | translate }}</p>
     </section>
   </article>
 </div>

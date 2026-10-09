@@ -7,6 +7,8 @@ import { StudioNavLink } from '../studio-mobile-nav/studio-nav-link';
 export const ADMIN_NAV_LINKS: readonly StudioNavLink[] = [
   { id: 'dashboard', route: '/admin', icon: 'phosphorHouse', labelKey: 'admin.nav.dashboard', exact: true },
   { id: 'moderation', route: '/admin/courses', icon: 'phosphorGraduationCap', labelKey: 'admin.nav.moderation' },
+  { id: 'categories', route: '/admin/categories', icon: 'phosphorTreeStructure', labelKey: 'admin.nav.categories' },
+  { id: 'instructors', route: '/admin/instructors', icon: 'phosphorIdentificationCard', labelKey: 'admin.nav.instructors' },
   { id: 'users', route: '/admin/users', icon: 'phosphorUsers', labelKey: 'admin.nav.users' },
   { id: 'marketing', route: '/admin/marketing', icon: 'phosphorTag', labelKey: 'admin.nav.marketing' },
   { id: 'banners', route: '/admin/banners', icon: 'phosphorImage', labelKey: 'admin.nav.banners' },
@@ -15,6 +17,7 @@ export const ADMIN_NAV_LINKS: readonly StudioNavLink[] = [
   { id: 'payouts', route: '/admin/payouts', icon: 'phosphorCurrencyDollar', labelKey: 'admin.nav.payouts' },
   { id: 'payments', route: '/admin/payments', icon: 'phosphorCreditCard', labelKey: 'admin.nav.payments' },
   { id: 'contact', route: '/admin/contact-messages', icon: 'phosphorEnvelopeSimple', labelKey: 'admin.nav.contact' },
+  { id: 'live-status', route: '/admin/live-status', icon: 'phosphorPulse', labelKey: 'admin.nav.liveStatus' },
 ];
 
 /** The header's mode-switch links, repeated in the drawer because the header hides them on small screens. */

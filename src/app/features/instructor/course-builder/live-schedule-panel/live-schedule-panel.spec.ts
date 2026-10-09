@@ -174,6 +174,23 @@ describe('LiveSchedulePanel', () => {
     expect(text()).toContain('Thailand time');
   });
 
+  it('reports the course delivery format to the builder once the schedule has loaded', async () => {
+    fixture = TestBed.createComponent(LiveSchedulePanel);
+    fixture.componentRef.setInput('courseId', 'c1');
+    const reported: string[] = [];
+    fixture.componentInstance.deliveryFormatChange.subscribe((format) => reported.push(format));
+    await settle();
+    httpMock.expectOne(SCHEDULE_URL).flush(schedule([session('a')], { deliveryFormat: 'Live' }));
+    httpMock.expectOne(MEETINGS_URL).flush({ items: [meeting('a')] });
+    httpMock
+      .expectOne((r) => r.url === STATES_URL)
+      .flush({ items: [stateItem('a', 'Upcoming', meeting('a'))], totalCount: 1, page: 1, pageSize: 50, totalPages: 1 });
+    httpMock.expectOne(GOOGLE_URL).flush(google());
+    await settle();
+
+    expect(reported).toEqual(['Live']);
+  });
+
   it('chooses the action from needsAction: PasteLink -> link field, ReconnectGoogle -> button, Retry -> button, Waiting -> status only', async () => {
     await open({
       schedule: schedule([session('p'), session('r'), session('t'), session('w')]),
@@ -190,7 +207,7 @@ describe('LiveSchedulePanel', () => {
     expect(rowFor('Session r').textContent).toContain('Reconnect Google');
     expect(rowFor('Session t').textContent).toContain('Try creating the room again');
     expect(rowFor('Session w').querySelector('input')).toBeNull();
-    expect(rowFor('Session w').textContent).toContain('creating the room');
+    expect(rowFor('Session w').textContent).toContain('Preparing the room');
   });
 
   describe('polling room status', () => {

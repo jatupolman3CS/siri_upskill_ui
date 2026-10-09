@@ -1,0 +1,51 @@
+<div class="animate-fade-in mx-auto flex max-w-6xl flex-col gap-6">
+  <header class="flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'admin.liveStatus.heading' | translate }}</h1>
+      <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.subheading' | translate }}</p>
+    </div>
+    <div class="flex flex-col items-start gap-1 sm:items-end">
+      <app-button variant="secondary" [loading]="isRefreshing()" [disabled]="isLoading()" (click)="reload()">
+        <ng-icon leading name="phosphorArrowClockwise" aria-hidden="true" />
+        {{ 'admin.liveStatus.refresh' | translate }}
+      </app-button>
+      @if (status(); as current) {
+        <p class="text-xs text-[var(--color-text-muted)]">
+          {{ 'admin.liveStatus.checkedAt' | translate: { time: (current.serverTimeUtc | bangkokDate: 'dateTime') } }}
+        </p>
+      }
+      <p class="text-xs text-[var(--color-text-muted)]">{{ 'admin.liveStatus.autoRefresh' | translate }}</p>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'common.loading' | translate">
+      <app-skeleton variant="block" height="7rem" radius="lg" />
+      <app-skeleton variant="block" height="10rem" radius="lg" />
+      <app-skeleton variant="block" height="14rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'admin.liveStatus.errorHeading' | translate"
+      [description]="'admin.liveStatus.errorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'admin.liveStatus.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (status(); as current) {
+    @if (isStale()) {
+      <p
+        role="alert"
+        class="flex items-start gap-2 rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--color-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-3 text-sm text-[var(--color-text)]"
+      >
+        <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--color-danger)]" />
+        <span>
+          {{ 'admin.liveStatus.staleNotice' | translate: { time: (current.serverTimeUtc | bangkokDate: 'dateTime') } }}
+        </span>
+      </p>
+    }
+
+    <app-live-status-verdict [status]="current" />
+    <app-live-status-jobs [status]="current" />
+    <app-live-status-services [status]="current" />
+  }
+</div>

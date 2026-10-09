@@ -25,6 +25,8 @@
       "menuTitle": "Admin menu",
       "dashboard": "System dashboard",
       "moderation": "Course moderation",
+      "categories": "Course categories",
+      "instructors": "Instructor applications",
       "users": "Users & roles",
       "marketing": "Marketing & discount codes",
       "banners": "Banners",
@@ -33,9 +35,260 @@
       "payouts": "Instructor payouts",
       "payments": "Payments",
       "contact": "Contact messages",
+      "liveStatus": "Live system status",
       "toInstructor": "Instructor mode",
       "toLearner": "Learner view",
       "toHome": "Go to home page"
+    },
+    "categories": {
+      "pageTitle": "Manage course categories",
+      "pageDescription": "Create, edit, reorder and delete the platform course categories",
+      "heading": "Course categories",
+      "subheading": "Instructors must pick a category when they create a course, so at least one category has to exist first.",
+      "createButton": "Create category",
+      "listLabel": "Course categories",
+      "emptyHeading": "There are no categories yet",
+      "emptyDescription": "Instructors cannot create courses until a category exists. Start by creating the first category.",
+      "emptyAction": "Create the first category",
+      "errorHeading": "Could not load the categories",
+      "retryButton": "Try again",
+      "row": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "level": "Level {{level}}",
+        "actionsFor": "Actions for category {{name}}",
+        "moveUp": "Move {{name}} up",
+        "moveDown": "Move {{name}} down",
+        "addChild": "Add a subcategory to {{name}}",
+        "edit": "Edit {{name}}",
+        "delete": "Delete {{name}}"
+      },
+      "form": {
+        "createTitle": "Create category",
+        "createChildTitle": "Create subcategory",
+        "editTitle": "Edit category",
+        "nameTh": "Thai name",
+        "nameEn": "English name",
+        "slug": "Slug (used in URLs)",
+        "slugHelper": "Lowercase English letters, digits and hyphens only, e.g. web-development. Suggested from the English name; you can edit it.",
+        "slugHelperEdit": "If you change the slug, existing links to this category (e.g. /courses?category=...) stop working.",
+        "parent": "Parent category",
+        "noParent": "None (top-level category)",
+        "icon": "Icon",
+        "iconNone": "No icon",
+        "active": "This category is active",
+        "activeHint": "An inactive category is hidden on the site, together with every subcategory beneath it.",
+        "cancel": "Cancel",
+        "saveCreate": "Create category",
+        "saveEdit": "Save changes",
+        "errors": {
+          "required": "This field is required",
+          "maxLength": "Must be at most {{max}} characters",
+          "slugFormat": "Use only lowercase English letters, digits and single hyphens between them, e.g. web-development"
+        }
+      },
+      "icons": {
+        "megaphone": "Megaphone (marketing)",
+        "code": "Code (technology)",
+        "coins": "Coins (finance)"
+      },
+      "delete": {
+        "title": "Delete category",
+        "body": "Delete the category \"{{name}}\"? This cannot be undone.",
+        "hasChildrenHint": "This category has {{count}} subcategories. It cannot be deleted until they are moved or deleted first.",
+        "cancel": "Cancel",
+        "confirm": "Delete category"
+      },
+      "toast": {
+        "created": "Category \"{{name}}\" created",
+        "updated": "Category \"{{name}}\" saved",
+        "deleted": "Category \"{{name}}\" deleted"
+      },
+      "live": {
+        "moved": "Moved {{name}} to position {{position}} of {{total}}"
+      },
+      "errors": {
+        "forbidden": "You do not have permission to manage categories. Sign in with an admin account.",
+        "notFound": "That category was not found; it may have been deleted or moved. The list has been reloaded.",
+        "slugTaken": "The slug \"{{slug}}\" is already in use. Please choose another one.",
+        "deleteBlocked": "It cannot be deleted because it still has subcategories or is still in use. Move or delete the related items first.",
+        "invalid": "Some values are not valid. Please check the fields that show a message.",
+        "cycle": "It cannot be moved there because that would put the category under one of its own subcategories.",
+        "reorderInvalid": "Reordering failed; the list may have changed. It has been reloaded."
+      }
+    },
+    "instructors": {
+      "pageTitle": "Instructor applications",
+      "pageDescription": "Review and approve pending instructor applications",
+      "heading": "Instructor applications",
+      "subheading": "Applications waiting for review, oldest first.",
+      "pendingCount": "{{count}} pending",
+      "roleHint": "Approving grants the applicant the Instructor role immediately. The application status and the role are saved together in a single step.",
+      "listLabel": "Pending instructor applications",
+      "emptyHeading": "No applications waiting for review",
+      "emptyDescription": "New instructor applications will show up here.",
+      "errorHeading": "Could not load the applications",
+      "errorDescription": "Something went wrong while loading the list. Please try again.",
+      "retryButton": "Try again",
+      "card": {
+        "appliedAt": "Applied {{date}}",
+        "showMore": "Read more",
+        "showLess": "Show less",
+        "approve": "Approve",
+        "reject": "Reject"
+      },
+      "confirm": {
+        "approveTitle": "Approve as instructor",
+        "approveBody": "Approve \"{{name}}\" as an instructor?",
+        "approveHint": "The applicant gets the Instructor role right away and can start creating courses.",
+        "approveConfirm": "Approve",
+        "rejectTitle": "Reject application",
+        "rejectBody": "Reject the application from \"{{name}}\"?",
+        "rejectHint": "The applicant will not get the Instructor role and can submit a new application later.",
+        "rejectConfirm": "Reject application",
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "approved": "\"{{name}}\" was approved as an instructor",
+        "rejected": "The application from \"{{name}}\" was rejected"
+      },
+      "errors": {
+        "forbidden": "You do not have permission to do this. Sign in with an admin account.",
+        "notFound": "That application was not found; it may have been removed. The list has been reloaded.",
+        "alreadyDecided": "That application has already been decided. The list has been reloaded."
+      }
+    },
+    "liveStatus": {
+      "pageTitle": "Live system status | SIRI UpSkill Admin",
+      "pageDescription": "Check whether the background job server, e-mail and Google connection are ready for live classes.",
+      "heading": "Live system status",
+      "subheading": "Can the platform really run live classes? Background job server, invite/reminder e-mail and room creation.",
+      "refresh": "Refresh",
+      "checkedAt": "Checked {{time}}",
+      "autoRefresh": "Updates itself every 30 seconds while this page is open.",
+      "errorHeading": "Could not load the system status",
+      "errorDescription": "Check your connection and try again. If it keeps failing, the backend may not be responding.",
+      "retry": "Try again",
+      "staleNotice": "Refresh failed — showing the last snapshot, checked {{time}}.",
+      "needsAttention": "Needs attention",
+      "verdict": {
+        "ready": "Ready",
+        "readyHint": "Nothing to fix in the job server, e-mail and Live settings the system can check.",
+        "attention": "Not fully ready — {{count}} to fix",
+        "attentionHint": "Work through the list below. This page updates itself once the system sees the fix.",
+        "impact": "Impact",
+        "action": "What to do",
+        "code": "Warning code"
+      },
+      "warnings": {
+        "no_job_server": {
+          "title": "No background job server",
+          "impact": "Invite/reminder e-mail and room creation will not run.",
+          "action": "Enable Hangfire:ServerInApi or deploy the Workers."
+        },
+        "email_unconfigured": {
+          "title": "E-mail sending is not configured",
+          "impact": "Learners will not receive live-class invitations or reminders.",
+          "action": "Set Email:Provider to Smtp with the full SMTP settings, then redeploy."
+        },
+        "outbox_backlog": {
+          "title": "E-mail is piling up in the outbox",
+          "impact": "Invitations and reminders may reach learners after class has started.",
+          "action": "Check that the job server is running and SMTP can send, then look at the failed count in the “E-mail” section below."
+        },
+        "public_base_url_not_https": {
+          "title": "The public URL is not https",
+          "impact": "Links in e-mails and the Google connection may fail or be insecure.",
+          "action": "Set the public base URL to start with https:// and match your real domain, then redeploy."
+        },
+        "google_not_configured": {
+          "title": "Google connection is not configured",
+          "impact": "Instructors cannot connect Google or have Meet rooms created automatically — they must paste room links themselves.",
+          "action": "Configure the platform Google OAuth client, or keep using pasted links (this does not block teaching)."
+        },
+        "meetings_stuck_pending": {
+          "title": "Some rooms are stuck in “preparing”",
+          "impact": "Some sessions have no room yet, so learners cannot join.",
+          "action": "Check that the job server is running, then ask the instructor to press “Try creating the room again” or paste a link on the session page."
+        },
+        "unknown": {
+          "title": "A warning this page does not know yet",
+          "impact": "The system found something that has no description on this page.",
+          "action": "Note the warning code above, then check the backend log or tell the dev team."
+        }
+      },
+      "jobServer": {
+        "heading": "Background job server (Hangfire)",
+        "running": "Running",
+        "stopped": "Not running",
+        "count": "{{count}} server(s)",
+        "colName": "Server name",
+        "colStarted": "Started",
+        "colHeartbeat": "Last heartbeat",
+        "none": "No job server is registered."
+      },
+      "recurring": {
+        "heading": "Recurring jobs",
+        "hint": "Jobs the job server runs on a schedule. If the last run is much older than the cron interval, the job is not running.",
+        "colJob": "Job",
+        "colCron": "Schedule (cron)",
+        "colLast": "Last run",
+        "colNext": "Next run",
+        "colState": "Last result",
+        "neverRan": "Never ran",
+        "none": "No recurring jobs are registered — usually the job server has never started."
+      },
+      "email": {
+        "heading": "E-mail (outbox)",
+        "hint": "Invitation and reminder e-mails wait in this queue before they are sent.",
+        "provider": "Sending via",
+        "providers": {
+          "Smtp": "SMTP",
+          "Log": "Log only — no real e-mail is sent",
+          "Unconfigured": "Not configured"
+        },
+        "pending": "Waiting to send",
+        "failed": "Failed",
+        "oldestPending": "Oldest waiting e-mail",
+        "noBacklog": "Nothing waiting"
+      },
+      "live": {
+        "heading": "Live settings",
+        "hint": "How rooms are created, the Google connection, and the rooms/invitations still outstanding.",
+        "provider": "Room creation",
+        "providers": {
+          "GoogleMeet": "Google Meet (created automatically)",
+          "ManualOnly": "Instructors paste room links themselves",
+          "Logging": "Test mode — no real rooms"
+        },
+        "google": "Google OAuth",
+        "googleYes": "Configured",
+        "googleNo": "Not configured",
+        "publicBaseUrl": "Public base URL (used in e-mail links and the Google connection)",
+        "meetingsPending": "Rooms being prepared",
+        "meetingsAwaitingLink": "Waiting for a pasted link",
+        "meetingsFailed": "Room creation failed",
+        "invitesPending": "Invitations waiting"
+      },
+      "time": {
+        "justNow": "just now",
+        "soon": "in a moment",
+        "secondsAgo": "{{count}} s ago",
+        "minutesAgo": "{{count}} min ago",
+        "hoursAgo": "{{count}} h ago",
+        "daysAgo": "{{count}} d ago",
+        "secondsIn": "in {{count}} s",
+        "minutesIn": "in {{count}} min",
+        "hoursIn": "in {{count}} h",
+        "daysIn": "in {{count}} d",
+        "never": "No data"
+      },
+      "duration": {
+        "seconds": "{{count}} s",
+        "minutes": "{{count}} min",
+        "hours": "{{count}} h",
+        "days": "{{count}} d"
+      }
     },
     "contactMessages": {
       "title": "Contact Messages",
@@ -119,7 +372,19 @@
     },
     "payouts": {
       "subtitle": "Process instructor revenue share (standard split: instructor {{percent}} / platform {{platformPercent}}, with payment fees deducted before the split) and approve refund requests.",
-      "createBatchHint": "Includes successfully paid orders that have passed the hold period of {{holdDays}} days, applies {{withholdingPercent}} withholding tax, and uses the {{minAmount}} minimum payout condition."
+      "createBatchHint": "Includes successfully paid orders that have passed the hold period of {{holdDays}} days, applies {{withholdingPercent}} withholding tax, and uses the {{minAmount}} minimum payout condition.",
+      "batchStatus": {
+        "draft": "Draft (awaiting payout)",
+        "executed": "Paid out",
+        "failed": "Failed"
+      },
+      "splitStatus": {
+        "all": "All",
+        "pending": "Pending (not in a batch yet)",
+        "payable": "Payable (in a payout batch)",
+        "paid": "Paid",
+        "reversed": "Reversed"
+      }
     }
   },
   "contact": {
@@ -130,7 +395,7 @@
     "dpoEmail": "Data Protection Officer (DPO):",
     "businessEmail": "Business & Enterprise:",
     "officeHours": "Operating Hours",
-    "officeHoursDetails": "Monday - Friday: 09:00 - 18:00 (Thailand Time UTC+7)<br>Closed on weekends and public holidays",
+    "officeHoursDetails": "The team replies to messages sent through the form or by email on business days.",
     "sendMessage": "Send Us a Message",
     "successTitle": "✓ Message Sent Successfully",
     "successDesc": "Our team will review your inquiry and get back to {{email}} as soon as possible.",
@@ -139,18 +404,76 @@
     "subjectLabel": "Subject",
     "messageLabel": "Your Message *",
     "btnSubmit": "Send Message",
-    "submitting": "Sending..."
+    "submitting": "Sending...",
+    "pageTitle": "Contact Us",
+    "pageDescription": "How to reach the SiriUpSkill team and customer support",
+    "validationRequired": "Please fill in all required fields.",
+    "successToast": "Your message has been sent. The team will get back to you as soon as possible.",
+    "sendFailed": "Something went wrong while sending your message. Please try again."
   },
   "faq": {
     "title": "Frequently Asked Questions (FAQ)",
-    "subtitle": "Everything you need to know about courses, payments, certificates, and using SiriUpSkill",
+    "subtitle": "Answers about learning, live classes, payments, certificates and using SiriUpSkill",
     "catAll": "All",
     "catLearning": "Learning & Certificates",
     "catPayment": "Billing & Payments",
     "catTechnical": "Account & Security",
     "ctaHeading": "Still have questions?",
     "ctaDesc": "Our team is here to assist you during business hours.",
-    "ctaButton": "Contact Us"
+    "ctaButton": "Contact Us",
+    "pageTitle": "Frequently Asked Questions (FAQ)",
+    "pageDescription": "Frequently asked questions about learning, live classes, payments, certificates and using SiriUpSkill",
+    "catLive": "Live classes",
+    "items": {
+      "about": {
+        "q": "What is SiriUpSkill and who is it for?",
+        "a": "SiriUpSkill is an online course platform. Instructors create and publish their own courses, and learners buy the courses they are interested in to build skills they can use at work. Browse every available category and course on the Courses page."
+      },
+      "access": {
+        "q": "How many times can I rewatch a course, and does access expire?",
+        "a": "You can rewatch as often as you like while your access is active. The access period is set per course: some courses never expire and others have a limited period, shown on each course’s detail page before you buy."
+      },
+      "certificate": {
+        "q": "How do I get a certificate?",
+        "a": "When you finish every lesson in a course (100% progress), the system issues a digital certificate automatically, with a verification code and a QR code that anyone can use to check it on the certificate verification page."
+      },
+      "invoice": {
+        "q": "How do I get a receipt or a tax invoice?",
+        "a": "After a successful payment you can view and print your receipt from Order History. A full tax invoice is not issued automatically at checkout at the moment. For tax invoice enquiries, contact the team through the Contact page and include your order number."
+      },
+      "methods": {
+        "q": "Which payment methods are available?",
+        "a": "You can pay by scanning a Thai QR PromptPay code from any banking app that supports PromptPay (processed by Stripe). Credit/debit cards (Visa, Mastercard) appear as an option on the checkout page only once they are enabled. Installment payments are not supported at the moment."
+      },
+      "devices": {
+        "q": "Can I sign in on several devices at the same time?",
+        "a": "The number of devices signed in at the same time per account is limited to help prevent account sharing. The default is 2 devices. When you sign in beyond the limit, the system automatically signs out the device that has been signed in the longest and notifies you by email. You can review and remove devices you no longer use on the Signed-in devices page."
+      },
+      "liveWhat": {
+        "q": "How are live and Hybrid courses different from regular video courses?",
+        "a": "A live course runs as sessions on a schedule set by the instructor: you join an online classroom with the instructor at the time of each session. A Hybrid course has both live sessions and videos you can watch whenever you like. The schedule (Thailand time) is shown on the course detail page."
+      },
+      "liveJoin": {
+        "q": "How do I join a live class, and why do I need to sign in and buy the course first?",
+        "a": "The classroom link is not shown publicly. Join with the join button on the course’s Live tab, or through the link in your invitation email. The system checks that you are signed in and have active, unexpired access to that course before taking you into the room, so only enrolled learners can enter. The room opens a little before the session starts and closes when it ends. Please do not forward the classroom link to anyone else."
+      },
+      "liveInvites": {
+        "q": "What do I receive after buying a live course?",
+        "a": "After a successful payment the system emails you a summary of the schedule with a calendar file (.ics) you can add to your calendar, and sends reminder emails before each session (about 24 hours and 1 hour before it starts). If the instructor changes the time or cancels a session, the update or cancellation is also sent to you by email."
+      },
+      "liveReplay": {
+        "q": "Can I watch a live session I missed?",
+        "a": "Yes, once the instructor has uploaded the recording of that session. It then appears as a video lesson in the course (the replay button). Classrooms are not recorded automatically, so you have to wait for the instructor to upload it. If you buy the course after some sessions have already taken place, you can watch the recordings of those sessions as soon as the instructor has uploaded them."
+      },
+      "liveAccess": {
+        "q": "How long can I access a live course, and is there an enrollment deadline?",
+        "a": "The access period is set per course, just like regular courses (see the course detail page). For live and Hybrid courses that have an access period, it is counted from the start of the course’s first live session if that session has not started yet; if it has already started, or the instructor has not set a schedule yet, it is counted from the purchase date. Instructors may also set an enrollment deadline and a seat limit; once enrollment closes or the seats are full, the course can no longer be purchased."
+      },
+      "liveRefund": {
+        "q": "Can I get a refund for a live course?",
+        "a": "You can submit a refund request from Order History and the team reviews it case by case. However, once you have joined a live session of a course, the system will not accept a refund request for that course’s share (other courses in the same order that you have not attended live can still be requested). See the Refund Policy for details."
+      }
+    }
   },
   "flashSale": {
     "title": "⚡ WEEKLY FLASH SALE",
@@ -594,6 +917,11 @@
     "freePreview": "Free Preview",
     "freePreviewNotice": "You are watching a free preview — enroll now to unlock all lessons.",
     "buyFullCourse": "Enroll in Course",
+    "liveOnly": {
+      "heading": "This course is taught live and has no video lessons yet",
+      "body": "You learn with the instructor on the live schedule — the room opens shortly before each class, and a recording appears here as a lesson after the class if the instructor attaches one.",
+      "openSchedule": "See the live schedule and join"
+    },
     "curriculumHeading": "Course Curriculum",
     "episodesCount": "{{count}} lesson(s)",
     "resumeTitle": "Resume playback?",
@@ -803,6 +1131,9 @@
       "basic": {
         "category": "Course Category *",
         "selectCategory": "-- Select Category --",
+        "noCategories": "There are no categories in the system yet",
+        "noCategoriesAdminAction": "Go create a category",
+        "noCategoriesAskAdmin": "Please ask an administrator to create a category first",
         "title": "Course Title *",
         "titlePlaceholder": "e.g. Full-Stack Web Development with Angular & .NET 10",
         "subtitle": "Subtitle",
@@ -893,8 +1224,83 @@
         "failed": "Failed"
       }
     },
+    "payoutAccount": {
+      "heading": "Bank account for payouts",
+      "hint": "This account is used to transfer your revenue share.",
+      "loadingLabel": "Loading bank account details",
+      "loadErrorHeading": "Couldn't load bank account details",
+      "loadErrorDescription": "Something went wrong while loading your bank account details. Please try again.",
+      "retry": "Try again",
+      "emptyHeading": "No payout account yet",
+      "emptyDescription": "Add the bank account you want to be paid into. An admin verifies the account before any money is transferred to you.",
+      "add": "Add payout account",
+      "edit": "Edit account",
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save account",
+      "saving": "Saving...",
+      "saved": "Payout account saved. It is waiting for admin verification.",
+      "reverifyNotice": "Adding or changing the bank, account number, account name or tax ID sets the account back to \"Awaiting admin verification\". An admin must verify it again before money can be transferred to you.",
+      "reenterNotice": "For your security the full account number and tax ID are never shown — please enter them again every time you save.",
+      "fields": {
+        "bank": "Bank",
+        "bankPlaceholder": "Select a bank",
+        "accountNo": "Account number",
+        "accountNoHelper": "Digits only; dashes and spaces are allowed",
+        "accountName": "Account name",
+        "accountNameHelper": "As shown on the bank book",
+        "taxPayerType": "Taxpayer type",
+        "taxId": "Tax ID",
+        "taxIdHelper": "Optional — national ID or tax identification number"
+      },
+      "taxPayerType": {
+        "Individual": "Individual",
+        "Corporate": "Juristic person"
+      },
+      "status": {
+        "verified": "Verified",
+        "verifiedOn": "on {{date}}",
+        "pending": "Awaiting admin verification",
+        "pendingNote": "An admin must verify this account before money can be transferred to you."
+      },
+      "validation": {
+        "accountNoDigits": "The account number must contain digits only (dashes and spaces are allowed)"
+      },
+      "errors": {
+        "forbidden": "Couldn't save: only approved instructors can add a payout account.",
+        "conflict": "Couldn't save: the account was changed from somewhere else at the same time. Reload this page and try again.",
+        "invalid": "The submitted details are not valid. Please check every field and try again.",
+        "generic": "Couldn't save the payout account. Please try again (what you entered is still here).",
+        "server": {
+          "bankCode": "Please choose a valid bank",
+          "accountNo": "The account number is not valid — please check it",
+          "accountName": "The account name is not valid — please check it",
+          "taxId": "The tax ID is not valid — please check it",
+          "taxPayerType": "Please choose a valid taxpayer type"
+        }
+      },
+      "banks": {
+        "BBL": "Bangkok Bank (BBL)",
+        "KBANK": "Kasikornbank (KBANK)",
+        "KTB": "Krungthai Bank (KTB)",
+        "SCB": "Siam Commercial Bank (SCB)",
+        "BAY": "Bank of Ayudhya / Krungsri (BAY)",
+        "TTB": "TMBThanachart Bank (TTB)",
+        "GSB": "Government Savings Bank (GSB)",
+        "GHB": "Government Housing Bank (GHB)",
+        "BAAC": "Bank for Agriculture and Agricultural Cooperatives (BAAC)",
+        "UOB": "United Overseas Bank (UOB)",
+        "CIMBT": "CIMB Thai Bank (CIMBT)",
+        "KKP": "Kiatnakin Phatra Bank (KKP)"
+      }
+    },
     "onboarding": {
-      "payoutAccountNote": "Your revenue share is transferred to this account when an admin creates a payout batch, after the hold period of {{holdDays}} days and once your accumulated balance reaches {{minAmount}}.",
+      "steps": {
+        "terms": "Confirm terms",
+        "termsHeading": "Step 2: Revenue-share terms and agreement"
+      },
+      "payoutAfterApprovalNote": "You don't need to enter a bank account to apply — once your application is approved, add your payout account on the \"Earnings\" page in Studio.",
+      "setupPayoutLink": "Set up your payout account on the Earnings page",
       "termsHeading": "Standard instructor revenue share: {{percent}}",
       "termsRevenueShare": "1. Instructors receive {{percent}} and the platform receives {{platformPercent}} of course sales, after payment fees are deducted.",
       "termsWithholding": "2. Regular payouts are subject to {{withholdingPercent}} withholding tax under Thai law, and a Form 50 Tawi withholding certificate is issued at the end of each year."
@@ -1059,7 +1465,7 @@
       },
       "meeting": {
         "statusLabel": "Room status",
-        "waiting": "Creating room",
+        "waiting": "Preparing room",
         "pasteLink": "Waiting for link",
         "reconnectGoogle": "Reconnect Google",
         "retry": "Room creation failed",
@@ -1074,14 +1480,23 @@
         "unknown": "Could not create the room. Try again or paste a room link yourself"
       },
       "actions": {
-        "waitingHint": "The system is creating the room. This usually takes about a minute.",
+        "waitingTitle": "Preparing the room for this session",
+        "waitingHint": "Nothing to do. This page updates by itself when the room is ready, or when you need to paste a link (usually under a minute).",
+        "manualTitle": "Set up the room yourself in 2 steps",
+        "stepOne": "Step 1",
+        "stepTwo": "Step 2",
+        "createRoomTitle": "Create a new meeting in Google Meet",
+        "createMeet": "Create a Google Meet room",
+        "opensNewTab": "opens in a new tab",
+        "otherProviders": "Already use Zoom or Microsoft Teams? Create the room in that app as usual, then copy its link (zoom.us or teams.microsoft.com) into step 2.",
+        "pasteTitle": "After creating the room, copy its link and paste it in this field",
         "reconnect": "Reconnect Google",
         "resync": "Try creating the room again",
         "pasteInstead": "Paste a room link instead",
         "hidePaste": "Hide the link field",
         "linkLabel": "Meeting link",
         "linkPlaceholder": "https://meet.google.com/abc-defg-hij",
-        "linkHelper": "Google Meet, Zoom and Microsoft Teams are supported (must start with https://). The link is never shown back — you can view it on the session details page only.",
+        "linkHelper": "Only https links from {{hosts}} are accepted. The link is never shown back — you can view it on the session details page only.",
         "saveLink": "Save link",
         "linkSaved": "Room link saved",
         "resyncStarted": "Room creation requested. The system is working on it."
@@ -1320,7 +1735,7 @@
       "retry": "Try again",
       "goMyCourses": "Go to my courses",
       "browseCourses": "Browse courses",
-      "forwardWarning": "Don't forward the classroom link — it only works for your account."
+      "forwardWarning": "Don't share the classroom link with anyone — every entry is recorded against your account."
     },
     "errors": {
       "notFoundOrNoAccess": "Session not found, or you don't have access.",
@@ -1494,6 +1909,113 @@
         "errorDeadline": "Enter both the date and the time the enrollment closes.",
         "errorSeats": "Seats must be a whole number of 1 or more.",
         "errorInvalid": "Invalid values (for example fewer seats than are already used)."
+      }
+    }
+  },
+  "legal": {
+    "terms": {
+      "pageTitle": "Terms of Service",
+      "pageDescription": "Terms and conditions for using the SiriUpSkill online course platform",
+      "title": "Terms of Service",
+      "s1": {
+        "heading": "1. Introduction and general agreement",
+        "p1": "Welcome to SiriUpSkill, an online course platform. By accessing or using our website and services you confirm that you have read, understood and agreed to be bound by all of these terms and conditions."
+      },
+      "s2": {
+        "heading": "2. Registration and user accounts",
+        "b1": "You must provide a valid, complete and truthful email address and information when you sign up.",
+        "b2": "You are responsible for keeping your password and your account access confidential.",
+        "b3": "Do not share your account. The number of devices signed in at the same time is limited (Concurrent Session Protection), and when the limit is exceeded the system automatically signs out the device that has been signed in the longest."
+      },
+      "s3": {
+        "heading": "3. Intellectual property and content copyright",
+        "p1": "All content, videos, supporting documents, quizzes and sample code on SiriUpSkill are the intellectual property of the instructors and SiriUpSkill. You must not copy, modify, publish, screen-record or redistribute them to third parties without written permission.",
+        "p2": "To deter copyright infringement, the system overlays the learner account’s name and email address with a timestamp as a moving watermark on videos, and keeps video playback logs, so the source can be traced if content is leaked without permission."
+      },
+      "s4": {
+        "heading": "4. Payments and refund policy",
+        "p1": "Payments are processed through the payment provider Stripe, which supports Thai QR PromptPay. Credit/debit cards appear as an option on the checkout page only once they are enabled. Prices and discounts are calculated by the system at the time of order, access starts once the system receives payment confirmation from the provider, and orders that are not paid within the allowed time expire automatically.",
+        "p2": "The access period is set per course and shown on the course detail page. Refund requests are handled under our",
+        "refundLink": "Refund Policy"
+      },
+      "s5": {
+        "heading": "5. Community rules and prohibited conduct",
+        "p1": "You must not compromise the security of the system, attempt to hack it, distribute malware, or post rude, disruptive or unlawful messages in the discussion and Q&A areas."
+      }
+    },
+    "privacy": {
+      "pageTitle": "Privacy Policy (PDPA)",
+      "pageDescription": "Personal data protection policy and PDPA rights for SiriUpSkill users",
+      "title": "Privacy Policy and Personal Data Protection (PDPA)",
+      "subtitle": "Prepared to explain how personal data is processed under the Thai Personal Data Protection Act B.E. 2562 (2019) (PDPA)",
+      "s1": {
+        "heading": "1. Personal data we collect",
+        "identityLabel": "Account and identity data:",
+        "identityText": "display name, email address, password (stored only as a hash), profile picture (if any, for example the picture from your Google account when you sign in with Google)",
+        "paymentLabel": "Payment and tax data:",
+        "paymentText": "order and payment history, including the name and tax ID you provide when a tax invoice is issued. We do not store credit/debit card numbers; card payments (when enabled) are processed by Stripe.",
+        "usageLabel": "System usage data:",
+        "usageText": "sign-in history and signed-in devices (device name, browser and IP address), video playback logs (including IP address), live classroom join logs, and learning progress",
+        "contentLabel": "Content you create:",
+        "contentText": "questions and comments in the discussion/Q&A area, submitted assignments and quiz answers",
+        "instructorLabel": "For instructors:",
+        "instructorText": "instructor profile data (display name and introduction) and payout account data (bank account/PromptPay and tax ID), plus the Google Calendar connection token if the instructor connects it to create live classrooms"
+      },
+      "s2": {
+        "heading": "2. Purposes of processing",
+        "p1": "We process data to provide the online course service (including live session invitations), issue completion certificates, issue receipts and tax documents, pay instructors their revenue share, keep the system secure, and prevent account sharing and video copyright infringement (for example by showing the account’s name and email as a watermark on videos), and to send important course notifications. We keep data only as needed for these purposes and as required by law, for example order records and financial documents."
+      },
+      "s3": {
+        "heading": "3. Data subject rights",
+        "intro": "You have the following rights under the PDPA:",
+        "accessLabel": "Right of access, copy and data portability:",
+        "accessText": "You can export your personal data as a JSON file yourself from",
+        "accessLink": "Privacy & data (PDPA)",
+        "erasureLabel": "Right to erasure:",
+        "erasureText": "You can delete your account yourself from the same page. The system signs you out of every device and anonymizes the account’s personal data; order records and financial documents that the law requires us to keep remain in non-identifying form. Manage it at",
+        "erasureLink": "Privacy settings",
+        "objectLabel": "Right to object or withdraw consent:",
+        "objectText": "You can accept or decline non-essential cookies in the banner shown the first time you visit the site. To withdraw consent or object to other processing, contact the Data Protection Officer using the details in section 6."
+      },
+      "s4": {
+        "heading": "4. Service providers involved with your data",
+        "p1": "We use third-party providers to deliver the service: Stripe (payments), Bunny.net (video storage and delivery), Google (sign-in with Google and live classrooms through Google Meet/Calendar) and an email delivery provider. For live courses where the instructor turns on invitations through Google Calendar, enrolled learners’ email addresses are also sent to Google to invite them."
+      },
+      "s5": {
+        "heading": "5. Data security",
+        "p1": "Passwords are stored as PBKDF2 hashes and are never stored in plain text. Instructors’ payout account data (bank account number and tax ID) is encrypted with authenticated encryption (AES-256-GCM) before it is stored. We do not store credit/debit card numbers, and connections use HTTPS."
+      },
+      "s6": {
+        "heading": "6. Contacting the Data Protection Officer (DPO)",
+        "p1": "If you have questions about this policy or want to exercise your PDPA rights, contact the Data Protection Officer at"
+      }
+    },
+    "refund": {
+      "pageTitle": "Refund Policy",
+      "pageDescription": "How refunds work for SiriUpSkill online courses",
+      "title": "Refund Policy",
+      "s1": {
+        "heading": "1. How refund requests are reviewed",
+        "p1": "Learners can submit a refund request for any order that has been paid successfully. The team reviews each request case by case, based on the reason given and the order details, and tells you the outcome. Refunds are never approved automatically. Example reasons include a duplicate purchase, content that does not match the description, or a technical problem on the platform’s side."
+      },
+      "s2": {
+        "heading": "2. Live courses",
+        "p1": "Once you have joined a live classroom of a course at least once, the system will not accept a refund request for that course’s share. Other courses in the same order that you have not attended live can still be refunded. This rule does not affect reasons unrelated to attending live classes, such as a technical problem on the platform’s side."
+      },
+      "s3": {
+        "heading": "3. How to request a refund",
+        "p1": "Learners can submit a refund request themselves from",
+        "ordersLink": "Order History",
+        "p2": "by pressing the \"Request Refund\" button on the order and giving a reason (an order with no amount paid, such as a free course, has nothing to refund).",
+        "p3": "If you have questions before submitting a request, ask the support team at"
+      },
+      "s4": {
+        "heading": "4. Refund channels and timing",
+        "general": "Once a request is approved, the team processes the refund through the original payment channel. How long it takes for the money to arrive depends on the payment method and your bank.",
+        "promptpayLabel": "PromptPay QR:",
+        "promptpayText": "PromptPay refunds are asynchronous. The payment provider (Stripe) may contact the buyer to ask for the bank account details to refund to. If the required details are not provided, the refund may stay pending until they are.",
+        "cardLabel": "Credit / debit card (when enabled):",
+        "cardText": "The money is returned to the original card. How long it takes depends on the card issuing bank."
       }
     }
   }

@@ -7,7 +7,12 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
-import { InstructorEarningsSummary, InstructorPayoutAccount, PayoutPolicy } from '../../payout/data/payout-api.models';
+import {
+  InstructorEarningsSummary,
+  InstructorPayoutAccount,
+  PayoutBatchItemStatus,
+  PayoutPolicy,
+} from '../../payout/data/payout-api.models';
 import { InstructorEarningsPage } from './instructor-earnings-page';
 
 registerLocaleData(localeTh);
@@ -35,7 +40,8 @@ const EARNINGS_SUMMARY: InstructorEarningsSummary = {
       netAmount: 12500,
       withholdingTaxAmount: 536,
       periodEndUtc: '2026-08-31T23:59:59Z',
-      status: 'Paid',
+      // `PayoutBatchItemStatus.Transferred` — the backend never sends "Paid" for an instructor history row.
+      status: 'Transferred',
       paidAtUtc: '2026-09-05T10:00:00Z',
     },
   ],
@@ -89,10 +95,12 @@ const EMPTY_EARNINGS_SUMMARY: InstructorEarningsSummary = {
 const PAYOUT_ACCOUNT: InstructorPayoutAccount = {
   id: 'account-1',
   instructorId: 'instructor-1',
-  bankCode: 'Test Bank',
-  bankAccountNumberMasked: '***-*-*9999-1',
-  accountHolderName: 'Somchai Test',
-  isVerified: true,
+  bankCode: 'KBANK',
+  maskedAccountNo: '***-***-9999',
+  accountName: 'Somchai Test',
+  taxId: null,
+  taxPayerType: 'Individual',
+  verifiedAtUtc: '2026-09-20T03:00:00Z',
 };
 
 describe('InstructorEarningsPage', () => {
@@ -188,8 +196,8 @@ describe('InstructorEarningsPage', () => {
     await flushAccount();
 
     const text = harness.routeNativeElement?.textContent ?? '';
-    expect(text).toContain('Test Bank');
-    expect(text).toContain('***-*-*9999-1');
+    expect(text).toContain('Kasikornbank (KBANK)');
+    expect(text).toContain('***-***-9999');
     expect(text).toContain('Somchai Test');
     expect(text).toContain('BATCH-2026-09-01');
     // The old fabricated fallback values — must never appear once real data is showing.
@@ -219,6 +227,67 @@ describe('InstructorEarningsPage', () => {
     expect(failedRow.textContent).toContain('Failed');
     expect(failedRow.textContent).not.toContain('Transferred');
     expect(failedRow.textContent).not.toContain('Pending');
+  });
+
+  it('renders every real backend status as an icon + text badge (the meaning never rests on colour alone)', async () => {
+    await navigate();
+    await flushPolicy();
+    await flushEarnings(EARNINGS_SUMMARY_WITH_MIXED_STATUSES);
+    await flushAccount();
+
+    // The status column is the 5th cell of each history row.
+    const statusCells = Array.from(harness.routeNativeElement?.querySelectorAll('tbody tr') ?? []).map(
+      (row) => row.querySelectorAll('td')[4],
+    );
+    expect(statusCells.map((cell) => cell?.textContent?.trim())).toEqual(['Transferred', 'Pending', 'Failed']);
+    for (const cell of statusCells) {
+      expect(cell?.querySelector('ng-icon'), 'a status badge needs an icon next to its text').not.toBeNull();
+    }
+  });
+
+  it('shows the latest transfer date from a Transferred history item ("Paid on <date>")', async () => {
+    await navigate();
+    await flushPolicy();
+    await flushEarnings(EARNINGS_SUMMARY);
+    await flushAccount();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('Paid on 05/09/2026');
+    expect(text).not.toContain('No payout yet');
+  });
+
+  it('shows "No payout yet" when no history item is Transferred (Pending / Failed rows carry no transfer date)', async () => {
+    await navigate();
+    await flushPolicy();
+    await flushEarnings({
+      ...EARNINGS_SUMMARY_WITH_MIXED_STATUSES,
+      latestPayoutAmount: 0,
+      history: EARNINGS_SUMMARY_WITH_MIXED_STATUSES.history.filter((item) => item.status !== 'Transferred'),
+    });
+    await flushAccount();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('No payout yet');
+    expect(text).not.toContain('Paid on');
+  });
+
+  it('does not treat a status the backend never sends ("Paid") as a completed transfer', async () => {
+    await navigate();
+    await flushPolicy();
+    // Widened through `string`: "Paid" is deliberately NOT a PayoutBatchItemStatus — this is the old, wrong comparison value.
+    const bogusStatus = 'Paid' as string as PayoutBatchItemStatus;
+    await flushEarnings({
+      ...EARNINGS_SUMMARY,
+      history: EARNINGS_SUMMARY.history.map((item) => ({ ...item, status: bogusStatus })),
+    });
+    await flushAccount();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).not.toContain('Paid on');
+    expect(text).toContain('No payout yet');
+    const row = harness.routeNativeElement?.querySelector('tbody tr');
+    expect(row?.textContent).not.toContain('Transferred');
+    expect(row?.querySelectorAll('td')[4]?.textContent?.trim()).toBe('Paid');
   });
 
   it('shows an empty-history state (not fabricated rows) when the summary has no payout history yet', async () => {
@@ -272,62 +341,20 @@ describe('InstructorEarningsPage', () => {
     await flushAccount();
 
     text = harness.routeNativeElement?.textContent ?? '';
-    expect(text).toContain('Test Bank');
+    expect(text).toContain('Kasikornbank (KBANK)');
     expect(text).toContain('Somchai Test');
   });
 
-  it('reflects a saved bank account immediately from the real server response, not a locally-fabricated guess', async () => {
+  it('treats a 404 from the payout-account GET as "no account yet" (an empty state with an add button), not as a load failure', async () => {
     await navigate();
     await flushPolicy();
     await flushEarnings();
-    await flushAccount();
-
-    findButtonByText('แก้ไขบัญชี')?.click();
-    await settle();
-
-    const accountNumberInput = harness.routeNativeElement?.querySelector('#earnings-account-number-input') as HTMLInputElement;
-    const holderInput = harness.routeNativeElement?.querySelector('#earnings-account-holder-input') as HTMLInputElement;
-
-    accountNumberInput.value = '1234567890';
-    accountNumberInput.dispatchEvent(new Event('input'));
-    holderInput.value = 'New Holder Name';
-    holderInput.dispatchEvent(new Event('input'));
-    await settle();
-
-    findButtonByText('บันทึกข้อมูล')?.click();
-    await settle();
-
-    const putReq = httpMock.expectOne((r) => r.url === '/api/payout/instructor/payout-account' && r.method === 'PUT');
-    putReq.flush({
-      id: 'account-1',
-      instructorId: 'instructor-1',
-      bankCode: 'New Bank',
-      bankAccountNumberMasked: '***-*-*7890-1',
-      accountHolderName: 'New Holder Name',
-      isVerified: false,
-    } satisfies InstructorPayoutAccount);
-    await settle();
+    await flushAccount(PAYOUT_ACCOUNT, 404);
 
     const text = harness.routeNativeElement?.textContent ?? '';
-    expect(text).toContain('New Bank');
-    expect(text).toContain('***-*-*7890-1');
-    expect(text).toContain('New Holder Name');
-  });
-
-  it('keeps saveBankAccount()\'s own client-side validation error message on an incomplete form (unchanged pre-existing behavior)', async () => {
-    await navigate();
-    await flushPolicy();
-    await flushEarnings();
-    await flushAccount();
-
-    findButtonByText('แก้ไขบัญชี')?.click();
-    await settle();
-
-    findButtonByText('บันทึกข้อมูล')?.click();
-    await settle();
-
-    const text = harness.routeNativeElement?.textContent ?? '';
-    expect(text).toContain('กรุณากรอกข้อมูลบัญชีธนาคารให้ครบถ้วน');
+    expect(text).toContain('No payout account yet');
+    expect(text).not.toContain("Couldn't load bank account details");
+    expect(findButtonByText('Add payout account')).toBeTruthy();
   });
 
   describe('revenue policy copy (GET /api/payout/policy)', () => {

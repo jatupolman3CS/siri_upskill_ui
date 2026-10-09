@@ -1,19 +1,23 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
 
 @Component({
   selector: 'app-terms-page',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './terms-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TermsPage {
+  private readonly translation = inject(TranslationService);
+
   constructor() {
     setPageMeta({
-      title: 'ข้อกำหนดและเงื่อนไขการใช้บริการ | SiriUpSkill',
-      description: 'ข้อกำหนดและเงื่อนไขการใช้บริการแพลตฟอร์มคอร์สเรียนออนไลน์ SiriUpSkill',
+      title: `${this.translation.t('legal.terms.pageTitle')} · ${this.translation.t('common.appName')}`,
+      description: this.translation.t('legal.terms.pageDescription'),
     });
   }
 }

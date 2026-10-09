@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -61,6 +61,8 @@ export class LiveSchedulePanel {
   protected readonly issues = inject(LiveSubmitIssues);
 
   readonly courseId = input.required<string>();
+  /** Reports the course's delivery format whenever it is (re)loaded, so the builder can tell whether a live course may be submitted without a video lesson. */
+  readonly deliveryFormatChange = output<DeliveryFormat>();
 
   private readonly scheduleResource = rxResource({
     params: () => this.courseId(),
@@ -129,7 +131,10 @@ export class LiveSchedulePanel {
     effect(() => {
       const format = this.schedule()?.deliveryFormat;
       if (format) {
-        untracked(() => this.formatControl.setValue(format, { emitEvent: false }));
+        untracked(() => {
+          this.formatControl.setValue(format, { emitEvent: false });
+          this.deliveryFormatChange.emit(format);
+        });
       }
     });
     // Rooms are created in the background; check again every 10 s, and only while one is still "Waiting".

@@ -1,0 +1,195 @@
+<section
+  class="animate-fade-in-up stagger-2 space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm"
+  aria-labelledby="payout-account-heading"
+>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+        <ng-icon name="phosphorBank" class="text-xl" aria-hidden="true" />
+      </div>
+      <div>
+        <h2 id="payout-account-heading" class="text-base font-bold text-[var(--color-text)]">
+          {{ 'instructor.payoutAccount.heading' | translate }}
+        </h2>
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.hint' | translate }}</p>
+      </div>
+    </div>
+
+    @if (!loading() && !loadFailed()) {
+      <button
+        #toggleButton
+        type="button"
+        (click)="toggleEditing()"
+        [attr.aria-expanded]="editing()"
+        [attr.aria-controls]="editing() ? 'payout-account-form' : null"
+        class="btn-tactile inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        <ng-icon name="phosphorPencilSimple" aria-hidden="true" />
+        <span>
+          {{
+            (editing() ? 'instructor.payoutAccount.close' : account() ? 'instructor.payoutAccount.edit' : 'instructor.payoutAccount.add')
+              | translate
+          }}
+        </span>
+      </button>
+    }
+  </div>
+
+  @if (editing()) {
+    <div class="space-y-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+      <p class="flex items-start gap-2 text-sm text-[var(--color-text)]" role="note">
+        <ng-icon name="phosphorInfo" class="mt-0.5 shrink-0 text-base text-[var(--color-primary)]" aria-hidden="true" />
+        <span>{{ 'instructor.payoutAccount.reverifyNotice' | translate }}</span>
+      </p>
+
+      @if (showClientErrorSummary() || apiError()) {
+        <div
+          #errorSummary
+          tabindex="-1"
+          role="alert"
+          class="rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-4 focus:outline-none focus-visible:outline-none"
+        >
+          <p class="font-semibold text-[var(--color-danger)]">{{ 'auth.common.errorSummaryHeading' | translate }}</p>
+          @if (formLevelMessage(); as message) {
+            <p class="mt-1 text-sm text-[var(--color-text)]">{{ message }}</p>
+          }
+        </div>
+      }
+
+      <form id="payout-account-form" [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <app-select
+            formControlName="bankCode"
+            [label]="'instructor.payoutAccount.fields.bank' | translate"
+            [placeholder]="'instructor.payoutAccount.fields.bankPlaceholder' | translate"
+            [options]="bankOptions()"
+            [required]="true"
+            [errorMessage]="bankError()"
+          />
+          <app-input
+            formControlName="accountNo"
+            [label]="'instructor.payoutAccount.fields.accountNo' | translate"
+            [helperText]="'instructor.payoutAccount.fields.accountNoHelper' | translate"
+            autocomplete="off"
+            [required]="true"
+            [errorMessage]="accountNoError()"
+          />
+          <app-input
+            formControlName="accountName"
+            [label]="'instructor.payoutAccount.fields.accountName' | translate"
+            [helperText]="'instructor.payoutAccount.fields.accountNameHelper' | translate"
+            autocomplete="off"
+            [required]="true"
+            [errorMessage]="accountNameError()"
+          />
+          <app-select
+            formControlName="taxPayerType"
+            [label]="'instructor.payoutAccount.fields.taxPayerType' | translate"
+            [options]="taxPayerOptions()"
+            [required]="true"
+            [errorMessage]="taxPayerTypeError()"
+          />
+          <app-input
+            formControlName="taxId"
+            [label]="'instructor.payoutAccount.fields.taxId' | translate"
+            [helperText]="'instructor.payoutAccount.fields.taxIdHelper' | translate"
+            autocomplete="off"
+            [errorMessage]="taxIdError()"
+          />
+        </div>
+
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.reenterNotice' | translate }}</p>
+
+        <div class="flex flex-wrap justify-end gap-2">
+          <app-button variant="secondary" [disabled]="submitting()" (click)="toggleEditing()">
+            {{ 'instructor.payoutAccount.cancel' | translate }}
+          </app-button>
+          <app-button type="submit" [loading]="submitting()" [disabled]="submitting()">
+            {{ (submitting() ? 'instructor.payoutAccount.saving' : 'instructor.payoutAccount.save') | translate }}
+          </app-button>
+        </div>
+      </form>
+    </div>
+  } @else if (loading()) {
+    <div
+      class="grid grid-cols-1 gap-4 rounded-xl bg-[var(--color-bg)] p-4 sm:grid-cols-3"
+      aria-busy="true"
+      [attr.aria-label]="'instructor.payoutAccount.loadingLabel' | translate"
+    >
+      @for (placeholder of [0, 1, 2]; track placeholder) {
+        <div class="flex flex-col gap-1.5">
+          <app-skeleton variant="text" width="50%" />
+          <app-skeleton variant="text" width="80%" />
+        </div>
+      }
+    </div>
+  } @else if (loadFailed()) {
+    <app-empty-state
+      [heading]="'instructor.payoutAccount.loadErrorHeading' | translate"
+      [description]="'instructor.payoutAccount.loadErrorDescription' | translate"
+    >
+      <button
+        emptyStateAction
+        type="button"
+        (click)="retry()"
+        class="btn-tactile min-h-11 rounded-xl border border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'instructor.payoutAccount.retry' | translate }}
+      </button>
+    </app-empty-state>
+  } @else if (account(); as acc) {
+    <div class="space-y-3 rounded-xl bg-[var(--color-bg)] p-4">
+      @if (acc.verifiedAtUtc) {
+        <p
+          class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-700 dark:text-emerald-400"
+        >
+          <ng-icon name="phosphorCheckCircle" aria-hidden="true" />
+          <span>{{ 'instructor.payoutAccount.status.verified' | translate }}</span>
+          <span class="font-normal">
+            · {{ 'instructor.payoutAccount.status.verifiedOn' | translate: { date: (acc.verifiedAtUtc | bangkokDate: 'date') } }}
+          </span>
+        </p>
+      } @else {
+        <div class="space-y-1">
+          <p
+            class="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-sm font-semibold text-amber-700 dark:text-amber-400"
+          >
+            <ng-icon name="phosphorClock" aria-hidden="true" />
+            <span>{{ 'instructor.payoutAccount.status.pending' | translate }}</span>
+          </p>
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.status.pendingNote' | translate }}</p>
+        </div>
+      }
+
+      <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <dt class="mb-0.5 text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.fields.bank' | translate }}</dt>
+          <dd class="font-bold text-[var(--color-text)]">{{ bankLabel(acc.bankCode) }}</dd>
+        </div>
+        <div>
+          <dt class="mb-0.5 text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.fields.accountNo' | translate }}</dt>
+          <dd class="font-mono font-bold text-[var(--color-text)]">{{ acc.maskedAccountNo }}</dd>
+        </div>
+        <div>
+          <dt class="mb-0.5 text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.fields.accountName' | translate }}</dt>
+          <dd class="font-bold text-[var(--color-text)]">{{ acc.accountName }}</dd>
+        </div>
+        <div>
+          <dt class="mb-0.5 text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.fields.taxPayerType' | translate }}</dt>
+          <dd class="font-bold text-[var(--color-text)]">{{ taxPayerLabel(acc.taxPayerType) }}</dd>
+        </div>
+        @if (acc.taxId) {
+          <div>
+            <dt class="mb-0.5 text-[var(--color-text-muted)]">{{ 'instructor.payoutAccount.fields.taxId' | translate }}</dt>
+            <dd class="font-mono font-bold text-[var(--color-text)]">{{ acc.taxId }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  } @else if (notCreatedYet()) {
+    <app-empty-state
+      [heading]="'instructor.payoutAccount.emptyHeading' | translate"
+      [description]="'instructor.payoutAccount.emptyDescription' | translate"
+    />
+  }
+</section>

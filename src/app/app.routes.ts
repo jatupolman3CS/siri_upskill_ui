@@ -310,6 +310,16 @@ export const routes: Routes = [
           import('./features/admin/course-moderation/admin-course-moderation-page').then((m) => m.AdminCourseModerationPage),
       },
       {
+        path: 'categories',
+        loadComponent: () =>
+          import('./features/admin/categories/admin-categories-page').then((m) => m.AdminCategoriesPage),
+      },
+      {
+        path: 'instructors',
+        loadComponent: () =>
+          import('./features/admin/instructors/admin-instructors-page').then((m) => m.AdminInstructorsPage),
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./features/admin/users/admin-users-page').then((m) => m.AdminUsersPage),
@@ -348,6 +358,11 @@ export const routes: Routes = [
         path: 'contact-messages',
         loadComponent: () =>
           import('./features/admin/contact-messages/admin-contact-messages-page').then((m) => m.AdminContactMessagesPage),
+      },
+      {
+        path: 'live-status',
+        loadComponent: () =>
+          import('./features/admin/live-status/admin-live-status-page').then((m) => m.AdminLiveStatusPage),
       },
     ],
   },

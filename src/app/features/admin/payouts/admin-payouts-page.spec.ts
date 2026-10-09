@@ -9,7 +9,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { PagedPendingRefunds } from './data/admin-refunds-api.models';
 import { AdminPayoutsPage } from './admin-payouts-page';
 import { PagedResponse } from '../../payout/data/payout-api.service';
-import { PayoutBatchItem, PayoutPolicy } from '../../payout/data/payout-api.models';
+import { PayoutBatchItem, PayoutPolicy, RevenueSplitItem, RevenueSplitStatus } from '../../payout/data/payout-api.models';
 
 registerLocaleData(localeTh);
 
@@ -31,7 +31,8 @@ const MOCK_BATCHES: PagedResponse<PayoutBatchItem> = {
       id: 'batch-1',
       periodKey: '2026-08',
       totalAmount: 125000,
-      status: 'Pending',
+      // `PayoutBatchStatus.Draft` — a freshly created batch; the backend has no "Pending" batch state.
+      status: 'Draft',
       createdAtUtc: '2026-08-20T00:00:00Z',
       items: [],
     },
@@ -113,7 +114,10 @@ describe('AdminPayoutsPage', () => {
   }
 
   /** `policy: 'pending'` leaves the policy request open so a test can assert the loading state. */
-  function flushInitialRequests(policy: 'ok' | 'error' | 'pending' = 'ok'): void {
+  function flushInitialRequests(
+    policy: 'ok' | 'error' | 'pending' = 'ok',
+    overrides: { batches?: PagedResponse<PayoutBatchItem>; splits?: PagedResponse<RevenueSplitItem> } = {},
+  ): void {
     if (policy === 'ok') {
       flushPolicy();
     } else if (policy === 'error') {
@@ -122,16 +126,18 @@ describe('AdminPayoutsPage', () => {
 
     const batchesReq = httpMock.expectOne((r) => r.url === '/api/payout/admin/batches');
     expect(batchesReq.request.method).toBe('GET');
-    batchesReq.flush(MOCK_BATCHES);
+    batchesReq.flush(overrides.batches ?? MOCK_BATCHES);
 
     const splitsReq = httpMock.expectOne((r) => r.url === '/api/payout/admin/revenue-splits');
     expect(splitsReq.request.method).toBe('GET');
-    splitsReq.flush({
-      items: [],
-      totalCount: 0,
-      page: 1,
-      pageSize: 50,
-    });
+    splitsReq.flush(
+      overrides.splits ?? {
+        items: [],
+        totalCount: 0,
+        page: 1,
+        pageSize: 50,
+      },
+    );
 
     const refundsReq = httpMock.expectOne((r) => r.url === '/api/commerce/admin/refunds/pending');
     expect(refundsReq.request.method).toBe('GET');
@@ -147,7 +153,7 @@ describe('AdminPayoutsPage', () => {
     expect(text).toContain('รอบจ่ายเงิน & คิวคำขอคืนเงิน');
     expect(text).toContain('2026-08');
     expect(text).toContain('125,000');
-    expect(text).toContain('รอดำเนินการ');
+    expect(text).toContain('ฉบับร่าง (รอยืนยันจ่าย)');
   });
 
   it('switches to refunds tab and approves pending refund', async () => {
@@ -230,7 +236,7 @@ describe('AdminPayoutsPage', () => {
       id: 'batch-2',
       periodKey: '2026-08',
       totalAmount: 50000,
-      status: 'Pending',
+      status: 'Draft',
       createdAtUtc: new Date().toISOString(),
       items: [],
     });
@@ -243,6 +249,192 @@ describe('AdminPayoutsPage', () => {
 
     const text = harness.routeNativeElement?.textContent ?? '';
     expect(text).toContain('สร้างรอบการจ่ายเงินงวด 2026-08 เรียบร้อยแล้ว');
+  });
+
+  describe('status badges and filter (real backend enum values)', () => {
+    const BATCHES_IN_EVERY_STATUS: PagedResponse<PayoutBatchItem> = {
+      items: [
+        { id: 'batch-draft', periodKey: '2026-07', totalAmount: 1000, status: 'Draft', createdAtUtc: '2026-07-31T00:00:00Z', items: [] },
+        {
+          id: 'batch-executed',
+          periodKey: '2026-06',
+          totalAmount: 2000,
+          status: 'Executed',
+          createdAtUtc: '2026-06-30T00:00:00Z',
+          executedAtUtc: '2026-07-01T00:00:00Z',
+          items: [],
+        },
+        { id: 'batch-failed', periodKey: '2026-05', totalAmount: 3000, status: 'Failed', createdAtUtc: '2026-05-31T00:00:00Z', items: [] },
+      ],
+      totalCount: 3,
+      page: 1,
+      pageSize: 50,
+    };
+
+    function splitIn(status: RevenueSplitStatus): RevenueSplitItem {
+      return {
+        id: `split-${status}`,
+        orderItemId: `order-item-${status}`,
+        instructorId: 'instructor-1',
+        grossAmount: 1000,
+        platformFeeAmount: 200,
+        paymentFeeAmount: 30,
+        instructorAmount: 770,
+        status,
+        createdAtUtc: '2026-08-10T00:00:00Z',
+      };
+    }
+
+    const SPLITS_IN_EVERY_STATUS: PagedResponse<RevenueSplitItem> = {
+      items: [splitIn('Pending'), splitIn('Payable'), splitIn('Paid'), splitIn('Reversed')],
+      totalCount: 4,
+      page: 1,
+      pageSize: 50,
+    };
+
+    const BATCH_STATUS_COLUMN = 4;
+    const BATCH_ACTIONS_COLUMN = 5;
+    const SPLIT_STATUS_COLUMN = 6;
+
+    function rowCells(column: number): HTMLTableCellElement[] {
+      return Array.from(harness.routeNativeElement?.querySelectorAll('tbody tr') ?? []).map(
+        (row) => row.querySelectorAll('td')[column],
+      );
+    }
+
+    async function openSplitsTab(): Promise<void> {
+      const tab = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find((b) =>
+        b.textContent?.includes('ส่วนแบ่งรายได้ (Revenue Splits)'),
+      );
+      expect(tab).toBeDefined();
+      tab?.click();
+      await settle();
+    }
+
+    function statusSelect(): HTMLSelectElement {
+      const select = harness.routeNativeElement?.querySelector('#split-status-filter');
+      expect(select).toBeInstanceOf(HTMLSelectElement);
+      return select as HTMLSelectElement;
+    }
+
+    async function chooseStatusFilter(value: string): Promise<void> {
+      const select = statusSelect();
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+      await settle();
+    }
+
+    function expectSplitsRequest(status: string | null): void {
+      const req = httpMock.expectOne((r) => r.url === '/api/payout/admin/revenue-splits');
+      expect(req.request.params.get('status')).toBe(status);
+      req.flush(SPLITS_IN_EVERY_STATUS);
+    }
+
+    it('renders Draft / Executed / Failed batches with their own icon + label, never as "Paid" or "Processing"', async () => {
+      await navigate();
+      flushInitialRequests('ok', { batches: BATCHES_IN_EVERY_STATUS });
+      await settle();
+
+      const cells = rowCells(BATCH_STATUS_COLUMN);
+      expect(cells.map((cell) => cell.textContent?.trim())).toEqual(['ฉบับร่าง (รอยืนยันจ่าย)', 'โอนเงินแล้ว', 'ดำเนินการไม่สำเร็จ']);
+      for (const cell of cells) {
+        expect(cell.querySelector('ng-icon'), 'a status badge needs an icon next to its text').not.toBeNull();
+      }
+    });
+
+    it('offers "execute" only on a Draft batch (the backend answers 409 for any other batch status)', async () => {
+      await navigate();
+      flushInitialRequests('ok', { batches: BATCHES_IN_EVERY_STATUS });
+      await settle();
+
+      const hasExecuteButton = rowCells(BATCH_ACTIONS_COLUMN).map((cell) =>
+        Array.from(cell.querySelectorAll('button')).some((b) => b.textContent?.includes('ยืนยันจ่ายเงิน')),
+      );
+      expect(hasExecuteButton).toEqual([true, false, false]);
+    });
+
+    it('executes a Draft batch via POST /batches/{id}/execute, then reloads and no longer offers execute', async () => {
+      await navigate();
+      flushInitialRequests('ok', { batches: BATCHES_IN_EVERY_STATUS });
+      await settle();
+
+      const executeBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find((b) =>
+        b.textContent?.includes('ยืนยันจ่ายเงิน'),
+      );
+      expect(executeBtn).toBeDefined();
+      executeBtn?.click();
+      await settle();
+
+      const executeReq = httpMock.expectOne('/api/payout/admin/batches/batch-draft/execute');
+      expect(executeReq.request.method).toBe('POST');
+      executeReq.flush({ ...BATCHES_IN_EVERY_STATUS.items[0], status: 'Executed', executedAtUtc: '2026-08-01T00:00:00Z' });
+      await settle();
+
+      const reloadReq = httpMock.expectOne((r) => r.url === '/api/payout/admin/batches');
+      reloadReq.flush({
+        ...BATCHES_IN_EVERY_STATUS,
+        items: [{ ...BATCHES_IN_EVERY_STATUS.items[0], status: 'Executed' }, ...BATCHES_IN_EVERY_STATUS.items.slice(1)],
+      });
+      await settle();
+
+      expect(rowCells(BATCH_STATUS_COLUMN)[0].textContent?.trim()).toBe('โอนเงินแล้ว');
+      expect(harness.routeNativeElement?.textContent).not.toContain('ยืนยันจ่ายเงิน');
+    });
+
+    it('renders Pending / Payable / Paid / Reversed splits with their own icon + label (no "Voided")', async () => {
+      await navigate();
+      flushInitialRequests('ok', { splits: SPLITS_IN_EVERY_STATUS });
+      await settle();
+      await openSplitsTab();
+
+      const cells = rowCells(SPLIT_STATUS_COLUMN);
+      expect(cells.map((cell) => cell.textContent?.trim())).toEqual([
+        'รอเข้ารอบจ่ายเงิน',
+        'พร้อมโอน (อยู่ในรอบจ่ายเงิน)',
+        'โอนแล้ว',
+        'ย้อนรายการ',
+      ]);
+      for (const cell of cells) {
+        expect(cell.querySelector('ng-icon'), 'a status badge needs an icon next to its text').not.toBeNull();
+      }
+      expect(harness.routeNativeElement?.textContent).not.toContain('Voided');
+    });
+
+    it('lists exactly the backend RevenueSplitStatus members in the status filter (plus "All")', async () => {
+      await navigate();
+      flushInitialRequests();
+      await settle();
+      await openSplitsTab();
+
+      const values = Array.from(statusSelect().options).map((option) => option.value);
+      expect(values).toEqual(['All', 'Pending', 'Payable', 'Paid', 'Reversed']);
+      expect(Array.from(statusSelect().options).map((option) => option.textContent?.trim())).toEqual([
+        'ทั้งหมด',
+        'รอเข้ารอบจ่ายเงิน',
+        'พร้อมโอน (อยู่ในรอบจ่ายเงิน)',
+        'โอนแล้ว',
+        'ย้อนรายการ',
+      ]);
+    });
+
+    it('sends ?status=<real enum value> when a status is picked and no status param for "All"', async () => {
+      await navigate();
+      flushInitialRequests();
+      await settle();
+      await openSplitsTab();
+
+      await chooseStatusFilter('Payable');
+      expectSplitsRequest('Payable');
+      await settle();
+
+      await chooseStatusFilter('Reversed');
+      expectSplitsRequest('Reversed');
+      await settle();
+
+      await chooseStatusFilter('All');
+      expectSplitsRequest(null);
+      await settle();
+    });
   });
 
   describe('revenue policy copy (GET /api/payout/policy)', () => {

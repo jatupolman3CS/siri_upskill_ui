@@ -1,3 +1,24 @@
+/**
+ * `Siri.Modules.Payout.Domain.RevenueSplitStatus` — serialized by name through the host's global
+ * `JsonStringEnumConverter`, and the only values `GET /api/payout/admin/revenue-splits?status=` binds (anything else
+ * is a 400). Mirror the backend enum exactly; do not add UI-only states here.
+ */
+export const REVENUE_SPLIT_STATUSES = ['Pending', 'Payable', 'Paid', 'Reversed'] as const;
+export type RevenueSplitStatus = (typeof REVENUE_SPLIT_STATUSES)[number];
+
+export function isRevenueSplitStatus(value: unknown): value is RevenueSplitStatus {
+  return typeof value === 'string' && (REVENUE_SPLIT_STATUSES as readonly string[]).includes(value);
+}
+
+/** `Siri.Modules.Payout.Domain.PayoutBatchStatus` — a batch is created as `Draft`, then `Executed` (or `Failed`). */
+export type PayoutBatchStatus = 'Draft' | 'Executed' | 'Failed';
+
+/**
+ * `Siri.Modules.Payout.Domain.PayoutBatchItemStatus` — one instructor's transfer inside a batch. Also the `status` of
+ * every `PayoutHistoryItem` (the instructor history is one row per batch item).
+ */
+export type PayoutBatchItemStatus = 'Pending' | 'Transferred' | 'Failed';
+
 export interface RevenueSplitItem {
   readonly id: string;
   readonly orderId?: string;
@@ -9,17 +30,42 @@ export interface RevenueSplitItem {
   readonly instructorAmount: number;
   readonly revenueSharePercent?: number;
   readonly periodKey?: string;
-  readonly status: string;
+  readonly status: RevenueSplitStatus;
   readonly createdAtUtc: string;
 }
 
+/** `Siri.Modules.Payout.Domain.TaxPayerType` — serialized by name through the host's global `JsonStringEnumConverter`. */
+export type TaxPayerType = 'Individual' | 'Corporate';
+
+/**
+ * `InstructorPayoutAccountResponse` (`Siri.Modules.Payout/Application/InstructorPayoutAccountModels.cs`), returned by
+ * `GET`/`POST`/`PUT /api/payout/instructor/payout-account`. The account number and tax id arrive already MASKED
+ * (`***-***-1234`) — the full values are never sent back. `verifiedAtUtc` is `null` until an admin verifies the
+ * account, and returns to `null` whenever the bank, account number, account name or tax id is changed.
+ */
 export interface InstructorPayoutAccount {
   readonly id: string;
   readonly instructorId: string;
   readonly bankCode: string;
-  readonly bankAccountNumberMasked: string;
-  readonly accountHolderName: string;
-  readonly isVerified: boolean;
+  readonly maskedAccountNo: string;
+  readonly accountName: string;
+  readonly taxId: string | null;
+  readonly taxPayerType: TaxPayerType;
+  readonly verifiedAtUtc: string | null;
+}
+
+/**
+ * `CreateInstructorPayoutAccountCommand` — the body of `PUT` (upsert) and `POST` (create) on
+ * `/api/payout/instructor/payout-account`. Server rules (`CreateInstructorPayoutAccountValidator`): `bankCode` required,
+ * max 20; `accountNo` required, max 34; `accountName` required, max 200; `taxId` optional, max 20; `taxPayerType` must be
+ * a defined enum value. The caller is always the authenticated user — there is no instructor id in the body.
+ */
+export interface UpsertPayoutAccountRequest {
+  readonly bankCode: string;
+  readonly accountNo: string;
+  readonly accountName: string;
+  readonly taxId: string | null;
+  readonly taxPayerType: TaxPayerType;
 }
 
 export interface PayoutBatchItemDetail {
@@ -29,7 +75,7 @@ export interface PayoutBatchItemDetail {
   readonly withholdingTaxPercent: number;
   readonly withholdingTaxAmount: number;
   readonly netAmount: number;
-  readonly status: string;
+  readonly status: PayoutBatchItemStatus;
   readonly transferRef?: string | null;
 }
 
@@ -37,7 +83,7 @@ export interface PayoutBatchItem {
   readonly id: string;
   readonly periodKey: string;
   readonly totalAmount: number;
-  readonly status: string;
+  readonly status: PayoutBatchStatus;
   readonly createdAtUtc: string;
   readonly executedAtUtc?: string | null;
   readonly executedByUserId?: string | null;
@@ -55,7 +101,8 @@ export interface PayoutHistoryItem {
   readonly netAmount: number;
   readonly withholdingTaxAmount: number;
   readonly periodEndUtc: string;
-  readonly status: string;
+  readonly status: PayoutBatchItemStatus;
+  /** The batch's `executedAtUtc` — `null` until the batch is executed, i.e. set exactly when the item is `Transferred`. */
   readonly paidAtUtc?: string | null;
 }
 

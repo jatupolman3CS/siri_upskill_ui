@@ -1,0 +1,50 @@
+<article
+  class="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-sm)] sm:p-5"
+  [attr.aria-labelledby]="'application-name-' + application().id"
+>
+  <div class="min-w-0">
+    <h2 [id]="'application-name-' + application().id" class="break-words text-lg font-semibold text-[var(--color-text)]">
+      {{ application().displayName }}
+    </h2>
+    @if (application().headline) {
+      <p class="mt-0.5 break-words text-[var(--color-text-muted)]">{{ application().headline }}</p>
+    }
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      {{ 'admin.instructors.card.appliedAt' | translate: { date: (application().createdAtUtc | bangkokDate: 'dateTime') } }}
+    </p>
+  </div>
+
+  <div>
+    <p
+      [id]="'application-bio-' + application().id"
+      class="whitespace-pre-line break-words text-base text-[var(--color-text)]"
+      [class.line-clamp-3]="isLongBio(application().bio) && !expanded()"
+    >
+      {{ application().bio }}
+    </p>
+    @if (isLongBio(application().bio)) {
+      <button
+        type="button"
+        (click)="toggleBio()"
+        [attr.aria-expanded]="expanded()"
+        [attr.aria-controls]="'application-bio-' + application().id"
+        class="mt-1 min-h-11 cursor-pointer rounded-[var(--radius-md)] px-1 text-sm font-medium text-[var(--color-primary)] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ (expanded() ? 'admin.instructors.card.showLess' : 'admin.instructors.card.showMore') | translate }}
+      </button>
+    }
+  </div>
+
+  <div class="flex flex-wrap justify-end gap-3 border-t border-[var(--color-border)] pt-4">
+    <app-button variant="secondary" [disabled]="busy()" (click)="reject.emit(application())">
+      <ng-icon leading name="phosphorXCircle" aria-hidden="true" />
+      {{ 'admin.instructors.card.reject' | translate }}
+      <span class="sr-only">{{ application().displayName }}</span>
+    </app-button>
+    <app-button [disabled]="busy()" (click)="approve.emit(application())">
+      <ng-icon leading name="phosphorCheckCircle" aria-hidden="true" />
+      {{ 'admin.instructors.card.approve' | translate }}
+      <span class="sr-only">{{ application().displayName }}</span>
+    </app-button>
+  </div>
+</article>

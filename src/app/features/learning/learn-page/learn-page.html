@@ -78,6 +78,24 @@
                 </button>
               }
             </div>
+          } @else if (course() && allEpisodes().length === 0) {
+            <!-- A course taught live has no lesson to play (yet): say so, instead of a spinner that never ends. -->
+            <div
+              class="animate-fade-in aspect-video w-full flex flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] bg-zinc-900 p-6 text-center"
+              role="status"
+            >
+              <p class="text-base font-semibold text-zinc-100">{{ 'learn.liveOnly.heading' | translate }}</p>
+              <p class="max-w-md text-sm text-zinc-300">{{ 'learn.liveOnly.body' | translate }}</p>
+              @if (liveTabVisible() && activeTab() !== 'live') {
+                <button
+                  type="button"
+                  (click)="activeTab.set('live')"
+                  class="btn-tactile mt-1 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition"
+                >
+                  {{ 'learn.liveOnly.openSchedule' | translate }}
+                </button>
+              }
+            </div>
           } @else {
             <div class="animate-fade-in aspect-video w-full flex flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] bg-zinc-900 text-zinc-400">
               <app-spinner size="md" color="white" />

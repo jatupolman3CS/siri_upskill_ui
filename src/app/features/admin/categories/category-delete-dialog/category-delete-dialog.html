@@ -1,0 +1,29 @@
+<app-modal [(open)]="open" [titleText]="'admin.categories.delete.title' | translate" [closeOnOverlayClick]="false">
+  @if (target(); as current) {
+    <p>{{ 'admin.categories.delete.body' | translate: { name: name() } }}</p>
+    @if (current.node.children.length > 0) {
+      <p class="mt-3 text-sm text-[var(--color-text-muted)]">
+        {{ 'admin.categories.delete.hasChildrenHint' | translate: { count: current.node.children.length } }}
+      </p>
+    }
+  }
+  @if (error(); as failure) {
+    <div
+      role="alert"
+      class="mt-4 rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+    >
+      <p class="font-medium">{{ failure.key | translate: failure.params }}</p>
+      @if (failure.detail) {
+        <p class="mt-1 text-[var(--color-text-muted)]">{{ failure.detail }}</p>
+      }
+    </div>
+  }
+  <div modalFooter class="flex gap-3">
+    <app-button variant="secondary" [disabled]="busy()" (click)="open.set(false)">
+      {{ 'admin.categories.delete.cancel' | translate }}
+    </app-button>
+    <app-button variant="danger" [loading]="busy()" (click)="confirm()">
+      {{ 'admin.categories.delete.confirm' | translate }}
+    </app-button>
+  </div>
+</app-modal>

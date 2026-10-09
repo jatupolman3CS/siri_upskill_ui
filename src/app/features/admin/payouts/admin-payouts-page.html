@@ -123,20 +123,14 @@
                     {{ batch.createdAtUtc | date:'d/M/yyyy HH:mm' }}
                   </td>
                   <td class="py-3.5 px-4 text-center">
-                    @if (batch.status === 'Paid') {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                        โอนเงินแล้ว
-                      </span>
-                    } @else if (batch.status === 'Processing') {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">
-                        กำลังประมวลผล
-                      </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-bold text-sky-600">
-                        รอดำเนินการ
-                      </span>
-                    }
+                    @let badge = batchStatusBadge(batch.status);
+                    <span
+                      class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold"
+                      [ngClass]="badge.badgeClass"
+                    >
+                      <ng-icon [name]="badge.icon" aria-hidden="true" />
+                      <span>{{ badge.labelKey ? (badge.labelKey | translate) : batch.status }}</span>
+                    </span>
                   </td>
                   <td class="py-3.5 px-4 text-right space-x-2">
                     <button
@@ -149,7 +143,8 @@
                       <span>ส่งออกไฟล์</span>
                     </button>
 
-                    @if (batch.status === 'Pending') {
+                    <!-- Backend execute answers 409 for anything but a Draft batch -->
+                    @if (batch.status === 'Draft') {
                       <button
                         type="button"
                         (click)="executeBatch(batch)"
@@ -195,16 +190,18 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">สถานะ:</span>
+          <label for="split-status-filter" class="text-xs font-semibold text-[var(--color-text-muted)]">สถานะ:</label>
           <select
+            id="split-status-filter"
             [(ngModel)]="splitFilterStatus"
             (change)="onFilterSplits()"
             class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] py-2 px-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
           >
-            <option value="All">ทั้งหมด</option>
-            <option value="Pending">รอโอน (Pending)</option>
-            <option value="Paid">โอนแล้ว (Paid)</option>
-            <option value="Voided">ยกเลิก (Voided)</option>
+            <option value="All">{{ 'admin.payouts.splitStatus.all' | translate }}</option>
+            <!-- Only the backend's RevenueSplitStatus members: any other value makes the endpoint answer 400 -->
+            @for (option of splitStatusOptions; track option.value) {
+              <option [value]="option.value">{{ option.badge.labelKey ? (option.badge.labelKey | translate) : option.value }}</option>
+            }
           </select>
         </div>
       </div>
@@ -260,19 +257,14 @@
                       {{ item.instructorAmount | currencyThb }}
                     </td>
                     <td class="py-3.5 px-4 text-center">
-                      @if (item.status === 'Paid') {
-                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                          โอนสำเร็จ
-                        </span>
-                      } @else if (item.status === 'Voided') {
-                        <span class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-bold text-rose-600">
-                          ยกเลิก
-                        </span>
-                      } @else {
-                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">
-                          รอโอน (Pending)
-                        </span>
-                      }
+                      @let splitBadge = splitStatusBadge(item.status);
+                      <span
+                        class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold"
+                        [ngClass]="splitBadge.badgeClass"
+                      >
+                        <ng-icon [name]="splitBadge.icon" aria-hidden="true" />
+                        <span>{{ splitBadge.labelKey ? (splitBadge.labelKey | translate) : item.status }}</span>
+                      </span>
                     </td>
                   </tr>
                 }

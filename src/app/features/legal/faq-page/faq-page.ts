@@ -1,70 +1,80 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorCaretDown } from '@ng-icons/phosphor-icons/regular';
+
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
 
+type FaqCategory = 'general' | 'learning' | 'payment' | 'technical' | 'live';
+type FaqFilter = 'all' | Exclude<FaqCategory, 'general'>;
+
+/**
+ * A question/answer pair lives in the i18n dictionaries under `faq.items.<id>.q` / `.a`; this list
+ * only fixes the order and the category. Every statement in those answers was checked against the
+ * backend (see the task notes) — do not reintroduce claims the system does not back (card payments
+ * as a given, "lifetime access" for every course, a fixed device count other than the documented
+ * default, etc.).
+ */
 interface FaqItem {
-  question: string;
-  answer: string;
-  category: string;
+  readonly id: string;
+  readonly category: FaqCategory;
+}
+
+interface FaqFilterTab {
+  readonly id: FaqFilter;
+  readonly labelKey: string;
 }
 
 @Component({
   selector: 'app-faq-page',
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, NgIcon],
   templateUrl: './faq-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons({ phosphorCaretDown })],
 })
 export class FaqPage {
-  readonly activeCategory = signal<string>('all');
+  private readonly translation = inject(TranslationService);
 
-  readonly faqs: FaqItem[] = [
-    {
-      category: 'general',
-      question: 'SiriUpSkill คืออะไร เหมาะกับใคร?',
-      answer: 'SiriUpSkill เป็นแพลตฟอร์มคอร์สเรียนออนไลน์ที่เน้นทักษะระดับมืออาชีพ ทั้งด้านวิศวกรรมซอฟต์แวร์ คลาวด์ ข้อมูล และการบริหารจัดการ ออกแบบมาสำหรับนักพัฒนาและผู้ที่ต้องการยกระดับทักษะการทำงานจริง',
-    },
-    {
-      category: 'learning',
-      question: 'สามารถเรียนซ้ำได้กี่ครั้ง มีวันหมดอายุหรือไม่?',
-      answer: 'คอร์สเรียนที่คุณซื้อจะสามารถเข้าเรียนได้ตลอดชีพ (Lifetime Access) สามารถเปิดดูย้อนหลังได้ทุกที่ทุกเวลาบนทุกอุปกรณ์',
-    },
-    {
-      category: 'learning',
-      question: 'จะได้รับใบรับรอง (Certificate) อย่างไร?',
-      answer: 'เมื่อคุณดูวิดีโอและทำแบบทดสอบครบ 100% ระบบจะสร้างใบรับรองดิจิทัลพร้อมรหัสตรวจสอบความถูกต้อง (Verification Code) ให้คุณโดยอัตโนมัติ',
-    },
-    {
-      category: 'payment',
-      question: 'สามารถขอใบกำกับภาษีเต็มรูปแบบได้หรือไม่?',
-      answer: 'ได้แน่นอน ในขั้นตอนชำระเงิน คุณสามารถเลือก "ต้องการใบกำกับภาษี" และกรอกข้อมูลผู้เสียภาษี ระบบจะออกใบกำกับภาษีอิเล็กทรอนิกส์ให้คุณทันทีหลังชำระเงินสำเร็จ',
-    },
-    {
-      category: 'payment',
-      question: 'ช่องทางการชำระเงินมีอะไรบ้าง?',
-      answer: 'เรารองรับบัตรเครดิต/เดบิต (Visa, Mastercard, JCB) และการสแกนจ่ายผ่าน Thai QR PromptPay ทุกธนาคาร',
-    },
-    {
-      category: 'technical',
-      question: 'สามารถเข้าสู่ระบบพร้อมกันหลายเครื่องได้หรือไม่?',
-      answer: 'ระบบจำกัดการเข้าสู่ระบบพร้อมกันสูงสุด 3 อุปกรณ์เพื่อความปลอดภัยและป้องกันการแชร์บัญชี คุณสามารถตรวจสอบและถอดอุปกรณ์ที่ไม่ได้ใช้งานได้ที่หน้าจัดการอุปกรณ์',
-    },
+  readonly activeCategory = signal<FaqFilter>('all');
+
+  readonly filters: readonly FaqFilterTab[] = [
+    { id: 'all', labelKey: 'faq.catAll' },
+    { id: 'learning', labelKey: 'faq.catLearning' },
+    { id: 'live', labelKey: 'faq.catLive' },
+    { id: 'payment', labelKey: 'faq.catPayment' },
+    { id: 'technical', labelKey: 'faq.catTechnical' },
   ];
+
+  readonly faqs: readonly FaqItem[] = [
+    { id: 'about', category: 'general' },
+    { id: 'access', category: 'learning' },
+    { id: 'certificate', category: 'learning' },
+    { id: 'liveWhat', category: 'live' },
+    { id: 'liveJoin', category: 'live' },
+    { id: 'liveInvites', category: 'live' },
+    { id: 'liveReplay', category: 'live' },
+    { id: 'liveAccess', category: 'live' },
+    { id: 'liveRefund', category: 'live' },
+    { id: 'invoice', category: 'payment' },
+    { id: 'methods', category: 'payment' },
+    { id: 'devices', category: 'technical' },
+  ];
+
+  readonly filteredFaqs = computed(() => {
+    const category = this.activeCategory();
+    return category === 'all' ? this.faqs : this.faqs.filter((faq) => faq.category === category);
+  });
 
   constructor() {
     setPageMeta({
-      title: 'คำถามที่พบบ่อย (FAQ) | SiriUpSkill',
-      description: 'คำถามที่พบบ่อยเกี่ยวกับการเรียน การชำระเงิน ใบรับรอง และการใช้งานระบบ SiriUpSkill',
+      title: `${this.translation.t('faq.pageTitle')} · ${this.translation.t('common.appName')}`,
+      description: this.translation.t('faq.pageDescription'),
     });
   }
 
-  setCategory(cat: string): void {
-    this.activeCategory.set(cat);
-  }
-
-  get filteredFaqs(): FaqItem[] {
-    const cat = this.activeCategory();
-    if (cat === 'all') return this.faqs;
-    return this.faqs.filter((f) => f.category === cat);
+  setCategory(category: FaqFilter): void {
+    this.activeCategory.set(category);
   }
 }

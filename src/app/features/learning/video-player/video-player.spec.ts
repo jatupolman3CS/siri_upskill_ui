@@ -66,6 +66,33 @@ describe('VideoPlayer Component', () => {
     expect(component).toBeTruthy();
   });
 
+  it('draws the server-built watermarkPayload (a long Thai + email string) in the watermark overlay', () => {
+    const payload =
+      'สมชาย ใจดีมากมายเหลือเกิน · somchai.jaidee.verylongaddress@example-university.ac.th · 2026-10-09 02:37:59 UTC';
+    fixture.componentRef.setInput('watermarkPayload', payload);
+
+    fixture.detectChanges();
+
+    const overlay = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="playback-watermark"]');
+    expect(overlay?.textContent?.trim()).toBe(payload);
+  });
+
+  it('falls back to the legacy structured watermark when no payload is given, and draws nothing when there is neither', () => {
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="playback-watermark"]')).toBeNull();
+
+    fixture.componentRef.setInput('watermark', {
+      text: 'Somchai',
+      userId: 'u1',
+      email: 'somchai@example.com',
+      timestamp: '2026-10-09T02:37:59Z',
+    });
+    fixture.detectChanges();
+
+    const overlay = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="playback-watermark"]');
+    expect(overlay?.textContent?.trim()).toBe('Somchai · somchai@example.com');
+  });
+
   it('should format seconds into mm:ss or hh:mm:ss correctly', () => {
     expect(internals(component).formatTime(0)).toBe('00:00');
     expect(internals(component).formatTime(65)).toBe('01:05');

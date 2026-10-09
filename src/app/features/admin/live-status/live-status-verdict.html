@@ -1,0 +1,48 @@
+<div aria-live="polite">
+  @if (isReady()) {
+    <section
+      class="flex items-start gap-3 rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--color-success)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] p-5"
+    >
+      <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-3xl text-[var(--color-success)]" />
+      <div>
+        <h2 class="text-xl font-bold text-[var(--color-text)]">{{ 'admin.liveStatus.verdict.ready' | translate }}</h2>
+        <p class="mt-1 text-sm text-[var(--color-text)]">{{ 'admin.liveStatus.verdict.readyHint' | translate }}</p>
+      </div>
+    </section>
+  } @else {
+    <section
+      class="rounded-[var(--radius-lg)] border-2 border-[var(--color-warning)] bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] p-5"
+    >
+      <div class="flex items-start gap-3">
+        <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-3xl text-[var(--color-warning)]" />
+        <div>
+          <h2 class="text-xl font-bold text-[var(--color-text)]">
+            {{ 'admin.liveStatus.verdict.attention' | translate: { count: warnings().length } }}
+          </h2>
+          <p class="mt-1 text-sm text-[var(--color-text)]">{{ 'admin.liveStatus.verdict.attentionHint' | translate }}</p>
+        </div>
+      </div>
+
+      <ul class="mt-4 flex flex-col gap-3">
+        @for (warning of warnings(); track warning.code) {
+          <li class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+            <h3 class="text-base font-semibold text-[var(--color-text)]">{{ warning.titleKey | translate }}</h3>
+            @if (!warning.known) {
+              <p class="mt-1 text-xs text-[var(--color-text-muted)]">
+                {{ 'admin.liveStatus.verdict.code' | translate }}: <code class="break-all">{{ warning.code }}</code>
+              </p>
+            }
+            <p class="mt-2 text-sm text-[var(--color-text)]">
+              <span class="font-semibold">{{ 'admin.liveStatus.verdict.impact' | translate }}:</span>
+              {{ warning.impactKey | translate }}
+            </p>
+            <p class="mt-1 text-sm text-[var(--color-text)]">
+              <span class="font-semibold">{{ 'admin.liveStatus.verdict.action' | translate }}:</span>
+              {{ warning.actionKey | translate }}
+            </p>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

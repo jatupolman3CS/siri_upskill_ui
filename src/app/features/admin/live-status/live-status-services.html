@@ -1,0 +1,109 @@
+<section
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  aria-labelledby="live-status-email-heading"
+>
+  <h2 id="live-status-email-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+    <ng-icon name="phosphorEnvelopeSimple" aria-hidden="true" class="text-xl" />
+    {{ 'admin.liveStatus.email.heading' | translate }}
+  </h2>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.email.hint' | translate }}</p>
+
+  <p class="mt-4 flex items-start gap-2 text-sm font-medium text-[var(--color-text)]">
+    <ng-icon [name]="iconFor(emailTone())" aria-hidden="true" class="mt-0.5 shrink-0 text-lg" [class]="classFor(emailTone())" />
+    <span>
+      <span class="text-[var(--color-text-muted)]">{{ 'admin.liveStatus.email.provider' | translate }}:</span>
+      {{ 'admin.liveStatus.email.providers.' + email().provider | translate }}
+    </span>
+  </p>
+
+  <dl class="mt-4 grid grid-cols-2 gap-3">
+    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.email.pending' | translate }}</dt>
+      <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ email().pendingCount }}</dd>
+    </div>
+    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.email.failed' | translate }}</dt>
+      <dd class="mt-1 flex items-center gap-1.5 text-2xl font-bold text-[var(--color-text)]">
+        {{ email().failedCount }}
+        @if (email().failedCount > 0) {
+          <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="text-lg text-[var(--color-danger)]" />
+          <span class="sr-only">{{ 'admin.liveStatus.needsAttention' | translate }}</span>
+        }
+      </dd>
+    </div>
+    <div class="col-span-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.email.oldestPending' | translate }}</dt>
+      <dd class="mt-1 text-base font-semibold text-[var(--color-text)]">
+        @if (oldestPending(); as age) {
+          {{ age.key | translate: { count: age.count } }}
+        } @else {
+          {{ 'admin.liveStatus.email.noBacklog' | translate }}
+        }
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  aria-labelledby="live-status-live-heading"
+>
+  <h2 id="live-status-live-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+    <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="text-xl" />
+    {{ 'admin.liveStatus.live.heading' | translate }}
+  </h2>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.live.hint' | translate }}</p>
+
+  <ul class="mt-4 flex flex-col gap-2 text-sm font-medium text-[var(--color-text)]">
+    <li class="flex items-start gap-2">
+      <ng-icon [name]="iconFor(liveTone())" aria-hidden="true" class="mt-0.5 shrink-0 text-lg" [class]="classFor(liveTone())" />
+      <span>
+        <span class="text-[var(--color-text-muted)]">{{ 'admin.liveStatus.live.provider' | translate }}:</span>
+        {{ 'admin.liveStatus.live.providers.' + live().provider | translate }}
+      </span>
+    </li>
+    <li class="flex items-start gap-2">
+      <ng-icon
+        [name]="live().googleConfigured ? 'phosphorCheckCircle' : 'phosphorMinusCircle'"
+        aria-hidden="true"
+        class="mt-0.5 shrink-0 text-lg"
+        [class]="live().googleConfigured ? 'text-[var(--color-success)]' : 'text-[var(--color-warning)]'"
+      />
+      <span>
+        <span class="text-[var(--color-text-muted)]">{{ 'admin.liveStatus.live.google' | translate }}:</span>
+        {{ (live().googleConfigured ? 'admin.liveStatus.live.googleYes' : 'admin.liveStatus.live.googleNo') | translate }}
+      </span>
+    </li>
+    <li class="flex flex-col gap-1">
+      <span class="text-[var(--color-text-muted)]">{{ 'admin.liveStatus.live.publicBaseUrl' | translate }}</span>
+      <code class="break-all rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-normal text-[var(--color-text)]">{{
+        live().publicBaseUrl
+      }}</code>
+    </li>
+  </ul>
+
+  <dl class="mt-4 grid grid-cols-2 gap-3">
+    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.meetingsPending' | translate }}</dt>
+      <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ live().meetingsPending }}</dd>
+    </div>
+    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.meetingsAwaitingLink' | translate }}</dt>
+      <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ live().meetingsAwaitingLink }}</dd>
+    </div>
+    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.meetingsFailed' | translate }}</dt>
+      <dd class="mt-1 flex items-center gap-1.5 text-2xl font-bold text-[var(--color-text)]">
+        {{ live().meetingsFailed }}
+        @if (live().meetingsFailed > 0) {
+          <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="text-lg text-[var(--color-danger)]" />
+          <span class="sr-only">{{ 'admin.liveStatus.needsAttention' | translate }}</span>
+        }
+      </dd>
+    </div>
+    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.invitesPending' | translate }}</dt>
+      <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ live().invitesPending }}</dd>
+    </div>
+  </dl>
+</section>

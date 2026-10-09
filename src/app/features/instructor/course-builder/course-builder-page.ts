@@ -54,12 +54,15 @@ import { CategoryApiService } from '../../catalog/data/category-api.service';
 import { CourseApiService } from '../../catalog/data/course-api.service';
 import { MediaApiService } from '../../media/data/media-api.service';
 import { MediaAssetResponse } from '../../media/data/media-api.models';
+import { AuthService } from '../../../core/auth/auth.service';
 import { notConfiguredMessageKey } from '../../../core/http/provider-errors';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { LiveInstructorApiService } from '../../live/data/live-instructor-api.service';
 import { LiveSubmitIssues } from '../../live/data/live-submit-issues.service';
+import type { DeliveryFormat } from '../../live/data/live.models';
 import { LiveSchedulePanel } from './live-schedule-panel/live-schedule-panel';
 
 export interface BuilderEpisode {
@@ -148,6 +151,9 @@ export class CourseBuilderPage implements OnInit {
 
   protected readonly activeTab = signal<'basic' | 'curriculum' | 'publish' | 'live'>('basic');
   private readonly liveIssues = inject(LiveSubmitIssues);
+  private readonly liveApi = inject(LiveInstructorApiService);
+  /** The course's delivery format; `null` until it is known (reported by the live tab, or read on demand when the instructor goes to submit). */
+  private readonly deliveryFormat = signal<DeliveryFormat | null>(null);
   protected readonly isLoading = signal(false);
   protected readonly saveSuccess = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -175,6 +181,10 @@ export class CourseBuilderPage implements OnInit {
   protected readonly courseId = signal<string | null>(null);
   protected readonly rowVersion = signal<string>('');
   protected readonly categories = signal<CategoryTreeNode[]>([]);
+  /** True once the public category list has loaded (even when empty), so "no categories yet" is not shown while loading. */
+  private readonly categoriesLoaded = signal(false);
+  protected readonly noCategoriesYet = computed(() => this.categoriesLoaded() && this.categories().length === 0);
+  protected readonly auth = inject(AuthService);
 
   // Form Fields
   // A new course starts blank: nothing the instructor did not type may be saved into the real draft.
@@ -237,6 +247,7 @@ export class CourseBuilderPage implements OnInit {
           };
           flatten(list);
           this.categories.set(flat);
+          this.categoriesLoaded.set(true);
         },
         error: (err) => {
           console.error('Failed to load categories', err);
@@ -1191,12 +1202,61 @@ export class CourseBuilderPage implements OnInit {
     void this.router.navigate(['/instructor/courses', id, 'builder'], { replaceUrl: true });
   }
 
+  /** The optional trailer is not mid-upload / mid-processing (a selected trailer must have finished converting). */
+  private readonly trailerSettled = computed(
+    () =>
+      this.trailerStatus() !== 'uploading' &&
+      this.trailerStatus() !== 'processing' &&
+      (!this.trailerMediaAssetId() || this.trailerStatus() === 'ready'),
+  );
+
+  /** The on-demand rule: at least one lesson and every lesson's video converted. */
   public readonly mediaReadyForReview = computed(() => {
     const episodes = this.sections().flatMap((section) => section.episodes);
-    return episodes.length > 0 && episodes.every((episode) => episode.mediaAssetId && episode.videoStatus === 'ready') &&
-      this.trailerStatus() !== 'uploading' && this.trailerStatus() !== 'processing' &&
-      (!this.trailerMediaAssetId() || this.trailerStatus() === 'ready');
+    return (
+      episodes.length > 0 &&
+      episodes.every((episode) => episode.mediaAssetId && episode.videoStatus === 'ready') &&
+      this.trailerSettled()
+    );
   });
+
+  /**
+   * Whether the course may be sent for review from here. A Live or Hybrid course can go on its scheduled live classes alone (the server checks that a
+   * future class with a usable room exists), so it needs no video lesson; an On-demand course still needs the video rule above. A Hybrid course that does
+   * have lessons must still finish converting them (they are covered by `mediaReadyForReview`, never by this exemption).
+   */
+  public readonly reviewReady = computed(() => {
+    if (this.mediaReadyForReview()) {
+      return true;
+    }
+    const format = this.deliveryFormat();
+    const noLessons = this.sections().every((section) => section.episodes.length === 0);
+    return format !== null && format !== 'OnDemand' && noLessons && this.trailerSettled();
+  });
+
+  /** Called by the live tab as it learns the course's format (and again whenever the instructor changes it). */
+  protected onDeliveryFormatChange(format: DeliveryFormat): void {
+    this.deliveryFormat.set(format);
+  }
+
+  /** Opens the "check & policy" tab; asks the server for the format first when it matters (a saved course with no lessons). */
+  protected showPublishTab(): void {
+    this.activeTab.set('publish');
+    const id = this.courseId();
+    if (id && this.deliveryFormat() === null && !this.mediaReadyForReview()) {
+      this.loadDeliveryFormat(id).subscribe();
+    }
+  }
+
+  /** Reads the course's delivery format from the live-schedule endpoint. A failed read falls back to the strict on-demand rule — never to "allowed". */
+  private loadDeliveryFormat(id: string): Observable<DeliveryFormat> {
+    return this.liveApi.getLiveSchedule(id).pipe(
+      map((schedule) => schedule.deliveryFormat),
+      catchError(() => of<DeliveryFormat>('OnDemand')),
+      tap((format) => this.deliveryFormat.set(format)),
+      takeUntilDestroyed(this.destroyRef),
+    );
+  }
 
   public publishCourse(): void {
     if (!this.courseTitle().trim()) {
@@ -1211,7 +1271,13 @@ export class CourseBuilderPage implements OnInit {
       return;
     }
 
-    if (!this.mediaReadyForReview()) {
+    if (!this.reviewReady()) {
+      const savedId = this.courseId();
+      if (savedId && this.deliveryFormat() === null && this.sections().every((section) => section.episodes.length === 0)) {
+        // No lessons: the course may be a live one. Ask the server what format it is, then evaluate the same rules again (the format is known by then).
+        this.loadDeliveryFormat(savedId).subscribe(() => this.publishCourse());
+        return;
+      }
       this.errorMessage.set('instructor.builder.validation.mediaNotReady');
       this.saveStatus.set('error');
       return;

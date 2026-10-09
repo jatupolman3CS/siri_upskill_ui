@@ -44,6 +44,7 @@ import { TranslationService } from '../../../core/i18n/translation.service';
 import { PlaybackWatermark } from '../data/learning-api.models';
 import { LearningApiService } from '../data/learning-api.service';
 import { PlaybackErrorInfo, mapPlaybackRenewalError, mapShakaPlaybackError } from './shaka-error-mapper';
+import { PlaybackWatermarkOverlay } from './playback-watermark-overlay';
 import { AuthPrefixRewrite, PlaybackRenewalTimer, computeAuthPrefixRewrite, rewriteRequestUris } from './playback-url-renewal';
 
 export interface QualityTrackOption {
@@ -62,7 +63,7 @@ export interface TextTrackOption {
 
 @Component({
   selector: 'app-video-player',
-  imports: [CommonModule, NgIcon],
+  imports: [CommonModule, NgIcon, PlaybackWatermarkOverlay],
   templateUrl: './video-player.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -155,10 +156,6 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   protected readonly isCaptionsEnabled = signal(false);
   protected readonly selectedTextTrack = signal<number | null>(null);
 
-  // Watermark positioning (random every 8s)
-  protected readonly watermarkTop = signal(20);
-  protected readonly watermarkLeft = signal(30);
-
   // Constants
   readonly speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
@@ -167,7 +164,6 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   private isInitializingPlayer = false;
   private pendingMediaUrl: string | null = null;
   private heartbeatTimer?: number;
-  private watermarkTimer?: number;
   private controlsTimeout?: number;
   private lastNonZeroVolume = 1;
   private isSeeking = false;
@@ -240,12 +236,6 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private setupTimers(): void {
-    // Watermark reposition every 8 seconds
-    this.watermarkTimer = window.setInterval(() => {
-      this.watermarkTop.set(Math.floor(Math.random() * 70) + 10);
-      this.watermarkLeft.set(Math.floor(Math.random() * 65) + 10);
-    }, 8000);
-
     // Heartbeat every 15 seconds while playing
     this.heartbeatTimer = window.setInterval(() => {
       if (this.isPlaying()) {
@@ -255,7 +245,6 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private cleanupTimers(): void {
-    if (this.watermarkTimer) clearInterval(this.watermarkTimer);
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
     if (this.controlsTimeout) clearTimeout(this.controlsTimeout);
   }

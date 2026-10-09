@@ -378,14 +378,14 @@ describe('LiveJoinPage', () => {
         opensAtUtc: '2026-10-08T02:45:00Z',
         serverTimeUtc: '2026-10-08T02:00:00Z',
       });
-      expect(text()).toContain("Don't forward the classroom link");
+      expect(text()).toContain("Don't share the classroom link");
       expect(text()).toContain('can no longer be refunded');
       httpMock.match(JOIN_URL);
     });
 
     it('omits the entry notices on a terminal refusal', () => {
       fail(open(), 404, { reason: 'live.not_found' });
-      expect(text()).not.toContain("Don't forward the classroom link");
+      expect(text()).not.toContain("Don't share the classroom link");
     });
   });
 

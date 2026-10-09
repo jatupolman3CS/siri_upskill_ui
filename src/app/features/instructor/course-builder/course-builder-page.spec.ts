@@ -6,6 +6,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { of, Subject, Subscription, throwError } from 'rxjs';
 
+import { buildTestAccessToken } from '../../../core/auth/testing/test-jwt';
+import { accessTokenStore } from '../../../core/http/access-token.store';
 import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { CategoryTreeNode } from '../../catalog/data/category-api.models';
@@ -862,6 +864,55 @@ describe('CourseBuilderPage', () => {
       component.onEpisodeVideoSelected(0, 0, fileEvent());
 
       expect(component['sections']()[0].episodes[0].errorMessage).toBe('instructor.builder.upload.transferFailed');
+    });
+  });
+
+  describe('when the public category list is empty', () => {
+    afterEach(() => accessTokenStore.set(null));
+
+    async function openWithCategories(categories: readonly CategoryTreeNode[], roles: string[]): Promise<HTMLElement> {
+      accessTokenStore.set(buildTestAccessToken({ userId: 'u-1', roles }));
+      await navigate('/instructor/courses/new');
+      httpMock.expectOne((r) => r.url === '/api/catalog/categories').flush(categories);
+      await settle();
+      httpMock.match('/api/identity/me');
+      harness.detectChanges();
+      return harness.routeNativeElement as HTMLElement;
+    }
+
+    it('tells an admin there are no categories and links to the admin category page', async () => {
+      const page = await openWithCategories([], ['Admin']);
+
+      expect(page.textContent).toContain('There are no categories in the system yet');
+      const link = page.querySelector('a[href="/admin/categories"]');
+      expect(link?.textContent).toContain('Go create a category');
+      expect(page.textContent).not.toContain('ask an administrator');
+    });
+
+    it('tells an instructor to ask an administrator, without any link to the admin area', async () => {
+      const page = await openWithCategories([], ['Instructor']);
+
+      expect(page.textContent).toContain('There are no categories in the system yet');
+      expect(page.textContent).toContain('Please ask an administrator to create a category first');
+      expect(page.querySelector('a[href="/admin/categories"]')).toBeNull();
+    });
+
+    it('shows nothing extra when categories exist', async () => {
+      const page = await openWithCategories(CATEGORIES, ['Admin']);
+
+      expect(page.textContent).not.toContain('There are no categories in the system yet');
+      expect(page.querySelector('a[href="/admin/categories"]')).toBeNull();
+    });
+
+    it('does not claim the list is empty while it is still loading', async () => {
+      accessTokenStore.set(buildTestAccessToken({ userId: 'u-1', roles: ['Admin'] }));
+      await navigate('/instructor/courses/new');
+      const page = harness.routeNativeElement as HTMLElement;
+
+      expect(page.textContent).not.toContain('There are no categories in the system yet');
+
+      httpMock.expectOne((r) => r.url === '/api/catalog/categories').flush([]);
+      httpMock.match('/api/identity/me');
     });
   });
 });

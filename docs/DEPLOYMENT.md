@@ -1,5 +1,7 @@
 # Deployment — Contabo VPS (self-hosted)
 
+> Current integration setup (2026-09-08): use the PostgreSQL 17 Compose files and commands in [README.md](../README.md). The SQL Server deployment notes below are historical and do not describe the current database provider. The local stack uses `docker-compose.dev.yml`; production uses `docker-compose.prod.yml` with an explicit migration service.
+
 > **ตัดสินใจแล้ว (Q3):** deploy บน **Contabo VPS** ที่มีอยู่แล้ว ไม่ใช้ cloud managed service
 > วิดีโอและ bandwidth หนักอยู่ที่ Bunny Stream อยู่แล้ว VPS จึงรับแค่ API + SSR + DB
 
@@ -56,8 +58,8 @@ Database `SIRIUPSKILL` มีเตรียมไว้แล้ว (เดิ�
 ```
 caddy            → reverse proxy + TLS อัตโนมัติ (Let's Encrypt) + security headers + rate limit ชั้นนอก
 angular-ssr      → Node container รัน Angular SSR (หน้า public)
-api              → ASP.NET Core 10 Web API (Hangfire Client + Dashboard)
-workers          → .NET 10 Worker Service (Hangfire Processing Server + Recurring Jobs)
+api              → ASP.NET Core 10 Web API (Hangfire Client + Dashboard + Processing Server + Recurring Jobs เป็นค่า default — ดู "Background jobs" ด้านล่าง)
+workers          → .NET 10 Worker Service (ทางเลือก: Hangfire Processing Server + Recurring Jobs แยก process)
 mssql            → SQL Server (persistent volume + tempdb แยก)
 redis            → cache + session/device registry
 seq              → เก็บ log แบบ query ได้
@@ -65,9 +67,45 @@ backup           → sidecar cron: dump DB → บีบอัด → เข้�
 uptime-kuma      → เช็ค uptime + แจ้งเตือน
 ```
 
+## Background jobs (Hangfire) — ใครรัน job server
+
+งานเบื้องหลังทั้งหมด (ส่งอีเมล outbox, สร้างห้อง Live/Meet, invite + reminder ของคาบสด, recount enrollment, reconcile การจ่ายเงิน, ...) **ทำงานก็ต่อเมื่อมี Hangfire processing server รันอยู่เท่านั้น** — ถ้าไม่มี: ห้อง Live ค้าง "รอ", ไม่มีอีเมลยืนยัน/เชิญ/เตือนส่งออกเลย
+
+| ทางเลือก | ตั้งค่า | เมื่อไหร่ใช้ |
+|---|---|---|
+| **API รัน server เอง** (default) | ไม่ต้องตั้งอะไร (`Hangfire__ServerInApi=true` เป็นค่า default) | deploy container เดียว (image `Dockerfile.api` รันแค่ `Siri.Api`) — ครบในตัว |
+| **แยก Workers** | `Hangfire__ServerInApi=false` ที่ API + deploy `Siri.Workers` | อยาก scale/restart งานเบื้องหลังแยกจาก web |
+| **ทั้งสองอย่างพร้อมกัน** | (ปล่อย default + deploy Workers เพิ่ม) | ปลอดภัย — ดูด้านล่าง |
+
+- ตัวแปรเดียว: `Hangfire:ServerInApi` (env `Hangfire__ServerInApi`, bool, default **true**) — API ใช้โค้ดชุดเดียวกับ Workers เป๊ะ (`AddHangfireWorker` → queue/จำนวน worker เท่ากัน) และ schedule recurring job ชุดเดียวกัน **id เดียวกัน** (`RecurringJobIds`) ใน `Siri.Workers`. ใน environment `IntegrationTest` ค่า default คือ false (เทสต์ไม่สตาร์ท job เอง) · dev (`scripts/dev.ps1`) ตั้ง `false` เพราะรัน Workers แยกอยู่แล้ว
+- **รัน API server + Workers พร้อมกันได้ ไม่ซ้ำซ้อนอันตราย**: (1) recurring job ถูกเก็บใน storage เดียว key ด้วย id → ลงทะเบียนซ้ำ = เขียนทับ definition เดิม ไม่เกิด job ที่สอง (2) scheduler ของ Hangfire ใช้ distributed lock ใน storage จึง enqueue แต่ละรอบ **ครั้งเดียว** ไม่ว่ามีกี่ server (3) job ที่เขียน/ส่งของออกนอกระบบทุกตัวมี `[DisableConcurrentExecution]` (lock อยู่ใน storage → กันข้าม server ด้วย): email outbox, live sync/invite/reminder, announcement, order expiry, stripe reconciliation, analytics, pdpa, bunny poll (4) ที่เหลือ 3 ตัวไม่มี lock โดยตั้งใจเพราะ idempotent — `course-enrollment-recount` (นับใหม่จาก enrollment จริง ทีละแถวใน transaction + row lock), `playback-anomaly-detection` (อ่านอย่างเดียว เขียนแค่ audit), `course-search-reindex` (upsert ตาม course id) — มีเทสต์ล็อกไว้ (`HangfireHostingTests`) ว่า job ใหม่ต้องมี lock หรือขึ้น allow-list พร้อมเหตุผล
+- ข้อควรระวัง: ถ้า pod ของ API ถูก restart/scale-down กลางงาน Hangfire จะรัน job นั้นซ้ำเอง (at-least-once) — job ทั้งหมดออกแบบให้ idempotent อยู่แล้ว (มี idempotency key / status transition) · ตั้ง `terminationGracePeriodSeconds` ≥ 30 วินาที
+- **ตรวจว่าระบบ Live ใช้งานได้จริงไหม**: `GET /api/live/admin/status` (Admin เท่านั้น) บอก job server รันอยู่ไหม, recurring job ลงทะเบียน/รันล่าสุดเมื่อไหร่, อีเมล (provider/ค้าง/ล้มเหลว), Live provider/Google/public URL, จำนวนห้องที่ค้าง และ `warnings` เป็นรหัสคงที่ (`no_job_server`, `email_unconfigured`, `outbox_backlog`, `public_base_url_not_https`, `google_not_configured`, `meetings_stuck_pending`, ...) · Production จะ log สรุปรหัสเดียวกันนี้ **บรรทัดเดียว** (level Warning) ~90 วินาทีหลัง start — ค้นใน log ด้วยคำว่า `Live system check`
+
+## Admin คนแรกของ DB ว่าง (Owner bootstrap) + runbook เปิดระบบ Live
+
+- ตั้ง env `Identity__Bootstrap__OwnerEmails__0` (`__1`, `__2` ... เพิ่มได้) เป็นอีเมลเจ้าของระบบ (**ไม่ใช่ secret**) · เจ้าของ**สมัครบัญชีเองตามปกติ + ยืนยันอีเมล** แล้ว `OwnerBootstrapService` (`src/Siri.Api/Bootstrap/`, ตรวจทุก 30 วินาทีจนทุกคนครบ แล้วหยุด) จะให้ role ทั้งสี่ (Learner/Instructor/Admin/SuperAdmin) + โปรไฟล์ผู้สอนที่อนุมัติแล้ว — เฉพาะบัญชีที่ **มีอยู่แล้วและ Active** (ไม่สร้างบัญชี ไม่แตะรหัสผ่าน ไม่ให้บัญชีที่ยังไม่ยืนยันอีเมล) · ไม่ต้อง restart · role มีผลตอน login ครั้งถัดไป · ไม่ตั้งค่า = ไม่ทำอะไรเลย · ใช้ได้ทุก environment รวม Production (ต่างจาก `--seed` ที่ห้ามใน Production)
+- ขั้นตอนเปิดระบบคอร์สสอนสดทั้งหมด (env ที่ต้องมี, Google Cloud, เช็คครั้งแรกบนเบราว์เซอร์, ตารางแก้ปัญหา): **[`docs/runbooks/live-course-go-live.md`](runbooks/live-course-go-live.md)**
+
 Subdomain: `siriupskill.com` (SSR) · `api.siriupskill.com` · `admin.siriupskill.com` · `staging.siriupskill.com`
 
 ⚠️ **ตั้งค่า `caddy` ให้ forward header บอก scheme จริงไปหา `angular-ssr`** (`X-Forwarded-Proto`/`Forwarded` — Caddy's `reverse_proxy` ทำให้อัตโนมัติอยู่แล้วโดย default ปกติ ไม่ต้องเพิ่ม directive พิเศษ แค่ต้อง**ยืนยัน**ตอน deploy จริง) แล้วตั้ง env `NG_TRUST_PROXY_HEADERS=true` ให้ container `angular-ssr` — ถ้าไม่ทำ Angular SSR (`SeoService`, task P1-24) จะเข้าใจผิดว่า request เป็น `http://` เสมอ (เช็คจาก `socket.encrypted` ตรง ๆ แทน) เพราะ Caddy→Node เป็น plain HTTP ภายใน docker network แม้ฝั่งผู้ใช้เข้าผ่าน `https://` จริง — canonical/OG URL ในหน้า SSR จะผิดเป็น `http://...` เงียบ ๆ ถ้าลืมข้อนี้
+
+## Meilisearch (ค้นหาคอร์ส + ชื่อผู้สอน — D-22)
+
+ตั้งค่าเป็น env ให้ **ทั้ง API และ Workers** (ทั้งสองโหลด `AddCatalogModule`; Workers เป็นคนรัน job `course-search-reindex`):
+
+| env | ความหมาย |
+|---|---|
+| `Meilisearch__Url` | base URL ของ Meilisearch เช่น `http://host:7700` (ว่าง = ปิดฟีเจอร์ ใช้ `pg_trgm`) |
+| `Meilisearch__ApiKey` | **secret** — key ที่ต้องมีสิทธิ์ `search`, `documents.add`, `documents.get`, `documents.delete`, `indexes.create`, `indexes.get`, `settings.update`, `tasks.get` (master key ใช้ได้) · ว่างหรือ `CHANGE_ME` = ปิดฟีเจอร์ |
+| `Meilisearch__DocumentsIndexUid` | uid ของ index (default `siriupskill_documents`; ใช้ได้เฉพาะ `A-Z a-z 0-9 - _`) |
+| `Meilisearch__Enabled` | `false` = ปิดทันทีทั้งที่ตั้งค่าครบ (default `true`) |
+
+- ตั้งแล้ว restart → ตอน start API จะสร้าง index + settings และเติมให้เองถ้า index ว่าง (log: `Meilisearch index is ready…` / `initial reindex indexed N`) ไม่ต้องสั่งอะไรเพิ่ม · ถ้าไม่ได้ผลดู log บรรทัด `Meilisearch course search is off (...)` จะบอกเหตุผล (ไม่มี URL / key ยังเป็น `CHANGE_ME` / ถูกปิด)
+- ตรวจสถานะ: `GET /api/catalog/admin/search/status` (Admin) → `enabled`, `reachable`, `indexedCourses` เทียบ `publishedCoursesInDatabase` · สั่งสร้างใหม่ทั้งหมด: `POST /api/catalog/admin/search/reindex`
+- **ความปลอดภัย:** ถ้า URL เป็น `http://` ไป public IP ตัว bearer key วิ่งแบบไม่เข้ารหัส → ใช้ `https://` (reverse proxy หน้า Meilisearch) หรือ private network, แนะนำสร้าง key แยกที่จำกัด action ตามตารางด้านบนแทน master key และอย่า commit ลงไฟล์ใด ๆ (`.env_prd`/Jenkins credentials เท่านั้น)
+- Meilisearch ล่มไม่ทำให้เว็บล่ม — ค้นหาตกกลับไป PostgreSQL อัตโนมัติ (ดู `ARCHITECTURE.md` § 6)
 
 ## CI/CD
 
@@ -104,9 +142,16 @@ push → GitHub Actions:
 
 ## Monitoring & alert
 
+> **อัปเดต 2026-09-21:** Uptime Kuma (`https://kuma.siristudiophoto.com/`) และ .NET Aspire
+> Dashboard (`https://monitor.siristudiophoto.com/`, แทนที่แผน Seq เดิมด้านล่าง) รันอยู่จริงบน
+> VPS แล้ว (shared ข้ามหลายโปรเจ็คบนเครื่องเดียวกัน) — ขั้นตอนตั้งค่าละเอียดอยู่ที่
+> `docs/runbooks/uptime-and-log-monitoring-setup.md` ค้างอยู่ 2 อย่างที่ต้องเจ้าของโปรเจ็คทำเอง
+> (login Kuma เพิ่ม monitor + รันคำสั่งเดียวบน VPS หา OTLP endpoint จริง) — Claude Code ทำแทนไม่ได้
+> ทั้งคู่ (ห้ามกรอกรหัสผ่าน + ไม่มีสิทธิ์ SSH เข้า production โดยตรง)
+
 - Uptime Kuma: เช็ค `/health`, หน้าแรก, และ Bunny playback ตัวอย่าง
 - Netdata หรือ Prometheus+Grafana: CPU / RAM / disk / IO
-- Seq: log + alert เมื่อ error rate พุ่ง
+- ~~Seq~~ .NET Aspire Dashboard: log + trace + metric ผ่าน OTLP (`Observability:OtlpEndpoint`, P0-13)
 - Alert เข้า LINE Notify หรือ Discord webhook
 - ต้อง alert เป็นพิเศษ: disk > 80%, DB > 7 GB (ถ้าใช้ Express), Stripe webhook ล้มเหลว/ตอบไม่ทันติดต่อกัน, ออร์เดอร์ค้างสถานะผิดปกติ (ops queue) > 20 รายการ
 

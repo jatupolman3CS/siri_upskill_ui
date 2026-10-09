@@ -74,17 +74,20 @@ describe('InstructorOnboardingPage', () => {
     return Array.from(root().querySelectorAll('button')).find((b) => b.textContent?.trim() === text);
   }
 
-  async function goToStep2(): Promise<void> {
+  /** Fills the profile step and moves on to the terms step (the application only has these two steps now). */
+  async function goToTermsStep(): Promise<void> {
     fill('#displayName', 'Test Instructor');
     fill('#bio', 'Test bio');
     findButtonByText('ถัดไป')?.click();
     await settle();
   }
 
-  async function goToStep3(): Promise<void> {
-    fill('#accountNumber', '1234567890');
-    fill('#accountHolder', 'Test Holder');
-    findButtonByText('ถัดไป')?.click();
+  async function agreeAndSubmit(): Promise<void> {
+    const agree = root().querySelector('input[type="checkbox"]') as HTMLInputElement;
+    agree.checked = true;
+    agree.dispatchEvent(new Event('change'));
+    await settle();
+    findButtonByText('ส่งใบสมัครเป็นผู้สอน')?.click();
     await settle();
   }
 
@@ -99,6 +102,78 @@ describe('InstructorOnboardingPage', () => {
     await settle();
   }
 
+  it('submits only the application through the instructor profile API and never calls the payout-account endpoint', async () => {
+    await openAsApplicant();
+    fill('#displayName', '  Somchai  ');
+    fill('#headline', '');
+    fill('#bio', ' My bio ');
+    findButtonByText('ถัดไป')?.click();
+    await settle();
+    await flushPolicy();
+    await agreeAndSubmit();
+
+    const apply = httpMock.expectOne('/api/catalog/instructors/apply');
+    expect(apply.request.method).toBe('POST');
+    expect(apply.request.body).toEqual({ displayName: 'Somchai', headline: null, bio: 'My bio' });
+    apply.flush({
+      id: 'p1',
+      userId: 'u1',
+      displayName: 'Somchai',
+      headline: null,
+      bio: 'My bio',
+      revenueSharePercent: 70,
+      status: 'Pending',
+      approvedAtUtc: null,
+    });
+    await settle();
+
+    // An applicant is not an approved instructor yet, so the payout endpoint would answer 403 — it must not be called.
+    httpMock.expectNone((r) => r.url.includes('/api/payout/instructor/payout-account'));
+    expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+  });
+
+  it('has two steps (profile, terms) and no bank-account fields anywhere in the application flow', async () => {
+    await openAsApplicant();
+    for (const id of ['#bankName', '#accountNumber', '#accountHolder', '#promptpay']) {
+      expect(root().querySelector(id)).toBeNull();
+    }
+
+    await goToTermsStep();
+    await flushPolicy();
+
+    expect(root().textContent).toContain('Step 2: Revenue-share terms and agreement');
+    for (const id of ['#bankName', '#accountNumber', '#accountHolder', '#promptpay']) {
+      expect(root().querySelector(id)).toBeNull();
+    }
+    expect(findButtonByText('ส่งใบสมัครเป็นผู้สอน')).toBeDefined();
+    expect(findButtonByText('ถัดไป')).toBeUndefined();
+  });
+
+  it('tells the applicant the bank account is added after approval on the earnings page, without claiming a payout schedule', async () => {
+    await openAsApplicant();
+    await goToTermsStep();
+    await flushPolicy();
+
+    const text = root().textContent ?? '';
+    expect(text).toContain("You don't need to enter a bank account to apply");
+    expect(text).toContain('"Earnings" page in Studio');
+  });
+
+  it('shows the server message and stays on the form when the application is rejected', async () => {
+    await openAsApplicant();
+    await goToTermsStep();
+    await flushPolicy();
+    await agreeAndSubmit();
+
+    httpMock
+      .expectOne('/api/catalog/instructors/apply')
+      .flush({ detail: 'already applied' }, { status: 409, statusText: 'Conflict' });
+    await settle();
+
+    expect(root().textContent).toContain('already applied');
+    expect(findButtonByText('ส่งใบสมัครเป็นผู้สอน')).toBeDefined();
+  });
+
   it('does not fetch the policy (or show any policy copy) on step 1', async () => {
     await openAsApplicant();
 
@@ -106,41 +181,31 @@ describe('InstructorOnboardingPage', () => {
     expect(root().textContent).not.toContain('hold period');
   });
 
-  it('renders the server numbers on the payout-account and terms steps with a single policy fetch (English)', async () => {
+  it('renders the server numbers on the terms step with a single policy fetch (English)', async () => {
     await openAsApplicant();
-    await goToStep2();
+    await goToTermsStep();
     await flushPolicy();
 
-    let text = root().textContent ?? '';
-    expect(text).toContain('after the hold period of 21 days and once your accumulated balance reaches ฿750.00');
-
-    await goToStep3();
-
-    text = root().textContent ?? '';
+    const text = root().textContent ?? '';
     expect(text).toContain('Standard instructor revenue share: 80%');
     expect(text).toContain('1. Instructors receive 80% and the platform receives 20% of course sales');
     expect(text).toContain('2. Regular payouts are subject to 5% withholding tax');
     for (const literal of OLD_POLICY_LITERALS) {
       expect(text).not.toContain(literal);
     }
-    // Moving 2 -> 3 reuses the page-level store: no second request (verified by httpMock.verify()).
   });
 
   it('renders the server numbers in Thai and states no payout date or cycle', async () => {
     TestBed.inject(TranslationService).setLocale('th');
     await openAsApplicant();
-    await goToStep2();
+    await goToTermsStep();
     await flushPolicy();
 
-    let text = root().textContent ?? '';
-    expect(text).toContain('เมื่อผู้ดูแลระบบสร้างรอบจ่ายหลังพ้นระยะ hold 21 วัน และยอดสะสมของคุณถึง ฿750.00');
-
-    await goToStep3();
-
-    text = root().textContent ?? '';
+    const text = root().textContent ?? '';
     expect(text).toContain('ส่วนแบ่งรายได้มาตรฐาน 80% สำหรับผู้สอน');
     expect(text).toContain('1. ผู้สอนจะได้รับส่วนแบ่งรายได้ 80% และแพลตฟอร์มได้รับ 20%');
     expect(text).toContain('หักภาษี ณ ที่จ่าย 5%');
+    expect(text).toContain('ขั้นตอนที่ 2: เงื่อนไขและข้อตกลงส่วนแบ่งรายได้');
     for (const literal of OLD_POLICY_LITERALS) {
       expect(text).not.toContain(literal);
     }
@@ -148,33 +213,28 @@ describe('InstructorOnboardingPage', () => {
 
   it('shows a skeleton, never a number, while the policy is loading', async () => {
     await openAsApplicant();
-    await goToStep2();
+    await goToTermsStep();
 
     const text = root().textContent ?? '';
-    expect(text).not.toContain('21 days');
     expect(text).not.toContain('฿');
     expect(text).not.toContain('70%');
+    expect(text).not.toContain('80%');
     expect(root().querySelector('app-payout-policy-text[aria-busy="true"]')).not.toBeNull();
 
     await flushPolicy();
-    expect(root().textContent).toContain('hold period of 21 days');
+    expect(root().textContent).toContain('Standard instructor revenue share: 80%');
     expect(root().querySelector('app-payout-policy-text[aria-busy="true"]')).toBeNull();
   });
 
   it('shows "—" instead of any number when the policy request fails, offers one retry, and retry restores real values', async () => {
     await openAsApplicant();
-    await goToStep2();
+    await goToTermsStep();
     await flushPolicy(POLICY, 500);
 
     let text = root().textContent ?? '';
-    expect(text).toContain('hold period of — days');
-    expect(text).not.toContain('21');
-
-    await goToStep3();
-
-    text = root().textContent ?? '';
     expect(text).toContain('Standard instructor revenue share: —');
     expect(text).toContain('1. Instructors receive — and the platform receives —');
+    expect(text).not.toContain('80%');
     for (const literal of OLD_POLICY_LITERALS) {
       expect(text).not.toContain(literal);
     }

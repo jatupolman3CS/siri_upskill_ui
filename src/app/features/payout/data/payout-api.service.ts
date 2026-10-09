@@ -11,6 +11,9 @@ import {
   PayoutHistoryItem,
   PayoutPolicy,
   RevenueSplitItem,
+  RevenueSplitStatus,
+  UpsertPayoutAccountRequest,
+  isRevenueSplitStatus,
 } from './payout-api.models';
 
 export interface PagedResponse<T> {
@@ -39,12 +42,10 @@ export class PayoutApiService {
     return this.http.get<InstructorPayoutAccount>('/api/payout/instructor/payout-account');
   }
 
-  upsertPayoutAccount(req: {
-    bankName: string;
-    accountNumber: string;
-    accountHolderName: string;
-    promptPayId?: string;
-  }): Observable<InstructorPayoutAccount> {
+  // `GET` answers 404 when this instructor has no account yet — callers treat that as "empty", not as a failure.
+  // Upsert: creates the account when none exists, otherwise replaces it (and resets the admin verification).
+  // 403 = the caller is not an approved instructor.
+  upsertPayoutAccount(req: UpsertPayoutAccountRequest): Observable<InstructorPayoutAccount> {
     return this.http.put<InstructorPayoutAccount>('/api/payout/instructor/payout-account', req);
   }
 
@@ -78,14 +79,16 @@ export class PayoutApiService {
   getAdminRevenueSplits(
     instructorId?: string,
     periodKey?: string,
-    status?: string,
+    status?: RevenueSplitStatus | 'All',
     page = 1,
     pageSize = 50,
   ): Observable<PagedResponse<RevenueSplitItem>> {
     let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (instructorId) params = params.set('instructorId', instructorId);
     if (periodKey) params = params.set('periodKey', periodKey);
-    if (status && status !== 'All') params = params.set('status', status);
+    // The backend binds `status` to the RevenueSplitStatus enum and answers 400 for anything else, so only a real
+    // enum member is ever sent ('All' / unknown / stale values mean "no status filter").
+    if (isRevenueSplitStatus(status)) params = params.set('status', status);
     return this.http.get<PagedResponse<RevenueSplitItem>>('/api/payout/admin/revenue-splits', { params });
   }
 }

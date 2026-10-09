@@ -188,6 +188,108 @@ describe('CourseBuilderPage — live schedule tab (P11)', () => {
     await settle();
   });
 
+  describe('submitting a course that has no video lessons (a live course is taught, not recorded)', () => {
+    const SCHEDULE_URL = `/api/catalog/instructor/courses/${COURSE_ID}/live-schedule`;
+    const AUTOSAVE_URL = `/api/catalog/instructor/courses/${COURSE_ID}/autosave`;
+    const SUBMIT_URL = `/api/catalog/instructor/courses/${COURSE_ID}/submit-for-review`;
+    const scheduleOf = (deliveryFormat: 'OnDemand' | 'Live' | 'Hybrid') => ({
+      courseId: COURSE_ID,
+      deliveryFormat,
+      status: 'Draft',
+      enrollmentDeadlineUtc: null,
+      maxSeats: null,
+      seatsUsed: 0,
+      googleAttendeeSyncEnabled: false,
+      sessions: [],
+    });
+
+    async function openWithoutLessons(): Promise<CourseBuilderPage> {
+      const component = await harness.navigateByUrl(`/instructor/courses/${COURSE_ID}/builder`, CourseBuilderPage);
+      await settle();
+      httpMock.expectOne((r) => r.url === '/api/catalog/categories').flush(CATEGORIES);
+      httpMock.expectOne((r) => r.url === `/api/catalog/instructor/courses/${COURSE_ID}/builder`).flush({ ...COURSE, sections: [] });
+      await settle();
+      return component;
+    }
+
+    it('a Live course goes to review on its live classes alone: the format is read once, then the course is saved and submitted', async () => {
+      const component = await openWithoutLessons();
+
+      component.publishCourse();
+      httpMock.expectOne(SCHEDULE_URL).flush(scheduleOf('Live'));
+      await settle();
+      httpMock.expectOne(AUTOSAVE_URL).flush({ courseId: COURSE_ID, rowVersion: 'AAAAAAAAB9F=', updatedAtUtc: '2026-10-07T00:00:00Z' });
+      await settle();
+      httpMock.expectOne(SUBMIT_URL).flush({});
+      await settle();
+
+      expect(component['errorMessage']()).toBeNull();
+      expect(component['saveStatus']()).toBe('saved');
+    });
+
+    it('does not ask again once the live tab has reported the format', async () => {
+      const component = await openWithoutLessons();
+      component['onDeliveryFormatChange']('Hybrid');
+
+      expect(component.reviewReady()).toBe(true);
+      component.publishCourse();
+      httpMock.expectNone(SCHEDULE_URL);
+      httpMock.expectOne(AUTOSAVE_URL).flush({ courseId: COURSE_ID, rowVersion: 'AAAAAAAAB9F=', updatedAtUtc: '2026-10-07T00:00:00Z' });
+      await settle();
+      httpMock.expectOne(SUBMIT_URL).flush({});
+      await settle();
+    });
+
+    it('an on-demand course with no lessons is still refused (and nothing is saved or submitted)', async () => {
+      const component = await openWithoutLessons();
+
+      component.publishCourse();
+      httpMock.expectOne(SCHEDULE_URL).flush(scheduleOf('OnDemand'));
+      await settle();
+
+      expect(component['errorMessage']()).toBe('instructor.builder.validation.mediaNotReady');
+      expect(component.reviewReady()).toBe(false);
+      httpMock.expectNone(AUTOSAVE_URL);
+      httpMock.expectNone(SUBMIT_URL);
+    });
+
+    it('a failed format read falls back to the strict on-demand rule, never to "allowed"', async () => {
+      const component = await openWithoutLessons();
+
+      component.publishCourse();
+      httpMock.expectOne(SCHEDULE_URL).flush({ status: 500 }, { status: 500, statusText: 'Server Error' });
+      await settle();
+
+      expect(component['errorMessage']()).toBe('instructor.builder.validation.mediaNotReady');
+      expect(component.reviewReady()).toBe(false);
+      httpMock.expectNone(SUBMIT_URL);
+    });
+
+    it('a Hybrid course whose lesson has not finished converting is refused even though it is not on-demand', async () => {
+      const component = await openSaved(); // one lesson, no video yet
+      component['onDeliveryFormatChange']('Hybrid');
+
+      expect(component.reviewReady()).toBe(false);
+      component.publishCourse();
+      expect(component['errorMessage']()).toBe('instructor.builder.validation.mediaNotReady');
+      httpMock.expectNone(SCHEDULE_URL);
+      httpMock.expectNone(SUBMIT_URL);
+    });
+
+    it('opening the publish tab shows the course as ready for review once the server says it is a Live course', async () => {
+      const component = await openWithoutLessons();
+
+      component['showPublishTab']();
+      httpMock.expectOne(SCHEDULE_URL).flush(scheduleOf('Live'));
+      await settle();
+
+      expect(component['activeTab']()).toBe('publish');
+      expect(component.reviewReady()).toBe(true);
+      expect(root().textContent).toContain('Your course is ready for publishing!');
+      expect(root().textContent).not.toContain('Upload a video for every lesson');
+    });
+  });
+
   it('any other submit failure keeps the generic message and stays on the current tab', async () => {
     const component = await openSaved();
     component['sections'].update((sections) =>

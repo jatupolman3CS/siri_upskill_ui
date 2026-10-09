@@ -184,7 +184,7 @@ describe('SessionDetailPage', () => {
     it('re-checks every 10 seconds until the room is ready, then stops', async () => {
       vi.useFakeTimers();
       await open(detail({ meetUrl: null, meeting: meeting({ needsAction: 'Waiting', syncStatus: 'Pending', hasMeetingLink: false, isUsable: false }) }));
-      expect(text()).toContain('Creating room');
+      expect(text()).toContain('Preparing room');
 
       vi.advanceTimersByTime(9_999);
       httpMock.expectNone(DETAIL_URL);

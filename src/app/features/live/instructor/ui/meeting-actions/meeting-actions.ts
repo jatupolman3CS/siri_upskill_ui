@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { phosphorArrowsClockwise, phosphorLinkSimple, phosphorPlugs } from '@ng-icons/phosphor-icons/regular';
+import {
+  phosphorArrowSquareOut,
+  phosphorArrowsClockwise,
+  phosphorLinkSimple,
+  phosphorPlugs,
+  phosphorVideoCamera,
+} from '@ng-icons/phosphor-icons/regular';
 
 import { TranslatePipe } from '../../../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../../../core/i18n/translation.service';
@@ -22,6 +28,9 @@ import {
 
 type Busy = 'link' | 'resync' | 'connect' | null;
 
+/** Google's own "create an instant meeting" entry point — opened in a new tab so the instructor keeps this page. */
+const NEW_MEET_URL = 'https://meet.google.com/new';
+
 /**
  * The action the instructor can take on one session's room, chosen ONLY from the server-derived `needsAction`
  * (`PasteLink` -> link field, `ReconnectGoogle` -> connect button, `Retry` -> resync, `Waiting` -> status text). The UI
@@ -33,7 +42,9 @@ type Busy = 'link' | 'resync' | 'connect' | null;
   imports: [ReactiveFormsModule, NgIcon, TranslatePipe, Button, InputField, Spinner],
   templateUrl: './meeting-actions.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons({ phosphorArrowsClockwise, phosphorLinkSimple, phosphorPlugs })],
+  providers: [
+    provideIcons({ phosphorArrowSquareOut, phosphorArrowsClockwise, phosphorLinkSimple, phosphorPlugs, phosphorVideoCamera }),
+  ],
   host: { class: 'block' },
 })
 export class MeetingActions {
@@ -50,6 +61,8 @@ export class MeetingActions {
   readonly returnPath = input.required<string>();
   readonly meetingChange = output<InstructorMeetingSummary>();
 
+  protected readonly newMeetUrl = NEW_MEET_URL;
+  protected readonly allowedHosts = ALLOWED_MEETING_HOSTS;
   protected readonly linkControl = new FormControl('', { nonNullable: true });
   protected readonly busy = signal<Busy>(null);
   protected readonly problem = signal<ProblemMessage | null>(null);

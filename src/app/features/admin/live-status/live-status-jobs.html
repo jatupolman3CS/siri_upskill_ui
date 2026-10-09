@@ -1,0 +1,113 @@
+<section
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  aria-labelledby="live-status-jobserver-heading"
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 id="live-status-jobserver-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+      <ng-icon name="phosphorHardDrives" aria-hidden="true" class="text-xl" />
+      {{ 'admin.liveStatus.jobServer.heading' | translate }}
+    </h2>
+    <p
+      class="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-sm font-medium text-[var(--color-text)]"
+      [class]="
+        jobServer().running
+          ? 'border-[color-mix(in_srgb,var(--color-success)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]'
+          : 'border-[color-mix(in_srgb,var(--color-danger)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]'
+      "
+    >
+      @if (jobServer().running) {
+        <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="text-[var(--color-success)]" />
+        {{ 'admin.liveStatus.jobServer.running' | translate }}
+      } @else {
+        <ng-icon name="phosphorXCircle" aria-hidden="true" class="text-[var(--color-danger)]" />
+        {{ 'admin.liveStatus.jobServer.stopped' | translate }}
+      }
+      · {{ 'admin.liveStatus.jobServer.count' | translate: { count: jobServer().serverCount } }}
+    </p>
+  </div>
+
+  @if (jobServer().servers.length > 0) {
+    <div
+      class="mt-4 overflow-x-auto"
+      role="region"
+      tabindex="0"
+      [attr.aria-label]="'admin.liveStatus.jobServer.heading' | translate"
+    >
+      <table class="w-full min-w-[32rem] text-left text-sm">
+        <caption class="sr-only">{{ 'admin.liveStatus.jobServer.heading' | translate }}</caption>
+        <thead>
+          <tr class="border-b border-[var(--color-border)] text-[var(--color-text-muted)]">
+            <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.liveStatus.jobServer.colName' | translate }}</th>
+            <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.liveStatus.jobServer.colStarted' | translate }}</th>
+            <th scope="col" class="py-2 font-medium">{{ 'admin.liveStatus.jobServer.colHeartbeat' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (server of jobServer().servers; track server.name) {
+            <tr class="border-b border-[var(--color-border)] last:border-b-0">
+              <th scope="row" class="break-all py-2 pr-4 font-mono text-xs font-medium text-[var(--color-text)]">{{ server.name }}</th>
+              <td class="py-2 pr-4"><app-live-status-time [instant]="server.startedAtUtc" [nowUtc]="nowUtc()" /></td>
+              <td class="py-2"><app-live-status-time [instant]="server.heartbeatUtc" [nowUtc]="nowUtc()" /></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="mt-4 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.jobServer.none' | translate }}</p>
+  }
+</section>
+
+<section
+  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  aria-labelledby="live-status-recurring-heading"
+>
+  <h2 id="live-status-recurring-heading" class="text-lg font-semibold text-[var(--color-text)]">
+    {{ 'admin.liveStatus.recurring.heading' | translate }}
+  </h2>
+  <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.recurring.hint' | translate }}</p>
+
+  @if (jobs().length > 0) {
+    <div
+      class="mt-4 overflow-x-auto"
+      role="region"
+      tabindex="0"
+      [attr.aria-label]="'admin.liveStatus.recurring.heading' | translate"
+    >
+      <table class="w-full min-w-[40rem] text-left text-sm">
+        <caption class="sr-only">{{ 'admin.liveStatus.recurring.heading' | translate }}</caption>
+        <thead>
+          <tr class="border-b border-[var(--color-border)] text-[var(--color-text-muted)]">
+            <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.liveStatus.recurring.colJob' | translate }}</th>
+            <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.liveStatus.recurring.colCron' | translate }}</th>
+            <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.liveStatus.recurring.colLast' | translate }}</th>
+            <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.liveStatus.recurring.colNext' | translate }}</th>
+            <th scope="col" class="py-2 font-medium">{{ 'admin.liveStatus.recurring.colState' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (job of jobs(); track job.id) {
+            <tr class="border-b border-[var(--color-border)] last:border-b-0">
+              <th scope="row" class="break-all py-2 pr-4 font-mono text-xs font-medium text-[var(--color-text)]">{{ job.id }}</th>
+              <td class="py-2 pr-4"><code class="whitespace-nowrap text-xs text-[var(--color-text)]">{{ job.cron }}</code></td>
+              <td class="py-2 pr-4"><app-live-status-time [instant]="job.lastExecutionUtc" [nowUtc]="nowUtc()" /></td>
+              <td class="py-2 pr-4"><app-live-status-time [instant]="job.nextExecutionUtc" [nowUtc]="nowUtc()" /></td>
+              <td class="py-2">
+                @if (job.lastJobState; as state) {
+                  <span class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text)]">
+                    <ng-icon [name]="job.icon" aria-hidden="true" [class]="job.toneClass" />
+                    {{ state }}
+                  </span>
+                } @else {
+                  <span class="text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.recurring.neverRan' | translate }}</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="mt-4 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.recurring.none' | translate }}</p>
+  }
+</section>

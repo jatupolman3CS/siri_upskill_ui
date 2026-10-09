@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,30 +22,21 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { AuthService } from '../../../core/auth/auth.service';
-import { PayoutApiService } from '../../payout/data/payout-api.service';
 import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
 import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
-
-export interface MyInstructorProfileDto {
-  readonly id: string;
-  readonly userId: string;
-  readonly displayName: string;
-  readonly headline: string | null;
-  readonly bio: string;
-  readonly revenueSharePercent: number;
-  readonly status: 'Pending' | 'Approved' | 'Rejected';
-  readonly approvedAtUtc: string | null;
-}
+import { InstructorProfileResponse } from '../data/instructor-profile-api.models';
+import { InstructorProfileApiService } from '../data/instructor-profile-api.service';
 
 @Component({
   selector: 'app-instructor-onboarding-page',
-  imports: [CommonModule, FormsModule, RouterLink, NgIcon, Spinner, PayoutPolicyText],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, Spinner, PayoutPolicyText, TranslatePipe],
   templateUrl: './instructor-onboarding-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    // One `GET /api/payout/policy` per page load, shared by the payout-account note and the terms box.
+    // One `GET /api/payout/policy` per page load, shared by the terms box (the bank account is entered after approval, on the earnings page).
     PayoutPolicyStore,
     provideIcons({
       phosphorUser,
@@ -62,16 +52,15 @@ export interface MyInstructorProfileDto {
   ],
 })
 export class InstructorOnboardingPage implements OnInit {
-  private readonly http = inject(HttpClient);
-  private readonly payoutApi = inject(PayoutApiService);
+  private readonly instructorApi = inject(InstructorProfileApiService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly seoService = inject(SeoService);
 
-  protected readonly currentStep = signal<1 | 2 | 3>(1);
+  protected readonly currentStep = signal<1 | 2>(1);
   protected readonly isLoading = signal(false);
   protected readonly isSubmitting = signal(false);
-  protected readonly existingProfile = signal<MyInstructorProfileDto | null>(null);
+  protected readonly existingProfile = signal<InstructorProfileResponse | null>(null);
   protected readonly submitError = signal<string | null>(null);
   protected readonly submitSuccess = signal(false);
 
@@ -80,23 +69,9 @@ export class InstructorOnboardingPage implements OnInit {
   protected headline = '';
   protected bio = '';
 
-  // Form Fields - Step 2: Payout Account
-  protected bankName = 'ธนาคารกสิกรไทย (KBANK)';
-  protected accountNumber = '';
-  protected accountHolderName = '';
-  protected promptPayId = '';
-
-  // Form Fields - Step 3: Agreement
+  // Form Fields - Step 2: Agreement. The bank (payout) account is deliberately NOT collected here: the payout
+  // endpoint only accepts an already-approved instructor, so it is entered later on /instructor/earnings.
   protected agreedToTerms = false;
-
-  readonly bankOptions = [
-    'ธนาคารกสิกรไทย (KBANK)',
-    'ธนาคารไทยพาณิชย์ (SCB)',
-    'ธนาคารกรุงเทพ (BBL)',
-    'ธนาคารกรุงไทย (KTB)',
-    'ธนาคารกรุงศรีอยุธยา (BAY)',
-    'ธนาคารทหารไทยธนชาต (TTB)',
-  ];
 
   ngOnInit(): void {
     this.seoService.set({
@@ -111,7 +86,7 @@ export class InstructorOnboardingPage implements OnInit {
 
   private checkExistingProfile(): void {
     this.isLoading.set(true);
-    this.http.get<MyInstructorProfileDto>('/api/catalog/instructors/me').subscribe({
+    this.instructorApi.getMyProfile().subscribe({
       next: (profile) => {
         this.existingProfile.set(profile);
         if (profile) {
@@ -135,20 +110,12 @@ export class InstructorOnboardingPage implements OnInit {
       }
       this.submitError.set(null);
       this.currentStep.set(2);
-    } else if (this.currentStep() === 2) {
-      if (!this.accountNumber.trim() || !this.accountHolderName.trim()) {
-        this.submitError.set('กรุณากรอกข้อมูลบัญชีธนาคารให้ครบถ้วน');
-        return;
-      }
-      this.submitError.set(null);
-      this.currentStep.set(3);
     }
   }
 
   protected prevStep(): void {
-    const s = this.currentStep();
-    if (s > 1) {
-      this.currentStep.set((s - 1) as 1 | 2 | 3);
+    if (this.currentStep() === 2) {
+      this.currentStep.set(1);
       this.submitError.set(null);
     }
   }
@@ -162,9 +129,8 @@ export class InstructorOnboardingPage implements OnInit {
     this.isSubmitting.set(true);
     this.submitError.set(null);
 
-    // 1. Submit instructor profile
-    this.http
-      .post<MyInstructorProfileDto>('/api/catalog/instructors/apply', {
+    this.instructorApi
+      .apply({
         displayName: this.displayName.trim(),
         headline: this.headline.trim() || null,
         bio: this.bio.trim(),
@@ -172,25 +138,8 @@ export class InstructorOnboardingPage implements OnInit {
       .subscribe({
         next: (profile) => {
           this.existingProfile.set(profile);
-
-          // 2. Save payout account info
-          this.payoutApi
-            .upsertPayoutAccount({
-              bankName: this.bankName,
-              accountNumber: this.accountNumber.trim(),
-              accountHolderName: this.accountHolderName.trim(),
-              promptPayId: this.promptPayId.trim() || undefined,
-            })
-            .subscribe({
-              next: () => {
-                this.isSubmitting.set(false);
-                this.submitSuccess.set(true);
-              },
-              error: () => {
-                this.isSubmitting.set(false);
-                this.submitSuccess.set(true); // Profile was submitted successfully
-              },
-            });
+          this.isSubmitting.set(false);
+          this.submitSuccess.set(true);
         },
         error: (err) => {
           this.isSubmitting.set(false);

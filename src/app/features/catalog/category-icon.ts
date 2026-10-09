@@ -13,6 +13,9 @@ const ICON_KEY_TO_NAME: Readonly<Record<string, string>> = {
   coins: 'phosphorCoins',
 };
 
+/** The `iconKey` values this map knows how to draw — the choices the admin category form offers. */
+export const CATEGORY_ICON_KEYS: readonly string[] = Object.keys(ICON_KEY_TO_NAME);
+
 /** The icon set `resolveCategoryIconName` can return — register it with `provideIcons(CATEGORY_ICONS)` wherever
  *  a category icon is rendered, otherwise the glyph silently does not draw. */
 export const CATEGORY_ICONS = { phosphorMegaphone, phosphorCode, phosphorCoins, phosphorFolder };

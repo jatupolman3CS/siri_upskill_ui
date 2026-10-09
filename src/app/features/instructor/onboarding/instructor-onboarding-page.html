@@ -38,6 +38,11 @@
             <ng-icon name="phosphorArrowRight" />
           </a>
         </div>
+        <p class="text-xs text-[var(--color-text-muted)]">
+          <a routerLink="/instructor/earnings" class="font-bold text-[var(--color-primary)] hover:underline">
+            {{ 'instructor.onboarding.setupPayoutLink' | translate }}
+          </a>
+        </p>
       </div>
     } @else if (profile.status === 'Pending' || submitSuccess()) {
       <div class="animate-fade-in-up rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 text-center space-y-4">
@@ -83,19 +88,7 @@
         >
           2
         </span>
-        <span class="text-xs font-semibold text-[var(--color-text)]">ข้อมูลบัญชีรับเงิน</span>
-      </div>
-      <div class="h-0.5 w-8 bg-[var(--color-border)]"></div>
-      <div class="flex items-center gap-2">
-        <span
-          class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
-          [class.bg-[var(--color-primary)]]="currentStep() >= 3"
-          [class.text-white]="currentStep() >= 3"
-          [class.bg-[var(--color-surface-muted)]]="currentStep() < 3"
-        >
-          3
-        </span>
-        <span class="text-xs font-semibold text-[var(--color-text)]">ยืนยันเงื่อนไข</span>
+        <span class="text-xs font-semibold text-[var(--color-text)]">{{ 'instructor.onboarding.steps.terms' | translate }}</span>
       </div>
     </div>
 
@@ -154,79 +147,11 @@
         </div>
       }
 
-      <!-- Step 2: Payout Account -->
+      <!-- Step 2: Terms & Agreement -->
       @if (currentStep() === 2) {
         <div class="space-y-4">
           <div class="border-b border-[var(--color-border)] pb-4">
-            <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 2: บัญชีธนาคารสำหรับรับเงินส่วนแบ่ง</h2>
-            <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
-              <app-payout-policy-text messageKey="instructor.onboarding.payoutAccountNote" />
-            </p>
-          </div>
-
-          <div class="space-y-3">
-            <div>
-              <label for="bankName" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ธนาคาร <span class="text-rose-500">*</span>
-              </label>
-              <select
-                id="bankName"
-                [(ngModel)]="bankName"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
-              >
-                @for (b of bankOptions; track b) {
-                  <option [value]="b">{{ b }}</option>
-                }
-              </select>
-            </div>
-
-            <div>
-              <label for="accountNumber" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                เลขที่บัญชีธนาคาร <span class="text-rose-500">*</span>
-              </label>
-              <input
-                id="accountNumber"
-                type="text"
-                [(ngModel)]="accountNumber"
-                placeholder="เช่น 123-4-56789-0"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
-              />
-            </div>
-
-            <div>
-              <label for="accountHolder" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ชื่อเจ้าของบัญชี (ตรงกับบัตรประชาชน) <span class="text-rose-500">*</span>
-              </label>
-              <input
-                id="accountHolder"
-                type="text"
-                [(ngModel)]="accountHolderName"
-                placeholder="เช่น ดร. อานนท์ พัฒนากุล"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
-              />
-            </div>
-
-            <div>
-              <label for="promptpay" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                หมายเลขพร้อมเพย์ (ไม่บังคับ)
-              </label>
-              <input
-                id="promptpay"
-                type="text"
-                [(ngModel)]="promptPayId"
-                placeholder="เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชน"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
-              />
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- Step 3: Terms & Agreement -->
-      @if (currentStep() === 3) {
-        <div class="space-y-4">
-          <div class="border-b border-[var(--color-border)] pb-4">
-            <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 3: เงื่อนไขและข้อตกลงส่วนแบ่งรายได้</h2>
+            <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.steps.termsHeading' | translate }}</h2>
             <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
               กรุณาตรวจสอบข้อตกลงในการเป็นผู้สอนบนแพลตฟอร์ม SIRI UpSkill
             </p>
@@ -241,6 +166,11 @@
             <p><app-payout-policy-text messageKey="instructor.onboarding.termsWithholding" [retryable]="false" skeletonWidth="80%" /></p>
             <p>3. คอร์สเรียนจะต้องเป็นเนื้อหาที่เป็นลิขสิทธิ์ของผู้สอนเองและไม่ละเมิดทรัพย์สินทางปัญญาของบุคคลอื่น</p>
           </div>
+
+          <p class="flex items-start gap-2 text-xs text-[var(--color-text-muted)]" role="note">
+            <ng-icon name="phosphorBank" class="mt-0.5 shrink-0 text-base text-[var(--color-primary)]" aria-hidden="true" />
+            <span>{{ 'instructor.onboarding.payoutAfterApprovalNote' | translate }}</span>
+          </p>
 
           <label class="flex items-start gap-3 cursor-pointer pt-2">
             <input
@@ -270,7 +200,7 @@
           <div></div>
         }
 
-        @if (currentStep() < 3) {
+        @if (currentStep() < 2) {
           <button
             type="button"
             (click)="nextStep()"

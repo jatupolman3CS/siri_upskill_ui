@@ -14,17 +14,28 @@
       <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-3 shadow-xs">
         <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'contact.channels' | translate }}</h2>
         <div class="space-y-2 text-xs text-[var(--color-text-muted)]">
-          <p>📧 <strong>{{ 'contact.supportEmail' | translate }}</strong> <a href="mailto:support@siriupskill.com" class="text-[var(--color-primary)] underline">support&#64;siriupskill.com</a></p>
-          <p>🛡️ <strong>{{ 'contact.dpoEmail' | translate }}</strong> <a href="mailto:dpo@siriupskill.com" class="text-[var(--color-primary)] underline">dpo&#64;siriupskill.com</a></p>
-          <p>💼 <strong>{{ 'contact.businessEmail' | translate }}</strong> <a href="mailto:business@siriupskill.com" class="text-[var(--color-primary)] underline">business&#64;siriupskill.com</a></p>
+          <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <ng-icon name="phosphorEnvelopeSimple" class="shrink-0 text-base" aria-hidden="true" />
+            <strong>{{ 'contact.supportEmail' | translate }}</strong>
+            <a [href]="'mailto:' + emails.support" class="text-[var(--color-primary)] underline">{{ emails.support }}</a>
+          </p>
+          <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <ng-icon name="phosphorShieldCheck" class="shrink-0 text-base" aria-hidden="true" />
+            <strong>{{ 'contact.dpoEmail' | translate }}</strong>
+            <a [href]="'mailto:' + emails.dpo" class="text-[var(--color-primary)] underline">{{ emails.dpo }}</a>
+          </p>
+          <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <ng-icon name="phosphorBriefcase" class="shrink-0 text-base" aria-hidden="true" />
+            <strong>{{ 'contact.businessEmail' | translate }}</strong>
+            <a [href]="'mailto:' + emails.business" class="text-[var(--color-primary)] underline">{{ emails.business }}</a>
+          </p>
         </div>
       </div>
 
       <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-2 shadow-xs">
         <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'contact.officeHours' | translate }}</h2>
         <p class="text-xs text-[var(--color-text-muted)]">
-          วันจันทร์ - ศุกร์: 09:00 - 18:00 น. (เวลาประเทศไทย UTC+7)<br>
-          หยุดวันเสาร์-อาทิตย์ และวันหยุดนักขัตฤกษ์
+          {{ 'contact.officeHoursDetails' | translate }}
         </p>
       </div>
     </div>

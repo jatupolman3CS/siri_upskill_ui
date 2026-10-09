@@ -334,3 +334,39 @@ describe('LearnPage playback failure while the video provider is not configured'
     expect(TestBed.inject(Title).getTitle()).toBe('Classroom: Owned course | SIRI UpSkill');
   });
 });
+
+describe('LearnPage — a course taught live that has no lessons', () => {
+  let fixture: ComponentFixture<LearnPage>;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [LearnPage],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([]), {
+        provide: ActivatedRoute,
+        useValue: {
+          paramMap: new BehaviorSubject(convertToParamMap({ slug: 'live-only' })),
+          queryParamMap: new BehaviorSubject(convertToParamMap({})),
+        },
+      }],
+    });
+    vi.spyOn(TestBed.inject(AuthService), 'isAuthenticated').mockReturnValue(false);
+    TestBed.inject(TranslationService).setLocale('en');
+    fixture = TestBed.createComponent(LearnPage);
+    httpMock = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('tells the learner there is no video to play instead of showing a spinner that never ends', () => {
+    httpMock.expectOne('/api/catalog/courses/live-only').flush({
+      id: 'course-1', slug: 'live-only', title: 'Live only', deliveryFormat: 'Live', sections: [],
+    });
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('This course is taught live and has no video lessons yet');
+    expect(text).not.toContain('กำลังเตรียมเครื่องเล่นวิดีโอ');
+  });
+});

@@ -200,7 +200,7 @@
 
       <button
         type="button"
-        (click)="activeTab.set('publish')"
+        (click)="showPublishTab()"
         class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
         [class.bg-[var(--color-primary)]]="activeTab() === 'publish'"
         [class.text-white]="activeTab() === 'publish'"
@@ -275,6 +275,21 @@
                   </option>
                 }
               </select>
+              @if (noCategoriesYet()) {
+                <div role="status" class="mt-2 text-xs text-[var(--color-text)]">
+                  <p class="font-bold">{{ 'instructor.builder.basic.noCategories' | translate }}</p>
+                  @if (auth.isAdmin()) {
+                    <a
+                      routerLink="/admin/categories"
+                      class="mt-1 inline-flex min-h-11 items-center font-bold text-[var(--color-primary)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                    >
+                      {{ 'instructor.builder.basic.noCategoriesAdminAction' | translate }}
+                    </a>
+                  } @else {
+                    <p class="mt-1 text-[var(--color-text-muted)]">{{ 'instructor.builder.basic.noCategoriesAskAdmin' | translate }}</p>
+                  }
+                </div>
+              }
             </div>
 
             <div>
@@ -833,7 +848,7 @@
 
     <!-- Live schedule (P11) — only for a saved course: sessions attach to a real course id. -->
     @if (activeTab() === 'live' && courseId(); as liveCourseId) {
-      <app-live-schedule-panel [courseId]="liveCourseId" />
+      <app-live-schedule-panel [courseId]="liveCourseId" (deliveryFormatChange)="onDeliveryFormatChange($event)" />
     }
 
     <!-- Tab 3: Publish -->
@@ -843,10 +858,10 @@
           <ng-icon name="phosphorCheckCircle" class="text-4xl" />
         </div>
         <h3 class="text-xl font-bold text-[var(--color-text)]">
-          {{ (mediaReadyForReview() ? 'instructor.builder.publish.readyHeading' : 'instructor.builder.validation.mediaNotReady') | translate }}
+          {{ (reviewReady() ? 'instructor.builder.publish.readyHeading' : 'instructor.builder.validation.mediaNotReady') | translate }}
         </h3>
         <p class="max-w-md mx-auto text-xs text-[var(--color-text-muted)]">
-          @if (mediaReadyForReview()) {
+          @if (reviewReady()) {
             {{ 'instructor.builder.publish.readyDescription' | translate }}
           }
         </p>

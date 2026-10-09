@@ -1,0 +1,88 @@
+<div
+  class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
+  [class.border-dashed]="!row().node.isActive"
+>
+  <span
+    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] text-[var(--color-primary)]"
+  >
+    <ng-icon [name]="iconName()" aria-hidden="true" class="text-xl" />
+  </span>
+
+  <div class="min-w-0 flex-1 basis-48">
+    <p class="truncate text-base font-medium text-[var(--color-text)]">
+      @if (row().depth > 0) {
+        <span class="sr-only">{{ 'admin.categories.row.level' | translate: { level: row().depth + 1 } }}</span>
+      }
+      {{ primaryName() }}
+    </p>
+    <p class="truncate text-sm text-[var(--color-text-muted)]">
+      {{ secondaryName() }} · <span class="font-mono">{{ row().node.slug }}</span>
+    </p>
+  </div>
+
+  @if (row().node.isActive) {
+    <span
+      class="inline-flex items-center gap-1 rounded-[var(--radius-full)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-sm font-medium text-[var(--color-text)]"
+    >
+      <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="text-[var(--color-success)]" />
+      {{ 'admin.categories.row.active' | translate }}
+    </span>
+  } @else {
+    <span
+      class="inline-flex items-center gap-1 rounded-[var(--radius-full)] border border-dashed border-[var(--color-text-muted)] px-2.5 py-1 text-sm font-medium text-[var(--color-text-muted)]"
+    >
+      <ng-icon name="phosphorEyeSlash" aria-hidden="true" />
+      {{ 'admin.categories.row.inactive' | translate }}
+    </span>
+  }
+
+  <div class="ml-auto flex items-center gap-2" role="group" [attr.aria-label]="'admin.categories.row.actionsFor' | translate: { name: primaryName() }">
+    <button
+      #moveUp
+      type="button"
+      [disabled]="busy() || !canMoveUp()"
+      (click)="move.emit({ row: row(), direction: 'up' })"
+      [attr.aria-label]="'admin.categories.row.moveUp' | translate: { name: primaryName() }"
+      class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <ng-icon name="phosphorArrowUp" aria-hidden="true" class="text-lg" />
+    </button>
+    <button
+      #moveDown
+      type="button"
+      [disabled]="busy() || !canMoveDown()"
+      (click)="move.emit({ row: row(), direction: 'down' })"
+      [attr.aria-label]="'admin.categories.row.moveDown' | translate: { name: primaryName() }"
+      class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <ng-icon name="phosphorArrowDown" aria-hidden="true" class="text-lg" />
+    </button>
+    <button
+      type="button"
+      [disabled]="busy()"
+      (click)="addChild.emit(row())"
+      [attr.aria-label]="'admin.categories.row.addChild' | translate: { name: primaryName() }"
+      class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <ng-icon name="phosphorPlus" aria-hidden="true" class="text-lg" />
+    </button>
+    <button
+      type="button"
+      [disabled]="busy()"
+      (click)="edit.emit(row())"
+      [attr.aria-label]="'admin.categories.row.edit' | translate: { name: primaryName() }"
+      class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <ng-icon name="phosphorPencilSimple" aria-hidden="true" class="text-lg" />
+    </button>
+    <button
+      type="button"
+      [disabled]="busy()"
+      (click)="remove.emit(row())"
+      [attr.aria-label]="'admin.categories.row.delete' | translate: { name: primaryName() }"
+      class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-danger)] transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <ng-icon name="phosphorTrash" aria-hidden="true" class="text-lg" />
+    </button>
+  </div>
+</div>

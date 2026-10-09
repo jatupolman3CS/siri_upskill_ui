@@ -1,0 +1,58 @@
+<app-modal [(open)]="open" [titleText]="titleKey() | translate" [closeOnOverlayClick]="false">
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
+    @if (errorView(); as error) {
+      <div
+        role="alert"
+        class="rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+      >
+        <p class="font-medium">{{ error.key | translate: error.params }}</p>
+        @if (error.detail) {
+          <p class="mt-1 text-[var(--color-text-muted)]">{{ error.detail }}</p>
+        }
+      </div>
+    }
+
+    <app-input
+      formControlName="nameTh"
+      [label]="'admin.categories.form.nameTh' | translate"
+      [required]="true"
+      [errorMessage]="message('nameTh', 'NameTh')"
+    />
+    <app-input
+      formControlName="nameEn"
+      [label]="'admin.categories.form.nameEn' | translate"
+      [required]="true"
+      [errorMessage]="message('nameEn', 'NameEn')"
+    />
+    <app-input
+      formControlName="slug"
+      [label]="'admin.categories.form.slug' | translate"
+      [required]="true"
+      [helperText]="(isEdit() ? 'admin.categories.form.slugHelperEdit' : 'admin.categories.form.slugHelper') | translate"
+      [errorMessage]="message('slug', 'Slug')"
+    />
+    <app-select
+      formControlName="parentId"
+      [label]="'admin.categories.form.parent' | translate"
+      [options]="parentOptions()"
+    />
+    <app-select
+      formControlName="iconKey"
+      [label]="'admin.categories.form.icon' | translate"
+      [options]="iconOptions()"
+    />
+    @if (isEdit()) {
+      <app-checkbox formControlName="isActive" [label]="'admin.categories.form.active' | translate" />
+      <p class="-mt-2 text-sm text-[var(--color-text-muted)]">{{ 'admin.categories.form.activeHint' | translate }}</p>
+    }
+
+    <div class="mt-2 flex justify-end gap-3">
+      <app-button variant="secondary" [disabled]="submitting()" (click)="open.set(false)">
+        {{ 'admin.categories.form.cancel' | translate }}
+      </app-button>
+      <app-button type="submit" [loading]="submitting()">
+        {{ (isEdit() ? 'admin.categories.form.saveEdit' : 'admin.categories.form.saveCreate') | translate }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
