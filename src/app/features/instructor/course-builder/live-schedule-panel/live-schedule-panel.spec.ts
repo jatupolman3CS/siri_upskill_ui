@@ -283,6 +283,8 @@ describe('LiveSchedulePanel', () => {
 
     it('attendee sync: explains itself, and the switch PUTs the new value', async () => {
       await open({ schedule: schedule([]), meetings: [] });
+      const courseChanged = vi.fn();
+      fixture.componentInstance.courseChanged.subscribe(courseChanged);
       expect(text()).toContain('learners do not see each other’s emails');
       const toggle = root().querySelector('button[role="switch"]') as HTMLButtonElement;
       expect(toggle.getAttribute('aria-checked')).toBe('false');
@@ -293,6 +295,7 @@ describe('LiveSchedulePanel', () => {
       expect(req.request.body).toEqual({ googleAttendeeSyncEnabled: true });
       req.flush({ courseId: 'c1', googleAttendeeSyncEnabled: true });
       await settle();
+      expect(courseChanged).toHaveBeenCalledTimes(1);
       httpMock.expectOne(SCHEDULE_URL).flush(schedule([], { googleAttendeeSyncEnabled: true }));
       await settle();
       expect((root().querySelector('button[role="switch"]') as HTMLElement).getAttribute('aria-checked')).toBe('true');
@@ -309,14 +312,19 @@ describe('LiveSchedulePanel', () => {
 
     it('changing the format PUTs it and refetches', async () => {
       await open({ schedule: schedule([], { deliveryFormat: 'OnDemand' }), meetings: [] });
+      const courseChanged = vi.fn();
+      fixture.componentInstance.courseChanged.subscribe(courseChanged);
       const select = root().querySelector('select') as HTMLSelectElement;
       select.value = 'Live';
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
       const req = httpMock.expectOne('/api/catalog/instructor/courses/c1/delivery-format');
       expect(req.request.body).toEqual({ deliveryFormat: 'Live' });
+      expect(courseChanged).not.toHaveBeenCalled();
       req.flush({ id: 'c1', deliveryFormat: 'Live' });
       await settle();
+      // The change rewrote the course row (new concurrency token): the builder is told so it can pick the token up.
+      expect(courseChanged).toHaveBeenCalledTimes(1);
       httpMock.expectOne(SCHEDULE_URL).flush(schedule([], { deliveryFormat: 'Live' }));
       httpMock.expectOne(MEETINGS_URL).flush({ items: [] });
       httpMock.expectOne((r) => r.url === STATES_URL).flush({ items: [], totalCount: 0, page: 1, pageSize: 50, totalPages: 0 });

@@ -97,7 +97,7 @@
         [deadlineUtc]="current.enrollmentDeadlineUtc"
         [maxSeats]="current.maxSeats"
         [seatsUsed]="current.seatsUsed"
-        (saved)="reloadAll()"
+        (saved)="onPolicySaved()"
       />
     }
   }

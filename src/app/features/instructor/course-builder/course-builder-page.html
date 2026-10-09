@@ -848,7 +848,11 @@
 
     <!-- Live schedule (P11) — only for a saved course: sessions attach to a real course id. -->
     @if (activeTab() === 'live' && courseId(); as liveCourseId) {
-      <app-live-schedule-panel [courseId]="liveCourseId" (deliveryFormatChange)="onDeliveryFormatChange($event)" />
+      <app-live-schedule-panel
+        [courseId]="liveCourseId"
+        (deliveryFormatChange)="onDeliveryFormatChange($event)"
+        (courseChanged)="onLiveCourseChanged()"
+      />
     }
 
     <!-- Tab 3: Publish -->

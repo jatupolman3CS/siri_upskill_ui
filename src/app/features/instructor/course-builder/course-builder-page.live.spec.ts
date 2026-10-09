@@ -240,6 +240,45 @@ describe('CourseBuilderPage — live schedule tab (P11)', () => {
       await settle();
     });
 
+    const BUILDER_URL = `/api/catalog/instructor/courses/${COURSE_ID}/builder`;
+
+    it('a live-tab change that rewrote the course takes the new concurrency token, so the next submit is not refused with a false 409', async () => {
+      const component = await openWithoutLessons();
+      component['onDeliveryFormatChange']('Live');
+      component['courseTitle'].set('Typed but not saved yet');
+
+      // The server rotated the token when the format changed; the builder only learns it by reading the course again.
+      component['onLiveCourseChanged']();
+      httpMock.expectOne(BUILDER_URL).flush({ ...COURSE, sections: [], title: 'Excel Pro', rowVersion: 'AAAAAAAAB9G=' });
+      await settle();
+
+      // Only the token is adopted: what the instructor has typed is not overwritten by the server copy.
+      expect(component['courseTitle']()).toBe('Typed but not saved yet');
+      expect(component['rowVersion']()).toBe('AAAAAAAAB9G=');
+
+      component.publishCourse();
+      const autosave = httpMock.expectOne(AUTOSAVE_URL);
+      expect(autosave.request.body.rowVersion).toBe('AAAAAAAAB9G=');
+      autosave.flush({ courseId: COURSE_ID, rowVersion: 'AAAAAAAAB9H=', updatedAtUtc: '2026-10-07T00:00:00Z' });
+      await settle();
+      httpMock.expectOne(SUBMIT_URL).flush({});
+      await settle();
+
+      expect(component['saveStatus']()).toBe('saved');
+      expect(component['isConflict']()).toBe(false);
+    });
+
+    it('says so immediately when the new token cannot be read, instead of failing the next save without explanation', async () => {
+      const component = await openWithoutLessons();
+
+      component['onLiveCourseChanged']();
+      httpMock.expectOne(BUILDER_URL).flush({ status: 500 }, { status: 500, statusText: 'Server Error' });
+      await settle();
+
+      expect(component['saveStatus']()).toBe('conflict');
+      expect(component['errorMessage']()).toBe('instructor.builder.concurrencyConflict');
+    });
+
     it('an on-demand course with no lessons is still refused (and nothing is saved or submitted)', async () => {
       const component = await openWithoutLessons();
 

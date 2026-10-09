@@ -1239,6 +1239,30 @@ export class CourseBuilderPage implements OnInit {
     this.deliveryFormat.set(format);
   }
 
+  /**
+   * The live tab rewrote the course row (delivery format, enrollment policy or attendee sync), which rotates the course's concurrency token on the
+   * server. Take the new token — and only the token, so nothing the instructor has typed here is overwritten — otherwise the next save or submit is
+   * refused with a false 409 and the live course can never be sent for review without a page reload.
+   */
+  protected onLiveCourseChanged(): void {
+    const id = this.courseId();
+    if (!id) {
+      return;
+    }
+    this.courseApi
+      .getCourseBuilder(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (course) => this.rowVersion.set(course.rowVersion),
+        // The token could not be refreshed: say so now instead of failing the next save with no explanation.
+        error: () => {
+          this.isConflict.set(true);
+          this.saveStatus.set('conflict');
+          this.errorMessage.set('instructor.builder.concurrencyConflict');
+        },
+      });
+  }
+
   /** Opens the "check & policy" tab; asks the server for the format first when it matters (a saved course with no lessons). */
   protected showPublishTab(): void {
     this.activeTab.set('publish');

@@ -63,6 +63,11 @@ export class LiveSchedulePanel {
   readonly courseId = input.required<string>();
   /** Reports the course's delivery format whenever it is (re)loaded, so the builder can tell whether a live course may be submitted without a video lesson. */
   readonly deliveryFormatChange = output<DeliveryFormat>();
+  /**
+   * Fires after a change that rewrote the course row itself (delivery format, enrollment policy, Google attendee sync). Each of those rotates the
+   * course's concurrency token on the server, so the builder must pick up the new token or its next save/submit is refused with 409.
+   */
+  readonly courseChanged = output<void>();
 
   private readonly scheduleResource = rxResource({
     params: () => this.courseId(),
@@ -165,6 +170,7 @@ export class LiveSchedulePanel {
         this.formatControl.enable({ emitEvent: false });
         this.toast.success(this.i18n.t('live.builder.format.saved'));
         this.reloadAll();
+        this.courseChanged.emit();
       },
       error: (error: unknown) => {
         this.changingFormat.set(false);
@@ -189,5 +195,11 @@ export class LiveSchedulePanel {
 
   protected onAttendeeSync(): void {
     this.scheduleResource.reload();
+    this.courseChanged.emit();
+  }
+
+  protected onPolicySaved(): void {
+    this.reloadAll();
+    this.courseChanged.emit();
   }
 }
