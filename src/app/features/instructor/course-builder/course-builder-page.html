@@ -215,6 +215,15 @@
     @if (activeTab() === 'basic') {
       <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6 shadow-sm">
         <div class="space-y-4">
+          @if (!courseId()) {
+            <div class="rounded-xl border border-sky-200 bg-sky-50/70 p-4 text-xs text-sky-950 flex items-start gap-3">
+              <ng-icon name="phosphorSparkle" class="text-base text-sky-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p class="font-bold text-sky-900">{{ 'instructor.builder.basic.liveNoticeHeading' | translate }}</p>
+                <p class="text-sky-700 mt-0.5 leading-relaxed">{{ 'instructor.builder.basic.liveNoticeBody' | translate }}</p>
+              </div>
+            </div>
+          }
           <div>
             <label for="builderCourseTitle" class="text-xs font-bold text-[var(--color-text)] block mb-1">
               {{ 'instructor.builder.basic.title' | translate }}
