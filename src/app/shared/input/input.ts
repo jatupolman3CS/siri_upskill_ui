@@ -46,6 +46,10 @@ export class InputField implements ControlValueAccessor {
   readonly errorMessage = input<string | undefined>(undefined);
   readonly required = input(false);
   readonly autocomplete = input<string | undefined>(undefined);
+  /** Native `step` (e.g. `0.01` for a money field); only meaningful for `type="number"`. */
+  readonly step = input<string | undefined>(undefined);
+  /** Virtual-keyboard hint (e.g. `decimal` for an amount). */
+  readonly inputMode = input<'text' | 'numeric' | 'decimal' | 'tel' | 'email' | 'url' | 'search' | undefined>(undefined);
   /** Standalone (non-forms) disabled override; ORed with CVA's setDisabledState. */
   readonly disabled = input(false);
 

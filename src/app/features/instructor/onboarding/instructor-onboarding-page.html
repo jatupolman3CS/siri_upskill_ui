@@ -19,8 +19,26 @@
     </div>
   }
 
-  @if (existingProfile(); as profile) {
-    @if (profile.status === 'Approved') {
+  @if (isLoading()) {
+    <div class="flex justify-center py-16">
+      <app-spinner size="lg" />
+    </div>
+  } @else if (loadError()) {
+    <div role="alert" class="animate-fade-in-up rounded-3xl border border-rose-500/20 bg-rose-500/5 p-8 text-center space-y-4">
+      <ng-icon name="phosphorWarningCircle" class="text-4xl text-rose-600" aria-hidden="true" />
+      <h2 class="text-xl font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.loadErrorHeading' | translate }}</h2>
+      <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
+        {{ 'instructor.onboarding.loadErrorDescription' | translate }}
+      </p>
+      <button
+        type="button"
+        (click)="checkExistingProfile()"
+        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+      >
+        {{ 'instructor.onboarding.retry' | translate }}
+      </button>
+    </div>
+  } @else if (isApproved()) {
       <div class="animate-fade-in-up rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center space-y-4">
         <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
           <ng-icon name="phosphorCheckCircle" class="text-4xl animate-bounce-subtle" />
@@ -44,7 +62,7 @@
           </a>
         </p>
       </div>
-    } @else if (profile.status === 'Pending' || submitSuccess()) {
+  } @else if (isPending()) {
       <div class="animate-fade-in-up rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 text-center space-y-4">
         <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-500/20">
           <ng-icon name="phosphorClock" class="text-4xl animate-spin-fast" />
@@ -63,8 +81,17 @@
           </a>
         </div>
       </div>
-    }
   } @else {
+    @if (isRejected()) {
+      <div role="status" class="animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-[var(--color-text)]">
+        <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5 text-amber-600" aria-hidden="true" />
+        <div>
+          <p class="font-bold">{{ 'instructor.onboarding.rejectedHeading' | translate }}</p>
+          <p class="mt-0.5 text-[var(--color-text-muted)]">{{ 'instructor.onboarding.rejectedDescription' | translate }}</p>
+        </div>
+      </div>
+    }
+
     <!-- Step Indicator -->
     <div class="animate-fade-in-up stagger-1 mb-8 flex items-center justify-center gap-3">
       <div class="flex items-center gap-2">

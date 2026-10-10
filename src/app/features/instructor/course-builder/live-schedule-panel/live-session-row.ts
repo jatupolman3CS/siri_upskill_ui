@@ -5,18 +5,20 @@ import { phosphorCaretRight, phosphorPencilSimple, phosphorWarning, phosphorXCir
 
 import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { Button } from '../../../../shared/button/button';
-import type { InstructorMeetingSummary, LiveSession } from '../../../live/data/live-instructor.models';
+import type { InstructorMeetingSummary, LiveSession, RecordingImportInfo } from '../../../live/data/live-instructor.models';
 import { meetingStatusView } from '../../../live/data/live-instructor.util';
 import type { LiveDisplayState } from '../../../live/data/live.models';
 import { LiveStatusBadge } from '../../../live/learner/live-status-badge/live-status-badge';
 import { MeetingActions } from '../../../live/instructor/ui/meeting-actions/meeting-actions';
-import { RecordingUploader } from '../../../live/instructor/ui/recording-uploader/recording-uploader';
+import { RecordingImport } from '../../../live/instructor/ui/recording-import/recording-import';
 import { StatusChip } from '../../../live/instructor/ui/status-chip/status-chip';
 import { BangkokTimeRange } from '../../../live/ui/bangkok-time-range/bangkok-time-range';
+import { TeachingMaterialsPanel } from '../teaching-materials-panel/teaching-materials-panel';
 
 /**
  * One session in the builder's live schedule: its time, server-computed state, room status and the action the server says
- * the room needs (`needsAction`), plus edit / cancel, and — once it has ended — recording upload. A session the last
+ * the room needs (`needsAction`), plus edit / cancel, and — once it has ended — the recording block (automatic-import status,
+ * retry, and manual upload). A session the last
  * "submit for review" refused for having no room is outlined and explained.
  */
 @Component({
@@ -30,7 +32,8 @@ import { BangkokTimeRange } from '../../../live/ui/bangkok-time-range/bangkok-ti
     StatusChip,
     BangkokTimeRange,
     MeetingActions,
-    RecordingUploader,
+    RecordingImport,
+    TeachingMaterialsPanel,
   ],
   templateUrl: './live-session-row.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +46,8 @@ export class LiveSessionRow {
   /** Server-computed (from the instructor session list). `null` until it has loaded — never derived from the clock here. */
   readonly displayState = input<LiveDisplayState | null>(null);
   readonly meeting = input<InstructorMeetingSummary | null>(null);
+  /** Server-computed automatic-import state (from the instructor session list); `null` until it has loaded. */
+  readonly recordingImport = input<RecordingImportInfo | null>(null);
   readonly googleConfigured = input<boolean | null>(null);
   /** The last submit-for-review named this session as having no meeting room. */
   readonly highlighted = input(false);

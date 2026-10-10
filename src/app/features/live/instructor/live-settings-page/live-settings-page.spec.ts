@@ -9,8 +9,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { errorInterceptor } from '../../../../core/http/error.interceptor';
 import { TranslationService } from '../../../../core/i18n/translation.service';
 import { ToastService } from '../../../../shared/toast/toast.service';
-import { GOOGLE_AUTH_REDIRECT } from '../../data/google-connect.service';
-import type { GoogleConnectionStatus } from '../../data/live-instructor.models';
+import { GOOGLE_AUTH_REDIRECT, RECORDING_ACCESS_MARKER } from '../../data/google-connect.service';
+import type { GoogleConnectionStatus, RecordingCapability } from '../../data/live-instructor.models';
 import { LiveSettingsPage } from './live-settings-page';
 
 registerLocaleData(localeTh);
@@ -27,9 +27,18 @@ function status(overrides: Partial<GoogleConnectionStatus> = {}): GoogleConnecti
     lastValidatedAtUtc: '2026-10-05T03:00:00Z',
     revokedReason: null,
     affectedSessionCount: 0,
+    accountKind: 'Personal',
+    hostedDomain: null,
+    recording: { mode: 'Manual', autoImportAvailable: false, scopesGranted: false },
     ...overrides,
   };
 }
+
+const workspace = (recording: RecordingCapability): Partial<GoogleConnectionStatus> => ({
+  accountKind: 'Workspace',
+  hostedDomain: 'example.com',
+  recording,
+});
 
 describe('LiveSettingsPage', () => {
   let harness: RouterTestingHarness;
@@ -55,7 +64,11 @@ describe('LiveSettingsPage', () => {
     toast = TestBed.inject(ToastService);
   });
 
-  afterEach(() => httpMock.verify());
+  afterEach(() => {
+    vi.useRealTimers();
+    sessionStorage.removeItem(RECORDING_ACCESS_MARKER);
+    httpMock.verify();
+  });
 
   async function settle(): Promise<void> {
     harness.detectChanges();
@@ -218,6 +231,173 @@ describe('LiveSettingsPage', () => {
 
       expect(successSpy).not.toHaveBeenCalled();
       expect(errorSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('account kind and the Recording card (P11-13)', () => {
+    const NEEDS_CONSENT: RecordingCapability = { mode: 'AutoNeedsConsent', autoImportAvailable: true, scopesGranted: false };
+    const AUTO: RecordingCapability = { mode: 'Auto', autoImportAvailable: true, scopesGranted: true };
+    const MANUAL: RecordingCapability = { mode: 'Manual', autoImportAvailable: true, scopesGranted: false };
+
+    it('personal account (feature on): shows the account kind, the manual instruction and why automatic import is not available', async () => {
+      await open();
+      await flushStatus(status({ accountKind: 'Personal', recording: MANUAL }));
+
+      expect(text()).toContain('Personal Google account');
+      expect(text()).toContain('Recording import');
+      expect(text()).toContain('After a class, upload the recording yourself');
+      expect(text()).toContain('only works with Google Workspace accounts');
+      expect(buttonByText('Turn on automatic recording import')).toBeUndefined();
+    });
+
+    it('Workspace account without the recording consent: explains it and offers the button; clicking posts the return path and redirects to Google', async () => {
+      await open();
+      await flushStatus(status(workspace(NEEDS_CONSENT)));
+
+      expect(text()).toContain('Google Workspace · example.com');
+      expect(text()).toContain('attaches it as a lesson');
+      expect(text()).toContain('Every enrolled learner will be able to watch the recording');
+
+      buttonByText('Turn on automatic recording import')?.click();
+      const req = httpMock.expectOne('/api/live/instructor/google/recording-access/connect');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ returnPath: '/instructor/live-settings' });
+      req.flush({ authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?state=rec' });
+
+      expect(redirect).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/v2/auth?state=rec');
+      expect(sessionStorage.getItem(RECORDING_ACCESS_MARKER)).toBe('1');
+    });
+
+    it('a 409 on the consent button toasts the reason and refreshes the status instead of leaving a stuck button', async () => {
+      const errorSpy = vi.spyOn(toast, 'error');
+      await open();
+      await flushStatus(status(workspace(NEEDS_CONSENT)));
+
+      buttonByText('Turn on automatic recording import')?.click();
+      httpMock
+        .expectOne('/api/live/instructor/google/recording-access/connect')
+        .flush({ reason: 'live.recording_not_available' }, { status: 409, statusText: 'Conflict' });
+      await settle();
+
+      expect(errorSpy).toHaveBeenCalledWith(TestBed.inject(TranslationService).t('live.errors.recordingNotAvailable'));
+      expect(redirect).not.toHaveBeenCalled();
+      expect(sessionStorage.getItem(RECORDING_ACCESS_MARKER)).toBeNull();
+      httpMock.expectOne(STATUS_URL).flush(status(workspace({ mode: 'Manual', autoImportAvailable: false, scopesGranted: false })));
+      await settle();
+      expect(text()).not.toContain('Turn on automatic recording import');
+    });
+
+    it('Workspace account with the consent: says it is on and has no button', async () => {
+      await open();
+      await flushStatus(status(workspace(AUTO)));
+
+      expect(text()).toContain('On — recordings are added to the course automatically');
+      expect(buttonByText('Turn on automatic recording import')).toBeUndefined();
+    });
+
+    it.each([
+      ['Manual', 'Workspace'],
+      ['AutoNeedsConsent', 'Workspace'],
+      ['Auto', 'Workspace'],
+      ['Manual', 'Personal'],
+    ] as const)(
+      'feature off on the server (%s / %s): the card shows only the manual text and never an enable button',
+      async (mode, kind) => {
+        await open();
+        await flushStatus(
+          status({
+            accountKind: kind,
+            hostedDomain: kind === 'Workspace' ? 'example.com' : null,
+            recording: { mode, autoImportAvailable: false, scopesGranted: mode === 'Auto' },
+          }),
+        );
+
+        expect(text()).toContain('After a class, upload the recording yourself');
+        expect(text()).not.toContain('only works with Google Workspace accounts');
+        expect(text()).not.toContain('On — recordings are added');
+        expect(buttonByText('Turn on automatic recording import')).toBeUndefined();
+      },
+    );
+
+    it('an account whose kind is still unknown reads "Checking…" and is re-read a few times, then left alone', async () => {
+      vi.useFakeTimers();
+      await open();
+      await flushStatus(status({ accountKind: 'Unknown', recording: MANUAL }));
+      expect(text()).toContain('Checking…');
+
+      vi.advanceTimersByTime(4_999);
+      httpMock.expectNone(STATUS_URL);
+      vi.advanceTimersByTime(1);
+      TestBed.flushEffects();
+      await flushStatus(status(workspace(NEEDS_CONSENT)));
+      expect(text()).toContain('Google Workspace · example.com');
+      expect(text()).not.toContain('Checking…');
+
+      vi.advanceTimersByTime(60_000);
+      httpMock.expectNone(STATUS_URL);
+    });
+
+    it('gives up re-checking an unknown account kind after three tries', async () => {
+      vi.useFakeTimers();
+      await open();
+      await flushStatus(status({ accountKind: 'Unknown', recording: MANUAL }));
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        vi.advanceTimersByTime(5_000);
+        TestBed.flushEffects();
+        await flushStatus(status({ accountKind: 'Unknown', recording: MANUAL }));
+      }
+      vi.advanceTimersByTime(60_000);
+      httpMock.expectNone(STATUS_URL);
+    });
+
+    it('not connected: no account kind and no Recording card', async () => {
+      await open();
+      await flushStatus(status({ connected: false, googleEmail: null, accountKind: null, hostedDomain: null }));
+
+      expect(text()).not.toContain('Account type');
+      expect(text()).not.toContain('Recording import');
+    });
+
+    it('needs reconnect: no Recording card until the connection works again', async () => {
+      await open();
+      await flushStatus(status({ connected: false, needsReconnect: true, revokedReason: 'invalid_grant', ...workspace(AUTO) }));
+
+      expect(text()).not.toContain('Recording import');
+      expect(buttonByText('Turn on automatic recording import')).toBeUndefined();
+    });
+
+    it('?google=error&reason=recording_scope_missing -> the specific error toast', async () => {
+      const errorSpy = vi.spyOn(toast, 'error');
+      await open('/instructor/live-settings?google=error&reason=recording_scope_missing');
+      await flushStatus(status(workspace(NEEDS_CONSENT)));
+      await harness.fixture.whenStable();
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        'All recording permissions must be allowed, so automatic recording import was not turned on. Please try again.',
+      );
+      expect(router.url).toBe('/instructor/live-settings');
+    });
+
+    it('?google=connected after starting the recording consent -> says recording import is on (and only once)', async () => {
+      const successSpy = vi.spyOn(toast, 'success');
+      sessionStorage.setItem(RECORDING_ACCESS_MARKER, '1');
+      await open('/instructor/live-settings?google=connected');
+      await flushStatus(status(workspace(AUTO)));
+      await harness.fixture.whenStable();
+
+      expect(successSpy).toHaveBeenCalledWith('Automatic recording import is on');
+      expect(text()).toContain('On — recordings are added to the course automatically');
+      expect(sessionStorage.getItem(RECORDING_ACCESS_MARKER)).toBeNull();
+    });
+
+    it('?google=connected without the marker still reads as the calendar connection', async () => {
+      const successSpy = vi.spyOn(toast, 'success');
+      await open('/instructor/live-settings?google=connected');
+      await flushStatus(status());
+      await harness.fixture.whenStable();
+
+      expect(successSpy).toHaveBeenCalledWith('Google Calendar connected');
     });
   });
 

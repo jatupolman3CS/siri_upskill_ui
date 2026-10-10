@@ -73,7 +73,12 @@ export class AuthService {
     };
   });
 
-  /** Mirrors the `/instructor` route's roleGuard (Instructor, Admin, SuperAdmin) so menus only offer the studio to people who can open it. */
+  /**
+   * Menu hint only: the token carries a studio-capable role (Instructor, Admin, SuperAdmin). The real gate is the
+   * `/instructor` route's `instructorStudioGuard`, which also requires an *approved* application for non-admins and
+   * sends everyone else to `/become-instructor` — so an Instructor-role user without an approval can see the menu entry
+   * but never the studio.
+   */
   readonly canUseInstructorStudio = computed(() => this.hasRole('Instructor') || this.hasRole('Admin'));
 
   /** Mirrors the `/admin` route's roleGuard (Admin, SuperAdmin). */

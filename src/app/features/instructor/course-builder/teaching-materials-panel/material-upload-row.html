@@ -1,0 +1,64 @@
+<div class="flex items-start justify-between gap-2">
+  <p class="min-w-0 break-words text-sm font-medium text-[var(--color-text)]">{{ upload().file.name }}</p>
+  @if (upload().status === 'failed') {
+    <div class="-my-2 -mr-2 flex shrink-0">
+      <button
+        type="button"
+        class="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-primary)]
+          hover:bg-[var(--color-surface-muted)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [attr.aria-label]="'teachingMaterials.upload.retryLabel' | translate: { name: upload().file.name }"
+        (click)="retry.emit()"
+      >
+        <ng-icon size="1.25rem" name="phosphorArrowClockwise" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        class="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text-muted)]
+          hover:bg-[var(--color-surface-muted)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [attr.aria-label]="'teachingMaterials.upload.dismissLabel' | translate: { name: upload().file.name }"
+        (click)="dismiss.emit()"
+      >
+        <ng-icon size="1.25rem" name="phosphorX" aria-hidden="true" />
+      </button>
+    </div>
+  }
+</div>
+
+@switch (upload().status) {
+  @case ('queued') {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'teachingMaterials.upload.queued' | translate }}</p>
+  }
+  @case ('uploading') {
+    @if (upload().percent < 100) {
+      <p class="text-sm text-[var(--color-text)]">{{ 'teachingMaterials.upload.uploading' | translate: { percent: upload().percent } }}</p>
+      <div
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="upload().percent"
+        [attr.aria-label]="'teachingMaterials.upload.progressLabel' | translate: { name: upload().file.name }"
+        class="h-2 w-full overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]"
+      >
+        <div
+          class="h-full origin-left rounded-[var(--radius-full)] bg-[var(--color-primary)] transition-transform duration-200 ease-out motion-reduce:transition-none"
+          [style.transform]="'scaleX(' + upload().percent / 100 + ')'"
+        ></div>
+      </div>
+    } @else {
+      <p class="flex items-center gap-2 text-sm text-[var(--color-text)]">
+        <ng-icon size="1.25rem" name="phosphorSpinner" aria-hidden="true" class="animate-spin text-[var(--color-primary)] motion-reduce:animate-none" />
+        {{ 'teachingMaterials.upload.processing' | translate }}
+      </p>
+    }
+  }
+  @case ('failed') {
+    @if (upload().error; as error) {
+      <p class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+        <ng-icon size="1.25rem" name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+        <span>{{ error.key | translate: error.params }}</span>
+      </p>
+    }
+  }
+}

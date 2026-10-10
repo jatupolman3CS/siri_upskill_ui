@@ -70,7 +70,14 @@
                       [calendarBusy]="calendarBusyId() === session.id"
                       (join)="join($event)"
                       (addToCalendar)="addToCalendar($event)"
-                    />
+                    >
+                      <app-learner-materials-list
+                        kind="session"
+                        headingKey="teachingMaterials.learner.sessionHeading"
+                        [parentId]="session.id"
+                        [quiet]="true"
+                      />
+                    </app-live-session-card>
                   </li>
                 }
               </ul>
@@ -85,7 +92,16 @@
               <ul class="space-y-3">
                 @for (session of past(); track session.id) {
                   <li>
-                    <app-live-session-card [session]="session" [courseSlug]="courseSlug()" [offsetMs]="offsetMs()" />
+                    <app-live-session-card [session]="session" [courseSlug]="courseSlug()" [offsetMs]="offsetMs()">
+                      @if (session.displayState !== 'Cancelled') {
+                        <app-learner-materials-list
+                          kind="session"
+                          headingKey="teachingMaterials.learner.sessionHeading"
+                          [parentId]="session.id"
+                          [quiet]="true"
+                        />
+                      }
+                    </app-live-session-card>
                   </li>
                 }
               </ul>

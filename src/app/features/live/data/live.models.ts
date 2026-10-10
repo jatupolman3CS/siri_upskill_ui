@@ -48,6 +48,8 @@ export type LiveProblemReason =
   | 'live.recording_asset_in_use'
   | 'live.recording_episode_has_no_media'
   | 'live.recording_episode_in_use'
+  | 'live.recording_not_available'
+  | 'live.recording_import_not_retryable'
   | 'refund.live_attended'
   | (string & {});
 

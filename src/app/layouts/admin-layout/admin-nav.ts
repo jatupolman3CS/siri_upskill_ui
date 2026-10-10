@@ -16,6 +16,7 @@ export const ADMIN_NAV_LINKS: readonly StudioNavLink[] = [
   { id: 'posts', route: '/admin/posts', icon: 'phosphorArticle', labelKey: 'admin.nav.posts' },
   { id: 'payouts', route: '/admin/payouts', icon: 'phosphorCurrencyDollar', labelKey: 'admin.nav.payouts' },
   { id: 'payments', route: '/admin/payments', icon: 'phosphorCreditCard', labelKey: 'admin.nav.payments' },
+  { id: 'payment-settings', route: '/admin/payment-settings', icon: 'phosphorCurrencyCircleDollar', labelKey: 'admin.nav.paymentSettings' },
   { id: 'contact', route: '/admin/contact-messages', icon: 'phosphorEnvelopeSimple', labelKey: 'admin.nav.contact' },
   { id: 'live-status', route: '/admin/live-status', icon: 'phosphorPulse', labelKey: 'admin.nav.liveStatus' },
 ];

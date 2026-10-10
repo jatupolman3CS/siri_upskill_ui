@@ -49,7 +49,7 @@
               class="flex items-center gap-2 rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-text)]
                 hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
-              <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" class="text-[var(--color-primary)]" />
+              <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" [class]="resolveTone(category.iconKey) + ' text-[var(--tone-fg)]'" />
               {{ categoryName(category) }}
             </a>
 

@@ -13,6 +13,7 @@ const NOT_CONFIGURED_KEYS: ReadonlyMap<string, string> = new Map([
   ['certificate.public_url_not_configured', 'common.notConfigured.certificatePublicUrl'],
   ['payout.payer_not_configured', 'common.notConfigured.payoutPayer'],
   ['attachment.virus_scanner_not_configured', 'common.notConfigured.attachmentScanner'],
+  ['storage.provider_not_configured', 'common.notConfigured.storageProvider'],
   ['payment.provider_not_configured', 'common.notConfigured.paymentProvider'],
   ['video.provider_not_configured', 'common.notConfigured.videoProvider'],
 ]);

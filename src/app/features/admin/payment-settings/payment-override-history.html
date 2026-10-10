@@ -1,0 +1,76 @@
+<section aria-labelledby="payment-override-history-heading" class="flex flex-col gap-4">
+  <h2 id="payment-override-history-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+    <ng-icon name="phosphorClockCounterClockwise" aria-hidden="true" class="text-xl" />
+    {{ 'admin.paymentSettings.history.heading' | translate }}
+  </h2>
+
+  @switch (view()) {
+    @case ('loading') {
+      <div class="flex flex-col gap-3" role="status" [attr.aria-label]="'common.loading' | translate">
+        <app-skeleton variant="block" height="3rem" />
+        <app-skeleton variant="block" height="3rem" />
+        <app-skeleton variant="block" height="3rem" />
+      </div>
+    }
+    @case ('error') {
+      <div
+        role="alert"
+        class="rounded-[var(--radius-lg)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-6 text-center shadow-sm"
+      >
+        <p class="font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.history.errorHeading' | translate }}</p>
+        <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.history.errorDescription' | translate }}</p>
+        <app-button variant="secondary" size="sm" class="mt-4" (click)="retry.emit()">
+          {{ 'admin.paymentSettings.retry' | translate }}
+        </app-button>
+      </div>
+    }
+    @case ('empty') {
+      <app-empty-state
+        [heading]="'admin.paymentSettings.history.emptyHeading' | translate"
+        [description]="'admin.paymentSettings.history.emptyDescription' | translate"
+      />
+    }
+    @case ('ready') {
+      <div class="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <table class="w-full min-w-[42rem] border-collapse text-left text-sm">
+          <caption class="sr-only">{{ 'admin.paymentSettings.history.caption' | translate }}</caption>
+          <thead>
+            <tr class="border-b border-[var(--color-border)] text-[var(--color-text-muted)]">
+              <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.paymentSettings.history.colDate' | translate }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.paymentSettings.history.colStatus' | translate }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.paymentSettings.history.colAmount' | translate }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.paymentSettings.history.colReason' | translate }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.paymentSettings.history.colBy' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of entries(); track entry.id) {
+              <tr class="border-b border-[var(--color-border)] align-top last:border-b-0">
+                <td class="whitespace-nowrap px-4 py-3 text-[var(--color-text)]">{{ entry.changedAtUtc | bangkokDate: 'dateTime' }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center gap-1 whitespace-nowrap rounded-[var(--radius-full)] border px-2.5 py-0.5 text-xs font-semibold text-[var(--color-text)]"
+                    [class]="entry.isEnabled ? 'border-[var(--color-warning)]' : 'border-[var(--color-border)]'"
+                  >
+                    <ng-icon [name]="entry.isEnabled ? 'phosphorToggleRight' : 'phosphorToggleLeft'" aria-hidden="true" class="text-base" />
+                    {{ (entry.isEnabled ? 'admin.paymentSettings.history.on' : 'admin.paymentSettings.history.off') | translate }}
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-[var(--color-text)]">{{ entry.overrideAmount | currencyThb }}</td>
+                <td class="break-words px-4 py-3 text-[var(--color-text)]">{{ entry.reason }}</td>
+                <td class="px-4 py-3 text-[var(--color-text)]">
+                  <code [title]="entry.changedByUserId" aria-hidden="true">{{ shortId(entry.changedByUserId) }}</code>
+                  <span class="sr-only">{{ entry.changedByUserId }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <app-pagination [currentPage]="page()" [totalPages]="totalPages()" (currentPageChange)="page.set($event)" class="flex justify-center" />
+      }
+    }
+  }
+</section>

@@ -18,7 +18,7 @@ import { CategoryTreeNode } from '../../catalog/data/category-api.models';
 import { CategoryApiService } from '../../catalog/data/category-api.service';
 import { SearchCoursesResponse } from '../../catalog/data/course-api.models';
 import { CourseApiService } from '../../catalog/data/course-api.service';
-import { resolveCategoryIconName } from '../../catalog/category-icon';
+import { resolveCategoryIconName, resolveCategoryTone } from '../../catalog/category-icon';
 import { BannerItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
 import { FlashSaleResponse } from '../../commerce/data/commerce-api.models';
@@ -68,6 +68,7 @@ export class HomePage {
   protected readonly translation = inject(TranslationService);
 
   protected readonly resolveIconName = resolveCategoryIconName;
+  protected readonly resolveTone = resolveCategoryTone;
 
   protected readonly flashSaleResource = rxResource({
     stream: () =>

@@ -218,5 +218,7 @@ export interface EpisodeAttachmentDownloadInfo {
   readonly fileName: string;
   readonly contentType: string;
   readonly sizeBytes: number;
+  /** Absolute signed storage URL (P4-03c): use it immediately, never cache it. */
   readonly downloadUrl: string;
+  readonly expiresAtUtc: string;
 }

@@ -8,6 +8,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { PayoutPolicy } from '../../payout/data/payout-api.models';
+import { InstructorApplicationStatus } from '../data/instructor-profile-api.models';
 import { InstructorOnboardingPage } from './instructor-onboarding-page';
 
 registerLocaleData(localeTh);
@@ -224,6 +225,97 @@ describe('InstructorOnboardingPage', () => {
     await flushPolicy();
     expect(root().textContent).toContain('Standard instructor revenue share: 80%');
     expect(root().querySelector('app-payout-policy-text[aria-busy="true"]')).toBeNull();
+  });
+
+  describe('what an applicant sees depending on the admin\'s decision', () => {
+    function existingProfile(status: InstructorApplicationStatus) {
+      return {
+        id: 'p1',
+        userId: 'u1',
+        displayName: 'Somchai Original',
+        headline: 'Cloud architect',
+        bio: 'Original bio',
+        revenueSharePercent: 70,
+        status,
+        approvedAtUtc: status === 'Approved' ? '2026-10-01T00:00:00Z' : null,
+      };
+    }
+
+    async function openWithProfile(status: InstructorApplicationStatus): Promise<void> {
+      await harness.navigateByUrl('/instructor/onboarding', InstructorOnboardingPage);
+      await settle();
+      httpMock.expectOne('/api/catalog/instructors/me').flush(existingProfile(status));
+      await settle();
+      await settle();
+    }
+
+    it('shows only a spinner — not the empty form — while the application status is loading', async () => {
+      await harness.navigateByUrl('/instructor/onboarding', InstructorOnboardingPage);
+      await settle();
+
+      expect(root().querySelector('app-spinner')).not.toBeNull();
+      expect(root().querySelector('#displayName')).toBeNull();
+
+      httpMock.expectOne('/api/catalog/instructors/me').flush({ title: 'Not found' }, { status: 404, statusText: 'Not Found' });
+      await settle();
+      expect(root().querySelector('#displayName')).not.toBeNull();
+    });
+
+    it('shows "waiting for review" and no application form while the application is pending', async () => {
+      await openWithProfile('Pending');
+
+      expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+      expect(root().querySelector('#displayName')).toBeNull();
+      expect(findButtonByText('ส่งใบสมัครเป็นผู้สอน')).toBeUndefined();
+    });
+
+    it('shows the way into the studio only once the application is approved', async () => {
+      await openWithProfile('Approved');
+
+      expect(root().textContent).toContain('คุณเป็นผู้สอนของ SIRI UpSkill แล้ว');
+      expect(root().querySelector('a[href="/instructor"]')).not.toBeNull();
+      expect(root().querySelector('#displayName')).toBeNull();
+    });
+
+    it('tells a rejected applicant so, keeps the form prefilled, and lets them apply again', async () => {
+      await openWithProfile('Rejected');
+
+      expect(root().textContent).toContain('Your previous application was not approved');
+      expect((root().querySelector('#displayName') as HTMLInputElement).value).toBe('Somchai Original');
+      expect((root().querySelector('#bio') as HTMLTextAreaElement).value).toBe('Original bio');
+
+      fill('#bio', 'Updated bio');
+      findButtonByText('ถัดไป')?.click();
+      await settle();
+      await flushPolicy();
+      await agreeAndSubmit();
+
+      const apply = httpMock.expectOne('/api/catalog/instructors/apply');
+      expect(apply.request.body).toEqual({ displayName: 'Somchai Original', headline: 'Cloud architect', bio: 'Updated bio' });
+      apply.flush(existingProfile('Pending'));
+      await settle();
+
+      expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+      expect(root().textContent).not.toContain('Your previous application was not approved');
+    });
+
+    it('does not show the empty form when the status lookup fails (not a 404), and retry loads it again', async () => {
+      await harness.navigateByUrl('/instructor/onboarding', InstructorOnboardingPage);
+      await settle();
+      httpMock.expectOne('/api/catalog/instructors/me').flush({ title: 'Server Error' }, { status: 500, statusText: 'Server Error' });
+      await settle();
+
+      expect(root().textContent).toContain("Couldn't check your application");
+      expect(root().querySelector('#displayName')).toBeNull();
+
+      findButtonByText('Try again')?.click();
+      await settle();
+      httpMock.expectOne('/api/catalog/instructors/me').flush(existingProfile('Pending'));
+      await settle();
+
+      expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+      expect(root().textContent).not.toContain("Couldn't check your application");
+    });
   });
 
   it('shows "—" instead of any number when the policy request fails, offers one retry, and retry restores real values', async () => {

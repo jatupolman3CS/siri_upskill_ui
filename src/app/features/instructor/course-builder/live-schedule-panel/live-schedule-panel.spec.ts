@@ -15,6 +15,7 @@ import type {
   InstructorMeetingSummary,
   InstructorSessionListItem,
   LiveSession,
+  RecordingImportInfo,
 } from '../../../live/data/live-instructor.models';
 import { LiveSubmitIssues } from '../../../live/data/live-submit-issues.service';
 import type { LiveDisplayState } from '../../../live/data/live.models';
@@ -75,10 +76,25 @@ const google = (overrides: Partial<GoogleConnectionStatus> = {}): GoogleConnecti
   lastValidatedAtUtc: null,
   revokedReason: null,
   affectedSessionCount: 0,
+  accountKind: 'Personal',
+  hostedDomain: null,
+  recording: { mode: 'Manual', autoImportAvailable: false, scopesGranted: false },
   ...overrides,
 });
 
-const stateItem = (sessionId: string, displayState: LiveDisplayState, m: InstructorMeetingSummary): InstructorSessionListItem => ({
+const manualImport: RecordingImportInfo = { mode: 'Manual', status: null, errorCode: null, nextAttemptAtUtc: null, canRetry: false };
+const recordingImport = (overrides: Partial<RecordingImportInfo> = {}): RecordingImportInfo => ({
+  ...manualImport,
+  mode: 'Auto',
+  ...overrides,
+});
+
+const stateItem = (
+  sessionId: string,
+  displayState: LiveDisplayState,
+  m: InstructorMeetingSummary,
+  imported: RecordingImportInfo = manualImport,
+): InstructorSessionListItem => ({
   sessionId,
   courseId: 'c1',
   courseTitle: 'Excel Pro',
@@ -91,12 +107,14 @@ const stateItem = (sessionId: string, displayState: LiveDisplayState, m: Instruc
   meeting: m,
   recordingEpisodeId: null,
   cancelReason: null,
+  recordingImport: imported,
 });
 
 interface Data {
   readonly schedule: CourseLiveSchedule;
   readonly meetings: InstructorMeetingSummary[];
   readonly states?: Record<string, LiveDisplayState>;
+  readonly imports?: Record<string, RecordingImportInfo>;
   readonly google?: GoogleConnectionStatus;
 }
 
@@ -142,7 +160,12 @@ describe('LiveSchedulePanel', () => {
       .expectOne((r) => r.url === STATES_URL)
       .flush({
         items: data.schedule.sessions.map((s) =>
-          stateItem(s.id, data.states?.[s.id] ?? 'Upcoming', data.meetings.find((m) => m.sessionId === s.id) ?? meeting(s.id)),
+          stateItem(
+            s.id,
+            data.states?.[s.id] ?? 'Upcoming',
+            data.meetings.find((m) => m.sessionId === s.id) ?? meeting(s.id),
+            data.imports?.[s.id],
+          ),
         ),
         totalCount: data.schedule.sessions.length,
         page: 1,
@@ -364,6 +387,188 @@ describe('LiveSchedulePanel', () => {
       (Array.from(row.querySelectorAll('button')).find((b) => b.textContent?.includes('Cancel session')) as HTMLButtonElement).click();
       await settle();
       expect(document.querySelector('[role="dialog"]')?.textContent).toContain('Reason for cancelling');
+    });
+  });
+
+  describe('automatic recording import (P11-13)', () => {
+    const RETRY_URL = '/api/live/instructor/sessions/e/recording-import/retry';
+    const rowFor = (title: string) =>
+      Array.from(root().querySelectorAll('app-live-session-row')).find((r) => r.textContent?.includes(title)) as HTMLElement;
+    const buttonIn = (el: HTMLElement, label: string) =>
+      Array.from(el.querySelectorAll('button')).find((b) => b.textContent?.includes(label)) as HTMLButtonElement | undefined;
+
+    const ended = (imported?: RecordingImportInfo, sessionOverrides: Partial<LiveSession> = {}): Data => ({
+      schedule: schedule([session('e', sessionOverrides)]),
+      meetings: [meeting('e')],
+      states: { e: 'Ended' },
+      imports: imported ? { e: imported } : undefined,
+    });
+
+    it.each([
+      ['Waiting', 'Waiting for Google Meet'],
+      ['Transferring', 'copying the file'],
+      ['Processing', 'processing the video'],
+    ] as const)('%s -> says it is importing, never offers retry, and keeps the manual upload available', async (status, phrase) => {
+      await open(ended(recordingImport({ status })));
+
+      const row = rowFor('Session e');
+      expect(row.textContent).toContain(phrase);
+      expect(row.textContent).toContain('Upload recording');
+      expect(buttonIn(row, 'Try importing again')).toBeUndefined();
+      expect(row.querySelector('[aria-live="polite"]')?.textContent).toContain(phrase);
+    });
+
+    it('NoRecording with canRetry -> explains, offers Retry and the manual upload; Retry posts, shows the new state at once, then refetches', async () => {
+      await open(ended(recordingImport({ status: 'NoRecording', canRetry: true })));
+      const row = rowFor('Session e');
+      expect(row.textContent).toContain('No Google Meet recording was found');
+      expect(row.textContent).toContain('Upload recording');
+
+      buttonIn(row, 'Try importing again')?.click();
+      const req = httpMock.expectOne(RETRY_URL);
+      expect(req.request.method).toBe('POST');
+      req.flush(recordingImport({ status: 'Waiting', canRetry: false }));
+      await settle();
+
+      // The answer to the retry replaces the row's import state before any refetch...
+      expect(rowFor('Session e').textContent).toContain('Waiting for Google Meet');
+      expect(buttonIn(rowFor('Session e'), 'Try importing again')).toBeUndefined();
+      // ...and the panel then reloads the schedule, rooms and session states.
+      httpMock.expectOne(SCHEDULE_URL).flush(schedule([session('e')]));
+      httpMock.expectOne(MEETINGS_URL).flush({ items: [meeting('e')] });
+      httpMock
+        .expectOne((r) => r.url === STATES_URL)
+        .flush({
+          items: [stateItem('e', 'Ended', meeting('e'), recordingImport({ status: 'Waiting' }))],
+          totalCount: 1,
+          page: 1,
+          pageSize: 50,
+          totalPages: 1,
+        });
+      await settle();
+      expect(rowFor('Session e').textContent).toContain('Waiting for Google Meet');
+    });
+
+    it('a retry the server refuses (409) shows an error toast and refetches instead of leaving a stale button', async () => {
+      await open(ended(recordingImport({ status: 'Failed', errorCode: 'transcode_failed', canRetry: true })));
+      expect(rowFor('Session e').textContent).toContain('Automatic recording import failed');
+      expect(rowFor('Session e').textContent).toContain('The video could not be processed.');
+
+      buttonIn(rowFor('Session e'), 'Try importing again')?.click();
+      httpMock
+        .expectOne(RETRY_URL)
+        .flush({ reason: 'live.recording_import_not_retryable' }, { status: 409, statusText: 'Conflict' });
+      await settle();
+
+      httpMock.expectOne(SCHEDULE_URL).flush(schedule([session('e')]));
+      httpMock.expectOne(MEETINGS_URL).flush({ items: [meeting('e')] });
+      httpMock.expectOne((r) => r.url === STATES_URL).flush({ items: [], totalCount: 0, page: 1, pageSize: 50, totalPages: 0 });
+      await settle();
+    });
+
+    it('Failed without canRetry -> no Retry button, but the reason and the manual upload are there; an unknown code is never shown raw', async () => {
+      await open(ended(recordingImport({ status: 'Failed', errorCode: 'weird_new_code', canRetry: false })));
+
+      const row = rowFor('Session e');
+      expect(buttonIn(row, 'Try importing again')).toBeUndefined();
+      expect(row.textContent).toContain('Upload recording');
+      expect(row.textContent).toContain('problem on our side');
+      expect(row.textContent).not.toContain('weird_new_code');
+    });
+
+    it('NeedsReconnect -> a link to the Google settings page next to the manual upload', async () => {
+      await open(ended(recordingImport({ status: 'NeedsReconnect', canRetry: true })));
+
+      const row = rowFor('Session e');
+      expect(row.textContent).toContain('Reconnect Google to allow recording import');
+      const link = Array.from(row.querySelectorAll('a')).find((a) => a.textContent?.includes('Reconnect Google'));
+      expect(link?.getAttribute('href')).toBe('/instructor/live-settings');
+      expect(row.textContent).toContain('Upload recording');
+    });
+
+    it('Attached -> the existing "recording attached" wording and the replace action, no import status', async () => {
+      await open(ended(recordingImport({ status: 'Attached' }), { recordingEpisodeId: 'ep1' }));
+
+      const row = rowFor('Session e');
+      expect(row.textContent).toContain('Recording attached');
+      expect(row.textContent).toContain('Replace recording');
+      expect(row.textContent).not.toContain('Waiting for Google Meet');
+    });
+
+    it('a manual-path or Skipped session keeps exactly the old upload prompt', async () => {
+      await open({
+        schedule: schedule([session('e'), session('s')]),
+        meetings: [meeting('e'), meeting('s')],
+        states: { e: 'Ended', s: 'Ended' },
+        imports: { s: recordingImport({ status: 'Skipped' }) },
+      });
+
+      for (const title of ['Session e', 'Session s']) {
+        expect(rowFor(title).textContent).toContain('This session has ended. Upload the recording');
+        expect(rowFor(title).textContent).toContain('Upload recording');
+        expect(buttonIn(rowFor(title), 'Try importing again')).toBeUndefined();
+      }
+    });
+
+    it('a session that has not ended shows no recording block at all', async () => {
+      await open({ schedule: schedule([session('a')]), meetings: [meeting('a')], imports: { a: recordingImport({ status: 'Waiting' }) } });
+      expect(rowFor('Session a').querySelector('app-live-recording-import')).toBeNull();
+    });
+
+    describe('polling', () => {
+      it('re-checks the schedule and session states every 30 s while an ended session is importing, and stops once it is attached', async () => {
+        vi.useFakeTimers();
+        await open(ended(recordingImport({ status: 'Waiting' })));
+
+        vi.advanceTimersByTime(29_999);
+        httpMock.expectNone(SCHEDULE_URL);
+        httpMock.expectNone((r) => r.url === STATES_URL);
+        vi.advanceTimersByTime(1);
+        TestBed.flushEffects();
+        httpMock.expectOne(SCHEDULE_URL).flush(schedule([session('e', { recordingEpisodeId: 'ep1' })]));
+        httpMock
+          .expectOne((r) => r.url === STATES_URL)
+          .flush({
+            items: [stateItem('e', 'Ended', meeting('e'), recordingImport({ status: 'Attached' }))],
+            totalCount: 1,
+            page: 1,
+            pageSize: 50,
+            totalPages: 1,
+          });
+        await settle();
+        expect(rowFor('Session e').textContent).toContain('Recording attached');
+
+        vi.advanceTimersByTime(120_000);
+        httpMock.expectNone(SCHEDULE_URL);
+        httpMock.expectNone((r) => r.url === STATES_URL);
+      });
+
+      it.each(['NoRecording', 'Failed', 'NeedsReconnect', 'Attached', 'Skipped'] as const)(
+        'never polls for a %s import',
+        async (status) => {
+          vi.useFakeTimers();
+          await open(ended(recordingImport({ status })));
+          vi.advanceTimersByTime(120_000);
+          httpMock.expectNone(SCHEDULE_URL);
+          httpMock.expectNone((r) => r.url === STATES_URL);
+        },
+      );
+
+      it('never polls for an upcoming session even if the server reports an import', async () => {
+        vi.useFakeTimers();
+        await open({ schedule: schedule([session('a')]), meetings: [meeting('a')], imports: { a: recordingImport({ status: 'Waiting' }) } });
+        vi.advanceTimersByTime(120_000);
+        httpMock.expectNone(SCHEDULE_URL);
+      });
+
+      it('stops polling when the panel is destroyed', async () => {
+        vi.useFakeTimers();
+        await open(ended(recordingImport({ status: 'Processing' })));
+        fixture.destroy();
+        vi.advanceTimersByTime(120_000);
+        httpMock.expectNone(SCHEDULE_URL);
+        httpMock.expectNone((r) => r.url === STATES_URL);
+      });
     });
   });
 

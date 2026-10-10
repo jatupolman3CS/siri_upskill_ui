@@ -99,7 +99,14 @@ describe('parseGoogleCallback', () => {
   });
 
   it('recognises each documented error reason', () => {
-    for (const reason of ['access_denied', 'state_invalid', 'scope_missing', 'no_refresh_token', 'exchange_failed']) {
+    for (const reason of [
+      'access_denied',
+      'state_invalid',
+      'scope_missing',
+      'no_refresh_token',
+      'exchange_failed',
+      'recording_scope_missing',
+    ]) {
       expect(parseGoogleCallback(reader({ google: 'error', reason }))).toEqual({ outcome: 'error', reason });
     }
   });

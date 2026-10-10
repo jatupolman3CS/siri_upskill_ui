@@ -29,8 +29,15 @@ export class MediaApiService extends ApiService {
   }
 
   completeUploadSession(sessionId: string): Observable<MediaUploadSessionResponse> {
+    // The TUS transfer already succeeded here, so a 409 only means the provider has not yet moved the video out of
+    // "created" (large files are assembled before Bunny updates the status). Back off up to ~80s (1s, 2s, 4s, then 8s
+    // steps) instead of failing a fully delivered upload after 5s; any other error is final.
     return this.post<MediaUploadSessionResponse>(`/media/upload-sessions/${encodeURIComponent(sessionId)}/complete`, {}).pipe(
-      retry({ count: 5, delay: (error) => error.status === 409 ? timer(1000) : throwError(() => error) }),
+      retry({
+        count: 12,
+        delay: (error, retryCount) =>
+          error.status === 409 ? timer(Math.min(1000 * 2 ** (retryCount - 1), 8000)) : throwError(() => error),
+      }),
     );
   }
 

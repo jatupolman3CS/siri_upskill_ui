@@ -9,7 +9,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { errorInterceptor } from '../../../../core/http/error.interceptor';
 import type { PagedResult } from '../../../../core/http/paged-result.model';
 import { TranslationService } from '../../../../core/i18n/translation.service';
-import type { InstructorMeetingSummary, InstructorSessionListItem } from '../../data/live-instructor.models';
+import type { InstructorMeetingSummary, InstructorSessionListItem, RecordingImportInfo } from '../../data/live-instructor.models';
 import { SessionsPage } from './sessions-page';
 
 registerLocaleData(localeTh);
@@ -26,6 +26,13 @@ const meeting = (overrides: Partial<InstructorMeetingSummary> = {}): InstructorM
   ...overrides,
 });
 
+const manualImport: RecordingImportInfo = { mode: 'Manual', status: null, errorCode: null, nextAttemptAtUtc: null, canRetry: false };
+const autoImport = (overrides: Partial<RecordingImportInfo> = {}): RecordingImportInfo => ({
+  ...manualImport,
+  mode: 'Auto',
+  ...overrides,
+});
+
 const item = (overrides: Partial<InstructorSessionListItem> = {}): InstructorSessionListItem => ({
   sessionId: 's1',
   courseId: 'c1',
@@ -39,6 +46,7 @@ const item = (overrides: Partial<InstructorSessionListItem> = {}): InstructorSes
   meeting: meeting(),
   recordingEpisodeId: null,
   cancelReason: null,
+  recordingImport: manualImport,
   ...overrides,
 });
 
@@ -174,6 +182,66 @@ describe('SessionsPage', () => {
     await settle();
     await flushList(page([item()]));
     expect(root().textContent).toContain('Session 1: basics');
+  });
+
+  describe('automatic recording import (P11-13)', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it.each([
+      ['Waiting', 'Importing recording'],
+      ['Processing', 'Importing recording'],
+      ['NoRecording', 'No recording found'],
+      ['Failed', 'Import failed'],
+      ['NeedsReconnect', 'Reconnect Google'],
+    ] as const)('an ended session with a %s import shows the "%s" chip (text only, inside the card link)', async (status, label) => {
+      await open('/instructor/sessions?scope=past');
+      await flushList(page([item({ displayState: 'Ended', recordingImport: autoImport({ status, canRetry: true }) })]));
+
+      const card = root().querySelector('a[href="/instructor/sessions/s1"]') as HTMLElement;
+      expect(card.textContent).toContain(label);
+      // The whole card is a link: nothing interactive may be nested inside it.
+      expect(card.querySelector('button')).toBeNull();
+    });
+
+    it.each([
+      ['a manual-path ended session', item({ displayState: 'Ended' })],
+      ['an Attached import', item({ displayState: 'Ended', recordingEpisodeId: 'e1', recordingImport: autoImport({ status: 'Attached' }) })],
+      ['a Skipped import', item({ displayState: 'Ended', recordingImport: autoImport({ status: 'Skipped' }) })],
+      ['an upcoming session', item({ displayState: 'Upcoming', recordingImport: autoImport({ status: 'Waiting' }) })],
+    ])('%s shows no import chip', async (_label, sessionItem) => {
+      await open('/instructor/sessions?scope=all');
+      await flushList(page([sessionItem]));
+
+      const text = root().textContent ?? '';
+      expect(text).not.toContain('Importing recording');
+      expect(text).not.toContain('No recording found');
+      expect(text).not.toContain('Import failed');
+    });
+
+    it('re-reads the list every 30 s while an ended session is importing, then stops', async () => {
+      vi.useFakeTimers();
+      await open('/instructor/sessions?scope=past');
+      await flushList(page([item({ displayState: 'Ended', recordingImport: autoImport({ status: 'Waiting' }) })]));
+
+      vi.advanceTimersByTime(29_999);
+      httpMock.expectNone((r) => r.url === '/api/live/instructor/sessions');
+      vi.advanceTimersByTime(1);
+      TestBed.flushEffects();
+      await flushList(page([item({ displayState: 'Ended', recordingEpisodeId: 'e1', recordingImport: autoImport({ status: 'Attached' }) })]));
+      expect(root().textContent).toContain('Recording attached');
+
+      vi.advanceTimersByTime(120_000);
+      httpMock.expectNone((r) => r.url === '/api/live/instructor/sessions');
+    });
+
+    it('never polls when nothing is importing', async () => {
+      vi.useFakeTimers();
+      await open();
+      await flushList(page([item(), item({ sessionId: 's2', displayState: 'Ended', recordingImport: autoImport({ status: 'NoRecording' }) })]));
+
+      vi.advanceTimersByTime(120_000);
+      httpMock.expectNone((r) => r.url === '/api/live/instructor/sessions');
+    });
   });
 
   it('paginates through the URL when there is more than one page', async () => {

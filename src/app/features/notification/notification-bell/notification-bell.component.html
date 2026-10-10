@@ -74,7 +74,9 @@
               class="flex items-start gap-3 p-3.5 hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors duration-150 relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <!-- Icon -->
-              <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <div
+                [class]="(item.type === 'Announcement' ? 'tone-orange' : 'tone-blue') + ' mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--tone-bg)] text-[var(--tone-fg)]'"
+              >
                 @if (item.type === 'Announcement') {
                   <ng-icon name="phosphorMegaphone" class="text-base" />
                 } @else {

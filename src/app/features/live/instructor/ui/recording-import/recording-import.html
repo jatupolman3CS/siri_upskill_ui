@@ -1,0 +1,50 @@
+<div class="flex flex-col gap-3">
+  <div aria-live="polite" aria-atomic="true" class="flex flex-col gap-1">
+    @if (view().textKey; as textKey) {
+      <p class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+        @if (view().icon; as icon) {
+          <ng-icon
+            [name]="icon"
+            aria-hidden="true"
+            class="mt-0.5 shrink-0 text-base"
+            [class]="iconClass()"
+          />
+        }
+        <span>{{ textKey | translate }}</span>
+      </p>
+      @if (view().detailKey; as detailKey) {
+        <p class="pl-6 text-xs text-[var(--color-text-muted)]">{{ detailKey | translate }}</p>
+      }
+    } @else {
+      <p class="text-sm text-[var(--color-text-muted)]">{{ plainTextKey() | translate }}</p>
+    }
+  </div>
+
+  @if (view().showRetry || view().showReconnect) {
+    <div class="flex flex-wrap items-center gap-2">
+      @if (view().showReconnect) {
+        <a
+          routerLink="/instructor/live-settings"
+          class="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 text-sm font-semibold text-[var(--color-text)]
+            transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          <ng-icon name="phosphorPlugs" aria-hidden="true" class="text-base" />
+          {{ 'live.recordingImport.reconnect' | translate }}
+        </a>
+      }
+      @if (view().showRetry) {
+        <app-button size="sm" variant="secondary" [loading]="retrying()" (click)="retry()">
+          {{ 'live.recordingImport.retry' | translate }}
+        </app-button>
+      }
+    </div>
+  }
+
+  <app-live-recording-uploader
+    [courseId]="courseId()"
+    [sessionId]="sessionId()"
+    [sessionTitle]="sessionTitle()"
+    [hasRecording]="hasRecording()"
+    (attached)="changed.emit()"
+  />
+</div>

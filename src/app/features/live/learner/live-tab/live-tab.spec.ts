@@ -86,6 +86,12 @@ describe('LiveTab', () => {
   });
 
   afterEach(() => {
+    // Every live/ended session card also asks for its teaching materials; those requests are not what these tests are about
+    // (see learner-materials-list.spec.ts), so answer whatever is still open before verifying nothing else is.
+    httpMock
+      .match((req) => req.url.endsWith('/attachments'))
+      .filter((req) => !req.cancelled)
+      .forEach((req) => req.flush([]));
     httpMock.verify();
     vi.useRealTimers();
   });
@@ -170,6 +176,53 @@ describe('LiveTab', () => {
     fixture.detectChanges();
     respond(httpMock.expectOne(SESSIONS_URL), response([item()], { hasAttendedAnySession: true }));
     expect(root.querySelector('app-live-refund-notice')).toBeNull();
+  });
+
+  describe('teaching materials', () => {
+    const attachmentsUrl = (sessionId: string) => `/api/catalog/live-sessions/${sessionId}/attachments`;
+
+    async function settle(): Promise<void> {
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await Promise.resolve();
+      fixture.detectChanges();
+    }
+
+    it("lists a session's materials inside its card, and asks for none on a cancelled session", async () => {
+      const root = create();
+      respond(
+        httpMock.expectOne(SESSIONS_URL),
+        response([item(), item({ id: 's-2', title: 'Cancelled one', displayState: 'Cancelled', status: 'Cancelled' })]),
+      );
+      await settle();
+
+      httpMock.expectNone(attachmentsUrl('s-2'));
+      httpMock.expectOne(attachmentsUrl('s-1')).flush([
+        { id: 'a1', fileName: 'slides.pdf', contentType: 'application/pdf', sizeBytes: 2048, createdAtUtc: '2026-10-08T01:00:00Z' },
+      ]);
+      await settle();
+
+      const card = root.querySelector('app-live-session-card') as HTMLElement;
+      expect(card.textContent).toContain('Materials for this session');
+      expect(card.textContent).toContain('slides.pdf');
+      expect(Array.from(card.querySelectorAll('button')).some((b) => b.textContent?.includes('Download: slides.pdf'))).toBe(true);
+    });
+
+    it('shows no materials block, and no error, when the session has none or the list cannot be read', async () => {
+      const root = create();
+      respond(httpMock.expectOne(SESSIONS_URL), response([item(), item({ id: 's-3', title: 'Third' })]));
+      await settle();
+
+      httpMock.expectOne(attachmentsUrl('s-1')).flush([]);
+      httpMock.expectOne(attachmentsUrl('s-3')).flush({ title: 'Not found', errorCode: 'not_found' }, { status: 404, statusText: 'Not Found' });
+      await settle();
+
+      expect(root.textContent).not.toContain('Materials for this session');
+      expect(root.querySelector('[role="alert"]')).toBeNull();
+      // The rest of the cards are untouched.
+      expect(root.textContent).toContain('Session one');
+      expect(root.textContent).toContain('Third');
+    });
   });
 
   describe('refetching at the moments the server state can change', () => {

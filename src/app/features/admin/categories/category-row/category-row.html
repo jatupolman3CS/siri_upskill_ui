@@ -3,7 +3,7 @@
   [class.border-dashed]="!row().node.isActive"
 >
   <span
-    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] text-[var(--color-primary)]"
+    [class]="tone() + ' flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--tone-bg)] text-[var(--tone-fg)]'"
   >
     <ng-icon [name]="iconName()" aria-hidden="true" class="text-xl" />
   </span>

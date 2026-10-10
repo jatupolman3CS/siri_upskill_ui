@@ -64,6 +64,7 @@ import { LiveInstructorApiService } from '../../live/data/live-instructor-api.se
 import { LiveSubmitIssues } from '../../live/data/live-submit-issues.service';
 import type { DeliveryFormat } from '../../live/data/live.models';
 import { LiveSchedulePanel } from './live-schedule-panel/live-schedule-panel';
+import { TeachingMaterialsPanel } from './teaching-materials-panel/teaching-materials-panel';
 
 export interface BuilderEpisode {
   id: string;
@@ -116,6 +117,7 @@ export type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'conflict' | 
     TranslatePipe,
     Spinner,
     LiveSchedulePanel,
+    TeachingMaterialsPanel,
   ],
   templateUrl: './course-builder-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

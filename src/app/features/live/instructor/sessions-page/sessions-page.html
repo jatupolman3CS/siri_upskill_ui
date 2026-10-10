@@ -90,6 +90,9 @@
                       {{ 'live.instructor.sessions.hasRecording' | translate }}
                     </span>
                   }
+                  @if (row.recording; as recordingChip) {
+                    <app-status-chip [view]="recordingChip" />
+                  }
                   @if (row.item.cancelReason) {
                     <span>{{ 'live.instructor.sessions.cancelReason' | translate: { reason: row.item.cancelReason } }}</span>
                   }

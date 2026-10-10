@@ -23,6 +23,8 @@ describe('liveErrorKey', () => {
     ['live.recording_asset_in_use', 'live.errors.recordingAssetInUse'],
     ['live.recording_episode_has_no_media', 'live.errors.recordingEpisodeHasNoMedia'],
     ['live.recording_episode_in_use', 'live.errors.recordingEpisodeInUse'],
+    ['live.recording_not_available', 'live.errors.recordingNotAvailable'],
+    ['live.recording_import_not_retryable', 'live.errors.recordingImportNotRetryable'],
     ['refund.live_attended', 'live.errors.refundLiveAttended'],
   ])('maps reason %s to %s', (reason, key) => {
     expect(liveErrorKey(problem(409, { reason }))).toBe(key);

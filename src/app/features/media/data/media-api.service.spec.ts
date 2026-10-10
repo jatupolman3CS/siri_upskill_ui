@@ -119,6 +119,30 @@ describe('MediaApiService', () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
+  it('keeps retrying a delivered upload past the old 5s window and then succeeds', async () => {
+    vi.useFakeTimers();
+    const next = vi.fn();
+    const error = vi.fn();
+    service.completeUploadSession('session-1').subscribe({ next, error });
+    for (let attempt = 0; attempt < 7; attempt++) {
+      httpMock.expectOne('/api/media/upload-sessions/session-1/complete')
+        .flush({}, { status: 409, statusText: 'Conflict' });
+      await vi.advanceTimersByTimeAsync(8000);
+    }
+    expect(error).not.toHaveBeenCalled();
+    httpMock.expectOne('/api/media/upload-sessions/session-1/complete').flush({ status: 'Completed' });
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  it('does not retry completion on a non-409 error', () => {
+    const error = vi.fn();
+    service.completeUploadSession('session-1').subscribe({ error });
+    httpMock.expectOne('/api/media/upload-sessions/session-1/complete')
+      .flush({}, { status: 403, statusText: 'Forbidden' });
+    httpMock.expectNone('/api/media/upload-sessions/session-1/complete');
+    expect(error).toHaveBeenCalledOnce();
+  });
+
   it('createAsset sends POST to /api/media/assets', () => {
     const mockAsset: MediaAssetResponse = {
       id: 'asset-1',

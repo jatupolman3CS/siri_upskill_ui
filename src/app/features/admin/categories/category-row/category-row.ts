@@ -12,7 +12,7 @@ import {
 
 import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../../core/i18n/translation.service';
-import { CATEGORY_ICONS, resolveCategoryIconName } from '../../../catalog/category-icon';
+import { CATEGORY_ICONS, resolveCategoryIconName, resolveCategoryTone } from '../../../catalog/category-icon';
 import { CategoryRow } from '../category-admin.util';
 
 /**
@@ -55,6 +55,7 @@ export class CategoryRowItem {
   private readonly moveDownButton = viewChild<ElementRef<HTMLButtonElement>>('moveDown');
 
   protected readonly iconName = computed(() => resolveCategoryIconName(this.row().node.iconKey));
+  protected readonly tone = computed(() => resolveCategoryTone(this.row().node.iconKey));
   protected readonly primaryName = computed(() => {
     const { nameTh, nameEn } = this.row().node;
     return this.translation.locale() === 'en' ? nameEn : nameTh;

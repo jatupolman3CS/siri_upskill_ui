@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { instructorStudioGuard } from './core/guards/instructor-studio.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
@@ -117,8 +118,9 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/account-privacy/account-privacy-page').then((m) => m.AccountPrivacyPage),
       },
-      // Instructor application (any signed-in user). The same wizard also lives at /instructor/onboarding,
-      // but that route sits behind the instructor roleGuard — useless to the learners who need to apply.
+      // Instructor application (any signed-in user) — the one instructor page an unapproved user may see: apply,
+      // wait for the admin's review, or re-apply after a rejection. The same wizard also lives at
+      // /instructor/onboarding, but that route sits behind instructorStudioGuard — closed to the very people who apply.
       {
         path: 'become-instructor',
         canActivate: [authGuard],
@@ -225,11 +227,11 @@ export const routes: Routes = [
       },
     ],
   },
-  // Instructor Studio (P4-20 .. P4-24) — CSR + authGuard + roleGuard
+  // Instructor Studio (P4-20 .. P4-24) — CSR + authGuard + instructorStudioGuard. Anyone whose application an
+  // admin has not approved is sent to /become-instructor (the only instructor page they may see); admins pass.
   {
     path: 'instructor',
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['Instructor', 'Admin', 'SuperAdmin'] },
+    canActivate: [authGuard, instructorStudioGuard],
     loadComponent: () =>
       import('./layouts/instructor-layout/instructor-layout').then((m) => m.InstructorLayout),
     children: [
@@ -353,6 +355,11 @@ export const routes: Routes = [
         path: 'payments',
         loadComponent: () =>
           import('./features/admin/payments/admin-payments-page').then((m) => m.AdminPaymentsPage),
+      },
+      {
+        path: 'payment-settings',
+        loadComponent: () =>
+          import('./features/admin/payment-settings/admin-payment-settings-page').then((m) => m.AdminPaymentSettingsPage),
       },
       {
         path: 'contact-messages',

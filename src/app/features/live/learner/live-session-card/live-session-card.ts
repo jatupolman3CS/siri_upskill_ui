@@ -23,7 +23,8 @@ import { LiveStatusBadge } from '../live-status-badge/live-status-badge';
 /**
  * One live session in the classroom's "Live" tab. Purely presentational: it renders what the server decided
  * (`displayState`, `canJoin`, `roomReady`) and reports intent through outputs — it never derives a state of its own and
- * never talks to the API.
+ * never talks to the API. Anything else that belongs on the card (the session's teaching materials) is projected in by
+ * the live tab through the default `<ng-content>` slot.
  */
 @Component({
   selector: 'app-live-session-card',

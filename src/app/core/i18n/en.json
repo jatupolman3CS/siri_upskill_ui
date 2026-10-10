@@ -10,7 +10,8 @@
       "attachmentScanner": "File uploads are temporarily unavailable because files cannot be checked for viruses right now. Please try again later.",
       "paymentProvider": "Payments are temporarily unavailable and you have not been charged. Please try again later.",
       "videoProvider": "Video uploads and playback are temporarily unavailable. Please try again later.",
-      "generic": "This feature is temporarily unavailable. Please try again later."
+      "generic": "This feature is temporarily unavailable. Please try again later.",
+      "storageProvider": "Document storage is temporarily unavailable, so files cannot be uploaded or downloaded right now. Please try again later or contact support."
     }
   },
   "studio": {
@@ -34,6 +35,7 @@
       "posts": "Articles & news (CMS)",
       "payouts": "Instructor payouts",
       "payments": "Payments",
+      "paymentSettings": "Stripe charge amount override",
       "contact": "Contact messages",
       "liveStatus": "Live system status",
       "toInstructor": "Instructor mode",
@@ -156,6 +158,82 @@
         "forbidden": "You do not have permission to do this. Sign in with an admin account.",
         "notFound": "That application was not found; it may have been removed. The list has been reloaded.",
         "alreadyDecided": "That application has already been decided. The list has been reloaded."
+      }
+    },
+    "paymentSettings": {
+      "pageTitle": "Stripe charge amount override | SIRI UpSkill Admin",
+      "pageDescription": "Turn the fixed charge amount sent to Stripe on or off to smoke-test real payments.",
+      "heading": "Stripe charge amount override",
+      "subheading": "For smoke-testing real payments in production with a small amount. While it is on, every new payment is charged the amount set here instead of the real price (never more than the order total), and every change is kept in the history.",
+      "retry": "Try again",
+      "loadErrorHeading": "Could not load the setting",
+      "loadErrorDescription": "Check your connection and try again. If it keeps failing, the backend may not be responding.",
+      "staleNotice": "Refresh failed. What is shown may not match the current setting, so try again before you decide anything.",
+      "status": {
+        "label": "Current status",
+        "active": "ACTIVE",
+        "inactive": "INACTIVE",
+        "activeBanner": "Right now every new payment is charged {{amount}} instead of the real price",
+        "activeHint": "The system uses the lower of this amount and the order total. Turn this off as soon as the test is done.",
+        "inactiveHint": "Customers are charged the real order price as usual.",
+        "neverChanged": "This setting has never been changed.",
+        "changedAt": "Last changed",
+        "changedBy": "Changed by (user id)",
+        "reason": "Reason"
+      },
+      "form": {
+        "heading": "Change the setting",
+        "intro": "Every save needs a reason and is kept in a history that cannot be edited afterwards.",
+        "enable": "Use a fixed charge amount",
+        "enableHint": "Untick this and save to go back to the real price.",
+        "amount": "Amount sent to Stripe (THB)",
+        "amountHelper": "Must be more than 0, with at most 2 decimals. Required even when switching off, so the history records it.",
+        "reason": "Reason for the change",
+        "reasonHelper": "For example: testing a real PromptPay payment before launch",
+        "reasonCount": "{{count}}/{{max}}",
+        "submitEnable": "Save and turn on",
+        "submitUpdate": "Save changes",
+        "submitDisable": "Save and turn off",
+        "errors": {
+          "required": "This field is required.",
+          "amountInvalid": "Enter a number, for example 20 or 20.50.",
+          "amountDecimals": "Use at most 2 decimals.",
+          "amountMin": "The amount must be more than 0 baht.",
+          "amountMax": "The amount must not exceed {{max}} baht.",
+          "reasonShort": "The reason must be at least {{min}} characters.",
+          "reasonLong": "The reason must not exceed {{max}} characters."
+        }
+      },
+      "confirm": {
+        "title": "Confirm charging a fixed amount",
+        "body": "Every new payment will be charged {{amount}} instead of the real price",
+        "realMoney": "This charges real money through Stripe, not test mode. It applies to every PaymentIntent created from now on, until you turn it off.",
+        "split": "Revenue share is calculated from the amount actually charged, not the full course price.",
+        "cancel": "Cancel",
+        "confirm": "Confirm and turn on"
+      },
+      "toast": {
+        "enabled": "Charge amount override is on. Every new payment is charged the amount you set.",
+        "disabled": "Charge amount override is off. Real prices apply again."
+      },
+      "errors": {
+        "forbidden": "You do not have permission to do this. Sign in with an admin account.",
+        "invalid": "Some details are not valid. Check the fields that show a message."
+      },
+      "history": {
+        "heading": "Change history",
+        "caption": "History of switching the Stripe charge amount override on and off and changing its amount, newest first",
+        "colDate": "Date and time",
+        "colStatus": "Status",
+        "colAmount": "Amount",
+        "colReason": "Reason",
+        "colBy": "Changed by",
+        "on": "On",
+        "off": "Off",
+        "emptyHeading": "No changes yet",
+        "emptyDescription": "Once this setting is switched on or off, the entry appears here.",
+        "errorHeading": "Could not load the history",
+        "errorDescription": "Check your connection and try again."
       }
     },
     "liveStatus": {
@@ -1301,6 +1379,11 @@
       },
       "payoutAfterApprovalNote": "You don't need to enter a bank account to apply — once your application is approved, add your payout account on the \"Earnings\" page in Studio.",
       "setupPayoutLink": "Set up your payout account on the Earnings page",
+      "loadErrorHeading": "Couldn't check your application",
+      "loadErrorDescription": "We couldn't load the status of your instructor application. Check your connection and try again.",
+      "retry": "Try again",
+      "rejectedHeading": "Your previous application was not approved",
+      "rejectedDescription": "You can update your details below and submit a new application for the team to review.",
       "termsHeading": "Standard instructor revenue share: {{percent}}",
       "termsRevenueShare": "1. Instructors receive {{percent}} and the platform receives {{platformPercent}} of course sales, after payment fees are deducted.",
       "termsWithholding": "2. Regular payouts are subject to {{withholdingPercent}} withholding tax under Thai law, and a Form 50 Tawi withholding certificate is issued at the end of each year."
@@ -1646,8 +1729,55 @@
         "scope_missing": "All calendar permissions must be allowed. Please reconnect.",
         "no_refresh_token": "Google did not return long-lived access. Please reconnect and allow everything requested.",
         "exchange_failed": "Could not complete the connection with Google. Please try again.",
+        "recording_scope_missing": "All recording permissions must be allowed, so automatic recording import was not turned on. Please try again.",
         "unknown": "Could not connect Google. Please try again."
       }
+    },
+    "recordingImport": {
+      "accountKind": {
+        "label": "Account type",
+        "Personal": "Personal Google account",
+        "Workspace": "Google Workspace · {{domain}}",
+        "Unknown": "Checking…"
+      },
+      "card": {
+        "heading": "Recording import",
+        "manual": "After a class, upload the recording yourself from the session details page or the course's “Live schedule” tab.",
+        "manualPersonal": "Automatic recording import only works with Google Workspace accounts. With a personal Google account (such as Gmail) you upload the recording yourself.",
+        "consentBody": "When this is on, the platform finds the Google Meet recording after a class, copies it into your course and attaches it as a lesson so learners can watch it later. You don't have to upload anything.",
+        "consentAsk": "This needs one more permission from Google so the platform can read your meeting recordings. It only looks for the recording of the room created for a live session on this platform, and emails you every time a recording is added to a course.",
+        "consentNote": "Every enrolled learner will be able to watch the recording, so make sure nothing in the session should stay private. You can turn this off at any time by disconnecting Google.",
+        "enable": "Turn on automatic recording import",
+        "on": "On — recordings are added to the course automatically after a class.",
+        "onNote": "If no recording file is found (for example your Google plan doesn't record), you'll see a message on that session and can upload it yourself."
+      },
+      "toast": {
+        "enabled": "Automatic recording import is on",
+        "retried": "We'll look for this session's recording again"
+      },
+      "status": {
+        "waiting": "Waiting for Google Meet to deliver the recording so it can be imported automatically. This usually doesn't take long after the class — nothing for you to do.",
+        "transferring": "Importing the recording automatically — copying the file into the platform.",
+        "processing": "Importing the recording automatically — processing the video.",
+        "noRecording": "No Google Meet recording was found for this session — you can upload it yourself.",
+        "failed": "Automatic recording import failed — try again, or upload it yourself.",
+        "needsReconnect": "Reconnect Google to allow recording import — then try again, or upload it yourself."
+      },
+      "chip": {
+        "importing": "Importing recording",
+        "noRecording": "No recording found",
+        "failed": "Import failed",
+        "needsReconnect": "Reconnect Google"
+      },
+      "error": {
+        "file_too_large": "The recording file is too large for automatic import. Please upload it yourself.",
+        "transcode_failed": "The video could not be processed.",
+        "transcode_timeout": "Processing the video took too long.",
+        "recording_scope_missing": "The permission to read recordings from Google wasn't fully granted.",
+        "unknown": "The import failed because of a problem on our side."
+      },
+      "retry": "Try importing again",
+      "reconnect": "Reconnect Google"
     },
     "refundNotice": "Joining your first live session means this course can no longer be refunded, per the refund policy.",
     "refundPolicyLink": "Read the refund policy",
@@ -1755,6 +1885,8 @@
       "recordingAssetInUse": "This video is already used elsewhere.",
       "recordingEpisodeHasNoMedia": "The selected episode has no video yet.",
       "recordingEpisodeInUse": "This episode is already the recording of another session.",
+      "recordingNotAvailable": "Automatic recording import can't be turned on — it needs a Google Workspace account and the platform administrator must enable it.",
+      "recordingImportNotRetryable": "This session's recording can't be re-imported right now. Please upload it yourself.",
       "rateLimited": "Too many requests. Please try again in a moment.",
       "generic": "Something went wrong. Please try again.",
       "refundLiveAttended": "You've joined a live session of a course in this order, so that course's share can't be refunded.",
@@ -2017,6 +2149,68 @@
         "cardLabel": "Credit / debit card (when enabled):",
         "cardText": "The money is returned to the original card. How long it takes depends on the card issuing bank."
       }
+    }
+  },
+  "teachingMaterials": {
+    "title": "Teaching materials",
+    "unsaved": "Save this lesson first (autosave is running) before attaching materials.",
+    "loading": "Loading materials...",
+    "loadError": "Couldn't load the materials.",
+    "retry": "Try again",
+    "empty": "No materials attached yet.",
+    "sessionCancelled": "This session was cancelled, so new materials can no longer be added.",
+    "listLabel": "Attached materials",
+    "drop": {
+      "title": "Drag files here, or",
+      "dropping": "Release to add the files",
+      "choose": "Choose files",
+      "hint": "PDF, Word, Excel, PowerPoint, ZIP, text and images · up to {{size}} per file · at most {{max}} files"
+    },
+    "reject": {
+      "type": "\"{{name}}\" is not a supported file type, so it was not added.",
+      "empty": "\"{{name}}\" is empty (0 bytes), so it was not added.",
+      "tooLarge": "\"{{name}}\" is larger than {{size}}, so it was not added.",
+      "limit": "You can attach at most {{max}} files here, so \"{{name}}\" was not added."
+    },
+    "upload": {
+      "queued": "Waiting in the upload queue",
+      "uploading": "Uploading {{percent}}%",
+      "processing": "Upload complete. Checking and saving the file...",
+      "progressLabel": "Upload progress for {{name}}",
+      "started": "Started uploading {{name}}",
+      "done": "{{name}} was uploaded.",
+      "failed": "Could not upload {{name}}",
+      "retry": "Try again",
+      "retryLabel": "Retry uploading {{name}}",
+      "dismissLabel": "Dismiss the message for {{name}}"
+    },
+    "delete": {
+      "label": "Delete {{name}}",
+      "title": "Delete this file?",
+      "body": "\"{{name}}\" will be permanently deleted and learners will no longer see it.",
+      "confirm": "Delete file",
+      "cancel": "Cancel",
+      "done": "{{name}} was deleted."
+    },
+    "download": {
+      "button": "Download",
+      "label": "Download {{name}}"
+    },
+    "learner": {
+      "sessionHeading": "Materials for this session"
+    },
+    "error": {
+      "generic": "Something went wrong. Please try again.",
+      "network": "Couldn't reach the server. Check your connection and try again; a very large file may exceed what the server accepts.",
+      "rejected": "The file was rejected: {{reason}}",
+      "rejectedNoReason": "The file was rejected. Check that its type, size and contents match its extension, then try again.",
+      "signedOut": "Your session has expired. Please sign in again.",
+      "forbidden": "You don't have permission to manage the materials here.",
+      "notFound": "This item was not found or you no longer have access. Refresh the page and try again.",
+      "conflict": "The file could not be added: this session was cancelled, or the maximum number of files is already attached.",
+      "tooLarge": "The file is larger than the server accepts. Make it smaller and upload it again.",
+      "tooManyRequests": "Too many requests. Please wait a moment and try again.",
+      "unavailable": "File storage is temporarily unavailable. Please try again."
     }
   }
 }

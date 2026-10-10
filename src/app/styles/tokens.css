@@ -74,6 +74,24 @@
   /* Focus ring — must stay visible; see ui-design.md a11y rules */
   --color-focus-ring: #db2777;
 
+  /* Icon / illustration hues (2026-10-10, owner directive: theme stays pink, but icons and
+     other non-brand elements may use other hues). Each hue is a foreground + soft-tint pair
+     checked ≥4.5:1 (fg on its own tint) in both themes. Use via the `.tone-*` classes below
+     (`tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]`) — never as brand/CTA color, that
+     stays --color-primary. Pink is deliberately not in this set. */
+  --hue-blue-fg: #1d4ed8;
+  --hue-blue-bg: #dbeafe;
+  --hue-teal-fg: #0f766e;
+  --hue-teal-bg: #ccfbf1;
+  --hue-violet-fg: #6d28d9;
+  --hue-violet-bg: #ede9fe;
+  --hue-orange-fg: #c2410c;
+  --hue-orange-bg: #ffedd5;
+  --hue-green-fg: #15803d;
+  --hue-green-bg: #dcfce7;
+  --hue-gold-fg: #92400e;
+  --hue-gold-bg: #fef3c7;
+
   /* Radius scale — only these sizes, no ad-hoc values per page */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
@@ -111,5 +129,47 @@
 
     /* focus ring must stay ≥3:1 against dark surfaces too */
     --color-focus-ring: #f472b6;
+
+    --hue-blue-fg: #93c5fd;
+    --hue-blue-bg: #1e2f5c;
+    --hue-teal-fg: #5eead4;
+    --hue-teal-bg: #134e4a;
+    --hue-violet-fg: #c4b5fd;
+    --hue-violet-bg: #3b2a73;
+    --hue-orange-fg: #fdba74;
+    --hue-orange-bg: #5c2a0e;
+    --hue-green-fg: #86efac;
+    --hue-green-bg: #14532d;
+    --hue-gold-fg: #fcd34d;
+    --hue-gold-bg: #4a3208;
   }
+}
+
+/* Tone classes — set the two custom properties a component then reads with
+   `bg-[var(--tone-bg)] text-[var(--tone-fg)]`. Plain CSS (not Tailwind utilities) so a tone can be
+   chosen at runtime (`[class]="'tone-' + hue"`) without the class string needing to be statically
+   visible to Tailwind's scanner. */
+.tone-blue {
+  --tone-fg: var(--hue-blue-fg);
+  --tone-bg: var(--hue-blue-bg);
+}
+.tone-teal {
+  --tone-fg: var(--hue-teal-fg);
+  --tone-bg: var(--hue-teal-bg);
+}
+.tone-violet {
+  --tone-fg: var(--hue-violet-fg);
+  --tone-bg: var(--hue-violet-bg);
+}
+.tone-orange {
+  --tone-fg: var(--hue-orange-fg);
+  --tone-bg: var(--hue-orange-bg);
+}
+.tone-green {
+  --tone-fg: var(--hue-green-fg);
+  --tone-bg: var(--hue-green-bg);
+}
+.tone-gold {
+  --tone-fg: var(--hue-gold-fg);
+  --tone-bg: var(--hue-gold-bg);
 }

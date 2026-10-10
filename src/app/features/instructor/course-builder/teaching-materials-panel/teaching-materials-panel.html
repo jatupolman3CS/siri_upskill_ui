@@ -1,0 +1,128 @@
+<section class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+  <button
+    #headerButton
+    type="button"
+    class="flex min-h-11 w-full items-center gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-medium text-[var(--color-text)]
+      transition-colors duration-200 hover:bg-[var(--color-surface-muted)]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="expanded() ? bodyId : null"
+    (click)="toggle()"
+  >
+    <ng-icon size="1rem" [name]="expanded() ? 'phosphorCaretDown' : 'phosphorCaretRight'" aria-hidden="true" class="shrink-0" />
+    <ng-icon size="1.25rem" name="phosphorPaperclip" aria-hidden="true" class="shrink-0 text-[var(--color-text-muted)]" />
+    <span>{{ 'teachingMaterials.title' | translate }}</span>
+    @if (listState() === 'ready') {
+      <span class="ml-auto rounded-[var(--radius-full)] bg-[var(--color-surface-muted)] px-2 text-sm text-[var(--color-text-muted)]">
+        {{ materials().length }}
+      </span>
+    }
+  </button>
+
+  @if (expanded()) {
+    <div [id]="bodyId" class="flex flex-col gap-3 border-t border-[var(--color-border)] p-3">
+      @if (!parentId()) {
+        <p class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+          <ng-icon size="1.25rem" name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-text-muted)]" />
+          <span>{{ 'teachingMaterials.unsaved' | translate }}</span>
+        </p>
+      } @else {
+        @switch (listState()) {
+          @case ('error') {
+            <div role="alert" class="flex flex-wrap items-center gap-3">
+              <p class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                <ng-icon size="1.25rem" name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+                <span>{{ 'teachingMaterials.loadError' | translate }}</span>
+              </p>
+              <app-button size="sm" variant="secondary" (click)="retryLoad()">
+                <ng-icon size="1.25rem" leading name="phosphorArrowClockwise" aria-hidden="true" />
+                {{ 'teachingMaterials.retry' | translate }}
+              </app-button>
+            </div>
+          }
+          @case ('ready') {
+            @if (isEmpty()) {
+              <p class="text-sm text-[var(--color-text-muted)]">{{ 'teachingMaterials.empty' | translate }}</p>
+            } @else {
+              <ul class="flex flex-col gap-2" [attr.aria-label]="'teachingMaterials.listLabel' | translate">
+                @for (material of materials(); track material.id) {
+                  <li class="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-2 pl-3">
+                    <ng-icon size="1.5rem" name="phosphorFileText" aria-hidden="true" class="shrink-0 text-[var(--color-text-muted)]" />
+                    <div class="min-w-0 flex-1">
+                      <p class="break-words text-sm font-medium text-[var(--color-text)]">{{ material.fileName }}</p>
+                      <p class="text-sm text-[var(--color-text-muted)]">{{ formatSize(material.sizeBytes) }}</p>
+                    </div>
+                    <button
+                      type="button"
+                      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-danger)]
+                        transition-colors duration-200 hover:bg-[var(--color-surface-muted)]
+                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                      [attr.aria-label]="'teachingMaterials.delete.label' | translate: { name: material.fileName }"
+                      (click)="askDelete(material)"
+                    >
+                      <ng-icon size="1.25rem" name="phosphorTrash" aria-hidden="true" />
+                    </button>
+                  </li>
+                }
+                @for (upload of uploads(); track upload.id) {
+                  <li>
+                    <app-material-upload-row [upload]="upload" (retry)="queue.retry(upload.id)" (dismiss)="queue.dismiss(upload.id)" />
+                  </li>
+                }
+              </ul>
+            }
+          }
+          @default {
+            <p role="status" class="text-sm text-[var(--color-text-muted)]">{{ 'teachingMaterials.loading' | translate }}</p>
+          }
+        }
+
+        @if (actionError(); as error) {
+          <p role="alert" class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+            <ng-icon size="1.25rem" name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+            <span>{{ error.key | translate: error.params }}</span>
+          </p>
+        }
+
+        @if (notices().length > 0) {
+          <ul role="alert" class="flex flex-col gap-1">
+            @for (notice of notices(); track notice.id) {
+              <li class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                <ng-icon size="1.25rem" name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+                <span>{{ notice.message.key | translate: notice.message.params }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        <!-- Uploading waits for the list: the file count already attached decides how many more fit. -->
+        @if (listState() === 'ready') {
+          @if (canUpload()) {
+            <app-material-drop-zone [disabled]="deleting()" (picked)="onFilesPicked($event)" />
+          } @else {
+            <p class="flex items-start gap-2 text-sm text-[var(--color-text-muted)]">
+              <ng-icon size="1.25rem" name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0" />
+              <span>{{ 'teachingMaterials.sessionCancelled' | translate }}</span>
+            </p>
+          }
+        }
+      }
+    </div>
+  }
+</section>
+
+<p class="sr-only" role="status" aria-live="polite">{{ announcement() }}</p>
+
+@if (deleteTarget(); as target) {
+  <app-modal [(open)]="confirmOpen" [titleText]="'teachingMaterials.delete.title' | translate" [closeOnOverlayClick]="false">
+    <p class="text-sm">{{ 'teachingMaterials.delete.body' | translate: { name: target.fileName } }}</p>
+    <div modalFooter class="flex gap-3">
+      <app-button variant="secondary" [disabled]="deleting()" (click)="confirmOpen.set(false)">
+        {{ 'teachingMaterials.delete.cancel' | translate }}
+      </app-button>
+      <app-button variant="danger" [loading]="deleting()" (click)="confirmDelete()">
+        {{ 'teachingMaterials.delete.confirm' | translate }}
+      </app-button>
+    </div>
+  </app-modal>
+}

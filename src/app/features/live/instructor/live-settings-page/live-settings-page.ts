@@ -5,6 +5,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorCalendarCheck,
   phosphorCheckCircle,
+  phosphorFilmStrip,
   phosphorGoogleLogo,
   phosphorInfo,
   phosphorLockKey,
@@ -25,9 +26,18 @@ import { GoogleConnectService } from '../../data/google-connect.service';
 import { LiveInstructorApiService } from '../../data/live-instructor-api.service';
 import type { GoogleCallbackResult } from '../../data/live-instructor.models';
 import { instructorProblemMessage, parseGoogleCallback } from '../../data/live-instructor.util';
+import { recordingCardView } from '../../data/live-recording-import.util';
+import { pollWhile } from '../poll-while';
 import { trackStudioMeta } from '../studio-meta';
 
 const PAGE_PATH = '/instructor/live-settings';
+
+/**
+ * An account connected before the Workspace check existed reports `Unknown`; the server resolves it (best effort) on a status
+ * read. Read again a few times, then stop — a lookup that keeps failing must not turn into endless polling.
+ */
+const ACCOUNT_KIND_RECHECK_MS = 5_000;
+const ACCOUNT_KIND_MAX_RECHECKS = 3;
 
 type ViewState = 'notConfigured' | 'needsReconnect' | 'connected' | 'notConnected';
 
@@ -45,6 +55,7 @@ type ViewState = 'notConfigured' | 'needsReconnect' | 'connected' | 'notConnecte
     provideIcons({
       phosphorCalendarCheck,
       phosphorCheckCircle,
+      phosphorFilmStrip,
       phosphorGoogleLogo,
       phosphorInfo,
       phosphorLockKey,
@@ -88,9 +99,24 @@ export class LiveSettingsPage {
     return reason ? this.i18n.t(`live.google.revokedReason.${reason}`) : this.i18n.t('live.google.revokedReason.invalid_grant');
   });
 
+  /** "Personal Google account" / "Google Workspace · example.com" / "Checking…"; `null` while not connected. */
+  protected readonly accountKindText = computed(() => {
+    const status = this.status();
+    return status?.accountKind
+      ? this.i18n.t(`live.recordingImport.accountKind.${status.accountKind}`, { domain: status.hostedDomain ?? '' })
+      : null;
+  });
+  /** Which Recording card to show; only for a working connection (nothing can be changed until the instructor reconnects). */
+  protected readonly recordingCard = computed(() => {
+    const status = this.status();
+    return this.viewState() === 'connected' ? recordingCardView(status?.recording ?? null, status?.accountKind ?? null) : null;
+  });
+
   protected readonly connecting = signal(false);
   protected readonly disconnecting = signal(false);
   protected readonly confirmOpen = signal(false);
+  protected readonly enablingRecording = signal(false);
+  private readonly kindRechecks = signal(0);
 
   constructor() {
     trackStudioMeta('live.google.pageTitle', 'live.google.pageDescription', () => PAGE_PATH);
@@ -100,6 +126,33 @@ export class LiveSettingsPage {
       if (result) {
         untracked(() => this.handleCallback(result));
       }
+    });
+
+    pollWhile(
+      () => this.status()?.accountKind === 'Unknown' && this.kindRechecks() < ACCOUNT_KIND_MAX_RECHECKS,
+      () => {
+        this.kindRechecks.update((count) => count + 1);
+        this.statusResource.reload();
+      },
+      ACCOUNT_KIND_RECHECK_MS,
+    );
+  }
+
+  /** The optional second Google consent (read Meet recordings). Redirects like the calendar connect. */
+  protected enableRecording(): void {
+    if (this.enablingRecording()) {
+      return;
+    }
+    this.enablingRecording.set(true);
+    // On success the window navigates to Google; the flag stays set so the button cannot be double-clicked.
+    this.googleConnect.startRecordingAccess(PAGE_PATH).subscribe({
+      error: (error: unknown) => {
+        this.enablingRecording.set(false);
+        const message = instructorProblemMessage(error);
+        this.toast.error(this.i18n.t(message.key, message.params));
+        // 409 = the feature was switched off / the account is not Workspace: show what the server says now.
+        this.statusResource.reload();
+      },
     });
   }
 
@@ -149,8 +202,10 @@ export class LiveSettingsPage {
   }
 
   private handleCallback(result: GoogleCallbackResult): void {
+    // Both consents come back as `?google=connected`; the marker left by `enableRecording()` tells them apart.
+    const recordingConsent = this.googleConnect.consumeRecordingAccessPending();
     if (result.outcome === 'connected') {
-      this.toast.success(this.i18n.t('live.google.toast.connected'));
+      this.toast.success(this.i18n.t(recordingConsent ? 'live.recordingImport.toast.enabled' : 'live.google.toast.connected'));
     } else {
       this.toast.error(this.i18n.t(`live.google.callbackError.${result.reason ?? 'unknown'}`));
     }

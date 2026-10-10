@@ -59,6 +59,7 @@ describe('AdminLayout navigation', () => {
     expect(drawer).toEqual(sidebar);
     expect(sidebar).toHaveLength(ADMIN_NAV_LINKS.length);
     expect(drawer).toContain('Payments');
+    expect(drawer).toContain('Stripe charge amount override');
     expect(drawer).toContain('Contact messages');
   });
 

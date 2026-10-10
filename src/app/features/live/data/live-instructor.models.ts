@@ -26,6 +26,23 @@ export type GoogleRevokedReason =
   | 'scope_missing'
   | 'insufficient_scope';
 
+/**
+ * Detected by the server from Google's `hd` (hosted domain) claim — never asked. `Unknown` = connected before the check
+ * existed; it resolves on a later status read (show "checking…").
+ */
+export type GoogleAccountKind = 'Personal' | 'Workspace' | 'Unknown';
+
+/** What the instructor's account can do about recordings (contract `P11-13` §6/§7). */
+export type RecordingCapabilityMode = 'Manual' | 'AutoNeedsConsent' | 'Auto';
+
+export interface RecordingCapability {
+  readonly mode: RecordingCapabilityMode;
+  /** The server feature flag (`Live:Recording:AutoImport:Enabled`) is on. `false` -> only the manual path exists. */
+  readonly autoImportAvailable: boolean;
+  /** Both recording scopes were granted by the instructor. */
+  readonly scopesGranted: boolean;
+}
+
 /** `GET /api/live/instructor/google/status`. */
 export interface GoogleConnectionStatus {
   /** The server has an OAuth client configured; `false` means "manual link only" (hide the connect button). */
@@ -39,6 +56,11 @@ export interface GoogleConnectionStatus {
   readonly revokedReason: GoogleRevokedReason | null;
   /** Future sessions of this instructor waiting for a reconnect / a pasted link. */
   readonly affectedSessionCount: number;
+  /** `null` when not connected. */
+  readonly accountKind: GoogleAccountKind | null;
+  /** The Workspace domain (`example.com`), `null` for a personal account or when not connected. */
+  readonly hostedDomain: string | null;
+  readonly recording: RecordingCapability;
 }
 
 /** `POST /api/live/instructor/google/connect` — `returnPath` must start with `/instructor/` (server-validated). */
@@ -50,13 +72,18 @@ export interface GoogleConnectResponse {
   readonly authorizationUrl: string;
 }
 
-/** Query params the API's callback redirect appends to `returnPath` (appendix §A.3). */
+/** `POST /api/live/instructor/google/recording-access/connect` (contract `P11-13` §7) — same `returnPath` rule. */
+export type RecordingAccessConnectRequest = GoogleConnectRequest;
+
+/** Query params the API's callback redirect appends to `returnPath` (appendix §A.3 + `P11-13`). */
 export type GoogleCallbackReason =
   | 'access_denied'
   | 'state_invalid'
   | 'scope_missing'
   | 'no_refresh_token'
-  | 'exchange_failed';
+  | 'exchange_failed'
+  /** The recording consent was granted without both recording scopes — nothing was stored. */
+  | 'recording_scope_missing';
 
 export type GoogleCallbackResult =
   | { readonly outcome: 'connected' }
@@ -87,6 +114,34 @@ export interface SetMeetingLinkRequest {
   readonly meetUrl: string;
 }
 
+// --- P11-13 Recording import (automatic for Google Workspace, by hand otherwise) -----------------------------------------
+
+/**
+ * Where an automatic import stands. `null` on {@link RecordingImportInfo.status} = no import row exists (personal account,
+ * feature off, or the session has not needed one). The server never sends a Drive id, asset id, URL or message text.
+ */
+export type RecordingImportStatus =
+  | 'Waiting'
+  | 'Transferring'
+  | 'Processing'
+  | 'Attached'
+  | 'NoRecording'
+  | 'Failed'
+  | 'NeedsReconnect'
+  | 'Skipped';
+
+/** `recordingImport` on the instructor session list item / detail, and the response of the retry call. */
+export interface RecordingImportInfo {
+  /** `Auto` when an import row exists or the instructor's capability is `Auto`, else `Manual`. */
+  readonly mode: 'Manual' | 'Auto';
+  readonly status: RecordingImportStatus | null;
+  /** Short stable code ('file_too_large', 'transcode_failed', …) — map to i18n, never show raw. */
+  readonly errorCode: string | null;
+  readonly nextAttemptAtUtc: IsoUtc | null;
+  /** The server decides (state + 30-day window); the UI only shows the button. */
+  readonly canRetry: boolean;
+}
+
 // --- B.5 Instructor sessions / roster --------------------------------------------------------------------------------
 
 export type InstructorSessionScope = 'upcoming' | 'past' | 'all';
@@ -104,6 +159,7 @@ export interface InstructorSessionListItem {
   readonly meeting: InstructorMeetingSummary;
   readonly recordingEpisodeId: Guid | null;
   readonly cancelReason: string | null;
+  readonly recordingImport: RecordingImportInfo;
 }
 
 export interface InstructorSessionListQuery {
@@ -130,6 +186,7 @@ export interface InstructorSessionDetail {
   /** Owning instructor only; `null` while no room exists yet. */
   readonly meetUrl: string | null;
   readonly meeting: InstructorMeetingSummary;
+  readonly recordingImport: RecordingImportInfo;
   readonly enrolledCount: number;
   readonly expectedLearners: number;
   readonly joinedLearners: number;

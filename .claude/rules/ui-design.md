@@ -11,6 +11,7 @@
 
 - Token อยู่ที่ `src/app/styles/tokens.css` — **ห้ามเขียน hex ดิบใน component** ใช้ CSS variable/Tailwind token เท่านั้น
 - รองรับ light + dark ตั้งแต่ต้น: นิยาม palette เต็มที่ `:root`, override เฉพาะ token ที่ต่างใน dark
+- ธีมหลัก/CTA/active/focus = ชมพู (`--color-primary`) แต่ **icon และส่วนตกแต่งที่ไม่ใช่แบรนด์ใช้สีอื่นได้** (เจ้าของโปรเจ็คอนุมัติ 2026-10-10) — ใช้ชุด `--hue-*` ผ่านคลาส `tone-blue|teal|violet|orange|green|gold` ใน `tokens.css` (`class="tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]"`) ห้ามใช้ Tailwind palette ดิบ (`text-emerald-600`) เพราะไม่ปรับตาม dark mode · ปุ่ม/ลิงก์/สถานะ active ยังเป็นชมพูเสมอ
 - Spacing scale 4px, radius และ shadow มีแค่ชุดที่กำหนดไว้ ห้ามคิดค่าใหม่รายหน้า
 - Icon ใช้ SVG ชุดเดียวทั้งระบบ (Phosphor/Lucide) — **ห้ามใช้ emoji แทน icon**
 - ฟอนต์ต้องรองรับภาษาไทยครบน้ำหนัก (แนะนำ IBM Plex Sans Thai / Noto Sans Thai / LINE Seed Sans TH) — เช็ครูปสระบน-ล่างไม่ชนกันที่ line-height ที่ใช้จริง

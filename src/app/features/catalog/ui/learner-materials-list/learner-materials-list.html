@@ -1,0 +1,64 @@
+@switch (view()) {
+  @case ('loading') {
+    @if (!quiet()) {
+      <p role="status" class="py-6 text-center text-sm text-[var(--color-text-muted)]">{{ 'teachingMaterials.loading' | translate }}</p>
+    }
+  }
+
+  @case ('error') {
+    @if (!quiet()) {
+      <div role="alert" class="flex flex-col items-start gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <p class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+          <ng-icon size="1.25rem" name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+          <span>{{ 'teachingMaterials.loadError' | translate }}</span>
+        </p>
+        <app-button size="sm" variant="secondary" (click)="retry()">
+          <ng-icon size="1.25rem" leading name="phosphorArrowClockwise" aria-hidden="true" />
+          {{ 'teachingMaterials.retry' | translate }}
+        </app-button>
+      </div>
+    }
+  }
+
+  @case ('empty') {
+    @if (!quiet()) {
+      <p class="py-6 text-center text-sm text-[var(--color-text-muted)]">{{ 'learn.resources.empty' | translate }}</p>
+    }
+  }
+
+  @case ('list') {
+    <div [class]="quiet() ? 'mt-4 border-t border-[var(--color-border)] pt-3' : ''">
+      @if (headingKey(); as key) {
+        <h5 class="mb-2 text-sm font-semibold text-[var(--color-text)]">{{ key | translate }}</h5>
+      }
+      <ul class="flex flex-col gap-2" [attr.aria-label]="'teachingMaterials.listLabel' | translate">
+        @for (item of items(); track item.id) {
+          <li class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+            <ng-icon size="1.5rem" name="phosphorFileText" aria-hidden="true" class="shrink-0 text-[var(--color-text-muted)]" />
+            <div class="min-w-0 flex-1">
+              <p class="break-words text-sm font-medium text-[var(--color-text)]">{{ item.fileName }}</p>
+              <p class="text-sm text-[var(--color-text-muted)]">{{ formatSize(item.sizeBytes) }}</p>
+            </div>
+            <app-button
+              size="sm"
+              variant="secondary"
+              [loading]="downloadingId() === item.id"
+              [disabled]="downloadingId() !== null"
+              (click)="download(item)"
+            >
+              <ng-icon size="1.25rem" leading name="phosphorDownloadSimple" aria-hidden="true" />
+              {{ 'teachingMaterials.download.button' | translate }}<span class="sr-only">: {{ item.fileName }}</span>
+            </app-button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+}
+
+@if (downloadError(); as message) {
+  <p role="alert" class="mt-2 flex items-start gap-2 text-sm text-[var(--color-text)]">
+    <ng-icon size="1.25rem" name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+    <span>{{ message.key | translate: message.params }}</span>
+  </p>
+}

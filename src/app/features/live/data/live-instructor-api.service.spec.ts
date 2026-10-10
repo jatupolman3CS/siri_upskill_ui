@@ -119,4 +119,61 @@ describe('LiveInstructorApiService', () => {
     expect(recording.request.body).toEqual({ mediaAssetId: 'm1' });
     recording.flush({});
   });
+
+  describe('recording import (P11-13)', () => {
+    it('getGoogleStatus returns the account kind, hosted domain and recording capability exactly as sent', () => {
+      const received = vi.fn();
+      service.getGoogleStatus().subscribe(received);
+      const body = {
+        configured: true,
+        connected: true,
+        needsReconnect: false,
+        googleEmail: 'teacher@example.com',
+        connectedAtUtc: null,
+        lastValidatedAtUtc: null,
+        revokedReason: null,
+        affectedSessionCount: 0,
+        accountKind: 'Workspace',
+        hostedDomain: 'example.com',
+        recording: { mode: 'AutoNeedsConsent', autoImportAvailable: true, scopesGranted: false },
+      };
+      httpMock.expectOne('/api/live/instructor/google/status').flush(body);
+      expect(received).toHaveBeenCalledWith(body);
+    });
+
+    it('connectRecordingAccess posts the return path to the recording-access route', () => {
+      const received = vi.fn();
+      service.connectRecordingAccess('/instructor/live-settings').subscribe(received);
+      const req = httpMock.expectOne('/api/live/instructor/google/recording-access/connect');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ returnPath: '/instructor/live-settings' });
+      req.flush({ authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?x=1' });
+      expect(received).toHaveBeenCalledWith({ authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?x=1' });
+    });
+
+    it('retryRecordingImport posts to the session retry route (id URL-encoded) and returns the refreshed import state', () => {
+      const received = vi.fn();
+      service.retryRecordingImport('s 1').subscribe(received);
+      const req = httpMock.expectOne('/api/live/instructor/sessions/s%201/recording-import/retry');
+      expect(req.request.method).toBe('POST');
+      const info = { mode: 'Auto', status: 'Waiting', errorCode: null, nextAttemptAtUtc: '2026-10-10T03:00:00Z', canRetry: false };
+      req.flush(info);
+      expect(received).toHaveBeenCalledWith(info);
+    });
+
+    it('listSessions / getSessionDetail pass the recordingImport object through untouched', () => {
+      const info = { mode: 'Auto', status: 'NoRecording', errorCode: null, nextAttemptAtUtc: null, canRetry: true };
+      const list = vi.fn();
+      service.listSessions({ scope: 'past' }).subscribe(list);
+      httpMock
+        .expectOne((r) => r.url === '/api/live/instructor/sessions')
+        .flush({ items: [{ sessionId: 's1', recordingImport: info }], totalCount: 1, page: 1, pageSize: 20, totalPages: 1 });
+      expect(list.mock.calls[0][0].items[0].recordingImport).toEqual(info);
+
+      const detail = vi.fn();
+      service.getSessionDetail('s1').subscribe(detail);
+      httpMock.expectOne('/api/live/instructor/sessions/s1').flush({ sessionId: 's1', recordingImport: info });
+      expect(detail.mock.calls[0][0].recordingImport).toEqual(info);
+    });
+  });
 });

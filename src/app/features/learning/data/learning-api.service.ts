@@ -13,8 +13,6 @@ import {
   CreateDiscussionRequest,
   DiscussionItem,
   EnrollmentItemResponse,
-  EpisodeAttachmentDownloadInfo,
-  EpisodeAttachmentItem,
   EpisodeProgressResponse,
   LearnerQuiz,
   PlaybackSessionResponse,
@@ -159,14 +157,7 @@ export class LearningApiService {
     return this.http.post<AssignmentSubmissionItem>('/api/learning/assignment-submissions', req);
   }
 
-  // --- Attachments / Resources ---
-  getEpisodeAttachments(episodeId: string): Observable<EpisodeAttachmentItem[]> {
-    return this.http.get<EpisodeAttachmentItem[]>(`/api/catalog/episodes/${episodeId}/attachments`);
-  }
-
-  downloadEpisodeAttachment(episodeId: string, attachmentId: string): Observable<EpisodeAttachmentDownloadInfo> {
-    return this.http.get<EpisodeAttachmentDownloadInfo>(`/api/catalog/episodes/${episodeId}/attachments/${attachmentId}/download`);
-  }
+  // Episode attachments (teaching materials) live in `features/catalog/data/teaching-materials-api.service.ts`.
 
   // --- Community Q&A ---
   getDiscussions(episodeId: string, page = 1, pageSize = 20): Observable<PagedResponse<DiscussionItem>> {

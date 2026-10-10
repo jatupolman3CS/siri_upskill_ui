@@ -12,7 +12,9 @@ import { Skeleton } from '../../../../shared/skeleton/skeleton';
 import { LiveInstructorApiService } from '../../data/live-instructor-api.service';
 import type { InstructorSessionScope } from '../../data/live-instructor.models';
 import { meetingStatusView } from '../../data/live-instructor.util';
+import { RECORDING_IMPORT_POLL_MS, hasInFlightRecordingImport, recordingListChip } from '../../data/live-recording-import.util';
 import { BangkokTimeRange } from '../../ui/bangkok-time-range/bangkok-time-range';
+import { pollWhile } from '../poll-while';
 import { trackStudioMeta } from '../studio-meta';
 import { LiveStatusBadge } from '../../learner/live-status-badge/live-status-badge';
 import { StatusChip } from '../ui/status-chip/status-chip';
@@ -62,11 +64,19 @@ export class SessionsPage {
       item,
       // A cancelled session has no room to report on.
       meeting: item.displayState === 'Cancelled' ? null : meetingStatusView(item.meeting),
+      // Text only: the whole card is a link, so the retry / upload controls live on the session's own page.
+      recording: recordingListChip(item.displayState, item.recordingEpisodeId, item.recordingImport),
     })),
   );
 
   constructor() {
     trackStudioMeta('live.instructor.sessions.pageTitle', 'live.instructor.sessions.pageDescription', () => '/instructor/sessions');
+    // An automatic recording import moves on by itself; look again every 30 s, and only while one is in flight.
+    pollWhile(
+      () => hasInFlightRecordingImport(this.result()?.items ?? []),
+      () => this.sessionsResource.reload(),
+      RECORDING_IMPORT_POLL_MS,
+    );
   }
 
   protected setScope(next: InstructorSessionScope): void {

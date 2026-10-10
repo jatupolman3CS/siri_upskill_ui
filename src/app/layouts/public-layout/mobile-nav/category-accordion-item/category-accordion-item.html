@@ -8,7 +8,7 @@
       hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
   >
     @if (depth() === 0) {
-      <ng-icon [name]="resolveIconName(category().iconKey)" aria-hidden="true" class="text-[var(--color-primary)]" />
+      <ng-icon [name]="resolveIconName(category().iconKey)" aria-hidden="true" [class]="resolveTone(category().iconKey) + ' text-[var(--tone-fg)]'" />
     }
     {{ categoryName(category()) }}
   </a>

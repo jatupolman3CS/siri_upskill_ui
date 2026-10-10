@@ -67,4 +67,27 @@ describe('InputField + formControlName', () => {
     fixture.detectChanges();
     expect(nativeInput.disabled).toBe(true);
   });
+
+  it('renders no step or inputmode attribute unless asked to', () => {
+    expect(nativeInput.hasAttribute('step')).toBe(false);
+    expect(nativeInput.hasAttribute('inputmode')).toBe(false);
+  });
+});
+
+@Component({
+  selector: 'app-input-amount-host',
+  imports: [InputField],
+  template: `<app-input label="Amount" type="number" step="0.01" inputMode="decimal" />`,
+})
+class AmountHost {}
+
+describe('InputField step and inputMode', () => {
+  it('passes the step and inputmode hints through to the native input', () => {
+    const fixture = TestBed.createComponent(AmountHost);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+
+    expect(input.getAttribute('step')).toBe('0.01');
+    expect(input.getAttribute('inputmode')).toBe('decimal');
+  });
 });

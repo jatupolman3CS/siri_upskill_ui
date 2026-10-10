@@ -28,3 +28,22 @@ export function resolveCategoryIconName(iconKey: string | null): string {
   }
   return ICON_KEY_TO_NAME[iconKey] ?? FALLBACK_ICON_NAME;
 }
+
+/** Hue classes defined in `styles/tokens.css` (`.tone-*`). The brand stays pink; category glyphs get their own hue so
+ *  the three seeded categories read apart at a glance instead of all being the same pink. */
+export type CategoryTone = 'tone-orange' | 'tone-blue' | 'tone-green' | 'tone-violet';
+
+const ICON_KEY_TO_TONE: Readonly<Record<string, CategoryTone>> = {
+  megaphone: 'tone-orange',
+  code: 'tone-blue',
+  coins: 'tone-green',
+};
+
+const FALLBACK_TONE: CategoryTone = 'tone-violet';
+
+export function resolveCategoryTone(iconKey: string | null): CategoryTone {
+  if (iconKey === null) {
+    return FALLBACK_TONE;
+  }
+  return ICON_KEY_TO_TONE[iconKey] ?? FALLBACK_TONE;
+}

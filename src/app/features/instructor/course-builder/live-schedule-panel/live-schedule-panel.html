@@ -80,6 +80,7 @@
                   [courseId]="courseId()"
                   [displayState]="row.state"
                   [meeting]="row.meeting"
+                  [recordingImport]="row.recordingImport"
                   [googleConfigured]="googleStatus()?.configured ?? null"
                   [highlighted]="row.highlighted"
                   (editRequested)="editing.set($event)"

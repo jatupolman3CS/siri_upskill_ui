@@ -8,7 +8,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 
 import { errorInterceptor } from '../../../../core/http/error.interceptor';
 import { TranslationService } from '../../../../core/i18n/translation.service';
-import type { InstructorMeetingSummary, InstructorSessionDetail } from '../../data/live-instructor.models';
+import type { InstructorMeetingSummary, InstructorSessionDetail, RecordingImportInfo } from '../../data/live-instructor.models';
 import { SessionDetailPage } from './session-detail-page';
 
 registerLocaleData(localeTh);
@@ -30,6 +30,13 @@ const meeting = (overrides: Partial<InstructorMeetingSummary> = {}): InstructorM
   ...overrides,
 });
 
+const manualImport: RecordingImportInfo = { mode: 'Manual', status: null, errorCode: null, nextAttemptAtUtc: null, canRetry: false };
+const recordingImport = (overrides: Partial<RecordingImportInfo> = {}): RecordingImportInfo => ({
+  ...manualImport,
+  mode: 'Auto',
+  ...overrides,
+});
+
 const detail = (overrides: Partial<InstructorSessionDetail> = {}): InstructorSessionDetail => ({
   sessionId: 's1',
   courseId: 'c1',
@@ -45,6 +52,7 @@ const detail = (overrides: Partial<InstructorSessionDetail> = {}): InstructorSes
   recordingEpisodeId: null,
   meetUrl: 'https://meet.google.com/abc-defg-hij',
   meeting: meeting(),
+  recordingImport: manualImport,
   enrolledCount: 20,
   expectedLearners: 18,
   joinedLearners: 3,
@@ -178,6 +186,90 @@ describe('SessionDetailPage', () => {
     const watch = Array.from(root().querySelectorAll('a')).find((a) => a.textContent?.includes('Watch the recording'));
     expect(watch?.getAttribute('href')).toBe('/learn/excel-pro/e9');
     expect(Array.from(root().querySelectorAll('button')).some((b) => b.textContent?.includes('Cancel this session'))).toBe(false);
+  });
+
+  describe('automatic recording import (P11-13)', () => {
+    const ended = (imported?: RecordingImportInfo, overrides: Partial<InstructorSessionDetail> = {}) =>
+      detail({ displayState: 'Ended', meetUrl: null, ...(imported ? { recordingImport: imported } : {}), ...overrides });
+    const buttonByText = (label: string) =>
+      Array.from(root().querySelectorAll('button')).find((b) => b.textContent?.includes(label)) as HTMLButtonElement | undefined;
+
+    it.each([
+      ['Waiting', 'Waiting for Google Meet'],
+      ['Transferring', 'copying the file'],
+      ['Processing', 'processing the video'],
+    ] as const)('%s -> says it is importing and keeps the manual upload available', async (status, phrase) => {
+      await open(ended(recordingImport({ status })));
+
+      expect(text()).toContain(phrase);
+      expect(text()).toContain('Upload recording');
+      expect(buttonByText('Try importing again')).toBeUndefined();
+    });
+
+    it('NoRecording with canRetry: Retry posts to the retry route and the page then refetches the session', async () => {
+      await open(ended(recordingImport({ status: 'NoRecording', canRetry: true })));
+      expect(text()).toContain('No Google Meet recording was found');
+
+      buttonByText('Try importing again')?.click();
+      const req = httpMock.expectOne('/api/live/instructor/sessions/s1/recording-import/retry');
+      expect(req.request.method).toBe('POST');
+      req.flush(recordingImport({ status: 'Waiting' }));
+      await settle();
+
+      expect(text()).toContain('Waiting for Google Meet');
+      httpMock.expectOne(DETAIL_URL).flush(ended(recordingImport({ status: 'Waiting' })));
+      await settle();
+      expect(text()).toContain('Waiting for Google Meet');
+    });
+
+    it('Failed shows the reason behind the error code', async () => {
+      await open(ended(recordingImport({ status: 'Failed', errorCode: 'file_too_large', canRetry: true })));
+      expect(text()).toContain('Automatic recording import failed');
+      expect(text()).toContain('too large for automatic import');
+    });
+
+    it('NeedsReconnect links to the Google settings page', async () => {
+      await open(ended(recordingImport({ status: 'NeedsReconnect' })));
+      const link = Array.from(root().querySelectorAll('a')).find((a) => a.textContent?.includes('Reconnect Google'));
+      expect(link?.getAttribute('href')).toBe('/instructor/live-settings');
+      expect(text()).toContain('Upload recording');
+    });
+
+    it('Attached keeps the old wording, the replace action and the watch link', async () => {
+      await open(ended(recordingImport({ status: 'Attached' }), { recordingEpisodeId: 'e9' }));
+      expect(text()).toContain('This session has a recording');
+      expect(text()).toContain('Replace recording');
+      expect(Array.from(root().querySelectorAll('a')).some((a) => a.textContent?.includes('Watch the recording'))).toBe(true);
+    });
+
+    it('a manual-path session keeps exactly the old upload prompt', async () => {
+      await open(ended());
+      expect(text()).toContain('No recording yet. Upload a video');
+      expect(buttonByText('Try importing again')).toBeUndefined();
+    });
+
+    it('re-reads the session every 30 s while the import is in flight, then stops once it is attached', async () => {
+      vi.useFakeTimers();
+      await open(ended(recordingImport({ status: 'Waiting' })));
+
+      vi.advanceTimersByTime(29_999);
+      httpMock.expectNone(DETAIL_URL);
+      vi.advanceTimersByTime(1);
+      TestBed.flushEffects();
+      httpMock.expectOne(DETAIL_URL).flush(ended(recordingImport({ status: 'Attached' }), { recordingEpisodeId: 'e9' }));
+      await settle();
+      expect(text()).toContain('This session has a recording');
+
+      vi.advanceTimersByTime(120_000);
+      httpMock.expectNone(DETAIL_URL);
+    });
+
+    it.each(['NoRecording', 'Failed', 'NeedsReconnect', 'Attached', 'Skipped'] as const)('never polls for a %s import', async (status) => {
+      vi.useFakeTimers();
+      await open(ended(recordingImport({ status })));
+      vi.advanceTimersByTime(120_000);
+      httpMock.expectNone(DETAIL_URL);
+    });
   });
 
   describe('while the room is still being created', () => {

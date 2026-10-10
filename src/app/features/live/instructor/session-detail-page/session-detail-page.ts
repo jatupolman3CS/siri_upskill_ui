@@ -16,11 +16,12 @@ import { Button } from '../../../../shared/button/button';
 import { EmptyState } from '../../../../shared/empty-state/empty-state';
 import { Skeleton } from '../../../../shared/skeleton/skeleton';
 import { LiveInstructorApiService } from '../../data/live-instructor-api.service';
+import { RECORDING_IMPORT_POLL_MS, hasInFlightRecordingImport } from '../../data/live-recording-import.util';
 import { BangkokTimeRange } from '../../ui/bangkok-time-range/bangkok-time-range';
 import { pollWhile } from '../poll-while';
 import { trackStudioMeta } from '../studio-meta';
 import { CancelSessionDialog } from '../ui/cancel-session-dialog/cancel-session-dialog';
-import { RecordingUploader } from '../ui/recording-uploader/recording-uploader';
+import { RecordingImport } from '../ui/recording-import/recording-import';
 import { LiveStatusBadge } from '../../learner/live-status-badge/live-status-badge';
 import { SessionRoomCard } from './session-room-card/session-room-card';
 import { SessionRoster } from './session-roster/session-roster';
@@ -47,7 +48,7 @@ const POLL_INTERVAL_MS = 10_000;
     SessionRoomCard,
     SessionRoster,
     CancelSessionDialog,
-    RecordingUploader,
+    RecordingImport,
   ],
   templateUrl: './session-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,6 +103,15 @@ export class SessionDetailPage {
     trackStudioMeta('live.instructor.detail.pageTitle', 'live.instructor.detail.pageDescription', () => `/instructor/sessions/${this.sessionId()}`);
     // The room is being created in the background — keep checking, but only while that is true.
     pollWhile(() => this.detail()?.meeting.needsAction === 'Waiting', () => this.reload(), POLL_INTERVAL_MS);
+    // An automatic recording import moves on by itself; look again every 30 s, and only while one is in flight.
+    pollWhile(
+      () => {
+        const detail = this.detail();
+        return detail !== null && hasInFlightRecordingImport([detail]);
+      },
+      () => this.reload(),
+      RECORDING_IMPORT_POLL_MS,
+    );
   }
 
   protected reload(): void {

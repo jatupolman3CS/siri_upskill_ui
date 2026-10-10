@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -29,6 +30,10 @@ import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { InstructorProfileResponse } from '../data/instructor-profile-api.models';
 import { InstructorProfileApiService } from '../data/instructor-profile-api.service';
+
+function isNotFound(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'status' in err && err.status === 404;
+}
 
 @Component({
   selector: 'app-instructor-onboarding-page',
@@ -64,6 +69,20 @@ export class InstructorOnboardingPage implements OnInit {
   protected readonly submitError = signal<string | null>(null);
   protected readonly submitSuccess = signal(false);
 
+  /** The lookup of the caller's application failed for a reason other than "never applied" (404). */
+  protected readonly loadError = signal(false);
+
+  // Exactly one of these shows at a time (else: the application form). Only `Approved` leads on to the studio —
+  // `/instructor` is closed to everyone else (instructorStudioGuard), this page is all an unapproved user sees.
+  protected readonly isApproved = computed(() => this.existingProfile()?.status === 'Approved');
+  protected readonly isPending = computed(
+    () => this.existingProfile()?.status === 'Pending' || this.submitSuccess(),
+  );
+  /** Rejected applicants get the form back, prefilled, to resubmit (the API reuses their existing application). */
+  protected readonly isRejected = computed(
+    () => this.existingProfile()?.status === 'Rejected' && !this.submitSuccess(),
+  );
+
   // Form Fields - Step 1: Profile
   protected displayName = '';
   protected headline = '';
@@ -84,8 +103,9 @@ export class InstructorOnboardingPage implements OnInit {
     this.checkExistingProfile();
   }
 
-  private checkExistingProfile(): void {
+  protected checkExistingProfile(): void {
     this.isLoading.set(true);
+    this.loadError.set(false);
     this.instructorApi.getMyProfile().subscribe({
       next: (profile) => {
         this.existingProfile.set(profile);
@@ -96,7 +116,10 @@ export class InstructorOnboardingPage implements OnInit {
         }
         this.isLoading.set(false);
       },
-      error: () => {
+      error: (err: unknown) => {
+        // 404 is the normal "never applied" answer → show the empty form. Anything else means we do not know
+        // the caller's status, and showing the form could invite a duplicate application.
+        this.loadError.set(!isNotFound(err));
         this.isLoading.set(false);
       },
     });

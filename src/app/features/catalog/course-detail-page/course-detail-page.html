@@ -56,15 +56,15 @@
               </span>
             }
             <span class="inline-flex items-center gap-1">
-              <ng-icon name="phosphorUsers" aria-hidden="true" />
+              <ng-icon name="phosphorUsers" aria-hidden="true" class="text-[var(--hue-blue-fg)]" />
               {{ 'catalog.detail.enrollmentCountLabel' | translate: { count: course.enrollmentCount } }}
             </span>
             <span class="inline-flex items-center gap-1">
-              <ng-icon name="phosphorBookOpen" aria-hidden="true" />
+              <ng-icon name="phosphorBookOpen" aria-hidden="true" class="text-[var(--hue-violet-fg)]" />
               {{ 'catalog.detail.episodeCountLabel' | translate: { count: course.episodeCount } }}
             </span>
             <span class="inline-flex items-center gap-1">
-              <ng-icon name="phosphorClock" aria-hidden="true" />
+              <ng-icon name="phosphorClock" aria-hidden="true" class="text-[var(--hue-teal-fg)]" />
               {{ course.totalDurationSeconds | duration }}
             </span>
           </div>
@@ -216,7 +216,7 @@
                         <a
                           [routerLink]="['/learn', course.slug, episode.id]"
                           class="inline-flex shrink-0 items-center gap-1 rounded-[var(--radius-full)] bg-emerald-500/10
-                            px-2.5 py-1 text-xs font-semibold text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/20 transition cursor-pointer"
+                            px-2.5 py-1 text-xs font-semibold text-[var(--hue-green-fg)] border border-emerald-500/20 hover:bg-emerald-500/20 transition cursor-pointer"
                         >
                           <ng-icon name="phosphorPlayCircle" aria-hidden="true" />
                           {{ 'catalog.detail.freePreviewBadge' | translate }}
@@ -381,7 +381,7 @@
                 [routerLink]="['/learn', course.slug]"
                 class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-emerald-500/30 bg-emerald-500/10 py-2.5 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 transition cursor-pointer"
               >
-                <ng-icon name="phosphorPlayCircle" class="text-base text-emerald-600" />
+                <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
                 <span>ทดลองเรียนฟรี ({{ freePreviewCount() }} บทเรียน)</span>
               </a>
             }
@@ -425,19 +425,19 @@
 
           <div class="border-t border-[var(--color-border)] pt-4 flex flex-col gap-2.5 text-xs text-[var(--color-text)]">
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorInfinity" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <ng-icon name="phosphorInfinity" aria-hidden="true" class="text-[var(--hue-blue-fg)] text-sm shrink-0" />
               <span>{{ accessDurationLabel(course.accessDurationDays) }}</span>
             </div>
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorDevices" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <ng-icon name="phosphorDevices" aria-hidden="true" class="text-[var(--hue-teal-fg)] text-sm shrink-0" />
               <span>{{ 'catalog.detail.guaranteeMultiDevice' | translate }}</span>
             </div>
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorCertificate" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <ng-icon name="phosphorCertificate" aria-hidden="true" class="text-[var(--hue-gold-fg)] text-sm shrink-0" />
               <span>{{ 'catalog.detail.guaranteeCertificate' | translate }}</span>
             </div>
             <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorArrowUUpLeft" class="text-[var(--color-primary)] text-sm shrink-0" />
+              <ng-icon name="phosphorArrowUUpLeft" aria-hidden="true" class="text-[var(--hue-green-fg)] text-sm shrink-0" />
               <span>{{ 'catalog.detail.guaranteeRefund' | translate }}</span>
             </div>
           </div>
@@ -476,7 +476,7 @@
             [routerLink]="['/learn', course.slug]"
             class="inline-flex items-center justify-center gap-1 rounded-[var(--radius-md)] border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-700"
           >
-            <ng-icon name="phosphorPlayCircle" class="text-base text-emerald-600" />
+            <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
             <span>ทดลองเรียนฟรี</span>
           </a>
         }

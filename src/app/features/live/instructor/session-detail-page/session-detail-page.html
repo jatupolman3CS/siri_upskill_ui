@@ -99,16 +99,15 @@
           <ng-icon name="phosphorFilmStrip" aria-hidden="true" class="text-xl" />
           {{ 'live.instructor.recording.heading' | translate }}
         </h2>
-        <p class="mt-1 text-sm text-[var(--color-text-muted)]">
-          {{ (d.recordingEpisodeId ? 'live.instructor.recording.hasRecording' : 'live.instructor.recording.noRecording') | translate }}
-        </p>
-        <div class="mt-4 flex flex-col gap-3">
-          <app-live-recording-uploader
+        <div class="mt-1 flex flex-col gap-3">
+          <app-live-recording-import
+            variant="detail"
             [courseId]="d.courseId"
             [sessionId]="d.sessionId"
             [sessionTitle]="d.title"
             [hasRecording]="d.recordingEpisodeId !== null"
-            (attached)="reload()"
+            [recordingImport]="d.recordingImport"
+            (changed)="reload()"
           />
           @if (d.recordingEpisodeId; as episodeId) {
             <a

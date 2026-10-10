@@ -827,6 +827,13 @@
                         <ng-icon name="phosphorTrash" />
                       </button>
                     </div>
+
+                    <!-- Teaching materials (P4-03c). An episode that exists only in the browser has no server id yet. -->
+                    <app-teaching-materials-panel
+                      class="w-full"
+                      kind="episode"
+                      [parentId]="episode.id.startsWith('ep-temp-') ? null : episode.id"
+                    />
                   </div>
                 }
 

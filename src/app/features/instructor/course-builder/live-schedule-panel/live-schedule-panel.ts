@@ -14,6 +14,7 @@ import { ToastService } from '../../../../shared/toast/toast.service';
 import { LiveInstructorApiService } from '../../../live/data/live-instructor-api.service';
 import type { LiveSession } from '../../../live/data/live-instructor.models';
 import { hasWaitingMeeting, instructorProblemMessage } from '../../../live/data/live-instructor.util';
+import { RECORDING_IMPORT_POLL_MS, hasInFlightRecordingImport } from '../../../live/data/live-recording-import.util';
 import { LiveSubmitIssues } from '../../../live/data/live-submit-issues.service';
 import type { DeliveryFormat } from '../../../live/data/live.models';
 import { pollWhile } from '../../../live/instructor/poll-while';
@@ -88,6 +89,7 @@ export class LiveSchedulePanel {
   protected readonly isLoading = computed(() => this.scheduleResource.isLoading() && !this.scheduleResource.hasValue());
   protected readonly hasError = computed(() => !this.scheduleResource.hasValue() && this.scheduleResource.status() === 'error');
   private readonly meetings = computed(() => (this.meetingsResource.hasValue() ? this.meetingsResource.value().items : []));
+  private readonly sessionStates = computed(() => (this.statesResource.hasValue() ? this.statesResource.value().items : []));
   protected readonly googleStatus = computed(() => (this.googleResource.hasValue() ? this.googleResource.value() : null));
 
   protected readonly formatControl = new FormControl<DeliveryFormat>('OnDemand', { nonNullable: true });
@@ -114,16 +116,15 @@ export class LiveSchedulePanel {
 
   protected readonly rows = computed(() => {
     const meetings = new Map(this.meetings().map((meeting) => [meeting.sessionId, meeting]));
-    const states = new Map(
-      (this.statesResource.hasValue() ? this.statesResource.value().items : []).map((item) => [item.sessionId, item.displayState]),
-    );
+    const states = new Map(this.sessionStates().map((item) => [item.sessionId, item]));
     const notReady = this.issues.notReadySessionIds();
     return (this.schedule()?.sessions ?? []).map((session) => {
       const meeting = meetings.get(session.id) ?? null;
       return {
         session,
         meeting,
-        state: states.get(session.id) ?? null,
+        state: states.get(session.id)?.displayState ?? null,
+        recordingImport: states.get(session.id)?.recordingImport ?? null,
         highlighted: notReady.includes(session.id) && !meeting?.isUsable,
       };
     });
@@ -144,6 +145,14 @@ export class LiveSchedulePanel {
     });
     // Rooms are created in the background; check again every 10 s, and only while one is still "Waiting".
     pollWhile(() => hasWaitingMeeting(this.meetings()), () => this.meetingsResource.reload(), MEETING_POLL_MS);
+    // A recording being imported automatically moves on by itself; look again every 30 s, and only while one is in flight.
+    pollWhile(() => hasInFlightRecordingImport(this.sessionStates()), () => this.refreshRecordings(), RECORDING_IMPORT_POLL_MS);
+  }
+
+  /** Import progress lives in the session list; a finished import also adds the recording lesson to the schedule. */
+  private refreshRecordings(): void {
+    this.scheduleResource.reload();
+    this.statesResource.reload();
   }
 
   protected reloadAll(): void {

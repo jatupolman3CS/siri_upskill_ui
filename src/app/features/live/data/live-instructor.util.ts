@@ -105,6 +105,7 @@ const CALLBACK_REASONS: readonly GoogleCallbackReason[] = [
   'scope_missing',
   'no_refresh_token',
   'exchange_failed',
+  'recording_scope_missing',
 ];
 
 /** Minimal slice of Angular's `ParamMap` — keeps this function trivially unit-testable. */

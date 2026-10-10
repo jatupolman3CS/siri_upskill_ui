@@ -27,6 +27,7 @@ import { ToastService } from '../../../../shared/toast/toast.service';
 import type { MySessionItem, MySessionsResponse } from '../../data/live-learner.models';
 import { LiveLearnerApiService } from '../../data/live-learner-api.service';
 import type { Guid } from '../../data/live.models';
+import { LearnerMaterialsList } from '../../../catalog/ui/learner-materials-list/learner-materials-list';
 import { clockOffsetMs, nextBoundaryDelayMs } from '../live-clock';
 import { LiveRefundNotice } from '../live-refund-notice/live-refund-notice';
 import { LiveSessionCard } from '../live-session-card/live-session-card';
@@ -45,7 +46,7 @@ type TabStatus = 'loading' | 'ready' | 'error' | 'unavailable';
  */
 @Component({
   selector: 'app-live-tab',
-  imports: [NgIcon, TranslatePipe, Button, EmptyState, Skeleton, LiveSessionCard, LiveRefundNotice],
+  imports: [NgIcon, TranslatePipe, Button, EmptyState, Skeleton, LiveSessionCard, LiveRefundNotice, LearnerMaterialsList],
   templateUrl: './live-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ phosphorArrowClockwise, phosphorWarning })],

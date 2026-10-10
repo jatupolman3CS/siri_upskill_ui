@@ -17,6 +17,8 @@ import type {
   LiveSession,
   LiveSessionRecording,
   LiveSessionWriteRequest,
+  RecordingAccessConnectRequest,
+  RecordingImportInfo,
   RosterItem,
   RosterQuery,
   SetDeliveryFormatRequest,
@@ -45,6 +47,15 @@ export class LiveInstructorApiService extends ApiService {
   /** Returns the Google consent URL; the caller navigates the whole window to it (it is a top-level redirect). */
   connectGoogle(returnPath?: string): Observable<GoogleConnectResponse> {
     return this.post<GoogleConnectResponse>('/live/instructor/google/connect', returnPath ? { returnPath } : {});
+  }
+
+  /**
+   * The second, optional Google consent for automatic recording import (Workspace accounts only, `P11-13`). Returns a consent
+   * URL exactly like {@link connectGoogle}; 409 `live.recording_not_available` = feature off or not a Workspace account.
+   */
+  connectRecordingAccess(returnPath: string): Observable<GoogleConnectResponse> {
+    const body: RecordingAccessConnectRequest = { returnPath };
+    return this.post<GoogleConnectResponse>('/live/instructor/google/recording-access/connect', body);
   }
 
   disconnectGoogle(): Observable<void> {
@@ -86,6 +97,17 @@ export class LiveInstructorApiService extends ApiService {
   /** The only instructor response that carries `meetUrl` — keep it in a component signal, never persist it. */
   getSessionDetail(sessionId: Guid): Observable<InstructorSessionDetail> {
     return this.get<InstructorSessionDetail>(`/live/instructor/sessions/${encodeURIComponent(sessionId)}`);
+  }
+
+  /**
+   * Asks the server to look for a session's recording again (`Failed` / `NoRecording` / `NeedsReconnect`, within 30 days of the
+   * end). Answers with the refreshed {@link RecordingImportInfo}; 409 `live.recording_import_not_retryable` otherwise.
+   */
+  retryRecordingImport(sessionId: Guid): Observable<RecordingImportInfo> {
+    return this.post<RecordingImportInfo>(
+      `/live/instructor/sessions/${encodeURIComponent(sessionId)}/recording-import/retry`,
+      {},
+    );
   }
 
   getRoster(sessionId: Guid, query: RosterQuery): Observable<PagedResult<RosterItem>> {

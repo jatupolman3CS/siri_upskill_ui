@@ -1,0 +1,50 @@
+<div aria-live="polite">
+  <section
+    class="rounded-[var(--radius-lg)] p-5"
+    [class]="
+      active()
+        ? 'border-2 border-[var(--color-warning)] bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]'
+        : 'border border-[color-mix(in_srgb,var(--color-success)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]'
+    "
+  >
+    <div class="flex items-start gap-3">
+      <ng-icon
+        [name]="active() ? 'phosphorWarning' : 'phosphorCheckCircle'"
+        aria-hidden="true"
+        class="mt-0.5 shrink-0 text-3xl"
+        [class]="active() ? 'text-[var(--color-warning)]' : 'text-[var(--color-success)]'"
+      />
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.status.label' | translate }}</p>
+        <h2 class="mt-0.5 text-xl font-bold text-[var(--color-text)]">
+          {{ (active() ? 'admin.paymentSettings.status.active' : 'admin.paymentSettings.status.inactive') | translate }}
+        </h2>
+
+        @if (active()) {
+          <p class="mt-3 text-lg font-bold text-[var(--color-text)]">
+            {{ 'admin.paymentSettings.status.activeBanner' | translate: { amount: ((state().overrideAmount | currencyThb) ?? '') } }}
+          </p>
+          <p class="mt-1 text-sm text-[var(--color-text)]">{{ 'admin.paymentSettings.status.activeHint' | translate }}</p>
+        } @else {
+          <p class="mt-1 text-sm text-[var(--color-text)]">{{ 'admin.paymentSettings.status.inactiveHint' | translate }}</p>
+        }
+
+        @if (changedBy(); as by) {
+          <dl class="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+            <dt class="font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.status.changedAt' | translate }}</dt>
+            <dd class="text-[var(--color-text)]">{{ state().changedAtUtc | bangkokDate: 'dateTime' }}</dd>
+            <dt class="font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.status.changedBy' | translate }}</dt>
+            <dd class="text-[var(--color-text)]">
+              <code [title]="by.full" aria-hidden="true">{{ by.short }}</code>
+              <span class="sr-only">{{ by.full }}</span>
+            </dd>
+            <dt class="font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.status.reason' | translate }}</dt>
+            <dd class="break-words text-[var(--color-text)]">{{ state().reason }}</dd>
+          </dl>
+        } @else {
+          <p class="mt-3 text-sm text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.status.neverChanged' | translate }}</p>
+        }
+      </div>
+    </div>
+  </section>
+</div>
