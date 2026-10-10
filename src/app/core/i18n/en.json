@@ -1247,7 +1247,16 @@
         "trailerUploaded": "Trailer Uploaded",
         "removeTrailer": "Remove Trailer",
         "liveNoticeHeading": "Want to create a Live or Hybrid course?",
-        "liveNoticeBody": "Fill in the basic info and click \"Save Draft\" above. The \"Live schedule\" tab will appear, allowing you to set up live sessions and online meeting rooms immediately."
+        "liveNoticeBody": "Select \"Live\" or \"Hybrid\" format below, then click \"Save Draft\" to immediately access the \"Live schedule\" tab and set up meeting rooms.",
+        "deliveryFormat": "Course Format",
+        "deliveryFormatHint": "Select the teaching and learning format for this course",
+        "formatOnDemand": "On-Demand (Self-Paced)",
+        "formatOnDemandDesc": "Students learn at their own pace with videos and exercises anytime.",
+        "formatLive": "Live Online Course",
+        "formatLiveDesc": "Real-time interactive sessions with instructor via Google Meet, Zoom, or Teams.",
+        "formatHybrid": "Hybrid Course",
+        "formatHybridDesc": "Combines self-paced video lessons with scheduled real-time live sessions.",
+        "liveFormatSelectedNote": "You selected a Live format — saving draft will activate live sessions in the \"Live schedule\" tab immediately."
       },
       "curriculum": {
         "heading": "Manage Sections & Lessons",
@@ -1969,6 +1978,9 @@
     },
     "builder": {
       "tab": "Live schedule",
+      "unsavedCourseHeading": "Ready for Live Teaching",
+      "unsavedCourseDescription": "Please fill in basic info and save as draft first to enable live scheduling and online meeting rooms.",
+      "saveDraftToStartLive": "Save Draft & Open Live Schedule",
       "heading": "Live schedule",
       "subheading": "Set how the course is taught, its live sessions and online rooms. All times are Thailand time.",
       "errorHeading": "Could not load the live schedule",

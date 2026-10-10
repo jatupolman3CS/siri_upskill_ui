@@ -136,13 +136,18 @@ describe('CourseBuilderPage — live schedule tab (P11)', () => {
     await settle();
   });
 
-  it('a course that has not been saved yet has no Live tab (sessions need a real course id)', async () => {
+  it('a course that has not been saved yet shows the Live tab with an onboarding prompt to save draft first', async () => {
     await harness.navigateByUrl('/instructor/courses/new', CourseBuilderPage);
     await settle();
     httpMock.expectOne((r) => r.url === '/api/catalog/categories').flush(CATEGORIES);
     await settle();
 
-    expect(tab('Live schedule')).toBeUndefined();
+    expect(tab('Live schedule')).toBeDefined();
+    tab('Live schedule')?.click();
+    await settle();
+
+    expect(root().textContent).toContain('Ready for Live Teaching');
+    expect(root().querySelector('app-live-schedule-panel')).toBeNull();
   });
 
   it('a refused submit (live.meetings_not_ready) jumps to the live tab, explains why, and marks the named sessions', async () => {

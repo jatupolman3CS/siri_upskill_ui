@@ -184,19 +184,17 @@
         {{ 'instructor.builder.tabs.curriculum' | translate }}
       </button>
 
-      @if (courseId()) {
-        <button
-          type="button"
-          (click)="activeTab.set('live')"
-          class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
-          [class.bg-[var(--color-primary)]]="activeTab() === 'live'"
-          [class.text-white]="activeTab() === 'live'"
-          [class.text-[var(--color-text-muted)]]="activeTab() !== 'live'"
-          [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'live'"
-        >
-          {{ 'live.builder.tab' | translate }}
-        </button>
-      }
+      <button
+        type="button"
+        (click)="activeTab.set('live')"
+        class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
+        [class.bg-[var(--color-primary)]]="activeTab() === 'live'"
+        [class.text-white]="activeTab() === 'live'"
+        [class.text-[var(--color-text-muted)]]="activeTab() !== 'live'"
+        [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'live'"
+      >
+        {{ 'live.builder.tab' | translate }}
+      </button>
 
       <button
         type="button"
@@ -215,15 +213,97 @@
     @if (activeTab() === 'basic') {
       <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6 shadow-sm">
         <div class="space-y-4">
-          @if (!courseId()) {
-            <div class="rounded-xl border border-sky-200 bg-sky-50/70 p-4 text-xs text-sky-950 flex items-start gap-3">
-              <ng-icon name="phosphorSparkle" class="text-base text-sky-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p class="font-bold text-sky-900">{{ 'instructor.builder.basic.liveNoticeHeading' | translate }}</p>
-                <p class="text-sky-700 mt-0.5 leading-relaxed">{{ 'instructor.builder.basic.liveNoticeBody' | translate }}</p>
-              </div>
+          <!-- Delivery Format Selection -->
+          <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-3 shadow-xs">
+            <div>
+              <label class="text-xs font-bold text-[var(--color-text)] block">
+                {{ 'instructor.builder.basic.deliveryFormat' | translate }}
+              </label>
+              <p class="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                {{ 'instructor.builder.basic.deliveryFormatHint' | translate }}
+              </p>
             </div>
-          }
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <!-- OnDemand -->
+              <button
+                type="button"
+                (click)="selectDeliveryFormat('OnDemand')"
+                class="btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
+                [class.border-[var(--color-primary)]]="selectedDeliveryFormat() === 'OnDemand'"
+                [class.bg-[var(--color-primary)]/10]="selectedDeliveryFormat() === 'OnDemand'"
+                [class.ring-2]="selectedDeliveryFormat() === 'OnDemand'"
+                [class.ring-[var(--color-primary)]/30]="selectedDeliveryFormat() === 'OnDemand'"
+                [class.border-[var(--color-border)]]="selectedDeliveryFormat() !== 'OnDemand'"
+                [class.bg-[var(--color-surface)]]="selectedDeliveryFormat() !== 'OnDemand'"
+              >
+                <div class="flex items-center gap-2">
+                  <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--color-primary)]" />
+                  <span class="text-xs font-bold text-[var(--color-text)]">
+                    {{ 'instructor.builder.basic.formatOnDemand' | translate }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+                  {{ 'instructor.builder.basic.formatOnDemandDesc' | translate }}
+                </p>
+              </button>
+
+              <!-- Live -->
+              <button
+                type="button"
+                (click)="selectDeliveryFormat('Live')"
+                class="btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
+                [class.border-rose-500]="selectedDeliveryFormat() === 'Live'"
+                [class.bg-rose-500/10]="selectedDeliveryFormat() === 'Live'"
+                [class.ring-2]="selectedDeliveryFormat() === 'Live'"
+                [class.ring-rose-500/30]="selectedDeliveryFormat() === 'Live'"
+                [class.border-[var(--color-border)]]="selectedDeliveryFormat() !== 'Live'"
+                [class.bg-[var(--color-surface)]]="selectedDeliveryFormat() !== 'Live'"
+              >
+                <div class="flex items-center gap-2">
+                  <ng-icon name="phosphorVideoCamera" class="text-base text-rose-500" />
+                  <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
+                    {{ 'instructor.builder.basic.formatLive' | translate }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+                  {{ 'instructor.builder.basic.formatLiveDesc' | translate }}
+                </p>
+              </button>
+
+              <!-- Hybrid -->
+              <button
+                type="button"
+                (click)="selectDeliveryFormat('Hybrid')"
+                class="btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
+                [class.border-amber-500]="selectedDeliveryFormat() === 'Hybrid'"
+                [class.bg-amber-500/10]="selectedDeliveryFormat() === 'Hybrid'"
+                [class.ring-2]="selectedDeliveryFormat() === 'Hybrid'"
+                [class.ring-amber-500/30]="selectedDeliveryFormat() === 'Hybrid'"
+                [class.border-[var(--color-border)]]="selectedDeliveryFormat() !== 'Hybrid'"
+                [class.bg-[var(--color-surface)]]="selectedDeliveryFormat() !== 'Hybrid'"
+              >
+                <div class="flex items-center gap-2">
+                  <ng-icon name="phosphorArrowClockwise" class="text-base text-amber-500" />
+                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                    {{ 'instructor.builder.basic.formatHybrid' | translate }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+                  {{ 'instructor.builder.basic.formatHybridDesc' | translate }}
+                </p>
+              </button>
+            </div>
+
+            @if (selectedDeliveryFormat() !== 'OnDemand') {
+              <div class="rounded-xl border border-sky-200 bg-sky-50/70 p-3 text-xs text-sky-950 flex items-start gap-2.5">
+                <ng-icon name="phosphorSparkle" class="text-sm text-sky-600 flex-shrink-0 mt-0.5" />
+                <p class="text-sky-800 leading-relaxed font-medium">
+                  {{ 'instructor.builder.basic.liveFormatSelectedNote' | translate }}
+                </p>
+              </div>
+            }
+          </div>
           <div>
             <label for="builderCourseTitle" class="text-xs font-bold text-[var(--color-text)] block mb-1">
               {{ 'instructor.builder.basic.title' | translate }}
@@ -862,13 +942,43 @@
       </div>
     }
 
-    <!-- Live schedule (P11) — only for a saved course: sessions attach to a real course id. -->
-    @if (activeTab() === 'live' && courseId(); as liveCourseId) {
-      <app-live-schedule-panel
-        [courseId]="liveCourseId"
-        (deliveryFormatChange)="onDeliveryFormatChange($event)"
-        (courseChanged)="onLiveCourseChanged()"
-      />
+    <!-- Live schedule (P11) -->
+    @if (activeTab() === 'live') {
+      @if (courseId(); as liveCourseId) {
+        <app-live-schedule-panel
+          [courseId]="liveCourseId"
+          (deliveryFormatChange)="onDeliveryFormatChange($event)"
+          (courseChanged)="onLiveCourseChanged()"
+        />
+      } @else {
+        <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center space-y-4 shadow-sm">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-600">
+            <ng-icon name="phosphorVideoCamera" class="text-4xl" />
+          </div>
+          <h3 class="text-xl font-bold text-[var(--color-text)]">
+            {{ 'live.builder.unsavedCourseHeading' | translate }}
+          </h3>
+          <p class="max-w-md mx-auto text-xs text-[var(--color-text-muted)] leading-relaxed">
+            {{ 'live.builder.unsavedCourseDescription' | translate }}
+          </p>
+          <div class="pt-4 flex justify-center gap-3">
+            <button
+              type="button"
+              (click)="saveAndOpenLive()"
+              [disabled]="isSaving() || isLoading()"
+              class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+            >
+              @if (isSaving()) {
+                <app-spinner size="xs" color="white" />
+                <span>{{ 'instructor.builder.saving' | translate }}</span>
+              } @else {
+                <ng-icon name="phosphorFloppyDisk" />
+                <span>{{ 'live.builder.saveDraftToStartLive' | translate }}</span>
+              }
+            </button>
+          </div>
+        </div>
+      }
     }
 
     <!-- Tab 3: Publish -->

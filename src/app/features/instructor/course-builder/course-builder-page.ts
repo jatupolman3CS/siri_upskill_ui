@@ -38,6 +38,7 @@ import {
   phosphorSpinner,
   phosphorTrash,
   phosphorUploadSimple,
+  phosphorVideoCamera,
   phosphorWarningCircle,
 } from '@ng-icons/phosphor-icons/regular';
 import { Observable, Subject, Subscription, of } from 'rxjs';
@@ -137,6 +138,7 @@ export type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'conflict' | 
       phosphorSpinner,
       phosphorTrash,
       phosphorUploadSimple,
+      phosphorVideoCamera,
       phosphorWarningCircle,
     }),
   ],
@@ -155,7 +157,8 @@ export class CourseBuilderPage implements OnInit {
   private readonly liveIssues = inject(LiveSubmitIssues);
   private readonly liveApi = inject(LiveInstructorApiService);
   /** The course's delivery format; `null` until it is known (reported by the live tab, or read on demand when the instructor goes to submit). */
-  private readonly deliveryFormat = signal<DeliveryFormat | null>(null);
+  protected readonly deliveryFormat = signal<DeliveryFormat | null>(null);
+  public readonly selectedDeliveryFormat = signal<DeliveryFormat>('OnDemand');
   protected readonly isLoading = signal(false);
   protected readonly saveSuccess = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -1117,6 +1120,7 @@ export class CourseBuilderPage implements OnInit {
     this.isConflict.set(false);
 
     if (!id) {
+      const chosenFormat = this.selectedDeliveryFormat();
       this.courseApi
         .createCourse({
           title: this.courseTitle(),
@@ -1128,6 +1132,16 @@ export class CourseBuilderPage implements OnInit {
         .pipe(
           switchMap((created) => {
             this.courseId.set(created.id);
+            if (chosenFormat !== 'OnDemand') {
+              return this.liveApi.setDeliveryFormat(created.id, chosenFormat).pipe(
+                tap((res) => {
+                  this.deliveryFormat.set(res.deliveryFormat);
+                  this.selectedDeliveryFormat.set(res.deliveryFormat);
+                }),
+                switchMap(() => this.courseApi.getCourseBuilder(created.id)),
+                catchError(() => this.courseApi.getCourseBuilder(created.id)),
+              );
+            }
             return this.courseApi.getCourseBuilder(created.id);
           }),
           switchMap((builder) => {
@@ -1144,6 +1158,9 @@ export class CourseBuilderPage implements OnInit {
             );
             setTimeout(() => this.saveSuccess.set(false), 3000);
             this.openCourseRoute();
+            if (chosenFormat !== 'OnDemand') {
+              this.activeTab.set('live');
+            }
           }),
           catchError((err) => {
             if (err?.status === 409) {
@@ -1239,6 +1256,35 @@ export class CourseBuilderPage implements OnInit {
   /** Called by the live tab as it learns the course's format (and again whenever the instructor changes it). */
   protected onDeliveryFormatChange(format: DeliveryFormat): void {
     this.deliveryFormat.set(format);
+    this.selectedDeliveryFormat.set(format);
+  }
+
+  public selectDeliveryFormat(format: DeliveryFormat): void {
+    if (this.selectedDeliveryFormat() === format) return;
+    this.selectedDeliveryFormat.set(format);
+    const id = this.courseId();
+    if (id) {
+      this.liveApi.setDeliveryFormat(id, format).subscribe({
+        next: (res) => {
+          this.deliveryFormat.set(res.deliveryFormat);
+          this.selectedDeliveryFormat.set(res.deliveryFormat);
+          this.onLiveCourseChanged();
+        },
+        error: (err) => {
+          this.selectedDeliveryFormat.set(this.deliveryFormat() ?? 'OnDemand');
+          if (err?.error?.message) {
+            this.errorMessage.set(err.error.message);
+          }
+        },
+      });
+    }
+  }
+
+  public saveAndOpenLive(): void {
+    if (this.selectedDeliveryFormat() === 'OnDemand') {
+      this.selectedDeliveryFormat.set('Live');
+    }
+    this.saveCourse();
   }
 
   /**
@@ -1279,7 +1325,10 @@ export class CourseBuilderPage implements OnInit {
     return this.liveApi.getLiveSchedule(id).pipe(
       map((schedule) => schedule.deliveryFormat),
       catchError(() => of<DeliveryFormat>('OnDemand')),
-      tap((format) => this.deliveryFormat.set(format)),
+      tap((format) => {
+        this.deliveryFormat.set(format);
+        this.selectedDeliveryFormat.set(format);
+      }),
       takeUntilDestroyed(this.destroyRef),
     );
   }
