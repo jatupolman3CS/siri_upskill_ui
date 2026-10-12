@@ -1,65 +1,63 @@
 /*
  * Design tokens — SIRI UpSkill
  * ============================================================================
- * Brand color superseded (2026-08-20, project owner directive via the mockup
- * handoff — full pink rebrand, replaces the P0-31 trust-blue/gold identity
- * below system-wide). Non-color tokens (spacing/radius/shadow/typography)
- * are UNCHANGED from P0-31 — the mockup's own token files copy those from
- * this system verbatim, only colors.css diverged. Source of the new palette:
- * frontend/design-system/siri-upskill/mockups-2026-08-20/_ds/ (the design
- * system subfolder there)/tokens/colors.css.
- * frontend/design-system/siri-upskill/MASTER.md's color section (P0-31) is
- * now historical — it documents *why blue* was chosen, which no longer
- * applies; see that file's own superseded-note for the pointer back here.
+ * Theme: "Cyber-Pink Glassmorphism" (D-24, 2026-10-12 — owner-approved, supersedes the flat
+ * look of P0-31 and the colour/typography parts of D-17). Brand stays magenta/pink
+ * (`--color-primary` #db2777); surfaces are slate with translucent glass layers; Prompt is the
+ * one font (Thai + Latin).
  *
- * - Color: magenta/pink primary + amber/gold accent retained for achievement
- *   moments (certificates, badges, "featured") — not used as a dominant UI
- *   color, just the "you earned this" signal, unchanged in spirit from
- *   P0-31 even though the primary hue changed.
- * - Typography: IBM Plex Sans Thai, one family for Thai + Latin (weights
- *   400–700 loaded). Avoids the mismatched-metrics risk of pairing a
- *   Latin-only display font with a separate Thai body font — this codebase
- *   ships a bilingual TH/EN UI (see core/i18n/), so headings and body must
- *   look like one system in both scripts, not two typefaces stitched
- *   together at the language boundary.
+ * Colour modes (3-way switch: light / dark / system — see core/theme/theme.service.ts):
+ * `:root` is light. Dark overrides live under `:root[data-theme='dark']`. The attribute is set
+ * synchronously before first paint by the inline script in index.html (cookie `siri_theme`, or the
+ * OS preference when the cookie says "system"), then kept in sync by ThemeService. There is no
+ * `prefers-color-scheme` fallback block on purpose: the app needs JS to run, the script sets the
+ * attribute before paint, and a second copy of every dark token would be a drift hazard.
+ * `@custom-variant dark` in styles.css points Tailwind's `dark:` utilities at the same attribute.
  *
- * Convention (ui-design.md): full palette defined on :root (light is the
- * default/fallback), only the tokens that actually differ are overridden
- * inside the prefers-color-scheme: dark block. Components must reference
- * these variables (directly or via Tailwind arbitrary-value syntax, e.g.
- * `text-[color:var(--color-text)]`) — never raw hex codes.
+ * Convention (ui-design.md): components reference these variables (directly or via Tailwind
+ * arbitrary-value syntax, e.g. `text-[var(--color-text)]`) — never raw hex / raw Tailwind palette.
+ * Hex lives only in this file.
  *
- * Contrast checked 2026-08-20 (WCAG 2.1, not assumed): --color-primary on
- * --color-bg (light) ≈ 4.6:1, passes 4.5:1 for normal text. --color-focus-ring
- * against its adjacent surface ≥3:1 in both themes, passes the non-text
- * threshold. One pre-existing characteristic carried over unchanged from the
- * P0-31 blue palette, not introduced by this rebrand: --color-primary used as
- * plain (non-hover) link-text color in DARK mode against --color-bg lands at
- * ≈3.9:1 — under the strict 4.5:1 normal-text AA threshold, same as blue's
- * ≈3.0:1 was (this rebrand is slightly better on that specific metric, not
- * worse). Links already switch to the higher-contrast --color-primary-hover
- * tint on :hover/:focus; if this needs to be tightened further, do it by
- * having dark-mode body links resolve to --color-primary-hover at rest too,
- * not by picking a random darker pink here.
+ * Contrast (WCAG 2.1, computed 2026-10-12, not eyeballed):
+ *   light  text/bg 14.0 · muted/bg 7.2 · white on primary 4.6 · primary-text/bg 5.8
+ *   dark   text/bg 16.0 · muted/bg 7.7 · primary-text/bg 7.5 · text on glass-card 13.3
+ * `--color-primary` itself is 4.4:1 on the light page background (slate-50) — fine for filled
+ * buttons (white text, 4.6) and focus rings (>=3), NOT for body-size link text. Use
+ * `--color-primary-text` for pink text; it is the AA-safe variant in both modes.
+ *
+ * Glass rules (D-24): `backdrop-filter` only on `.glass-panel` (header, sidebar, modal, hero
+ * panel — a handful per screen). `.glass-card` is translucent but never blurs, so it is cheap
+ * enough for every card. Both fall back to solid surfaces when the browser lacks backdrop-filter
+ * or the user asks for reduced transparency (styles.css).
  * ============================================================================
  */
 
 :root {
+  color-scheme: light;
+
   /* Surfaces */
-  --color-bg: #ffffff;
-  --color-surface: #fdf2f7;
-  --color-surface-muted: #fae3ee;
-  --color-border: #f3cbdd;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #e2e8f0;
 
   /* Text */
-  --color-text: #2a1220;
-  --color-text-muted: #75465e;
-  --color-text-inverse: #fdf2f7;
+  --color-text: #1e293b;
+  --color-text-muted: #475569;
+  --color-text-inverse: #f8fafc;
 
-  /* Brand — magenta/pink. Primary CTA, links, active nav, checkout affordances. */
+  /* Brand — magenta/pink. Primary CTA fill, active nav, checkout affordances. */
   --color-primary: #db2777;
   --color-primary-hover: #be185d;
   --color-primary-foreground: #ffffff;
+  /* Pink as TEXT on the page background (links, active labels). AA-safe in both modes. */
+  --color-primary-text: #be185d;
+  /* Pressed/hover FILL for primary buttons. Unlike --color-primary-hover (which becomes a light
+     tint in dark mode for text use), this stays dark in both modes so white button text keeps 6:1. */
+  --color-primary-pressed: #be185d;
+
+  /* Secondary — violet. Gradient partner and decoration only; never a CTA or status colour. */
+  --color-secondary: #8b5cf6;
 
   /* Accent — achievement gold. Certificates, badges, "featured" ribbons only;
      never the dominant color on a page (that stays --color-primary). */
@@ -74,11 +72,40 @@
   /* Focus ring — must stay visible; see ui-design.md a11y rules */
   --color-focus-ring: #db2777;
 
+  /* Glass layers (translucent surfaces over the ambient background). */
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-bg-strong: rgb(255 255 255 / 0.9);
+  --glass-border: rgb(226 232 240 / 0.9);
+  --glass-shadow: 0 8px 32px 0 rgb(15 23 42 / 0.08);
+  --glass-blur: 20px;
+
+  /* Decorative gradient + glow (headline accent, logo tile, primary CTA hover). */
+  --gradient-brand: linear-gradient(
+    90deg,
+    var(--color-brand-500),
+    var(--color-secondary),
+    var(--color-brand-500)
+  );
+  --gradient-brand-tile: linear-gradient(135deg, var(--color-brand-400), var(--color-brand-600));
+  --shadow-glow: 0 0 20px rgb(236 72 153 / 0.35);
+
+  /* Ambient background blobs (app-ambient-background). */
+  --blob-pink: rgb(244 114 182 / 0.22);
+  --blob-purple: rgb(167 139 250 / 0.22);
+  --blob-rose: rgb(251 113 133 / 0.2);
+
+  /* Modal / drawer scrim */
+  --overlay-scrim: rgb(15 23 42 / 0.6);
+
+  /* Skeleton shimmer highlight */
+  --skeleton-sheen: rgb(255 255 255 / 0.55);
+
   /* Icon / illustration hues (2026-10-10, owner directive: theme stays pink, but icons and
      other non-brand elements may use other hues). Each hue is a foreground + soft-tint pair
      checked ≥4.5:1 (fg on its own tint) in both themes. Use via the `.tone-*` classes below
      (`tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]`) — never as brand/CTA color, that
-     stays --color-primary. Pink is deliberately not in this set. */
+     stays --color-primary. Pink is deliberately not in this set. `red` (2026-10-12) replaces the
+     raw rose/red palette classes in status chips and error callouts. */
   --hue-blue-fg: #1d4ed8;
   --hue-blue-bg: #dbeafe;
   --hue-teal-fg: #0f766e;
@@ -91,6 +118,8 @@
   --hue-green-bg: #dcfce7;
   --hue-gold-fg: #92400e;
   --hue-gold-bg: #fef3c7;
+  --hue-red-fg: #b91c1c;
+  --hue-red-bg: #fee2e2;
 
   /* Radius scale — only these sizes, no ad-hoc values per page */
   --radius-sm: 0.25rem;
@@ -98,51 +127,90 @@
   --radius-lg: 0.75rem;
   --radius-full: 9999px;
 
-  /* Shadow scale — restrained per the Flat/Minimalism-influenced style;
-     used for elevation (cards, popovers), not decoration. */
+  /* Shadow scale — used for elevation (cards, popovers), not decoration. */
   --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.06);
   --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.1), 0 2px 4px -2px rgb(15 23 42 / 0.06);
   --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.1), 0 4px 6px -4px rgb(15 23 42 / 0.06);
 
-  /* Typography — IBM Plex Sans Thai loaded in index.html (weights 400-700).
-     One family, full Thai + Latin coverage; use font-weight for hierarchy
-     (600/700 headings, 400 body) rather than switching families. */
-  --font-sans:
-    'IBM Plex Sans Thai', system-ui, -apple-system, 'Noto Sans Thai', 'Leelawadee UI', sans-serif;
+  /* Typography: --font-sans lives in the @theme block below (single source). */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #2c0b1d;
-    --color-surface: #3d1129;
-    --color-surface-muted: #521a38;
-    --color-border: #521a38;
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-    --color-text: #fdf2f7;
-    --color-text-muted: #d9a3bd;
-    --color-text-inverse: #2c0b1d;
+  --color-bg: #050b14;
+  --color-surface: #0b1424;
+  --color-surface-muted: #162033;
+  --color-border: #334155;
 
-    /* Lighter tints for sufficient contrast against dark surfaces */
-    --color-primary-hover: #f472b6;
-    --color-accent: #fbbf24;
-    --color-accent-foreground: #1c1917;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #050b14;
 
-    /* focus ring must stay ≥3:1 against dark surfaces too */
-    --color-focus-ring: #f472b6;
+  /* Lighter tints for sufficient contrast against dark surfaces */
+  --color-primary-hover: #f472b6;
+  --color-primary-text: #f472b6;
+  --color-accent: #fbbf24;
+  --color-accent-foreground: #1c1917;
 
-    --hue-blue-fg: #93c5fd;
-    --hue-blue-bg: #1e2f5c;
-    --hue-teal-fg: #5eead4;
-    --hue-teal-bg: #134e4a;
-    --hue-violet-fg: #c4b5fd;
-    --hue-violet-bg: #3b2a73;
-    --hue-orange-fg: #fdba74;
-    --hue-orange-bg: #5c2a0e;
-    --hue-green-fg: #86efac;
-    --hue-green-bg: #14532d;
-    --hue-gold-fg: #fcd34d;
-    --hue-gold-bg: #4a3208;
-  }
+  /* focus ring must stay ≥3:1 against dark surfaces too */
+  --color-focus-ring: #f472b6;
+
+  --glass-bg: rgb(15 23 42 / 0.6);
+  --glass-bg-strong: rgb(30 41 59 / 0.7);
+  --glass-border: rgb(255 255 255 / 0.1);
+  --glass-shadow:
+    0 8px 32px 0 rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+
+  --shadow-glow: 0 0 24px rgb(236 72 153 / 0.45);
+
+  --blob-pink: rgb(219 39 119 / 0.16);
+  --blob-purple: rgb(124 58 237 / 0.16);
+  --blob-rose: rgb(225 29 72 / 0.14);
+
+  --overlay-scrim: rgb(2 6 23 / 0.7);
+  --skeleton-sheen: rgb(255 255 255 / 0.08);
+
+  --hue-blue-fg: #93c5fd;
+  --hue-blue-bg: #1e2f5c;
+  --hue-teal-fg: #5eead4;
+  --hue-teal-bg: #134e4a;
+  --hue-violet-fg: #c4b5fd;
+  --hue-violet-bg: #3b2a73;
+  --hue-orange-fg: #fdba74;
+  --hue-orange-bg: #5c2a0e;
+  --hue-green-fg: #86efac;
+  --hue-green-bg: #14532d;
+  --hue-gold-fg: #fcd34d;
+  --hue-gold-bg: #4a3208;
+  --hue-red-fg: #fca5a5;
+  --hue-red-bg: #4c1519;
+}
+
+/* Tailwind v4 theme extension (CSS-first config — this repo has no tailwind.config.*).
+   THEME_REFACTOR.md Phase 1: `brand` pink scale + Prompt font. `static` forces every
+   variable to be emitted even when no utility references it yet, so var(--font-sans)
+   in styles.css and var(--color-brand-*) in the gradient tokens above never resolve to nothing.
+   Utilities generated: bg-brand-500, text-brand-600, border-brand-200, font-sans, ...
+   Prompt is loaded in index.html (weights 300-700) and covers Thai + Latin in one family;
+   the fallbacks after it keep Thai glyphs correct if the webfont fails to load.
+   --color-brand-600 / -700 equal --color-primary / --color-primary-hover above; the
+   semantic --color-primary tokens stay the thing components reference for CTA/links.
+   brand-500 (#ec4899) is decoration only (glow, gradient) — white text on it is ~3.5:1. */
+@theme static {
+  --font-sans:
+    'Prompt', system-ui, -apple-system, 'Noto Sans Thai', 'Leelawadee UI', sans-serif;
+
+  --color-brand-50: #fdf2f8;
+  --color-brand-100: #fce7f3;
+  --color-brand-200: #fbcfe8;
+  --color-brand-300: #f9a8d4;
+  --color-brand-400: #f472b6;
+  --color-brand-500: #ec4899;
+  --color-brand-600: #db2777;
+  --color-brand-700: #be185d;
+  --color-brand-800: #9d174d;
+  --color-brand-900: #831843;
 }
 
 /* Tone classes — set the two custom properties a component then reads with
@@ -172,4 +240,8 @@
 .tone-gold {
   --tone-fg: var(--hue-gold-fg);
   --tone-bg: var(--hue-gold-bg);
+}
+.tone-red {
+  --tone-fg: var(--hue-red-fg);
+  --tone-bg: var(--hue-red-bg);
 }

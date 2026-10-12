@@ -5,11 +5,29 @@
   <title>SIRI UpSkill</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <!-- Theme bootstrap (D-24): sets data-theme on <html> BEFORE first paint so there is no flash of the
+       wrong theme. Mirrors ThemeService: cookie `siri_theme` = light | dark | system (absent = system).
+       Keep it tiny and dependency-free. If a CSP is ever added, allow this script by hash. -->
+  <script>
+    (function () {
+      try {
+        var match = document.cookie.match(/(?:^|;\s*)siri_theme=(light|dark|system)/);
+        var preference = match ? match[1] : 'system';
+        var dark =
+          preference === 'dark' ||
+          (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!-- IBM Plex Sans Thai: single family covering Thai + Latin, per docs/design-system/siri-upskill/MASTER.md -->
+  <!-- Prompt: single family covering Thai + Latin, per docs/THEME_REFACTOR.md Phase 1 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <app-root></app-root>

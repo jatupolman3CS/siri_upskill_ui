@@ -14,6 +14,12 @@
       "storageProvider": "Document storage is temporarily unavailable, so files cannot be uploaded or downloaded right now. Please try again later or contact support."
     }
   },
+  "theme": {
+    "groupLabel": "Colour theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Match system"
+  },
   "studio": {
     "nav": {
       "openMenu": "Open menu",
@@ -668,6 +674,9 @@
   "home": {
     "pageDescription": "SIRI UpSkill is an online learning platform — learn new skills from real instructors.",
     "hero": {
+      "badge": "Online courses and live classes from real instructors",
+      "headingLead": "Learn new skills.",
+      "headingAccent": "Grow your career.",
       "heading": "Learn new skills. Grow your career.",
       "subheading": "Quality online courses from real instructors — learn anytime, anywhere.",
       "ctaRegister": "Get started",

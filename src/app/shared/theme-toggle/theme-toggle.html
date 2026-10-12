@@ -1,0 +1,29 @@
+<div
+  role="radiogroup"
+  [attr.aria-label]="'theme.groupLabel' | translate"
+  class="glass-pill inline-flex items-center gap-0.5 rounded-full p-0.5"
+>
+  @for (option of options; track option.value) {
+    <button
+      #optionButton
+      type="button"
+      role="radio"
+      [attr.aria-checked]="theme.preference() === option.value"
+      [attr.aria-label]="option.labelKey | translate"
+      [attr.title]="option.labelKey | translate"
+      [attr.tabindex]="theme.preference() === option.value ? 0 : -1"
+      (click)="select(option.value)"
+      (keydown.arrowright)="move(option.value, 1, $event)"
+      (keydown.arrowdown)="move(option.value, 1, $event)"
+      (keydown.arrowleft)="move(option.value, -1, $event)"
+      (keydown.arrowup)="move(option.value, -1, $event)"
+      class="relative inline-flex cursor-pointer items-center justify-center rounded-full text-base
+        transition-colors duration-200 ease-out motion-reduce:transition-none
+        after:absolute after:-inset-y-1.5 after:inset-x-0 after:content-['']
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      [class]="optionClasses(option.value)"
+    >
+      <ng-icon [name]="option.icon" aria-hidden="true" />
+    </button>
+  }
+</div>

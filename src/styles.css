@@ -1,11 +1,20 @@
 @import 'tailwindcss';
 @import './app/styles/tokens.css';
 
+/* Tailwind's `dark:` utilities follow the 3-way theme switch (light / dark / system), not the raw
+   OS preference: ThemeService + the inline script in index.html set data-theme on <html>. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 /* Global element defaults — component-level styling stays in Tailwind
    utilities per frontend.md; this file is only for the few things that
-   must apply document-wide. */
-body {
+   must apply document-wide.
+   The page colour sits on <html>, not <body>: <app-ambient-background> paints its blobs at
+   z-index -10, which lands above the root background but below any opaque body background. */
+html {
   background-color: var(--color-bg);
+}
+
+body {
   color: var(--color-text);
   font-family: var(--font-sans);
 }
@@ -246,9 +255,163 @@ html {
   .animate-slide-in-left,
   .animate-pulse-subtle,
   .card-hover,
-  .btn-tactile {
+  .btn-tactile,
+  .app-blob,
+  .text-shimmer,
+  .reveal,
+  .glow-border::after {
     animation: none !important;
     transition: none !important;
     transform: none !important;
   }
+}
+
+/* ============================================================================
+ * Glassmorphism theme (D-24)
+ * Surfaces: `.glass-panel` blurs (use sparingly — header, sidebar, modal, hero panel);
+ * `.glass-card` is translucent WITHOUT blur so it stays cheap on every card; `.glass-pill` is the
+ * nav/chip container. In `@layer components` so a Tailwind utility on the same element (a different
+ * `bg-*`, `border-*`) still wins. All values come from tokens.css — no raw colours here.
+ * ============================================================================ */
+@layer components {
+  .glass-panel {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-card {
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-pill {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Pink-to-violet gradient text (headline accent). Static: no motion unless `.text-shimmer`. */
+  .text-gradient-brand {
+    background-image: var(--gradient-brand);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+/* No backdrop-filter support, or the user asked for less transparency: fall back to the solid
+   surface so text never sits on an unpredictable blurred/unblurred mix. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel {
+    background: var(--color-surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel,
+  .glass-card,
+  .glass-pill {
+    background: var(--color-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Headline shimmer — the one place a non-transform/opacity property animates
+   (background-position on a single text element, 3 passes then rests). Documented exception, D-24. */
+@keyframes app-shimmer {
+  from {
+    background-position: 200% center;
+  }
+  to {
+    background-position: -200% center;
+  }
+}
+
+.text-shimmer {
+  animation: app-shimmer 3s linear 3;
+}
+
+/* Ambient background blobs (<app-ambient-background>): transform-only, slow, and still on
+   mobile (smaller blur, no animation) — big blurred layers are the expensive part. */
+@keyframes app-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.app-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+}
+
+@media (min-width: 768px) {
+  .app-blob {
+    filter: blur(100px);
+    animation: app-blob 16s ease-in-out infinite;
+  }
+}
+
+/* CSS-only scroll reveal. Content is visible by default; browsers that support scroll-driven
+   animations fade/slide it in as it enters the viewport. No JS, no hidden-until-hydrated content
+   (the previous mock's IntersectionObserver version kept LCP content at opacity 0 until JS ran). */
+@keyframes app-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: app-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+/* Gradient ring on hover/focus-within. Drawn inside the element's own box (mask-composite
+   cut-out) so `overflow-hidden` on the card cannot clip it; static, opacity transition only. */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: var(--gradient-brand);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+}
+
+.glow-border:hover::after,
+.glow-border:focus-within::after {
+  opacity: 1;
 }
