@@ -31,6 +31,7 @@
 ## Layout & responsive
 
 - Mobile-first; breakpoint หลัก 640 / 768 / 1024 / 1280
+- **หน้า admin / instructor (studio)**: shell (`layouts/admin-layout`, `instructor-layout`) ให้คอลัมน์เนื้อหาเดียว `mx-auto w-full max-w-[100rem]` — root ของทุกหน้าเป็น `flex flex-col gap-8` (2rem) **ไม่ใส่ `max-w-*`/`mx-auto` เอง** ลูกชั้นบนสุด = header (ชื่อ+คำอธิบายซ้าย, action ขวา) แล้วตามด้วย panel (`glass-card`) หรือ grid ของ panel · ใช้ความกว้างด้วย grid (KPI `sm:grid-cols-2 xl:grid-cols-4`, การ์ด `md:grid-cols-2 2xl:grid-cols-3`, หลัก+ข้าง `xl:grid-cols-[minmax(0,1fr)_22rem]`, ฟอร์ม `md:grid-cols-2`) ภายใน panel ใช้ `flex flex-col gap-6`/`gap-4` ไม่ใช้ `space-y-*` · ตารางอยู่ใน panel พร้อม wrapper `overflow-x-auto` · มือถือเป็นคอลัมน์เดียวไม่มี horizontal scroll · **เนื้อหา studio กว้างแค่ ~960px ที่หน้าจอ 1280** (sidebar 256 + padding 64) — คอลัมน์ข้างกว้าง 22–24rem ให้เริ่มที่ `2xl` ไม่ใช่ `xl` ถ้าคอลัมน์หลักมีตาราง · เซลล์ข้อความที่ผู้ใช้ป้อน (ชื่อ, หัวข้อ, เหตุผล, อีเมล) ต้องมี `min-w-*` + `max-w-*` + `break-words`/`break-all` และ `<select>` ที่ option ยาวได้ต้องมีความกว้างตายตัว (`w-full sm:w-64`) ไม่งั้นหน้าจะกว้างตาม option
 - ห้ามเกิด horizontal scroll ที่ระดับ body — ตาราง/โค้ด/กราฟกว้างต้อง scroll ในกล่องของตัวเอง
 - จองพื้นที่ให้รูปและ block ที่โหลดทีหลังเสมอ (CLS < 0.1)
 - Bottom nav บนมือถือไม่เกิน 5 รายการ; รองรับ safe area ของ iOS

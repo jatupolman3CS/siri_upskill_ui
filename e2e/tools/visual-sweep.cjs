@@ -7,9 +7,11 @@
  *
  *   npx ng serve --port 4210                       # terminal 1
  *   node e2e/tools/visual-sweep.cjs                # terminal 2 (all routes, light + dark)
- *   ROUTES=/admin/users,/cart THEMES=dark node e2e/tools/visual-sweep.cjs
+ *   ROUTES=/admin/users,/cart THEMES=dark WIDTH=1920 HEIGHT=1080 node e2e/tools/visual-sweep.cjs
  *   (Git Bash: prefix with MSYS_NO_PATHCONV=1 when ROUTES contains a leading slash)
  *
+ * WIDTH/HEIGHT set the viewport (default 1280x800). The studio/admin shells are `h-screen` with the scroll inside
+ * <main>, so FULLPAGE=1 does not capture more than one screen there — use a tall HEIGHT (e.g. 1400) instead.
  * Output: test-results/visual-sweep/*.png and summary.json. Needs Chromium (npx playwright install chromium).
  * The focus check reads box-shadow rings; a form/wrapper with a translucent `color-mix` ring (the header
  * search) is reported as a false positive.
@@ -86,7 +88,7 @@ const sampler = () => {
   const browser = await chromium.launch();
   const summary = [];
   for (const theme of themes) {
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: theme, reducedMotion: 'reduce' });
+    const ctx = await browser.newContext({ viewport: { width: Number(process.env.WIDTH || 1280), height: Number(process.env.HEIGHT || 800) }, colorScheme: theme, reducedMotion: 'reduce' });
     await ctx.addCookies([{ name: 'siri_theme', value: theme, url: BASE }]);
     await ctx.route('**/api/**', async (route) => {
       const url = new URL(route.request().url());
@@ -131,7 +133,7 @@ const sampler = () => {
           });
           if (r && r.vis && !r.ok) focusBad.push(r);
         }
-        await page.screenshot({ path: path.join(OUT, name + '.png') });
+        await page.screenshot({ path: path.join(OUT, name + '.png'), fullPage: process.env.FULLPAGE === '1' });
         summary.push({ focusBad, theme, route: r, finalUrl: new URL(page.url()).pathname, dataTheme: html, overflow, lowContrast: bad.length, worst: bad.sort((a, b) => a.ratio - b.ratio).slice(0, 4), errors: [...errors] });
       } catch (e) {
         summary.push({ theme, route: r, failed: String(e).slice(0, 120) });
