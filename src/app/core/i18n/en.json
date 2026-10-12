@@ -20,6 +20,29 @@
     "dark": "Dark",
     "system": "Match system"
   },
+  "a11y": {
+    "admin": {
+      "banners": {
+        "delete": "Delete banner"
+      },
+      "posts": {
+        "delete": "Delete post"
+      }
+    },
+    "learner": {
+      "removeFromCart": "Remove {{name}} from cart",
+      "orderStatusFilter": "Filter orders by status",
+      "upvote": "Upvote this question (currently {{count}})"
+    },
+    "public": {
+      "clearSearch": "Clear search",
+      "removeRecentSearch": "Remove \"{{name}}\" from recent searches"
+    },
+    "studio": {
+      "removeOutcome": "Remove learning outcome {{index}}",
+      "removeRequirement": "Remove requirement {{index}}"
+    }
+  },
   "studio": {
     "nav": {
       "openMenu": "Open menu",
@@ -677,7 +700,6 @@
       "badge": "Online courses and live classes from real instructors",
       "headingLead": "Learn new skills.",
       "headingAccent": "Grow your career.",
-      "heading": "Learn new skills. Grow your career.",
       "subheading": "Quality online courses from real instructors — learn anytime, anywhere.",
       "ctaRegister": "Get started",
       "ctaLogin": "Log in"

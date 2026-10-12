@@ -415,3 +415,25 @@ html {
 .glow-border:focus-within::after {
   opacity: 1;
 }
+
+/* Enlarges the pointer hit area of a small control to 44x44px WITHOUT changing its visible size or
+   layout (ui-design.md: touch targets >= 44px). Use only where the neighbouring controls are at
+   least ~8px away — otherwise give the control a real size (`min-h-11 min-w-11`) instead, because
+   overlapping hit areas steal each other's taps. */
+/* In `@layer components` so an `absolute`/`sticky`/`fixed` utility on the same element still wins
+   over the `position: relative` below. */
+@layer components {
+  .hit-44 {
+    position: relative;
+  }
+
+  .hit-44::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
