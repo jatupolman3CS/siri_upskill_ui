@@ -4,7 +4,7 @@
     <div class="flex items-center gap-3 min-w-0">
       <a
         [routerLink]="['/courses', course()?.slug]"
-        class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)]/80 focus:outline-none"
+        class="hit-44 inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >
         <ng-icon name="phosphorArrowLeft" />
         <span>{{ 'learn.backToCourse' | translate }}</span>
@@ -64,7 +64,7 @@
                 <button
                   type="button"
                   (click)="retryPlayback()"
-                  class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
+                  class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
                 >
                   {{ 'catalog.retryButton' | translate }}
                 </button>
@@ -72,7 +72,7 @@
                 <button
                   type="button"
                   (click)="buyCourse()"
-                  class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
+                  class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
                 >
                   {{ 'learn.buyFullCourse' | translate }}
                 </button>
@@ -90,7 +90,7 @@
                 <button
                   type="button"
                   (click)="activeTab.set('live')"
-                  class="btn-tactile mt-1 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
+                  class="btn-tactile hit-44 mt-1 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
                 >
                   {{ 'learn.liveOnly.openSchedule' | translate }}
                 </button>
@@ -109,7 +109,7 @@
       @if (courseProgress()?.progressPercent === 100 || certificate()) {
         <div class="tone-green glass-card animate-fade-in-down mx-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border-[var(--tone-fg)]/40 p-5 shadow-sm">
           <div class="flex items-center gap-3">
-            <span class="animate-pop-in flex h-10 w-10 items-center justify-center rounded-full bg-[var(--tone-fg)] text-[var(--tone-bg)] font-bold text-xl shadow">
+            <span aria-hidden="true" class="animate-pop-in flex h-10 w-10 items-center justify-center rounded-full bg-[var(--tone-fg)] text-[var(--tone-bg)] font-bold text-xl shadow">
               🎓
             </span>
             <div>
@@ -127,7 +127,7 @@
               <a
                 [routerLink]="['/certificates/verify', cert.verifyCode]"
                 target="_blank"
-                class="btn-tactile inline-flex items-center gap-1.5 rounded-lg border border-[var(--tone-fg)]/40 bg-[var(--color-surface)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] shadow-sm transition hover:bg-[var(--tone-bg)]"
+                class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-lg border border-[var(--tone-fg)]/40 bg-[var(--color-surface)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] shadow-sm transition hover:bg-[var(--tone-bg)]"
               >
                 <ng-icon name="phosphorCertificate" />
                 <span>{{ 'learn.celebration.viewCertificate' | translate }}</span>
@@ -135,7 +135,7 @@
               <button
                 type="button"
                 (click)="downloadCertificatePdf()"
-                class="btn-tactile inline-flex items-center gap-1.5 rounded-lg bg-[var(--tone-fg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-bg)] shadow transition hover:opacity-90"
+                class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-lg bg-[var(--tone-fg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-bg)] shadow transition hover:opacity-90"
               >
                 <ng-icon name="phosphorDownloadSimple" />
                 <span>{{ 'learn.celebration.downloadCertificate' | translate }}</span>
@@ -149,7 +149,7 @@
       @if (currentEpisode()?.isFreePreview && !courseProgress()) {
         <div class="tone-green glass-card animate-fade-in mx-4 mt-4 flex items-center justify-between rounded-xl border-[var(--tone-fg)]/40 p-4">
           <div class="flex items-center gap-3">
-            <span class="animate-pop-in flex h-8 w-8 items-center justify-center rounded-full bg-[var(--tone-fg)] text-[var(--tone-bg)] font-bold text-sm">
+            <span aria-hidden="true" class="animate-pop-in flex h-8 w-8 items-center justify-center rounded-full bg-[var(--tone-fg)] text-[var(--tone-bg)] font-bold text-sm">
               ★
             </span>
             <div>
@@ -159,7 +159,7 @@
           </div>
           <a
             [routerLink]="['/courses', course()?.slug]"
-            class="btn-tactile rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
+            class="btn-tactile hit-44 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
           >
             {{ 'learn.buyFullCourse' | translate }}
           </a>
@@ -193,7 +193,7 @@
           <button
             type="button"
             (click)="activeTab.set('curriculum')"
-            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none lg:hidden"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] lg:hidden"
             [class.border-[var(--color-primary)]]="activeTab() === 'curriculum'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'curriculum'"
             [class.border-transparent]="activeTab() !== 'curriculum'"
@@ -208,7 +208,7 @@
           <button
             type="button"
             (click)="activeTab.set('overview')"
-            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class.border-[var(--color-primary)]]="activeTab() === 'overview'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'overview'"
             [class.border-transparent]="activeTab() !== 'overview'"
@@ -224,7 +224,7 @@
           <button
             type="button"
             (click)="activeTab.set('live')"
-            class="rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class.border-[var(--color-primary)]]="activeTab() === 'live'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'live'"
             [class.border-transparent]="activeTab() !== 'live'"
@@ -241,7 +241,7 @@
           <button
             type="button"
             (click)="activeTab.set('quiz')"
-            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class.border-[var(--color-primary)]]="activeTab() === 'quiz'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'quiz'"
             [class.border-transparent]="activeTab() !== 'quiz'"
@@ -256,7 +256,7 @@
           <button
             type="button"
             (click)="activeTab.set('assignment')"
-            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class.border-[var(--color-primary)]]="activeTab() === 'assignment'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'assignment'"
             [class.border-transparent]="activeTab() !== 'assignment'"
@@ -271,7 +271,7 @@
           <button
             type="button"
             (click)="activeTab.set('resources')"
-            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class.border-[var(--color-primary)]]="activeTab() === 'resources'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'resources'"
             [class.border-transparent]="activeTab() !== 'resources'"
@@ -286,7 +286,7 @@
           <button
             type="button"
             (click)="activeTab.set('qa')"
-            class="pb-3 text-sm font-semibold transition border-b-2 focus:outline-none"
+            class="hit-44 rounded-sm pb-3 text-sm font-semibold transition border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class.border-[var(--color-primary)]]="activeTab() === 'qa'"
             [class.text-[var(--color-primary-text)]]="activeTab() === 'qa'"
             [class.border-transparent]="activeTab() !== 'qa'"
@@ -387,14 +387,14 @@
                   [(ngModel)]="newQuestionBody"
                   rows="3"
                   placeholder="พิมพ์คำถามหรือข้อสงสัยของคุณที่นี่..."
-                  class="w-full rounded-lg glass-card p-3 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                  class="w-full rounded-lg glass-card p-3 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                 ></textarea>
                 <div class="mt-3 flex justify-end">
                   <button
                     type="button"
                     (click)="submitQuestion()"
                     [disabled]="!newQuestionBody().trim() || isSubmittingQuestion()"
-                    class="btn-tactile inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
+                    class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
                   >
                     @if (isSubmittingQuestion()) {
                       <app-spinner size="xs" color="white" />
@@ -440,7 +440,8 @@
                         <button
                           type="button"
                           (click)="upvote(disc.id)"
-                          class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary-text)] transition"
+                          [attr.aria-label]="'a11y.learner.upvote' | translate: { count: disc.upvoteCount }"
+                          class="hit-44 inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary-text)] transition"
                           [class.text-[var(--color-primary-text)]]="upvotedDiscussionIds().has(disc.id)"
                           [class.border-[var(--color-primary)]]="upvotedDiscussionIds().has(disc.id)"
                         >

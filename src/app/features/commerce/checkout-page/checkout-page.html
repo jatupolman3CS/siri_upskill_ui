@@ -193,7 +193,7 @@
               <div class="animate-fade-in-up mt-6 pt-6 border-t border-[var(--color-border)]">
                 @if (paymentPollStatus() === 'succeeded') {
                   <div class="tone-green animate-pop-in p-6 rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/30 text-center space-y-3">
-                    <ng-icon name="phosphorCheckCircle" class="text-5xl text-[var(--tone-fg)] mx-auto animate-bounce-subtle" />
+                    <ng-icon name="phosphorCheckCircle" class="text-5xl text-[var(--tone-fg)] mx-auto" />
                     <h3 class="text-lg font-bold text-[var(--tone-fg)]">
                       {{ 'checkout.qr.paid' | translate }}
                     </h3>
@@ -242,7 +242,7 @@
                     <!-- QR Box -->
                     <div class="card-hover w-44 h-44 rounded-xl border border-[var(--color-border)] bg-white flex flex-col items-center justify-center p-3 shadow-inner flex-none">
                       @if (p.qrCodeUrl) {
-                        <img [src]="p.qrCodeUrl" alt="PromptPay QR Code" class="w-32 h-32 object-contain" />
+                        <img [ngSrc]="p.qrCodeUrl" width="128" height="128" alt="PromptPay QR Code" class="w-32 h-32 object-contain" />
                       } @else {
                         <ng-icon name="phosphorQrCode" class="text-7xl text-[var(--color-primary)] mb-1" />
                       }
@@ -356,7 +356,7 @@
                   [placeholder]="'checkout.summary.promoPlaceholder' | translate"
                   [value]="promoCodeInput()"
                   (input)="updatePromoCode($any($event.target).value)"
-                  class="w-full h-11 px-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-sm text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)] uppercase"
+                  class="w-full h-11 px-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-sm text-[var(--color-text)] focus-visible:outline-none focus:border-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] uppercase"
                 />
               </div>
               <app-button
@@ -462,7 +462,7 @@
           type="button"
           (click)="initiatePayment()"
           [disabled]="isCreatingPayment()"
-          class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
         >
           @if (isCreatingPayment()) {
             <app-spinner size="xs" color="white" />

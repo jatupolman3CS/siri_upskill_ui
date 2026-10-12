@@ -14,7 +14,7 @@
     <!-- Tabs -->
     <div
       role="tablist"
-      aria-label="Order status filter"
+      [attr.aria-label]="'a11y.learner.orderStatusFilter' | translate"
       class="inline-flex rounded-xl bg-[var(--color-surface-muted)] p-1 text-xs font-semibold text-[var(--color-text-muted)]"
     >
       <button
@@ -22,7 +22,7 @@
         role="tab"
         [attr.aria-selected]="selectedTab() === 'all'"
         (click)="setTab('all')"
-        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        class="btn-tactile min-h-11 rounded-lg px-3.5 py-2 transition duration-150"
         [class.bg-[var(--color-bg)]]="selectedTab() === 'all'"
         [class.text-[var(--color-text)]]="selectedTab() === 'all'"
         [class.shadow-sm]="selectedTab() === 'all'"
@@ -34,7 +34,7 @@
         role="tab"
         [attr.aria-selected]="selectedTab() === 'paid'"
         (click)="setTab('paid')"
-        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        class="btn-tactile min-h-11 rounded-lg px-3.5 py-2 transition duration-150"
         [class.bg-[var(--color-bg)]]="selectedTab() === 'paid'"
         [class.text-[var(--color-text)]]="selectedTab() === 'paid'"
         [class.shadow-sm]="selectedTab() === 'paid'"
@@ -46,7 +46,7 @@
         role="tab"
         [attr.aria-selected]="selectedTab() === 'awaiting'"
         (click)="setTab('awaiting')"
-        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        class="btn-tactile min-h-11 rounded-lg px-3.5 py-2 transition duration-150"
         [class.bg-[var(--color-bg)]]="selectedTab() === 'awaiting'"
         [class.text-[var(--color-text)]]="selectedTab() === 'awaiting'"
         [class.shadow-sm]="selectedTab() === 'awaiting'"
@@ -58,7 +58,7 @@
         role="tab"
         [attr.aria-selected]="selectedTab() === 'refunded'"
         (click)="setTab('refunded')"
-        class="btn-tactile rounded-lg px-3.5 py-2 transition duration-150"
+        class="btn-tactile min-h-11 rounded-lg px-3.5 py-2 transition duration-150"
         [class.bg-[var(--color-bg)]]="selectedTab() === 'refunded'"
         [class.text-[var(--color-text)]]="selectedTab() === 'refunded'"
         [class.shadow-sm]="selectedTab() === 'refunded'"
@@ -79,7 +79,7 @@
         [placeholder]="'orders.searchPlaceholder' | translate"
         [ngModel]="searchQuery()"
         (ngModelChange)="searchQuery.set($event)"
-        class="h-10 w-full rounded-xl glass-card pl-9 pr-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        class="h-11 w-full rounded-xl glass-card pl-9 pr-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       />
     </div>
   </div>
@@ -121,7 +121,7 @@
         <div emptyStateAction class="pt-4">
           <a
             routerLink="/courses"
-            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
+            class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
           >
             <ng-icon name="phosphorArrowRight" />
             <span>{{ 'orders.empty.browseCourses' | translate }}</span>
@@ -187,7 +187,7 @@
               <button
                 type="button"
                 (click)="toggleExpand(order.id)"
-                class="btn-tactile inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary-text)] transition"
+                class="btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-primary-text)] transition"
               >
                 <span>
                   {{ (isExpanded(order.id) ? 'orders.card.hideDetails' : 'orders.card.viewDetails') | translate }}
@@ -200,7 +200,7 @@
                 @if (order.status === 'AwaitingPayment' || order.status === 'Pending') {
                   <a
                     [routerLink]="['/checkout', order.id]"
-                    class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:bg-[var(--color-primary-pressed)] transition"
+                    class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:bg-[var(--color-primary-pressed)] transition"
                   >
                     <ng-icon name="phosphorCreditCard" />
                     <span>{{ 'orders.card.payNow' | translate }}</span>
@@ -212,7 +212,7 @@
                   <button
                     type="button"
                     (click)="openReceiptModal(order)"
-                    class="btn-tactile inline-flex items-center gap-1.5 rounded-xl glass-card px-3 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                    class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl glass-card px-3 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
                   >
                     <ng-icon name="phosphorReceipt" class="text-[var(--color-primary-text)]" />
                     <span>{{ 'orders.card.downloadReceipt' | translate }}</span>
@@ -220,7 +220,7 @@
 
                   <a
                     routerLink="/my-courses"
-                    class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:bg-[var(--color-primary-pressed)] transition"
+                    class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:bg-[var(--color-primary-pressed)] transition"
                   >
                     <ng-icon name="phosphorPlayCircle" />
                     <span>{{ 'orders.card.startLearning' | translate }}</span>
@@ -230,7 +230,7 @@
                     <button
                       type="button"
                       (click)="openRefundModal(order)"
-                      class="tone-red btn-tactile inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--tone-fg)] transition px-2 py-1"
+                      class="tone-red btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--tone-fg)] transition px-2 py-1"
                     >
                       <span>{{ 'orders.card.requestRefund' | translate }}</span>
                     </button>
@@ -437,7 +437,7 @@
             [placeholder]="'orders.refund.reasonPlaceholder' | translate"
             [ngModel]="refundReason()"
             (ngModelChange)="refundReason.set($event)"
-            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
 

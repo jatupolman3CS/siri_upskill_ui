@@ -53,7 +53,7 @@
             <button
               type="button"
               (click)="retryPlayback()"
-              class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--color-primary-pressed)] focus:outline-none focus:ring-2 focus:ring-white/50"
+              class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <ng-icon name="phosphorArrowsClockwise" class="text-base" />
               <span>ลองใหม่อีกครั้ง</span>
@@ -70,7 +70,7 @@
       type="button"
       (click)="togglePlay()"
       aria-label="Play video"
-      class="absolute inset-0 z-10 m-auto flex h-20 w-20 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-[var(--color-primary)]/90 text-white shadow-2xl backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-[var(--color-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-primary)]/50"
+      class="absolute inset-0 z-10 m-auto flex h-20 w-20 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-[var(--color-primary)]/90 text-white shadow-2xl backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
     >
       <ng-icon name="phosphorPlay" class="text-4xl translate-x-0.5" />
     </button>
@@ -88,14 +88,14 @@
           <button
             type="button"
             (click)="resumeFromSaved()"
-            class="flex-1 min-h-[44px] rounded-lg bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-pressed)] focus:outline-none"
+            class="flex-1 min-h-[44px] rounded-lg bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             เล่นต่อจากจุดเดิม
           </button>
           <button
             type="button"
             (click)="startFromBeginning()"
-            class="min-h-[44px] rounded-lg border border-white/20 bg-white/5 py-2.5 px-4 text-sm font-medium text-zinc-300 transition hover:bg-white/10 focus:outline-none"
+            class="min-h-[44px] rounded-lg border border-white/20 bg-white/5 py-2.5 px-4 text-sm font-medium text-zinc-300 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             เริ่มใหม่
           </button>
@@ -121,7 +121,7 @@
           <button
             type="button"
             (click)="onBuyCourseClick()"
-            class="flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-[var(--color-primary-pressed)] focus:outline-none focus:ring-2 focus:ring-white"
+            class="flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <span>สมัครเรียนเลย</span>
             <ng-icon name="phosphorArrowRight" class="text-base" />
@@ -130,7 +130,7 @@
           <button
             type="button"
             (click)="startFromBeginning(); showFreePreviewCta.set(false)"
-            class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-xs font-medium text-zinc-300 transition hover:bg-white/10 focus:outline-none"
+            class="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-xs font-medium text-zinc-300 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <ng-icon name="phosphorArrowsClockwise" />
             <span>ดูตัวอย่างอีกครั้ง</span>
@@ -155,7 +155,7 @@
         [value]="currentTime()"
         (input)="onSeekInput($event)"
         (change)="onSeekChange($event)"
-        class="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2.5 focus:outline-none"
+        class="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         aria-label="Video seek bar"
       />
     </div>
@@ -167,7 +167,7 @@
         <button
           type="button"
           (click)="togglePlay()"
-          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           [attr.aria-label]="isPlaying() ? 'Pause (Space/k)' : 'Play (Space/k)'"
         >
           <ng-icon [name]="isPlaying() ? 'phosphorPause' : 'phosphorPlay'" class="text-xl" />
@@ -177,7 +177,7 @@
         <button
           type="button"
           (click)="skip(-10)"
-          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Rewind 10 seconds (j/←)"
         >
           <ng-icon name="phosphorArrowCounterClockwise" class="text-lg" />
@@ -187,7 +187,7 @@
         <button
           type="button"
           (click)="skip(10)"
-          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Forward 10 seconds (l/→)"
         >
           <ng-icon name="phosphorArrowClockwise" class="text-lg" />
@@ -198,7 +198,7 @@
           <button
             type="button"
             (click)="toggleMute()"
-            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             [attr.aria-label]="isMuted() || volume() === 0 ? 'Unmute (m)' : 'Mute (m)'"
           >
             <ng-icon
@@ -213,7 +213,7 @@
             step="0.05"
             [value]="isMuted() ? 0 : volume()"
             (input)="onVolumeInput($event)"
-            class="h-1.5 w-16 cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2 focus:outline-none hidden sm:block"
+            class="h-1.5 w-16 cursor-pointer appearance-none rounded-lg bg-white/25 accent-[var(--color-primary)] transition-all hover:h-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white hidden sm:block"
             aria-label="Volume slider (↑/↓)"
           />
         </div>
@@ -233,7 +233,7 @@
           <button
             type="button"
             (click)="showSpeedMenu.set(!showSpeedMenu()); showQualityMenu.set(false); showCaptionsMenu.set(false)"
-            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 text-xs font-semibold text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 text-xs font-semibold text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="Playback speed"
           >
             <span>{{ playbackRate() }}x</span>
@@ -267,7 +267,7 @@
           <button
             type="button"
             (click)="showQualityMenu.set(!showQualityMenu()); showSpeedMenu.set(false); showCaptionsMenu.set(false)"
-            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="Video quality settings"
           >
             <ng-icon name="phosphorGear" class="text-lg" />
@@ -313,7 +313,7 @@
         <button
           type="button"
           (click)="toggleCaptions()"
-          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           [class.text-[var(--color-primary-text)]]="isCaptionsEnabled()"
           [attr.aria-label]="isCaptionsEnabled() ? 'Disable captions (c)' : 'Enable captions (c)'"
         >
@@ -324,7 +324,7 @@
         <button
           type="button"
           (click)="togglePip()"
-          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] hidden sm:flex"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white hidden sm:flex"
           aria-label="Picture in Picture"
         >
           <ng-icon name="phosphorPictureInPicture" class="text-lg" />
@@ -334,7 +334,7 @@
         <button
           type="button"
           (click)="toggleFullscreen()"
-          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           [attr.aria-label]="isFullscreen() ? 'Exit Fullscreen (f)' : 'Fullscreen (f)'"
         >
           <ng-icon [name]="isFullscreen() ? 'phosphorCornersIn' : 'phosphorCornersOut'" class="text-xl" />

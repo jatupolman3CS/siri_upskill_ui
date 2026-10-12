@@ -1,4 +1,4 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -45,7 +45,7 @@ export interface OrderSuccessSummary {
 
 @Component({
   selector: 'app-order-success-page',
-  imports: [CommonModule, RouterLink, NgIcon, CurrencyThbPipe, TranslatePipe],
+  imports: [CommonModule, NgOptimizedImage, RouterLink, NgIcon, CurrencyThbPipe, TranslatePipe],
   templateUrl: './order-success-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

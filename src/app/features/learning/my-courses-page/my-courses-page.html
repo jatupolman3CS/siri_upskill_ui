@@ -14,7 +14,7 @@
     <button
       type="button"
       (click)="activeFilter.set('all')"
-      class="btn-tactile rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
+      class="btn-tactile hit-44 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       [class.bg-[var(--color-primary)]]="activeFilter() === 'all'"
       [class.text-[var(--color-primary-foreground)]]="activeFilter() === 'all'"
       [class.text-[var(--color-text-muted)]]="activeFilter() !== 'all'"
@@ -26,7 +26,7 @@
     <button
       type="button"
       (click)="activeFilter.set('inProgress')"
-      class="btn-tactile rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
+      class="btn-tactile hit-44 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       [class.bg-[var(--color-primary)]]="activeFilter() === 'inProgress'"
       [class.text-[var(--color-primary-foreground)]]="activeFilter() === 'inProgress'"
       [class.text-[var(--color-text-muted)]]="activeFilter() !== 'inProgress'"
@@ -38,7 +38,7 @@
     <button
       type="button"
       (click)="activeFilter.set('completed')"
-      class="btn-tactile rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none"
+      class="btn-tactile hit-44 rounded-lg px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       [class.bg-[var(--color-primary)]]="activeFilter() === 'completed'"
       [class.text-[var(--color-primary-foreground)]]="activeFilter() === 'completed'"
       [class.text-[var(--color-text-muted)]]="activeFilter() !== 'completed'"
@@ -78,7 +78,7 @@
       </p>
       <a
         routerLink="/courses"
-        class="btn-tactile mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] focus:outline-none"
+        class="btn-tactile hit-44 mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >
         <span>{{ 'myCourses.browseCourses' | translate }}</span>
         <ng-icon name="phosphorArrowRight" />
@@ -93,9 +93,9 @@
           <div class="relative aspect-video w-full overflow-hidden bg-[var(--color-surface-muted)]">
             @if (enrollment.thumbnailUrl) {
               <img
-                [src]="enrollment.thumbnailUrl"
+                [ngSrc]="enrollment.thumbnailUrl" fill
                 [alt]="enrollment.title"
-                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                class="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             } @else {
               <div class="flex h-full w-full items-center justify-center bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
@@ -149,7 +149,7 @@
                 @if (enrollment.status === 'Active' && enrollment.slug) {
                 <a
                   [routerLink]="['/learn', enrollment.slug]"
-                  class="btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)]"
+                  class="btn-tactile hit-44 flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)]"
                 >
                   <ng-icon name="phosphorPlayCircle" class="text-base" />
                   <span>{{ 'myCourses.continueLearning' | translate }}</span>
@@ -160,7 +160,7 @@
                   <button
                     type="button"
                     (click)="downloadCertificate(enrollment.id)"
-                    class="tone-green btn-tactile inline-flex items-center justify-center gap-1 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-2 text-xs font-bold text-[var(--tone-fg)] shadow-sm transition hover:opacity-80"
+                    class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-1 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-2 text-xs font-bold text-[var(--tone-fg)] shadow-sm transition hover:opacity-80"
                     title="{{ 'myCourses.downloadCertificate' | translate }}"
                   >
                     <ng-icon name="phosphorCertificate" class="text-base" />

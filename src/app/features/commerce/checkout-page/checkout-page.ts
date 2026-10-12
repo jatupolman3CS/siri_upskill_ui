@@ -1,4 +1,4 @@
-import { CurrencyPipe, DOCUMENT } from '@angular/common';
+import { CurrencyPipe, DOCUMENT, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -67,6 +67,7 @@ export type CheckoutStep = 'selection' | 'qr_display' | 'card_entry' | 'card_pro
     TranslatePipe,
     CurrencyThbPipe,
     NgIcon,
+    NgOptimizedImage,
     Button,
     Checkbox,
     InputField,

@@ -29,7 +29,7 @@
         <button
           type="button"
           (click)="toggleSection(section.id)"
-          class="flex w-full items-center justify-between bg-[var(--color-surface-muted)]/50 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus:outline-none"
+          class="flex w-full items-center justify-between bg-[var(--color-surface-muted)]/50 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-focus-ring)]"
         >
           <div class="min-w-0 pr-2">
             <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] block">
@@ -53,7 +53,7 @@
               <button
                 type="button"
                 (click)="onEpisodeClick(episode.id, episode.isFreePreview)"
-                class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus:outline-none"
+                class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-focus-ring)]"
                 [class.opacity-60]="!isEnrolled() && !episode.isFreePreview"
                 [class.bg-[var(--color-primary)]/10]="episode.id === activeEpisodeId()"
                 [class.border-l-4]="episode.id === activeEpisodeId()"

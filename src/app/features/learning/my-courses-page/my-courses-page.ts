@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -45,7 +45,7 @@ interface EnrichedEnrollment extends EnrollmentItemResponse {
 
 @Component({
   selector: 'app-my-courses-page',
-  imports: [CommonModule, RouterLink, NgIcon, TranslatePipe, Skeleton, LiveNextSessionChip],
+  imports: [CommonModule, NgOptimizedImage, RouterLink, NgIcon, TranslatePipe, Skeleton, LiveNextSessionChip],
   templateUrl: './my-courses-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

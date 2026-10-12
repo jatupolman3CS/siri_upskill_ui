@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -22,6 +22,7 @@ import {
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
@@ -35,7 +36,9 @@ import { CartStore } from './cart-store.service';
     FormsModule,
     RouterLink,
     NgIcon,
+    NgOptimizedImage,
     CurrencyThbPipe,
+    TranslatePipe,
     Spinner,
   ],
   templateUrl: './cart-page.component.html',

@@ -32,7 +32,7 @@
       <div class="mt-6">
         <a
           routerLink="/courses"
-          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)]"
+          class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)]"
         >
           <span>เลือกดูคอร์สเรียน</span>
           <ng-icon name="phosphorArrowRight" />
@@ -47,9 +47,9 @@
           <div class="card-hover flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl glass-card p-4 shadow-sm">
             <div class="flex items-center gap-4 w-full sm:w-auto">
               <!-- Thumbnail -->
-              <div class="h-20 w-32 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] shrink-0">
+              <div class="relative h-20 w-32 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] shrink-0">
                 @if (item.thumbnailUrl) {
-                  <img [src]="item.thumbnailUrl" [alt]="item.title" class="h-full w-full object-cover" />
+                  <img [ngSrc]="item.thumbnailUrl" fill [alt]="item.title" class="object-cover" />
                 } @else {
                   <div class="flex h-full w-full items-center justify-center text-[var(--color-text-muted)]">
                     <ng-icon name="phosphorShoppingBag" class="text-2xl" />
@@ -80,8 +80,9 @@
               <button
                 type="button"
                 (click)="cart.removeItem(item.courseId)"
-                class="tone-red btn-tactile flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--tone-bg)] hover:text-[var(--tone-fg)] transition"
+                class="tone-red btn-tactile hit-44 flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--tone-bg)] hover:text-[var(--tone-fg)] transition"
                 title="ลบออกจากตะกร้า"
+                [attr.aria-label]="'a11y.learner.removeFromCart' | translate: { name: item.title }"
               >
                 <ng-icon name="phosphorTrash" class="text-lg" />
               </button>
@@ -110,7 +111,7 @@
                 <button
                   type="button"
                   (click)="removePromo()"
-                  class="tone-red text-[11px] font-bold text-[var(--tone-fg)] hover:underline"
+                  class="tone-red hit-44 text-[11px] font-bold text-[var(--tone-fg)] hover:underline"
                 >
                   ลบ
                 </button>
@@ -122,13 +123,13 @@
                   type="text"
                   [(ngModel)]="promoCodeInput"
                   placeholder="เช่น SIRI2026"
-                  class="w-full rounded-xl glass-card px-3.5 py-2 text-xs uppercase text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+                  class="min-h-11 w-full rounded-xl glass-card px-3.5 py-2 text-xs uppercase text-[var(--color-text)] focus-visible:outline-none focus:border-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                 />
                 <button
                   type="button"
                   (click)="applyPromo()"
                   [disabled]="!promoCodeInput.trim() || cart.isApplyingPromo()"
-                  class="btn-tactile inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition disabled:opacity-50"
+                  class="btn-tactile hit-44 inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition disabled:opacity-50"
                 >
                   @if (cart.isApplyingPromo()) {
                     <app-spinner size="xs" color="muted" />
