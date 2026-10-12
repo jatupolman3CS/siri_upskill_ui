@@ -1,4 +1,4 @@
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -27,7 +27,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-course-moderation-page',
-  imports: [CommonModule, FormsModule, RouterLink, NgIcon, CurrencyThbPipe, TranslatePipe, Spinner],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, NgOptimizedImage, CurrencyThbPipe, TranslatePipe, Spinner],
   templateUrl: './admin-course-moderation-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

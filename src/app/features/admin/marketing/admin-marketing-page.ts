@@ -33,13 +33,14 @@ import {
 } from './data/admin-marketing-api.models';
 import { AdminMarketingApiService } from './data/admin-marketing-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-marketing-page',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, Skeleton, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Skeleton, Spinner],
   templateUrl: './admin-marketing-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

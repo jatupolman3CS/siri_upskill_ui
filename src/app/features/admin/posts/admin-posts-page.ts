@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -18,12 +18,13 @@ import {
 
 import { PostItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-posts-page',
-  imports: [CommonModule, FormsModule, NgIcon, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, NgOptimizedImage, TranslatePipe, Spinner],
   templateUrl: './admin-posts-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

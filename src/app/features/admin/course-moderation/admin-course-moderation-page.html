@@ -55,7 +55,7 @@
             <!-- Thumbnail -->
             <div class="relative aspect-video w-full overflow-hidden bg-[var(--color-surface-muted)] group">
               @if (course.thumbnailUrl) {
-                <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <img [ngSrc]="course.thumbnailUrl" fill [alt]="course.title" class="object-cover transition-transform duration-500 group-hover:scale-105" />
               } @else {
                 <div class="flex h-full w-full items-center justify-center bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
                   <ng-icon name="phosphorGraduationCap" class="text-4xl" />
@@ -102,7 +102,7 @@
             <a
               [routerLink]="['/courses', course.slug]"
               target="_blank"
-              class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-text)] hover:text-[var(--color-primary-text)] transition"
+              class="btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-text)] hover:text-[var(--color-primary-text)] transition"
             >
               <ng-icon name="phosphorEye" />
               <span>{{ 'admin.moderation.previewCourse' | translate }}</span>
@@ -112,7 +112,7 @@
               <button
                 type="button"
                 (click)="openRejectModal(course)"
-                class="tone-red btn-tactile inline-flex items-center gap-1 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
+                class="tone-red btn-tactile hit-44 inline-flex items-center gap-1 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
               >
                 <ng-icon name="phosphorXCircle" />
                 <span>{{ 'admin.moderation.reject' | translate }}</span>
@@ -121,7 +121,7 @@
               <button
                 type="button"
                 (click)="approveCourse(course)"
-                class="tone-green btn-tactile inline-flex items-center gap-1 rounded-xl bg-[var(--tone-fg)] px-4 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow hover:opacity-90 transition"
+                class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-xl bg-[var(--tone-fg)] px-4 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow hover:opacity-90 transition"
               >
                 <ng-icon name="phosphorCheckCircle" />
                 <span>{{ 'admin.moderation.approve' | translate }}</span>
@@ -149,7 +149,7 @@
             [(ngModel)]="rejectionReason"
             rows="4"
             [placeholder]="'admin.moderation.rejectReasonPlaceholder' | translate"
-            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
+            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
 
@@ -157,7 +157,7 @@
           <button
             type="button"
             (click)="closeRejectModal()"
-            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             {{ 'admin.moderation.btnCancel' | translate }}
           </button>
@@ -165,7 +165,7 @@
             type="button"
             (click)="confirmReject()"
             [disabled]="isSubmittingReject() || !rejectionReason().trim()"
-            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:opacity-90 disabled:opacity-50"
+            class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:opacity-90 disabled:opacity-50"
           >
             @if (isSubmittingReject()) {
               <app-spinner size="xs" color="white" />

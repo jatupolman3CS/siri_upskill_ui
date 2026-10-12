@@ -14,7 +14,7 @@
       <button
         type="button"
         (click)="openCreateBatchModal()"
-        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
+        class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
       >
         <ng-icon name="phosphorPlus" class="text-base" />
         <span>เปิดรอบจ่ายเงินใหม่ (Create Batch)</span>
@@ -32,8 +32,13 @@
         <ng-icon [name]="msg.type === 'success' ? 'phosphorCheckCircle' : 'phosphorWarning'" class="text-lg shrink-0" />
         <span>{{ msg.text }}</span>
       </div>
-      <button (click)="actionMessage.set(null)" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-        <ng-icon name="phosphorXCircle" class="text-base" />
+      <button
+        type="button"
+        (click)="actionMessage.set(null)"
+        class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+        [attr.aria-label]="'shared.toast.dismiss' | translate"
+      >
+        <ng-icon name="phosphorXCircle" class="text-base" aria-hidden="true" />
       </button>
     </div>
   }
@@ -44,7 +49,7 @@
       type="button"
       (click)="activeTab.set('batches')"
       [class]="activeTab() === 'batches' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
+      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorCurrencyDollar" class="text-base" />
       <span>รอบการจ่ายเงิน (Payout Batches)</span>
@@ -55,7 +60,7 @@
       type="button"
       (click)="activeTab.set('splits')"
       [class]="activeTab() === 'splits' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
+      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorChartPieSlice" class="text-base" />
       <span>ส่วนแบ่งรายได้ (Revenue Splits)</span>
@@ -66,7 +71,7 @@
       type="button"
       (click)="activeTab.set('refunds')"
       [class]="activeTab() === 'refunds' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
+      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorReceipt" class="text-base" />
       <span>คำขอคืนเงินรออนุมัติ (Pending Refunds)</span>
@@ -89,7 +94,7 @@
           <button
             type="button"
             (click)="openCreateBatchModal()"
-            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
+            class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
             <span>+ เปิดรอบจ่ายเงินงวดแรก</span>
           </button>
@@ -136,7 +141,7 @@
                     <button
                       type="button"
                       (click)="exportBatch(batch)"
-                      class="btn-tactile inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                      class="btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
                       title="ส่งออกไฟล์โอนเงินธนาคาร"
                     >
                       <ng-icon name="phosphorDownloadSimple" />
@@ -148,7 +153,7 @@
                       <button
                         type="button"
                         (click)="executeBatch(batch)"
-                        class="tone-green btn-tactile inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
+                        class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
                       >
                         <ng-icon name="phosphorPlay" />
                         <span>ยืนยันจ่ายเงิน</span>
@@ -177,13 +182,13 @@
               [(ngModel)]="splitSearchInstructor"
               (keyup.enter)="onFilterSplits()"
               placeholder="ค้นหา Instructor ID..."
-              class="w-full rounded-xl glass-card py-2 pl-9 pr-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="min-h-11 w-full rounded-xl glass-card py-2 pl-9 pr-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             />
           </div>
           <button
             type="button"
             (click)="onFilterSplits()"
-            class="btn-tactile rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition shrink-0"
+            class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition shrink-0"
           >
             ค้นหา
           </button>
@@ -195,7 +200,7 @@
             id="split-status-filter"
             [(ngModel)]="splitFilterStatus"
             (change)="onFilterSplits()"
-            class="rounded-xl glass-card py-2 px-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+            class="min-h-11 rounded-xl glass-card py-2 px-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           >
             <option value="All">{{ 'admin.payouts.splitStatus.all' | translate }}</option>
             <!-- Only the backend's RevenueSplitStatus members: any other value makes the endpoint answer 400 -->
@@ -327,14 +332,14 @@
                     <button
                       type="button"
                       (click)="openApproveRefundModal(refund)"
-                      class="tone-green btn-tactile inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-3 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
+                      class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-3 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
                     >
                       <span>อนุมัติคืนเงิน</span>
                     </button>
                     <button
                       type="button"
                       (click)="openRejectRefundModal(refund)"
-                      class="tone-red btn-tactile inline-flex items-center gap-1 rounded-lg border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
+                      class="tone-red btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
                     >
                       <span>ปฏิเสธ</span>
                     </button>
@@ -357,8 +362,13 @@
             <ng-icon name="phosphorCurrencyDollar" class="tone-green text-[var(--tone-fg)] text-lg" />
             <span>เปิดรอบการจ่ายเงินใหม่ (Create Batch)</span>
           </h2>
-          <button (click)="closeCreateBatchModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-            <ng-icon name="phosphorXCircle" class="text-xl" />
+          <button
+            type="button"
+            (click)="closeCreateBatchModal()"
+            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            [attr.aria-label]="'shared.modal.close' | translate"
+          >
+            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
           </button>
         </div>
 
@@ -373,7 +383,7 @@
               name="pKey"
               required
               placeholder="YYYY-MM เช่น 2026-08"
-              class="w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             />
             <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
               <app-payout-policy-text messageKey="admin.payouts.createBatchHint" skeletonWidth="100%" />
@@ -384,14 +394,14 @@
             <button
               type="button"
               (click)="closeCreateBatchModal()"
-              class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+              class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
             >
               ยกเลิก
             </button>
             <button
               type="submit"
               [disabled]="isSubmittingBatch()"
-              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+              class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
             >
               @if (isSubmittingBatch()) {
                 <app-spinner size="xs" color="white" />
@@ -412,8 +422,13 @@
       <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h2 class="text-base font-bold text-[var(--color-text)]">ยืนยันการอนุมัติคืนเงิน</h2>
-          <button (click)="closeApproveRefundModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-            <ng-icon name="phosphorXCircle" class="text-xl" />
+          <button
+            type="button"
+            (click)="closeApproveRefundModal()"
+            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            [attr.aria-label]="'shared.modal.close' | translate"
+          >
+            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
           </button>
         </div>
 
@@ -431,7 +446,7 @@
             name="appNote"
             rows="2"
             placeholder="เช่น อนุมัติการคืนเงินเข้าบัญชีต้นทางเรียบร้อยแล้ว"
-            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
 
@@ -439,7 +454,7 @@
           <button
             type="button"
             (click)="closeApproveRefundModal()"
-            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             ยกเลิก
           </button>
@@ -447,7 +462,7 @@
             type="button"
             (click)="submitApproveRefund()"
             [disabled]="isSubmittingApprove()"
-            class="tone-green btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--tone-fg)] px-5 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 disabled:opacity-50 transition"
+            class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--tone-fg)] px-5 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 disabled:opacity-50 transition"
           >
             @if (isSubmittingApprove()) {
               <app-spinner size="xs" color="current" />
@@ -467,8 +482,13 @@
       <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h2 class="tone-red text-base font-bold text-[var(--tone-fg)]">ปฏิเสธคำขอคืนเงิน</h2>
-          <button (click)="closeRejectRefundModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-            <ng-icon name="phosphorXCircle" class="text-xl" />
+          <button
+            type="button"
+            (click)="closeRejectRefundModal()"
+            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            [attr.aria-label]="'shared.modal.close' | translate"
+          >
+            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
           </button>
         </div>
 
@@ -487,7 +507,7 @@
             rows="2"
             required
             placeholder="ระบุเหตุผลในการปฏิเสธเพื่อแจ้งผู้ซื้อ เช่น เกินระยะเวลานโยบายคืนเงิน หรือเรียนเนื้อหาเกิน 30%"
-            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
 
@@ -495,7 +515,7 @@
           <button
             type="button"
             (click)="closeRejectRefundModal()"
-            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             ยกเลิก
           </button>
@@ -503,7 +523,7 @@
             type="button"
             (click)="submitRejectRefund()"
             [disabled]="isSubmittingReject()"
-            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-90 disabled:opacity-50 transition"
+            class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-90 disabled:opacity-50 transition"
           >
             @if (isSubmittingReject()) {
               <app-spinner size="xs" color="white" />

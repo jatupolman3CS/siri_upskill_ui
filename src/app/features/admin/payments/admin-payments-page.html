@@ -22,7 +22,7 @@
         type="button"
         (click)="loadData()"
         [disabled]="loading()"
-        class="btn-tactile inline-flex items-center gap-2 rounded-xl glass-card px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
+        class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl glass-card px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
       >
         <ng-icon name="phosphorArrowClockwise" [class.animate-spin]="loading()" class="text-base" />
         <span>รีเฟรช</span>
@@ -37,7 +37,7 @@
         <ng-icon name="phosphorWarningCircle" class="text-lg shrink-0" />
         <span>{{ errorMessage() }}</span>
       </div>
-      <button (click)="errorMessage.set(null)" class="text-xs font-bold hover:underline">ปิด</button>
+      <button type="button" (click)="errorMessage.set(null)" class="hit-44 text-xs font-bold hover:underline">ปิด</button>
     </div>
   }
 
@@ -47,7 +47,7 @@
         <ng-icon name="phosphorCheckCircle" class="text-lg shrink-0" />
         <span>{{ successMessage() }}</span>
       </div>
-      <button (click)="successMessage.set(null)" class="text-xs font-bold hover:underline">ปิด</button>
+      <button type="button" (click)="successMessage.set(null)" class="hit-44 text-xs font-bold hover:underline">ปิด</button>
     </div>
   }
 
@@ -153,7 +153,7 @@
               ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
               : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
           "
-          class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           ทั้งหมด
         </button>
@@ -165,7 +165,7 @@
               ? 'tone-gold bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
               : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
           "
-          class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           รอตรวจสอบ (Open)
         </button>
@@ -177,7 +177,7 @@
               ? 'tone-blue bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
               : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
           "
-          class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           กำลังดำเนินการ (In Progress)
         </button>
@@ -189,7 +189,7 @@
               ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
               : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
           "
-          class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           แก้ไขแล้ว (Resolved)
         </button>
@@ -201,7 +201,7 @@
               ? 'bg-[var(--color-text-muted)] text-[var(--color-text-inverse)]'
               : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
           "
-          class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           ยกเลิก/ปิดเคส (Dismissed)
         </button>
@@ -298,7 +298,7 @@
                         <button
                           type="button"
                           (click)="assignToSelf(item)"
-                          class="btn-tactile rounded-xl glass-card px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                          class="btn-tactile hit-44 rounded-xl glass-card px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
                         >
                           รับเรื่อง
                         </button>
@@ -308,14 +308,14 @@
                         <button
                           type="button"
                           (click)="openResolveModal(item)"
-                          class="tone-green btn-tactile rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
+                          class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                         >
                           ดำเนินการ
                         </button>
                         <button
                           type="button"
                           (click)="openDismissModal(item)"
-                          class="tone-red btn-tactile rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
+                          class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                         >
                           ยกเลิก
                         </button>
@@ -385,14 +385,14 @@
                       <button
                         type="button"
                         (click)="openRefundModal(refund, 'approve')"
-                        class="tone-green btn-tactile rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
+                        class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                       >
                         อนุมัติคืนเงิน
                       </button>
                       <button
                         type="button"
                         (click)="openRefundModal(refund, 'reject')"
-                        class="tone-red btn-tactile rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
+                        class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                       >
                         ปฏิเสธ
                       </button>
@@ -425,8 +425,13 @@
               </p>
             </div>
           </div>
-          <button (click)="closeResolveModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-            <ng-icon name="phosphorXCircle" class="text-xl" />
+          <button
+            type="button"
+            (click)="closeResolveModal()"
+            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            [attr.aria-label]="'shared.modal.close' | translate"
+          >
+            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
           </button>
         </div>
 
@@ -489,7 +494,7 @@
               [(ngModel)]="resolveNote"
               rows="3"
               placeholder="ระบุเหตุผลหรือรายละเอียดการตรวจสอบ..."
-              class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
+              class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             ></textarea>
           </div>
         </div>
@@ -498,7 +503,7 @@
           <button
             type="button"
             (click)="closeResolveModal()"
-            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             ยกเลิก
           </button>
@@ -506,7 +511,7 @@
             type="button"
             (click)="submitResolve()"
             [disabled]="isSubmittingResolve()"
-            class="tone-green btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--tone-fg)] px-4 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
+            class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--tone-fg)] px-4 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
           >
             @if (isSubmittingResolve()) {
               <app-spinner size="xs" color="current" />
@@ -527,8 +532,13 @@
             <ng-icon name="phosphorWarningCircle" class="text-lg" />
             <span>ปิดเคส / ยกเลิกรายการ</span>
           </h3>
-          <button (click)="closeDismissModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-            <ng-icon name="phosphorXCircle" class="text-xl" />
+          <button
+            type="button"
+            (click)="closeDismissModal()"
+            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            [attr.aria-label]="'shared.modal.close' | translate"
+          >
+            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
           </button>
         </div>
 
@@ -545,7 +555,7 @@
             [(ngModel)]="dismissNote"
             rows="3"
             placeholder="เช่น รายการซ้ำซ้อน, ผู้ใช้ชำระเงินใหม่แล้ว..."
-            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
+            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
 
@@ -553,7 +563,7 @@
           <button
             type="button"
             (click)="closeDismissModal()"
-            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             ย้อนกลับ
           </button>
@@ -561,7 +571,7 @@
             type="button"
             (click)="submitDismiss()"
             [disabled]="isSubmittingDismiss() || !dismissNote().trim()"
-            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
+            class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
           >
             @if (isSubmittingDismiss()) {
               <app-spinner size="xs" color="white" />
@@ -585,8 +595,13 @@
               <span class="tone-red text-[var(--tone-fg)]">ปฏิเสธคำขอคืนเงิน</span>
             }
           </h3>
-          <button (click)="closeRefundModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
-            <ng-icon name="phosphorXCircle" class="text-xl" />
+          <button
+            type="button"
+            (click)="closeRefundModal()"
+            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            [attr.aria-label]="'shared.modal.close' | translate"
+          >
+            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
           </button>
         </div>
 
@@ -603,7 +618,7 @@
             [(ngModel)]="refundDecisionNote"
             rows="3"
             placeholder="ระบุข้อความถึงผู้เรียนหรือบันทึกภายใน..."
-            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
+            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
 
@@ -611,7 +626,7 @@
           <button
             type="button"
             (click)="closeRefundModal()"
-            class="btn-tactile rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             ย้อนกลับ
           </button>
@@ -626,7 +641,7 @@
                   ? 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:opacity-90'
                   : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
             "
-            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition disabled:opacity-50"
+            class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition disabled:opacity-50"
           >
             @if (isSubmittingRefundAction()) {
               <app-spinner size="xs" color="current" />

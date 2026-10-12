@@ -25,6 +25,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { Spinner } from '../../../shared/spinner/spinner';
 import {
   AdminRefundItem,
@@ -38,7 +39,7 @@ import { AdminPaymentsApiService } from './data/admin-payments-api.service';
 @Component({
   selector: 'app-admin-payments-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, CurrencyThbPipe, Spinner],
+  imports: [CommonModule, FormsModule, NgIconComponent, CurrencyThbPipe, TranslatePipe, Spinner],
   templateUrl: './admin-payments-page.html',
   viewProviders: [
     provideIcons({
