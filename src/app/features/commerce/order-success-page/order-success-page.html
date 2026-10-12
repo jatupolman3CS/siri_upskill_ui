@@ -1,80 +1,92 @@
-<div class="animate-fade-in mx-auto max-w-3xl px-4 py-12 pb-24 space-y-8">
+<div class="page-shell page-shell-narrow animate-fade-in">
   @if (isLoading()) {
-    <p role="status">{{ 'common.loading' | translate }}</p>
+    <section class="rounded-2xl glass-card p-6 shadow-sm">
+      <p role="status" class="text-sm text-[var(--color-text-muted)]">{{ 'common.loading' | translate }}</p>
+    </section>
   } @else if (loadError()) {
-    <p role="alert">{{ 'common.error' | translate }}</p>
-    <a routerLink="/account/orders">{{ 'nav.orders' | translate }}</a>
+    <section class="flex flex-col items-start gap-4 rounded-2xl glass-card p-6 shadow-sm">
+      <p role="alert" class="text-sm font-medium text-[var(--color-text)]">{{ 'common.error' | translate }}</p>
+      <a
+        routerLink="/account/orders"
+        class="btn-tactile hit-44 inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
+      >
+        <span>{{ 'nav.orders' | translate }}</span>
+        <ng-icon name="phosphorArrowRight" aria-hidden="true" />
+      </a>
+    </section>
   }
   @if (order(); as ord) {
-    <!-- Success Banner -->
-    <div class="tone-green glass-card animate-fade-in-down rounded-3xl border-[var(--tone-fg)]/40 p-8 text-center space-y-3">
-      <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tone-fg)] text-[var(--tone-bg)] shadow-lg">
-        <ng-icon name="phosphorCheckCircle" class="text-4xl" />
-      </div>
-      <h1 class="text-2xl font-black text-[var(--color-text)] sm:text-3xl">
-        {{ 'checkout.success.heading' | translate }}
-      </h1>
-      <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
-        {{ 'checkout.success.subheading' | translate }}
-      </p>
-
-    </div>
-
-    <!-- Order Summary Box -->
-    <div class="animate-fade-in-up stagger-1 rounded-3xl glass-card p-6 sm:p-8 space-y-6 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--color-border)] pb-6">
-        <div>
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'checkout.success.orderNo' | translate }}</span>
-          <p class="text-base font-mono font-bold text-[var(--color-text)]">{{ ord.orderNo }}</p>
+    <!-- Confirmation panel: success banner + order facts -->
+    <section class="tone-green glass-card animate-fade-in-down flex flex-col gap-6 rounded-2xl border-[var(--tone-fg)]/40 p-6 shadow-sm">
+      <div class="flex flex-col items-center gap-3 text-center">
+        <div class="animate-pop-in flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tone-fg)] text-[var(--tone-bg)] shadow-lg">
+          <ng-icon name="phosphorCheckCircle" class="text-4xl" />
         </div>
-        <div>
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'checkout.paymentMethodHeading' | translate }}</span>
-          <p class="text-xs font-bold text-[var(--color-text)]">{{ ord.paymentMethod | translate }}</p>
-        </div>
-        <div>
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'orders.detail.netTotal' | translate }}</span>
-          <p class="text-base font-black text-[var(--color-primary-text)]">{{ ord.totalAmount | currencyThb }}</p>
+        <div class="flex flex-col gap-1">
+          <h1 class="text-2xl font-black text-[var(--color-text)] sm:text-3xl">
+            {{ 'checkout.success.heading' | translate }}
+          </h1>
+          <p class="mx-auto max-w-md text-xs text-[var(--color-text-muted)]">
+            {{ 'checkout.success.subheading' | translate }}
+          </p>
         </div>
       </div>
 
-      <!-- Purchased Courses Section -->
-      <div class="space-y-4">
+      <dl class="grid grid-cols-1 gap-4 border-t border-[var(--color-border)] pt-6 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        <div class="flex min-w-0 flex-col gap-1">
+          <dt class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'checkout.success.orderNo' | translate }}</dt>
+          <dd class="break-all font-mono text-base font-bold text-[var(--color-text)]">{{ ord.orderNo }}</dd>
+        </div>
+        <div class="flex min-w-0 flex-col gap-1">
+          <dt class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'checkout.paymentMethodHeading' | translate }}</dt>
+          <dd class="text-xs font-bold text-[var(--color-text)]">{{ ord.paymentMethod | translate }}</dd>
+        </div>
+        <div class="flex min-w-0 flex-col gap-1">
+          <dt class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'orders.detail.netTotal' | translate }}</dt>
+          <dd class="text-base font-black text-[var(--color-primary-text)]">{{ ord.totalAmount | currencyThb }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Next steps panel: purchased courses + receipt / library actions -->
+    <section class="animate-fade-in-up stagger-1 flex flex-col gap-6 rounded-2xl glass-card p-6 shadow-sm">
+      <div class="flex flex-col gap-4">
         <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'checkout.success.coursesHeading' | translate }}</h2>
 
-        <div class="space-y-3">
+        <ul class="flex flex-col gap-3">
           @for (course of ord.purchasedCourses; track course.courseId) {
-            <div class="card-hover flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)] p-4">
-              <div class="flex items-center gap-4 w-full sm:w-auto">
-                <div class="relative h-16 w-24 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] shrink-0">
+            <li class="flex flex-col items-stretch justify-between gap-4 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)] p-4 sm:flex-row sm:items-center">
+              <div class="flex min-w-0 items-center gap-4">
+                <div class="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--color-surface-muted)]">
                   @if (course.thumbnailUrl) {
                     <img [ngSrc]="course.thumbnailUrl" fill [alt]="course.title" class="object-cover" />
                   }
                 </div>
-                <div class="min-w-0 flex-1">
-                  <h3 class="text-xs sm:text-sm font-bold text-[var(--color-text)] line-clamp-1">{{ course.title }}</h3>
-                  <p class="text-xs font-semibold text-[var(--color-primary-text)] mt-1">{{ course.price | currencyThb }}</p>
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <h3 class="line-clamp-2 break-words text-xs font-bold text-[var(--color-text)] sm:text-sm">{{ course.title }}</h3>
+                  <p class="text-xs font-semibold text-[var(--color-primary-text)]">{{ course.price | currencyThb }}</p>
                 </div>
               </div>
 
               <a
                 [routerLink]="course.slug ? ['/learn', course.slug] : ['/my-courses']"
-                class="btn-tactile hit-44 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
+                class="btn-tactile hit-44 inline-flex w-full shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] sm:w-auto"
               >
                 <ng-icon name="phosphorPlayCircle" class="text-base" />
                 <span>{{ 'checkout.success.startNow' | translate }}</span>
               </a>
-            </div>
+            </li>
           }
-        </div>
+        </ul>
       </div>
 
       <!-- Actions / Receipts -->
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[var(--color-border)] pt-6">
+      <div class="flex flex-col items-stretch justify-between gap-4 border-t border-[var(--color-border)] pt-6 sm:flex-row sm:items-center">
         <button
           type="button"
           (click)="downloadReceipt()"
           [disabled]="isDownloadingReceipt()"
-          class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl glass-card px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl glass-card px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
         >
           <ng-icon name="phosphorFilePdf" class="tone-red text-base text-[var(--tone-fg)]" />
           <span>{{ 'checkout.success.downloadReceipt' | translate }}</span>
@@ -82,12 +94,12 @@
 
         <a
           routerLink="/my-courses"
-          class="hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
+          class="hit-44 inline-flex items-center justify-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
         >
           <span>{{ 'checkout.success.goToMyCourses' | translate }}</span>
           <ng-icon name="phosphorArrowRight" />
         </a>
       </div>
-    </div>
+    </section>
   }
 </div>

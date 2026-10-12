@@ -1,16 +1,28 @@
-<div class="animate-fade-in mx-auto max-w-6xl px-4 py-8 pb-24 sm:px-6 lg:px-8">
+<div class="page-shell animate-fade-in">
   <!-- Page Header -->
-  <div class="animate-fade-in-down mb-8">
-    <h1 class="text-2xl font-black tracking-tight text-[var(--color-text)] sm:text-3xl">
-      {{ 'cart.heading' | translate }}
-    </h1>
-    <p class="mt-1 text-xs text-[var(--color-text-muted)]">
-      {{ 'cart.itemCountText' | translate: { count: cart.itemCount() } }}
-    </p>
-  </div>
+  <header class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex min-w-0 flex-col gap-1">
+      <h1 class="text-2xl font-black tracking-tight text-[var(--color-text)] sm:text-3xl">
+        {{ 'cart.heading' | translate }}
+      </h1>
+      <p class="text-xs text-[var(--color-text-muted)]">
+        {{ 'cart.itemCountText' | translate: { count: cart.itemCount() } }}
+      </p>
+    </div>
+
+    @if (cart.hasItems()) {
+      <a
+        routerLink="/courses"
+        class="btn-tactile hit-44 inline-flex items-center gap-1.5 self-start text-xs font-bold text-[var(--color-primary-text)] hover:underline sm:self-auto"
+      >
+        <span>{{ 'orders.empty.browseCourses' | translate }}</span>
+        <ng-icon name="phosphorArrowRight" aria-hidden="true" />
+      </a>
+    }
+  </header>
 
   @if (checkoutError(); as errorMsg) {
-    <div class="animate-fade-in mb-6 flex items-start gap-3 tone-red rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)]">
+    <div class="animate-fade-in tone-red flex items-start gap-3 rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)]">
       <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5" />
       <div>
         <p class="font-bold">{{ 'cart.checkoutErrorHeading' | translate }}</p>
@@ -21,177 +33,177 @@
 
   @if (!cart.hasItems()) {
     <!-- Empty State -->
-    <div class="animate-fade-in-up rounded-3xl glass-card p-12 text-center shadow-sm">
-      <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+    <section class="animate-fade-in-up flex flex-col items-center gap-4 rounded-2xl glass-card p-6 py-12 text-center shadow-sm">
+      <div class="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
         <ng-icon name="phosphorShoppingBag" class="text-4xl" />
       </div>
-      <h2 class="mt-4 text-lg font-bold text-[var(--color-text)]">{{ 'cart.empty.heading' | translate }}</h2>
-      <p class="mt-1 text-xs text-[var(--color-text-muted)] max-w-sm mx-auto">
-        {{ 'cart.empty.description' | translate }}
-      </p>
-      <div class="mt-6">
-        <a
-          routerLink="/courses"
-          class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)]"
-        >
-          <span>{{ 'orders.empty.browseCourses' | translate }}</span>
-          <ng-icon name="phosphorArrowRight" />
-        </a>
+      <div class="flex flex-col gap-1">
+        <h2 class="text-lg font-bold text-[var(--color-text)]">{{ 'cart.empty.heading' | translate }}</h2>
+        <p class="mx-auto max-w-sm text-xs text-[var(--color-text-muted)]">
+          {{ 'cart.empty.description' | translate }}
+        </p>
       </div>
-    </div>
+      <a
+        routerLink="/courses"
+        class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)]"
+      >
+        <span>{{ 'orders.empty.browseCourses' | translate }}</span>
+        <ng-icon name="phosphorArrowRight" />
+      </a>
+    </section>
   } @else {
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-      <!-- Items List -->
-      <div class="animate-fade-in-up stagger-1 space-y-4 lg:col-span-8">
-        @for (item of cart.items(); track item.courseId) {
-          <div class="card-hover flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl glass-card p-4 shadow-sm">
-            <div class="flex items-center gap-4 w-full sm:w-auto">
-              <!-- Thumbnail -->
-              <div class="relative h-20 w-32 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] shrink-0">
-                @if (item.thumbnailUrl) {
-                  <img [ngSrc]="item.thumbnailUrl" fill [alt]="item.title" class="object-cover" />
-                } @else {
-                  <div class="flex h-full w-full items-center justify-center text-[var(--color-text-muted)]">
-                    <ng-icon name="phosphorShoppingBag" class="text-2xl" />
-                  </div>
-                }
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <!-- Items panel -->
+      <section class="animate-fade-in-up stagger-1 min-w-0 rounded-2xl glass-card p-4 shadow-sm sm:p-6">
+        <ul class="flex flex-col divide-y divide-[var(--color-border)]">
+          @for (item of cart.items(); track item.courseId) {
+            <li class="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
+              <div class="flex min-w-0 flex-1 items-center gap-4">
+                <!-- Thumbnail -->
+                <div class="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] sm:h-20 sm:w-32">
+                  @if (item.thumbnailUrl) {
+                    <img [ngSrc]="item.thumbnailUrl" fill [alt]="item.title" class="object-cover" />
+                  } @else {
+                    <div class="flex h-full w-full items-center justify-center text-[var(--color-text-muted)]">
+                      <ng-icon name="phosphorShoppingBag" class="text-2xl" />
+                    </div>
+                  }
+                </div>
+
+                <!-- Info -->
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <a [routerLink]="['/courses', item.slug]" class="line-clamp-2 break-words text-sm font-bold text-[var(--color-text)] transition hover:text-[var(--color-primary-text)]">
+                    {{ item.title }}
+                  </a>
+                  @if (item.instructorName) {
+                    <p class="truncate text-xs text-[var(--color-text-muted)]">{{ 'cart.item.instructor' | translate: { name: item.instructorName } }}</p>
+                  }
+                  <p class="text-sm font-extrabold text-[var(--color-primary-text)] sm:hidden">
+                    {{ item.price | currencyThb }}
+                  </p>
+                </div>
               </div>
 
-              <!-- Info -->
-              <div class="min-w-0 flex-1 space-y-1">
-                <a [routerLink]="['/courses', item.slug]" class="text-sm font-bold text-[var(--color-text)] line-clamp-2 hover:text-[var(--color-primary-text)] transition">
-                  {{ item.title }}
-                </a>
-                @if (item.instructorName) {
-                  <p class="text-xs text-[var(--color-text-muted)]">{{ 'cart.item.instructor' | translate: { name: item.instructorName } }}</p>
-                }
-                <p class="text-sm font-extrabold text-[var(--color-primary-text)] sm:hidden">
+              <!-- Price & Action -->
+              <div class="flex shrink-0 items-center gap-6">
+                <span class="hidden text-base font-black text-[var(--color-primary-text)] sm:inline-block">
                   {{ item.price | currencyThb }}
-                </p>
+                </span>
+
+                <button
+                  type="button"
+                  (click)="cart.removeItem(item.courseId)"
+                  class="tone-red btn-tactile hit-44 flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] transition hover:bg-[var(--tone-bg)] hover:text-[var(--tone-fg)]"
+                  [attr.title]="'cart.item.removeTitle' | translate"
+                  [attr.aria-label]="'a11y.learner.removeFromCart' | translate: { name: item.title }"
+                >
+                  <ng-icon name="phosphorTrash" class="text-lg" />
+                </button>
               </div>
-            </div>
+            </li>
+          }
+        </ul>
+      </section>
 
-            <!-- Price & Action -->
-            <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t border-[var(--color-border)] sm:border-0 pt-3 sm:pt-0">
-              <span class="hidden sm:inline-block text-base font-black text-[var(--color-primary-text)]">
-                {{ item.price | currencyThb }}
-              </span>
+      <!-- Order Summary panel -->
+      <aside class="animate-fade-in-up stagger-2 flex flex-col gap-6 rounded-2xl glass-card p-6 shadow-sm lg:sticky lg:top-24">
+        <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'checkout.summary.heading' | translate }}</h2>
 
+        <!-- Promo Code Section -->
+        <div class="flex flex-col gap-2">
+          <label for="promoInput" class="text-xs font-semibold text-[var(--color-text)]">{{ 'cart.promo.label' | translate }}</label>
+          @if (cart.appliedPromo(); as promo) {
+            <div class="tone-green flex items-center justify-between rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/30 px-3.5 py-2.5 text-xs text-[var(--tone-fg)]">
+              <div class="flex items-center gap-2">
+                <ng-icon name="phosphorTicket" class="text-base text-[var(--tone-fg)]" />
+                <div>
+                  <span class="font-mono font-bold">{{ promo.code }}</span>
+                  <p class="text-[10px] text-[var(--tone-fg)]">-{{ promo.discountAmount | currencyThb }}</p>
+                </div>
+              </div>
               <button
                 type="button"
-                (click)="cart.removeItem(item.courseId)"
-                class="tone-red btn-tactile hit-44 flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--tone-bg)] hover:text-[var(--tone-fg)] transition"
-                [attr.title]="'cart.item.removeTitle' | translate"
-                [attr.aria-label]="'a11y.learner.removeFromCart' | translate: { name: item.title }"
+                (click)="removePromo()"
+                class="tone-red hit-44 text-[11px] font-bold text-[var(--tone-fg)] hover:underline"
               >
-                <ng-icon name="phosphorTrash" class="text-lg" />
+                {{ 'cart.promo.remove' | translate }}
               </button>
             </div>
-          </div>
-        }
-      </div>
-
-      <!-- Order Summary Card -->
-      <div class="animate-fade-in-up stagger-2 lg:col-span-4">
-        <div class="sticky top-24 rounded-3xl glass-card p-6 space-y-6 shadow-sm">
-          <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'checkout.summary.heading' | translate }}</h2>
-
-          <!-- Promo Code Section -->
-          <div class="space-y-2">
-            <label for="promoInput" class="text-xs font-semibold text-[var(--color-text)]">{{ 'cart.promo.label' | translate }}</label>
-            @if (cart.appliedPromo(); as promo) {
-              <div class="tone-green flex items-center justify-between rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/30 px-3.5 py-2.5 text-xs text-[var(--tone-fg)]">
-                <div class="flex items-center gap-2">
-                  <ng-icon name="phosphorTicket" class="text-base text-[var(--tone-fg)]" />
-                  <div>
-                    <span class="font-mono font-bold">{{ promo.code }}</span>
-                    <p class="text-[10px] text-[var(--tone-fg)]">-{{ promo.discountAmount | currencyThb }}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  (click)="removePromo()"
-                  class="tone-red hit-44 text-[11px] font-bold text-[var(--tone-fg)] hover:underline"
-                >
-                  {{ 'cart.promo.remove' | translate }}
-                </button>
-              </div>
-            } @else {
-              <div class="flex gap-2">
-                <input
-                  id="promoInput"
-                  type="text"
-                  [(ngModel)]="promoCodeInput"
-                  [placeholder]="'cart.promo.placeholder' | translate"
-                  class="min-h-11 w-full rounded-xl glass-card px-3.5 py-2 text-xs uppercase text-[var(--color-text)] focus-visible:outline-none focus:border-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-                />
-                <button
-                  type="button"
-                  (click)="applyPromo()"
-                  [disabled]="!promoCodeInput.trim() || cart.isApplyingPromo()"
-                  class="btn-tactile hit-44 inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition disabled:opacity-50"
-                >
-                  @if (cart.isApplyingPromo()) {
-                    <app-spinner size="xs" color="muted" />
-                  }
-                  <span>{{ (cart.isApplyingPromo() ? 'cart.promo.applying' : 'checkout.summary.applyPromo') | translate }}</span>
-                </button>
-              </div>
-              @if (cart.promoError(); as err) {
-                <p class="tone-red text-[11px] text-[var(--tone-fg)] animate-fade-in">{{ err }}</p>
-              }
+          } @else {
+            <div class="flex gap-2">
+              <input
+                id="promoInput"
+                type="text"
+                [(ngModel)]="promoCodeInput"
+                [placeholder]="'cart.promo.placeholder' | translate"
+                class="min-h-11 w-full min-w-0 rounded-xl glass-card px-3.5 py-2 text-xs uppercase text-[var(--color-text)] focus-visible:outline-none focus:border-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              />
+              <button
+                type="button"
+                (click)="applyPromo()"
+                [disabled]="!promoCodeInput.trim() || cart.isApplyingPromo()"
+                class="btn-tactile hit-44 inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition disabled:opacity-50"
+              >
+                @if (cart.isApplyingPromo()) {
+                  <app-spinner size="xs" color="muted" />
+                }
+                <span>{{ (cart.isApplyingPromo() ? 'cart.promo.applying' : 'checkout.summary.applyPromo') | translate }}</span>
+              </button>
+            </div>
+            @if (cart.promoError(); as err) {
+              <p class="tone-red text-[11px] text-[var(--tone-fg)] animate-fade-in">{{ err }}</p>
             }
+          }
+        </div>
+
+        <!-- Price Calculation -->
+        <div class="flex flex-col gap-3 border-t border-[var(--color-border)] pt-4 text-xs">
+          <div class="flex justify-between text-[var(--color-text-muted)]">
+            <span>{{ 'cart.summary.subtotal' | translate }}</span>
+            <span class="font-medium text-[var(--color-text)]">{{ cart.subtotal() | currencyThb }}</span>
           </div>
 
-          <!-- Price Calculation -->
-          <div class="space-y-3 border-t border-[var(--color-border)] pt-4 text-xs">
-            <div class="flex justify-between text-[var(--color-text-muted)]">
-              <span>{{ 'cart.summary.subtotal' | translate }}</span>
-              <span class="font-medium text-[var(--color-text)]">{{ cart.subtotal() | currencyThb }}</span>
+          @if (cart.discount() > 0) {
+            <div class="tone-green flex justify-between text-[var(--tone-fg)] font-semibold animate-fade-in">
+              <span>{{ 'checkout.summary.discount' | translate }}</span>
+              <span>-{{ cart.discount() | currencyThb }}</span>
             </div>
+          }
 
-            @if (cart.discount() > 0) {
-              <div class="tone-green flex justify-between text-[var(--tone-fg)] font-semibold animate-fade-in">
-                <span>{{ 'checkout.summary.discount' | translate }}</span>
-                <span>-{{ cart.discount() | currencyThb }}</span>
-              </div>
-            }
-
-            <div class="flex justify-between border-t border-[var(--color-border)] pt-3 text-sm font-black text-[var(--color-text)]">
-              <span>{{ 'orders.detail.netTotal' | translate }}</span>
-              <span class="text-base text-[var(--color-primary-text)]">{{ cart.total() | currencyThb }}</span>
-            </div>
-          </div>
-
-          <!-- Checkout CTA -->
-          <button
-            type="button"
-            (click)="proceedToCheckout()"
-            [disabled]="isCreatingOrder()"
-            class="btn-tactile w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] py-3.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
-          >
-            @if (isCreatingOrder()) {
-              <app-spinner size="sm" color="white" />
-              <span>{{ 'cart.summary.creating' | translate }}</span>
-            } @else {
-              <ng-icon name="phosphorLockSimple" class="text-sm" />
-              <span>{{ 'cart.summary.proceed' | translate }}</span>
-            }
-          </button>
-
-          <!-- Guarantee badges -->
-          <div class="space-y-2 pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
-            <div class="flex items-center gap-2">
-              <ng-icon name="phosphorShieldCheck" class="tone-green text-[var(--tone-fg)] text-sm" />
-              <span>{{ 'cart.guarantee.secure' | translate }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <ng-icon name="phosphorCheckCircle" class="tone-green text-[var(--tone-fg)] text-sm" />
-              <span>{{ 'cart.guarantee.receipt' | translate }}</span>
-            </div>
+          <div class="flex justify-between border-t border-[var(--color-border)] pt-3 text-sm font-black text-[var(--color-text)]">
+            <span>{{ 'orders.detail.netTotal' | translate }}</span>
+            <span class="text-base text-[var(--color-primary-text)]">{{ cart.total() | currencyThb }}</span>
           </div>
         </div>
-      </div>
+
+        <!-- Checkout CTA -->
+        <button
+          type="button"
+          (click)="proceedToCheckout()"
+          [disabled]="isCreatingOrder()"
+          class="btn-tactile w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] py-3.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
+        >
+          @if (isCreatingOrder()) {
+            <app-spinner size="sm" color="white" />
+            <span>{{ 'cart.summary.creating' | translate }}</span>
+          } @else {
+            <ng-icon name="phosphorLockSimple" class="text-sm" />
+            <span>{{ 'cart.summary.proceed' | translate }}</span>
+          }
+        </button>
+
+        <!-- Guarantee badges -->
+        <div class="flex flex-col gap-2 border-t border-[var(--color-border)]/60 pt-4 text-[11px] text-[var(--color-text-muted)]">
+          <div class="flex items-center gap-2">
+            <ng-icon name="phosphorShieldCheck" class="tone-green text-[var(--tone-fg)] text-sm" />
+            <span>{{ 'cart.guarantee.secure' | translate }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <ng-icon name="phosphorCheckCircle" class="tone-green text-[var(--tone-fg)] text-sm" />
+            <span>{{ 'cart.guarantee.receipt' | translate }}</span>
+          </div>
+        </div>
+      </aside>
     </div>
   }
 </div>
