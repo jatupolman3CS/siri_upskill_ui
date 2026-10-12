@@ -3,10 +3,11 @@
   @if (actionMessage(); as msg) {
     <div
       class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 shadow-2xl text-sm font-semibold transition animate-pop-in duration-300"
-      [class.bg-emerald-600]="msg.type === 'success'"
-      [class.text-white]="msg.type === 'success'"
-      [class.bg-red-600]="msg.type === 'error'"
-      [class.text-white]="msg.type === 'error'"
+      [class]="
+        msg.type === 'success'
+          ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+          : 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)]'
+      "
     >
       @if (msg.type === 'success') {
         <ng-icon name="phosphorCheckCircle" class="text-xl animate-pop-in" />
@@ -22,7 +23,7 @@
     <div>
       <div class="flex items-center gap-2">
         <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'admin.moderation.title' | translate }}</h1>
-        <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600">
+        <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
           {{ 'admin.moderation.pendingCount' | translate: { count: totalCount() } }}
         </span>
       </div>
@@ -33,13 +34,13 @@
   </div>
 
   @if (isLoading()) {
-    <div class="animate-fade-in flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-16 text-center text-xs text-[var(--color-text-muted)]">
+    <div class="animate-fade-in flex flex-col items-center justify-center gap-3 rounded-2xl glass-card p-16 text-center text-xs text-[var(--color-text-muted)]">
       <app-spinner size="md" />
       <span>{{ 'admin.moderation.loading' | translate }}</span>
     </div>
   } @else if (pendingCourses().length === 0) {
-    <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center">
-      <div class="animate-pop-in mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 mb-3">
+    <div class="animate-fade-in-up rounded-2xl glass-card p-12 text-center">
+      <div class="tone-green animate-pop-in mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--tone-bg)] text-[var(--tone-fg)] mb-3">
         <ng-icon name="phosphorCheckCircle" class="text-2xl" />
       </div>
       <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'admin.moderation.emptyTitle' | translate }}</h2>
@@ -49,25 +50,25 @@
     <!-- Course Cards Grid -->
     <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 md:grid-cols-2">
       @for (course of pendingCourses(); track course.id) {
-        <div class="card-hover flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <div class="card-hover flex flex-col justify-between overflow-hidden rounded-2xl glass-card shadow-sm">
           <div>
             <!-- Thumbnail -->
-            <div class="relative aspect-video w-full overflow-hidden bg-zinc-900 group">
+            <div class="relative aspect-video w-full overflow-hidden bg-[var(--color-surface-muted)] group">
               @if (course.thumbnailUrl) {
                 <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               } @else {
-                <div class="flex h-full w-full items-center justify-center bg-zinc-800 text-zinc-500">
+                <div class="flex h-full w-full items-center justify-center bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
                   <ng-icon name="phosphorGraduationCap" class="text-4xl" />
                 </div>
               }
-              <span class="absolute top-3 left-3 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white shadow">
+              <span class="tone-gold absolute top-3 left-3 rounded-full bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow">
                 {{ 'admin.moderation.pendingStatus' | translate }}
               </span>
             </div>
 
             <div class="p-6 space-y-4">
               <div>
-                <span class="rounded bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-primary)]">
+                <span class="rounded bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-primary-text)]">
                   {{ course.categoryName || ('admin.moderation.defaultCategory' | translate) }}
                 </span>
                 <h2 class="mt-2 text-base font-bold text-[var(--color-text)] leading-snug line-clamp-2">
@@ -101,7 +102,7 @@
             <a
               [routerLink]="['/courses', course.slug]"
               target="_blank"
-              class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-text)] hover:text-[var(--color-primary)] transition"
+              class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-text)] hover:text-[var(--color-primary-text)] transition"
             >
               <ng-icon name="phosphorEye" />
               <span>{{ 'admin.moderation.previewCourse' | translate }}</span>
@@ -111,7 +112,7 @@
               <button
                 type="button"
                 (click)="openRejectModal(course)"
-                class="btn-tactile inline-flex items-center gap-1 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-500/20 transition"
+                class="tone-red btn-tactile inline-flex items-center gap-1 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
               >
                 <ng-icon name="phosphorXCircle" />
                 <span>{{ 'admin.moderation.reject' | translate }}</span>
@@ -120,7 +121,7 @@
               <button
                 type="button"
                 (click)="approveCourse(course)"
-                class="btn-tactile inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition"
+                class="tone-green btn-tactile inline-flex items-center gap-1 rounded-xl bg-[var(--tone-fg)] px-4 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow hover:opacity-90 transition"
               >
                 <ng-icon name="phosphorCheckCircle" />
                 <span>{{ 'admin.moderation.approve' | translate }}</span>
@@ -134,10 +135,10 @@
 
   <!-- Reject Modal -->
   @if (rejectingCourse(); as course) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-3xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div>
-          <h2 class="text-lg font-bold text-red-600">{{ 'admin.moderation.rejectModalTitle' | translate }}</h2>
+          <h2 class="tone-red text-lg font-bold text-[var(--tone-fg)]">{{ 'admin.moderation.rejectModalTitle' | translate }}</h2>
           <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ course.title }}</p>
         </div>
 
@@ -148,7 +149,7 @@
             [(ngModel)]="rejectionReason"
             rows="4"
             [placeholder]="'admin.moderation.rejectReasonPlaceholder' | translate"
-            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-red-500 focus:outline-none"
+            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
           ></textarea>
         </div>
 
@@ -164,7 +165,7 @@
             type="button"
             (click)="confirmReject()"
             [disabled]="isSubmittingReject() || !rejectionReason().trim()"
-            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow transition hover:bg-red-700 disabled:opacity-50"
+            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:opacity-90 disabled:opacity-50"
           >
             @if (isSubmittingReject()) {
               <app-spinner size="xs" color="white" />

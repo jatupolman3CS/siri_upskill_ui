@@ -10,7 +10,7 @@
   @if (error(); as failure) {
     <div
       role="alert"
-      class="mt-4 rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+      class="mt-4 rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm text-[var(--color-text)]"
     >
       <p class="font-medium">{{ failure.key | translate: failure.params }}</p>
       @if (failure.detail) {

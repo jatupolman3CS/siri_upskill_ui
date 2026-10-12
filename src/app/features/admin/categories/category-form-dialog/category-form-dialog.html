@@ -3,7 +3,7 @@
     @if (errorView(); as error) {
       <div
         role="alert"
-        class="rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+        class="rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm text-[var(--color-text)]"
       >
         <p class="font-medium">{{ error.key | translate: error.params }}</p>
         @if (error.detail) {

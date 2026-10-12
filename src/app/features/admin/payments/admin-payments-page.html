@@ -6,8 +6,8 @@
         <h1 class="text-2xl font-black tracking-tight text-[var(--color-text)]">
           การจัดการชำระเงิน & Ops Queue
         </h1>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="tone-green inline-flex items-center gap-1.5 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
+          <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)] animate-pulse"></span>
           Stripe Live
         </span>
       </div>
@@ -22,7 +22,7 @@
         type="button"
         (click)="loadData()"
         [disabled]="loading()"
-        class="btn-tactile inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
+        class="btn-tactile inline-flex items-center gap-2 rounded-xl glass-card px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
       >
         <ng-icon name="phosphorArrowClockwise" [class.animate-spin]="loading()" class="text-base" />
         <span>รีเฟรช</span>
@@ -32,7 +32,7 @@
 
   <!-- Alerts -->
   @if (errorMessage()) {
-    <div class="animate-pop-in rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm font-medium text-rose-600 flex items-center justify-between">
+    <div class="tone-red animate-pop-in rounded-xl border border-[var(--tone-fg)]/20 bg-[var(--tone-bg)] p-4 text-sm font-medium text-[var(--tone-fg)] flex items-center justify-between">
       <div class="flex items-center gap-2">
         <ng-icon name="phosphorWarningCircle" class="text-lg shrink-0" />
         <span>{{ errorMessage() }}</span>
@@ -42,7 +42,7 @@
   }
 
   @if (successMessage()) {
-    <div class="animate-pop-in rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-600 flex items-center justify-between">
+    <div class="tone-green animate-pop-in rounded-xl border border-[var(--tone-fg)]/20 bg-[var(--tone-bg)] p-4 text-sm font-medium text-[var(--tone-fg)] flex items-center justify-between">
       <div class="flex items-center gap-2">
         <ng-icon name="phosphorCheckCircle" class="text-lg shrink-0" />
         <span>{{ successMessage() }}</span>
@@ -53,12 +53,12 @@
 
   <!-- KPI Summary Cards -->
   <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-xs flex flex-col justify-between h-full">
+    <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           Ops Queue ค้างตรวจ (รายการ)
         </span>
-        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+        <div class="tone-gold flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorWarning" class="text-lg" />
         </div>
       </div>
@@ -70,12 +70,12 @@
       </div>
     </div>
 
-    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-xs flex flex-col justify-between h-full">
+    <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           คำขอคืนเงินรอตรวจ (รายการ)
         </span>
-        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600">
+        <div class="tone-red flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorArrowsDownUp" class="text-lg" />
         </div>
       </div>
@@ -87,12 +87,12 @@
       </div>
     </div>
 
-    <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-xs flex flex-col justify-between h-full">
+    <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           เกตเวย์การชำระเงิน
         </span>
-        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600">
+        <div class="tone-blue flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorCreditCard" class="text-lg" />
         </div>
       </div>
@@ -100,7 +100,7 @@
         <div class="text-xl font-black tracking-tight text-[var(--color-text)]">
           Stripe PromptPay
         </div>
-        <p class="mt-1 text-xs text-emerald-600 font-semibold">Webhooks & Auto-reconciliation Active</p>
+        <p class="tone-green mt-1 text-xs text-[var(--tone-fg)] font-semibold">Webhooks & Auto-reconciliation Active</p>
       </div>
     </div>
   </div>
@@ -111,14 +111,14 @@
       type="button"
       (click)="setTab('ops-queue')"
       [class.border-[var(--color-primary)]]="activeTab() === 'ops-queue'"
-      [class.text-[var(--color-primary)]]="activeTab() === 'ops-queue'"
+      [class.text-[var(--color-primary-text)]]="activeTab() === 'ops-queue'"
       [class.border-transparent]="activeTab() !== 'ops-queue'"
       [class.text-[var(--color-text-muted)]]="activeTab() !== 'ops-queue'"
       class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
     >
       <ng-icon name="phosphorWarningCircle" class="text-base" />
       <span>คิวตรวจสอบความผิดปกติ (Ops Queue)</span>
-      <span class="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-black text-amber-600">
+      <span class="tone-gold rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
         {{ opsTotalCount() }}
       </span>
     </button>
@@ -127,14 +127,14 @@
       type="button"
       (click)="setTab('refunds')"
       [class.border-[var(--color-primary)]]="activeTab() === 'refunds'"
-      [class.text-[var(--color-primary)]]="activeTab() === 'refunds'"
+      [class.text-[var(--color-primary-text)]]="activeTab() === 'refunds'"
       [class.border-transparent]="activeTab() !== 'refunds'"
       [class.text-[var(--color-text-muted)]]="activeTab() !== 'refunds'"
       class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
     >
       <ng-icon name="phosphorArrowsDownUp" class="text-base" />
       <span>คำขอคืนเงิน (Refunds)</span>
-      <span class="rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-black text-rose-600">
+      <span class="tone-red rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
         {{ refundsTotalCount() }}
       </span>
     </button>
@@ -148,10 +148,11 @@
         <button
           type="button"
           (click)="setStatusFilter('ALL')"
-          [class.bg-[var(--color-primary)]]="opsStatusFilter() === 'ALL'"
-          [class.text-white]="opsStatusFilter() === 'ALL'"
-          [class.bg-[var(--color-surface)]]="opsStatusFilter() !== 'ALL'"
-          [class.text-[var(--color-text-muted)]]="opsStatusFilter() !== 'ALL'"
+          [class]="
+            opsStatusFilter() === 'ALL'
+              ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+          "
           class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           ทั้งหมด
@@ -159,10 +160,11 @@
         <button
           type="button"
           (click)="setStatusFilter('Open')"
-          [class.bg-amber-600]="opsStatusFilter() === 'Open'"
-          [class.text-white]="opsStatusFilter() === 'Open'"
-          [class.bg-[var(--color-surface)]]="opsStatusFilter() !== 'Open'"
-          [class.text-[var(--color-text-muted)]]="opsStatusFilter() !== 'Open'"
+          [class]="
+            opsStatusFilter() === 'Open'
+              ? 'tone-gold bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+          "
           class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           รอตรวจสอบ (Open)
@@ -170,10 +172,11 @@
         <button
           type="button"
           (click)="setStatusFilter('InProgress')"
-          [class.bg-indigo-600]="opsStatusFilter() === 'InProgress'"
-          [class.text-white]="opsStatusFilter() === 'InProgress'"
-          [class.bg-[var(--color-surface)]]="opsStatusFilter() !== 'InProgress'"
-          [class.text-[var(--color-text-muted)]]="opsStatusFilter() !== 'InProgress'"
+          [class]="
+            opsStatusFilter() === 'InProgress'
+              ? 'tone-blue bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+          "
           class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           กำลังดำเนินการ (In Progress)
@@ -181,10 +184,11 @@
         <button
           type="button"
           (click)="setStatusFilter('Resolved')"
-          [class.bg-emerald-600]="opsStatusFilter() === 'Resolved'"
-          [class.text-white]="opsStatusFilter() === 'Resolved'"
-          [class.bg-[var(--color-surface)]]="opsStatusFilter() !== 'Resolved'"
-          [class.text-[var(--color-text-muted)]]="opsStatusFilter() !== 'Resolved'"
+          [class]="
+            opsStatusFilter() === 'Resolved'
+              ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+          "
           class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           แก้ไขแล้ว (Resolved)
@@ -192,10 +196,11 @@
         <button
           type="button"
           (click)="setStatusFilter('Dismissed')"
-          [class.bg-slate-600]="opsStatusFilter() === 'Dismissed'"
-          [class.text-white]="opsStatusFilter() === 'Dismissed'"
-          [class.bg-[var(--color-surface)]]="opsStatusFilter() !== 'Dismissed'"
-          [class.text-[var(--color-text-muted)]]="opsStatusFilter() !== 'Dismissed'"
+          [class]="
+            opsStatusFilter() === 'Dismissed'
+              ? 'bg-[var(--color-text-muted)] text-[var(--color-text-inverse)]'
+              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+          "
           class="btn-tactile rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
           ยกเลิก/ปิดเคส (Dismissed)
@@ -203,7 +208,7 @@
       </div>
 
       <!-- Ops Queue Table -->
-      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs overflow-hidden">
+      <div class="rounded-2xl glass-card shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -230,7 +235,7 @@
                 <tr>
                   <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
                     <div class="flex flex-col items-center gap-2">
-                      <ng-icon name="phosphorCheckCircle" class="text-3xl text-emerald-500" />
+                      <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)]" />
                       <p class="font-bold text-[var(--color-text)]">ไม่พบรายการที่ต้องตรวจสอบ</p>
                       <p class="text-xs">ระบบการชำระเงินทำงานปกติ ไม่มีเคสค้างในสถานะนี้</p>
                     </div>
@@ -247,7 +252,7 @@
                     </div>
                   </td>
                   <td class="px-5 py-4 text-xs font-medium text-[var(--color-text)]">
-                    <div class="flex items-center gap-1.5 text-amber-600 font-bold">
+                    <div class="tone-gold flex items-center gap-1.5 text-[var(--tone-fg)] font-bold">
                       <ng-icon name="phosphorWarningCircle" class="shrink-0 text-sm" />
                       <span>{{ item.reason }}</span>
                     </div>
@@ -266,22 +271,22 @@
                   <td class="px-5 py-4">
                     @switch (item.status) {
                       @case ('Open') {
-                        <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600">
+                        <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
                           รอตรวจสอบ
                         </span>
                       }
                       @case ('InProgress') {
-                        <span class="inline-flex items-center rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-600">
+                        <span class="tone-blue inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
                           กำลังดำเนินการ
                         </span>
                       }
                       @case ('Resolved') {
-                        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600">
+                        <span class="tone-green inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
                           แก้ไขแล้ว
                         </span>
                       }
                       @case ('Dismissed') {
-                        <span class="inline-flex items-center rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+                        <span class="inline-flex items-center rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-xs font-bold text-[var(--color-text-muted)]">
                           ปิดเคส
                         </span>
                       }
@@ -293,7 +298,7 @@
                         <button
                           type="button"
                           (click)="assignToSelf(item)"
-                          class="btn-tactile rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                          class="btn-tactile rounded-xl glass-card px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
                         >
                           รับเรื่อง
                         </button>
@@ -303,14 +308,14 @@
                         <button
                           type="button"
                           (click)="openResolveModal(item)"
-                          class="btn-tactile rounded-xl bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition"
+                          class="tone-green btn-tactile rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                         >
                           ดำเนินการ
                         </button>
                         <button
                           type="button"
                           (click)="openDismissModal(item)"
-                          class="btn-tactile rounded-xl border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-600 hover:bg-rose-500/10 transition"
+                          class="tone-red btn-tactile rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                         >
                           ยกเลิก
                         </button>
@@ -331,7 +336,7 @@
   <!-- Tab 2: Refunds Content -->
   @if (activeTab() === 'refunds') {
     <div class="animate-fade-in-up stagger-3 space-y-4">
-      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs overflow-hidden">
+      <div class="rounded-2xl glass-card shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -349,7 +354,7 @@
                 <tr>
                   <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
                     <div class="flex flex-col items-center gap-2">
-                      <ng-icon name="phosphorCheckCircle" class="text-3xl text-emerald-500 animate-pop-in" />
+                      <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)] animate-pop-in" />
                       <p class="font-bold text-[var(--color-text)]">ไม่มีคำขอคืนเงินที่รอดำเนินการ</p>
                     </div>
                   </td>
@@ -364,14 +369,14 @@
                   <td class="px-5 py-4 text-xs font-medium text-[var(--color-text)]">
                     {{ refund.reason }}
                   </td>
-                  <td class="px-5 py-4 font-bold text-xs text-rose-600">
+                  <td class="tone-red px-5 py-4 font-bold text-xs text-[var(--tone-fg)]">
                     {{ refund.amount | currencyThb }}
                   </td>
                   <td class="px-5 py-4 text-xs text-[var(--color-text-muted)]">
                     {{ refund.requestedAtUtc | date:'dd/MM/yyyy HH:mm' }}
                   </td>
                   <td class="px-5 py-4">
-                    <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600">
+                    <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
                       {{ refund.status }}
                     </span>
                   </td>
@@ -380,14 +385,14 @@
                       <button
                         type="button"
                         (click)="openRefundModal(refund, 'approve')"
-                        class="btn-tactile rounded-xl bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition"
+                        class="tone-green btn-tactile rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                       >
                         อนุมัติคืนเงิน
                       </button>
                       <button
                         type="button"
                         (click)="openRefundModal(refund, 'reject')"
-                        class="btn-tactile rounded-xl border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-600 hover:bg-rose-500/10 transition"
+                        class="tone-red btn-tactile rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                       >
                         ปฏิเสธ
                       </button>
@@ -404,11 +409,11 @@
 
   <!-- Resolve Modal -->
   @if (selectedEntryForResolve()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <div class="flex items-center gap-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 font-bold">
+            <div class="tone-green flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)] font-bold">
               <ng-icon name="phosphorCheckCircle" class="text-lg" />
             </div>
             <div>
@@ -420,7 +425,7 @@
               </p>
             </div>
           </div>
-          <button (click)="closeResolveModal()" class="text-gray-400 hover:text-gray-600">
+          <button (click)="closeResolveModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
             <ng-icon name="phosphorXCircle" class="text-xl" />
           </button>
         </div>
@@ -437,7 +442,7 @@
                   name="action"
                   value="Refund"
                   [(ngModel)]="resolveAction"
-                  class="mt-1 text-[var(--color-primary)]"
+                  class="mt-1 text-[var(--color-primary-text)]"
                 />
                 <div>
                   <div class="text-xs font-bold text-[var(--color-text)]">คืนเงินให้ผู้ซื้อ (Refund via Stripe)</div>
@@ -451,7 +456,7 @@
                   name="action"
                   value="ReopenAndFulfillOrder"
                   [(ngModel)]="resolveAction"
-                  class="mt-1 text-[var(--color-primary)]"
+                  class="mt-1 text-[var(--color-primary-text)]"
                 />
                 <div>
                   <div class="text-xs font-bold text-[var(--color-text)]">เปิดออร์เดอร์และมอบสิทธิ์เข้าเรียน (Reopen & Fulfill)</div>
@@ -465,7 +470,7 @@
                   name="action"
                   value="GrantAccessOnly"
                   [(ngModel)]="resolveAction"
-                  class="mt-1 text-[var(--color-primary)]"
+                  class="mt-1 text-[var(--color-primary-text)]"
                 />
                 <div>
                   <div class="text-xs font-bold text-[var(--color-text)]">มอบสิทธิ์เข้าเรียนอย่างเดียว (Grant Access Only)</div>
@@ -484,7 +489,7 @@
               [(ngModel)]="resolveNote"
               rows="3"
               placeholder="ระบุเหตุผลหรือรายละเอียดการตรวจสอบ..."
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
+              class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
             ></textarea>
           </div>
         </div>
@@ -501,10 +506,10 @@
             type="button"
             (click)="submitResolve()"
             [disabled]="isSubmittingResolve()"
-            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition disabled:opacity-50"
+            class="tone-green btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--tone-fg)] px-4 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
           >
             @if (isSubmittingResolve()) {
-              <app-spinner size="xs" color="white" />
+              <app-spinner size="xs" color="current" />
             }
             <span>ยืนยันการดำเนินการ</span>
           </button>
@@ -515,14 +520,14 @@
 
   <!-- Dismiss Modal -->
   @if (selectedEntryForDismiss()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-4">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h3 class="text-base font-bold text-rose-600 flex items-center gap-2">
+          <h3 class="tone-red text-base font-bold text-[var(--tone-fg)] flex items-center gap-2">
             <ng-icon name="phosphorWarningCircle" class="text-lg" />
             <span>ปิดเคส / ยกเลิกรายการ</span>
           </h3>
-          <button (click)="closeDismissModal()" class="text-gray-400 hover:text-gray-600">
+          <button (click)="closeDismissModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
             <ng-icon name="phosphorXCircle" class="text-xl" />
           </button>
         </div>
@@ -533,14 +538,14 @@
 
         <div>
           <label for="payment-dismiss-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
-            เหตุผลในการยกเลิก (จำเป็น) <span class="text-rose-500">*</span>
+            เหตุผลในการยกเลิก (จำเป็น) <span class="tone-red text-[var(--tone-fg)]">*</span>
           </label>
           <textarea
             id="payment-dismiss-note-textarea"
             [(ngModel)]="dismissNote"
             rows="3"
             placeholder="เช่น รายการซ้ำซ้อน, ผู้ใช้ชำระเงินใหม่แล้ว..."
-            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
+            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
           ></textarea>
         </div>
 
@@ -556,7 +561,7 @@
             type="button"
             (click)="submitDismiss()"
             [disabled]="isSubmittingDismiss() || !dismissNote().trim()"
-            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition disabled:opacity-50"
+            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
           >
             @if (isSubmittingDismiss()) {
               <app-spinner size="xs" color="white" />
@@ -570,17 +575,17 @@
 
   <!-- Refund Approve/Reject Modal -->
   @if (selectedRefundForAction()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-4">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h3 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
             @if (selectedRefundForAction()?.action === 'approve') {
-              <span class="text-emerald-600">อนุมัติคำขอคืนเงิน</span>
+              <span class="tone-green text-[var(--tone-fg)]">อนุมัติคำขอคืนเงิน</span>
             } @else {
-              <span class="text-rose-600">ปฏิเสธคำขอคืนเงิน</span>
+              <span class="tone-red text-[var(--tone-fg)]">ปฏิเสธคำขอคืนเงิน</span>
             }
           </h3>
-          <button (click)="closeRefundModal()" class="text-gray-400 hover:text-gray-600">
+          <button (click)="closeRefundModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
             <ng-icon name="phosphorXCircle" class="text-xl" />
           </button>
         </div>
@@ -598,7 +603,7 @@
             [(ngModel)]="refundDecisionNote"
             rows="3"
             placeholder="ระบุข้อความถึงผู้เรียนหรือบันทึกภายใน..."
-            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
+            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-hidden"
           ></textarea>
         </div>
 
@@ -614,14 +619,17 @@
             type="button"
             (click)="submitRefundAction()"
             [disabled]="isSubmittingRefundAction()"
-            [class.bg-emerald-600]="selectedRefundForAction()?.action === 'approve'"
-            [class.hover:bg-emerald-700]="selectedRefundForAction()?.action === 'approve'"
-            [class.bg-rose-600]="selectedRefundForAction()?.action === 'reject'"
-            [class.hover:bg-rose-700]="selectedRefundForAction()?.action === 'reject'"
-            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-white shadow-xs transition disabled:opacity-50"
+            [class]="
+              selectedRefundForAction()?.action === 'approve'
+                ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)] hover:opacity-90'
+                : selectedRefundForAction()?.action === 'reject'
+                  ? 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:opacity-90'
+                  : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
+            "
+            class="btn-tactile inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition disabled:opacity-50"
           >
             @if (isSubmittingRefundAction()) {
-              <app-spinner size="xs" color="white" />
+              <app-spinner size="xs" color="current" />
             }
             <span>ยืนยัน</span>
           </button>

@@ -25,7 +25,7 @@
 
       <ul class="mt-4 flex flex-col gap-3">
         @for (warning of warnings(); track warning.code) {
-          <li class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+          <li class="rounded-[var(--radius-md)] glass-card p-4">
             <h3 class="text-base font-semibold text-[var(--color-text)]">{{ warning.titleKey | translate }}</h3>
             @if (!warning.known) {
               <p class="mt-1 text-xs text-[var(--color-text-muted)]">

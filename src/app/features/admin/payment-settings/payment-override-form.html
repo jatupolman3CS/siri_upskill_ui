@@ -2,7 +2,7 @@
   [formGroup]="form"
   (ngSubmit)="submit()"
   novalidate
-  class="flex flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  class="flex flex-col gap-5 rounded-[var(--radius-lg)] glass-card p-5"
 >
   <div>
     <h2 class="text-lg font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.form.heading' | translate }}</h2>
@@ -12,7 +12,7 @@
   @if (formError(); as key) {
     <p
       role="alert"
-      class="rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-bg)] p-3 text-sm font-medium text-[var(--color-text)]"
+      class="rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm font-medium text-[var(--color-text)]"
     >
       {{ key | translate }}
     </p>
@@ -47,7 +47,7 @@
       aria-required="true"
       [attr.aria-invalid]="message('reason') ? 'true' : null"
       aria-describedby="payment-override-reason-hint"
-      class="block w-full resize-y rounded-[var(--radius-md)] border bg-[var(--color-bg)] px-3.5 py-3 text-base text-[var(--color-text)]
+      class="block w-full resize-y rounded-[var(--radius-md)] border bg-[var(--glass-bg-strong)] px-3.5 py-3 text-base text-[var(--color-text)]
         transition-colors duration-200 ease-out
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       [class]="message('reason') ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)] focus-visible:border-[var(--color-primary)]'"

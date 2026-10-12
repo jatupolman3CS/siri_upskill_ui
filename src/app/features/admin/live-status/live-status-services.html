@@ -1,5 +1,5 @@
 <section
-  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  class="rounded-[var(--radius-lg)] glass-card p-5"
   aria-labelledby="live-status-email-heading"
 >
   <h2 id="live-status-email-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
@@ -17,11 +17,11 @@
   </p>
 
   <dl class="mt-4 grid grid-cols-2 gap-3">
-    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.email.pending' | translate }}</dt>
       <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ email().pendingCount }}</dd>
     </div>
-    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.email.failed' | translate }}</dt>
       <dd class="mt-1 flex items-center gap-1.5 text-2xl font-bold text-[var(--color-text)]">
         {{ email().failedCount }}
@@ -31,7 +31,7 @@
         }
       </dd>
     </div>
-    <div class="col-span-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="col-span-2 rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.email.oldestPending' | translate }}</dt>
       <dd class="mt-1 text-base font-semibold text-[var(--color-text)]">
         @if (oldestPending(); as age) {
@@ -45,7 +45,7 @@
 </section>
 
 <section
-  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+  class="rounded-[var(--radius-lg)] glass-card p-5"
   aria-labelledby="live-status-live-heading"
 >
   <h2 id="live-status-live-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
@@ -76,22 +76,22 @@
     </li>
     <li class="flex flex-col gap-1">
       <span class="text-[var(--color-text-muted)]">{{ 'admin.liveStatus.live.publicBaseUrl' | translate }}</span>
-      <code class="break-all rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-normal text-[var(--color-text)]">{{
+      <code class="break-all rounded-[var(--radius-md)] glass-card px-3 py-2 text-xs font-normal text-[var(--color-text)]">{{
         live().publicBaseUrl
       }}</code>
     </li>
   </ul>
 
   <dl class="mt-4 grid grid-cols-2 gap-3">
-    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.meetingsPending' | translate }}</dt>
       <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ live().meetingsPending }}</dd>
     </div>
-    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.meetingsAwaitingLink' | translate }}</dt>
       <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ live().meetingsAwaitingLink }}</dd>
     </div>
-    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.meetingsFailed' | translate }}</dt>
       <dd class="mt-1 flex items-center gap-1.5 text-2xl font-bold text-[var(--color-text)]">
         {{ live().meetingsFailed }}
@@ -101,7 +101,7 @@
         }
       </dd>
     </div>
-    <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div class="rounded-[var(--radius-md)] glass-card p-3">
       <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'admin.liveStatus.live.invitesPending' | translate }}</dt>
       <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ live().invitesPending }}</dd>
     </div>

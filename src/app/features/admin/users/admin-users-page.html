@@ -3,10 +3,11 @@
   @if (actionMessage(); as msg) {
     <div
       class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 shadow-2xl text-sm font-semibold transition animate-pop-in duration-300"
-      [class.bg-emerald-600]="msg.type === 'success'"
-      [class.text-white]="msg.type === 'success'"
-      [class.bg-red-600]="msg.type === 'error'"
-      [class.text-white]="msg.type === 'error'"
+      [class]="
+        msg.type === 'success'
+          ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+          : 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)]'
+      "
     >
       @if (msg.type === 'success') {
         <ng-icon name="phosphorCheckCircle" class="text-xl animate-pop-in" />
@@ -26,13 +27,13 @@
 
     <div class="flex items-center gap-3">
       <!-- Tabs -->
-      <div class="flex items-center gap-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] p-1">
+      <div class="flex items-center gap-1 rounded-xl glass-card p-1">
         <button
           type="button"
           (click)="activeTab.set('users')"
           class="btn-tactile rounded-lg px-4 py-1.5 text-xs font-bold transition"
           [class.bg-[var(--color-primary)]]="activeTab() === 'users'"
-          [class.text-white]="activeTab() === 'users'"
+          [class.text-[var(--color-primary-foreground)]]="activeTab() === 'users'"
           [class.text-[var(--color-text-muted)]]="activeTab() !== 'users'"
         >
           รายชื่อผู้ใช้ ({{ totalUsers() }})
@@ -42,7 +43,7 @@
           (click)="activeTab.set('audit')"
           class="btn-tactile rounded-lg px-4 py-1.5 text-xs font-bold transition"
           [class.bg-[var(--color-primary)]]="activeTab() === 'audit'"
-          [class.text-white]="activeTab() === 'audit'"
+          [class.text-[var(--color-primary-foreground)]]="activeTab() === 'audit'"
           [class.text-[var(--color-text-muted)]]="activeTab() !== 'audit'"
         >
           ประวัติ Audit Logs ({{ totalAuditLogs() }})
@@ -52,7 +53,7 @@
       <button
         type="button"
         (click)="openInviteModal()"
-        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition shrink-0"
+        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition shrink-0"
       >
         <ng-icon name="phosphorUserPlus" class="text-base" />
         <span>เชิญผู้ใช้ใหม่</span>
@@ -62,7 +63,7 @@
 
   @if (activeTab() === 'users') {
     <!-- Search & Filter Controls -->
-    <div class="animate-fade-in-up stagger-1 flex flex-col sm:flex-row items-center gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+    <div class="animate-fade-in-up stagger-1 flex flex-col sm:flex-row items-center gap-4 rounded-2xl glass-card p-4 shadow-sm">
       <div class="relative flex-1 w-full">
         <ng-icon name="phosphorMagnifyingGlass" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] text-base" />
         <input
@@ -70,7 +71,7 @@
           [(ngModel)]="searchQuery"
           (keydown.enter)="onSearch()"
           placeholder="ค้นหาตามชื่อ หรืออีเมลผู้ใช้..."
-          class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] pl-9 pr-4 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          class="w-full rounded-xl glass-card pl-9 pr-4 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
         />
       </div>
 
@@ -80,7 +81,7 @@
           id="users-role-filter-select"
           [(ngModel)]="selectedRole"
           (change)="onSearch()"
-          class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none"
+          class="rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none"
         >
           <option value="All">ทั้งหมด</option>
           <option value="Admin">ผู้ดูแลระบบ (Admin)</option>
@@ -93,7 +94,7 @@
           id="users-status-filter-select"
           [(ngModel)]="selectedStatus"
           (change)="onSearch()"
-          class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none"
+          class="rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none"
         >
           <option value="All">ทั้งหมด</option>
           <option value="Active">ใช้งานปกติ</option>
@@ -103,7 +104,7 @@
     </div>
 
     <!-- Users Table -->
-    <div class="animate-fade-in-up stagger-2 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+    <div class="animate-fade-in-up stagger-2 overflow-hidden rounded-2xl glass-card shadow-sm">
       @if (isLoadingUsers()) {
         <div class="flex flex-col items-center justify-center gap-3 p-16 text-center text-xs text-[var(--color-text-muted)]">
           <app-spinner size="md" />
@@ -139,12 +140,13 @@
                       @for (role of user.roles; track role) {
                         <span
                           class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold"
-                          [class.bg-rose-500/10]="role === 'Admin' || role === 'SuperAdmin'"
-                          [class.text-rose-600]="role === 'Admin' || role === 'SuperAdmin'"
-                          [class.bg-indigo-500/10]="role === 'Instructor'"
-                          [class.text-indigo-600]="role === 'Instructor'"
-                          [class.bg-zinc-500/10]="role === 'Learner'"
-                          [class.text-zinc-600]="role === 'Learner'"
+                          [class]="
+                            role === 'Admin' || role === 'SuperAdmin'
+                              ? 'tone-red bg-[var(--tone-bg)] text-[var(--tone-fg)]'
+                              : role === 'Instructor'
+                                ? 'tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]'
+                                : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
+                          "
                         >
                           {{ role }}
                         </span>
@@ -154,10 +156,13 @@
                   <td class="px-6 py-4">
                     <span
                       class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold"
-                      [class.bg-emerald-500/10]="user.status === 'Active'"
-                      [class.text-emerald-600]="user.status === 'Active'"
-                      [class.bg-red-500/10]="user.status === 'Suspended'"
-                      [class.text-red-600]="user.status === 'Suspended'"
+                      [class]="
+                        user.status === 'Active'
+                          ? 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]'
+                          : user.status === 'Suspended'
+                            ? 'tone-red bg-[var(--tone-bg)] text-[var(--tone-fg)]'
+                            : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
+                      "
                     >
                       {{ user.status === 'Active' ? 'ใช้งานปกติ' : 'ถูกระงับสิทธิ์' }}
                     </span>
@@ -170,7 +175,7 @@
                       <button
                         type="button"
                         (click)="openEditRoleModal(user)"
-                        class="btn-tactile rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                        class="btn-tactile rounded-xl glass-card px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
                       >
                         เปลี่ยนบทบาท
                       </button>
@@ -179,7 +184,7 @@
                         <button
                           type="button"
                           (click)="openSuspendModal(user)"
-                          class="btn-tactile rounded-xl border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10 transition"
+                          class="tone-red btn-tactile rounded-xl border border-[var(--tone-fg)]/30 px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                         >
                           ระงับบัญชี
                         </button>
@@ -187,7 +192,7 @@
                         <button
                           type="button"
                           (click)="reactivateUser(user)"
-                          class="btn-tactile rounded-xl border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-500/10 transition"
+                          class="tone-green btn-tactile rounded-xl border border-[var(--tone-fg)]/30 px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                         >
                           คืนสิทธิ์
                         </button>
@@ -205,7 +210,7 @@
 
   @if (activeTab() === 'audit') {
     <!-- Audit Log Viewer -->
-    <div class="animate-fade-in-up overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+    <div class="animate-fade-in-up overflow-hidden rounded-2xl glass-card shadow-sm">
       @if (isLoadingAudit()) {
         <div class="flex flex-col items-center justify-center gap-3 p-16 text-center text-xs text-[var(--color-text-muted)]">
           <app-spinner size="md" />
@@ -229,7 +234,7 @@
             <tbody class="divide-y divide-[var(--color-border)]">
               @for (log of auditLogs(); track log.id) {
                 <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="px-6 py-4 font-mono font-bold text-xs text-[var(--color-primary)]">
+                  <td class="px-6 py-4 font-mono font-bold text-xs text-[var(--color-primary-text)]">
                     {{ log.eventType }}
                   </td>
                   <td class="px-6 py-4 text-xs text-[var(--color-text)] max-w-md truncate">
@@ -252,8 +257,8 @@
 
   <!-- Edit Role Modal -->
   @if (editingUser(); as user) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-3xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div>
           <h2 class="text-lg font-bold text-[var(--color-text)]">แก้ไขบทบาทผู้ใช้งาน</h2>
           <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ user.displayName }} ({{ user.email }})</p>
@@ -264,7 +269,7 @@
           <select
             id="edit-role-select"
             [(ngModel)]="editRoleSelected"
-            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+            class="w-full rounded-xl glass-card px-3 py-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
           >
             <option value="Learner">ผู้เรียน (Learner)</option>
             <option value="Instructor">ผู้สอน (Instructor)</option>
@@ -284,7 +289,7 @@
             type="button"
             (click)="saveUserRole()"
             [disabled]="isSavingRole()"
-            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
           >
             @if (isSavingRole()) {
               <app-spinner size="xs" color="white" />
@@ -300,10 +305,10 @@
 
   <!-- Suspend Modal -->
   @if (suspendingUser(); as user) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-3xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div>
-          <h2 class="text-lg font-bold text-red-600">ระงับการใช้งานบัญชีผู้ใช้</h2>
+          <h2 class="tone-red text-lg font-bold text-[var(--tone-fg)]">ระงับการใช้งานบัญชีผู้ใช้</h2>
           <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ user.displayName }} ({{ user.email }})</p>
         </div>
 
@@ -314,7 +319,7 @@
             [(ngModel)]="suspendReason"
             rows="3"
             placeholder="เช่น ละเมิดข้อกำหนดการใช้งาน, มีพฤติกรรมน่าสงสัย..."
-            class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-red-500 focus:outline-none"
+            class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus:outline-none"
           ></textarea>
         </div>
 
@@ -330,7 +335,7 @@
             type="button"
             (click)="confirmSuspend()"
             [disabled]="isSubmittingSuspend()"
-            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-5 py-2 text-xs font-bold text-white shadow transition hover:bg-red-700 disabled:opacity-50"
+            class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:opacity-90 disabled:opacity-50"
           >
             @if (isSubmittingSuspend()) {
               <app-spinner size="xs" color="white" />
@@ -346,8 +351,8 @@
 
   <!-- Invite User Modal -->
   @if (showInviteModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-3xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div>
           <h2 class="text-lg font-bold text-[var(--color-text)]">เชิญผู้ใช้ใหม่เข้าสู่ระบบ</h2>
           <p class="text-xs text-[var(--color-text-muted)] mt-1">ระบบจะสร้างบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึงให้ทันที</p>
@@ -361,7 +366,7 @@
               type="email"
               [(ngModel)]="inviteEmail"
               placeholder="user@example.com"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -372,7 +377,7 @@
               type="text"
               [(ngModel)]="inviteDisplayName"
               placeholder="เช่น สมชาย ใจดี"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -381,7 +386,7 @@
             <select
               id="invite-role-select"
               [(ngModel)]="inviteRole"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             >
               <option value="Learner">ผู้เรียน (Learner)</option>
               <option value="Instructor">ผู้สอน (Instructor)</option>
@@ -403,7 +408,7 @@
             type="button"
             (click)="submitInvite()"
             [disabled]="isSubmittingInvite() || !inviteEmail().trim() || !inviteDisplayName().trim()"
-            class="btn-tactile rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center gap-1.5"
+            class="btn-tactile rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50 inline-flex items-center gap-1.5"
           >
             @if (isSubmittingInvite()) {
               <app-spinner size="xs" color="white" />

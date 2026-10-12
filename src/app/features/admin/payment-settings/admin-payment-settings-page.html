@@ -20,7 +20,7 @@
     @if (isStale()) {
       <div
         role="alert"
-        class="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+        class="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm text-[var(--color-text)]"
       >
         <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="shrink-0 text-lg text-[var(--color-danger)]" />
         <span class="min-w-0 flex-1">{{ 'admin.paymentSettings.staleNotice' | translate }}</span>

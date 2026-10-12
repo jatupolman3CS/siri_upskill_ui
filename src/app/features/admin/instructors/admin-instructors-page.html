@@ -12,7 +12,7 @@
     </div>
     <p class="mt-1 text-[var(--color-text-muted)]">{{ 'admin.instructors.subheading' | translate }}</p>
     <p
-      class="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text-muted)]"
+      class="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] glass-card p-3 text-sm text-[var(--color-text-muted)]"
     >
       <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-lg" />
       <span>{{ 'admin.instructors.roleHint' | translate }}</span>
@@ -29,7 +29,7 @@
     }
     @case ('error') {
       <section
-        class="rounded-[var(--radius-lg)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-6 text-center shadow-sm"
+        class="rounded-[var(--radius-lg)] glass-card border-[var(--color-danger)] p-6 text-center shadow-sm"
         role="alert"
       >
         <p class="font-semibold text-[var(--color-text)]">{{ 'admin.instructors.errorHeading' | translate }}</p>
@@ -88,7 +88,7 @@
   @if (confirmError(); as message) {
     <p
       role="alert"
-      class="mt-4 rounded-[var(--radius-md)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-3 text-sm font-medium text-[var(--color-text)]"
+      class="mt-4 rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm font-medium text-[var(--color-text)]"
     >
       {{ message }}
     </p>

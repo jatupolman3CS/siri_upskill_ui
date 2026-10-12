@@ -16,7 +16,7 @@
         <button
           type="button"
           (click)="openPromoModal()"
-          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:opacity-95 transition"
+          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
         >
           <ng-icon name="phosphorPlusCircle" class="text-base" />
           <span>สร้างโค้ดส่วนลด</span>
@@ -25,7 +25,7 @@
         <button
           type="button"
           (click)="openFlashSaleModal()"
-          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:opacity-95 transition"
+          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
         >
           <ng-icon name="phosphorLightning" class="text-base" />
           <span>สร้าง Flash Sale</span>
@@ -34,7 +34,7 @@
         <button
           type="button"
           (click)="openBundleModal()"
-          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:opacity-95 transition"
+          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
         >
           <ng-icon name="phosphorFolder" class="text-base" />
           <span>สร้างชุดคอร์ส Bundle</span>
@@ -47,7 +47,7 @@
   @if (actionMessage(); as msg) {
     <div
       class="rounded-xl p-4 text-xs font-semibold flex items-center justify-between shadow-sm transition animate-pop-in"
-      [ngClass]="msg.type === 'success' ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-700 border border-rose-500/20'"
+      [ngClass]="msg.type === 'success' ? 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)] border border-[var(--tone-fg)]/30' : 'tone-red bg-[var(--tone-bg)] text-[var(--tone-fg)] border border-[var(--tone-fg)]/30'"
     >
       <div class="flex items-center gap-2">
         <ng-icon [name]="msg.type === 'success' ? 'phosphorCheckCircle' : 'phosphorWarning'" class="text-lg shrink-0" />
@@ -64,7 +64,7 @@
     <button
       type="button"
       (click)="activeTab.set('promos')"
-      [class]="activeTab() === 'promos' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+      [class]="activeTab() === 'promos' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
       class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorTag" class="text-base" />
@@ -75,7 +75,7 @@
     <button
       type="button"
       (click)="activeTab.set('flashSales')"
-      [class]="activeTab() === 'flashSales' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+      [class]="activeTab() === 'flashSales' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
       class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorLightning" class="text-base" />
@@ -86,7 +86,7 @@
     <button
       type="button"
       (click)="activeTab.set('bundles')"
-      [class]="activeTab() === 'bundles' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+      [class]="activeTab() === 'bundles' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
       class="btn-tactile pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorFolder" class="text-base" />
@@ -97,7 +97,7 @@
 
   <!-- TAB 1: PROMO CODES -->
   @if (activeTab() === 'promos') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
       @if (isLoadingPromos() && promos().length === 0) {
         <div class="p-6 space-y-4">
           <app-skeleton className="h-10 w-full" />
@@ -111,7 +111,7 @@
           <button
             type="button"
             (click)="openPromoModal()"
-            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary)] font-bold hover:underline"
+            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
             <span>+ สร้างโค้ดแรกของคุณ</span>
           </button>
@@ -132,16 +132,16 @@
             <tbody class="divide-y divide-[var(--color-border)]">
               @for (item of promos(); track item.id) {
                 <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-primary)] tracking-wide">
+                  <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-primary-text)] tracking-wide">
                     {{ item.code }}
                   </td>
                   <td class="py-3.5 px-4 font-semibold">
                     @if (item.discountType === 'Percentage') {
-                      <span class="rounded-md bg-rose-500/10 px-2 py-0.5 text-rose-600 font-bold">
+                      <span class="tone-red rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
                         ลด {{ item.discountValue }}%
                       </span>
                     } @else {
-                      <span class="rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-600 font-bold">
+                      <span class="tone-green rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
                         ลด {{ item.discountValue | currencyThb }}
                       </span>
                     }
@@ -158,12 +158,12 @@
                   </td>
                   <td class="py-3.5 px-4 text-center">
                     @if (item.isActive) {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                      <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                        <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
                         เปิดใช้งาน
                       </span>
                     } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-neutral-500/10 px-2.5 py-0.5 text-[10px] font-bold text-neutral-500">
+                      <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
                         ปิดใช้งาน
                       </span>
                     }
@@ -179,7 +179,7 @@
 
   <!-- TAB 2: FLASH SALES -->
   @if (activeTab() === 'flashSales') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
       @if (isLoadingFlashSales() && flashSales().length === 0) {
         <div class="p-6 space-y-4">
           <app-skeleton className="h-10 w-full" />
@@ -192,7 +192,7 @@
           <button
             type="button"
             (click)="openFlashSaleModal()"
-            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary)] font-bold hover:underline"
+            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
             <span>+ สร้าง Flash Sale แคมเปญแรก</span>
           </button>
@@ -218,12 +218,12 @@
                   <td class="py-3.5 px-4 text-center font-bold">{{ sale.items.length }} รายการ</td>
                   <td class="py-3.5 px-4 text-center">
                     @if (sale.isActive) {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-600">
-                        <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                      <span class="tone-gold inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                        <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
                         Active
                       </span>
                     } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-neutral-500/10 px-2.5 py-0.5 text-[10px] font-bold text-neutral-500">
+                      <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
                         Inactive
                       </span>
                     }
@@ -239,7 +239,7 @@
 
   <!-- TAB 3: BUNDLES -->
   @if (activeTab() === 'bundles') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm overflow-hidden">
+    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
       @if (isLoadingBundles() && bundles().length === 0) {
         <div class="p-6 space-y-4">
           <app-skeleton className="h-10 w-full" />
@@ -252,7 +252,7 @@
           <button
             type="button"
             (click)="openBundleModal()"
-            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary)] font-bold hover:underline"
+            class="btn-tactile inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
             <span>+ สร้าง Bundle แรก</span>
           </button>
@@ -279,16 +279,16 @@
                     }
                   </td>
                   <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">{{ bundle.slug }}</td>
-                  <td class="py-3.5 px-4 text-right font-black text-emerald-600">{{ bundle.price | currencyThb }}</td>
+                  <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">{{ bundle.price | currencyThb }}</td>
                   <td class="py-3.5 px-4 text-center font-bold">{{ bundle.items.length }} คอร์ส</td>
                   <td class="py-3.5 px-4 text-center">
                     @if (bundle.isActive) {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                      <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                        <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
                         Active
                       </span>
                     } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-neutral-500/10 px-2.5 py-0.5 text-[10px] font-bold text-neutral-500">
+                      <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
                         Inactive
                       </span>
                     }
@@ -304,11 +304,11 @@
 
   <!-- MODAL 1: CREATE PROMO CODE -->
   @if (showPromoModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            <ng-icon name="phosphorTag" class="text-rose-600 text-lg" />
+            <ng-icon name="phosphorTag" class="tone-red text-[var(--tone-fg)] text-lg" />
             <span>สร้างโค้ดส่วนลดใหม่ (Create Promo Code)</span>
           </h2>
           <button (click)="closePromoModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
@@ -328,7 +328,7 @@
               name="promoCode"
               required
               placeholder="เช่น SIRI2026, EARLYBIRD"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 uppercase font-mono font-bold text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+              class="w-full rounded-xl glass-card px-3 py-2.5 uppercase font-mono font-bold text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
             />
           </div>
 
@@ -341,7 +341,7 @@
                 [ngModel]="promoDiscountType()"
                 (ngModelChange)="promoDiscountType.set($event)"
                 name="discountType"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               >
                 <option value="Percentage">เปอร์เซ็นต์ (%)</option>
                 <option value="Fixed">จำนวนเงินคงที่ (฿)</option>
@@ -357,7 +357,7 @@
                 name="discountValue"
                 min="1"
                 required
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
           </div>
@@ -373,7 +373,7 @@
                 (ngModelChange)="promoMinSpend.set($event)"
                 name="minSpend"
                 min="0"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -385,7 +385,7 @@
                 (ngModelChange)="promoMaxRedemptions.set($event)"
                 name="maxRedemptions"
                 min="1"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -397,7 +397,7 @@
                 (ngModelChange)="promoMaxPerUser.set($event)"
                 name="maxPerUser"
                 min="1"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
           </div>
@@ -412,7 +412,7 @@
                 [ngModel]="promoStartsAt()"
                 (ngModelChange)="promoStartsAt.set($event)"
                 name="startsAt"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -423,7 +423,7 @@
                 [ngModel]="promoEndsAt()"
                 (ngModelChange)="promoEndsAt.set($event)"
                 name="endsAt"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
           </div>
@@ -439,7 +439,7 @@
             <button
               type="submit"
               [disabled]="isSubmittingPromo()"
-              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-white shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
             >
               @if (isSubmittingPromo()) {
                 <app-spinner size="xs" color="white" />
@@ -456,11 +456,11 @@
 
   <!-- MODAL 2: CREATE FLASH SALE -->
   @if (showFlashSaleModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            <ng-icon name="phosphorLightning" class="text-amber-500 text-lg" />
+            <ng-icon name="phosphorLightning" class="tone-gold text-[var(--tone-fg)] text-lg" />
             <span>สร้าง Flash Sale แคมเปญใหม่</span>
           </h2>
           <button (click)="closeFlashSaleModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
@@ -479,7 +479,7 @@
               name="flashTitle"
               required
               placeholder="เช่น Mega Mid-Year Sale ลดกระหน่ำ 24 ชม."
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+              class="w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
             />
           </div>
 
@@ -494,7 +494,7 @@
                 name="courseId"
                 required
                 placeholder="ระบุรหัส GUID ของคอร์ส"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -507,7 +507,7 @@
                 name="salePrice"
                 min="0"
                 required
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
           </div>
@@ -521,7 +521,7 @@
                 [ngModel]="flashSaleStartsAt()"
                 (ngModelChange)="flashSaleStartsAt.set($event)"
                 name="fsStarts"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -532,7 +532,7 @@
                 [ngModel]="flashSaleEndsAt()"
                 (ngModelChange)="flashSaleEndsAt.set($event)"
                 name="fsEnds"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
           </div>
@@ -548,7 +548,7 @@
             <button
               type="submit"
               [disabled]="isSubmittingFlashSale()"
-              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-white shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
             >
               @if (isSubmittingFlashSale()) {
                 <app-spinner size="xs" color="white" />
@@ -565,11 +565,11 @@
 
   <!-- MODAL 3: CREATE BUNDLE -->
   @if (showBundleModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-5">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
         <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            <ng-icon name="phosphorFolder" class="text-indigo-600 text-lg" />
+            <ng-icon name="phosphorFolder" class="tone-blue text-[var(--tone-fg)] text-lg" />
             <span>สร้างชุดคอร์สแพ็กเกจใหม่ (Bundle)</span>
           </h2>
           <button (click)="closeBundleModal()" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
@@ -588,7 +588,7 @@
               name="bTitle"
               required
               placeholder="เช่น Full-Stack AI Engineer 3-in-1 Bundle"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+              class="w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
             />
           </div>
 
@@ -602,7 +602,7 @@
                 (ngModelChange)="bundleSlug.set($event)"
                 name="bSlug"
                 placeholder="full-stack-ai-bundle"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
             <div>
@@ -615,7 +615,7 @@
                 name="bPrice"
                 min="0"
                 required
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+                class="w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
               />
             </div>
           </div>
@@ -629,7 +629,7 @@
               name="bDesc"
               rows="2"
               placeholder="รายละเอียดจุดเด่นของชุดแพ็กเกจ"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+              class="w-full rounded-xl glass-card p-3 text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
             ></textarea>
           </div>
 
@@ -645,7 +645,7 @@
               rows="3"
               required
               placeholder="88888888-8888-8888-8888-888888888888&#10;99999999-9999-9999-9999-999999999999"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 font-mono text-[11px] text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
+              class="w-full rounded-xl glass-card p-3 font-mono text-[11px] text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none"
             ></textarea>
           </div>
 
@@ -660,7 +660,7 @@
             <button
               type="submit"
               [disabled]="isSubmittingBundle()"
-              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-white shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+              class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
             >
               @if (isSubmittingBundle()) {
                 <app-spinner size="xs" color="white" />

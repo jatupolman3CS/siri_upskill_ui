@@ -3,10 +3,11 @@
   @if (actionMessage(); as msg) {
     <div
       class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 shadow-2xl text-sm font-semibold transition animate-pop-in duration-300"
-      [class.bg-emerald-600]="msg.type === 'success'"
-      [class.text-white]="msg.type === 'success'"
-      [class.bg-red-600]="msg.type === 'error'"
-      [class.text-white]="msg.type === 'error'"
+      [class]="
+        msg.type === 'success'
+          ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+          : 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)]'
+      "
     >
       @if (msg.type === 'success') {
         <ng-icon name="phosphorCheckCircle" class="text-xl animate-pop-in" />
@@ -27,7 +28,7 @@
     <button
       type="button"
       (click)="openAddModal()"
-      class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] transition"
+      class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
     >
       <ng-icon name="phosphorPlus" class="text-base" />
       <span>{{ 'admin.menus.btnAdd' | translate }}</span>
@@ -35,7 +36,7 @@
   </div>
 
   <!-- Menu Table Card -->
-  <div class="animate-fade-in-up stagger-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+  <div class="animate-fade-in-up stagger-1 overflow-hidden rounded-2xl glass-card shadow-sm">
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm text-[var(--color-text)]">
         <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -95,12 +96,13 @@
                     type="button"
                     (click)="toggleActive(item)"
                     class="btn-tactile inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold transition"
-                    [class.bg-emerald-500/10]="item.isActive"
-                    [class.text-emerald-600]="item.isActive"
-                    [class.bg-zinc-500/10]="!item.isActive"
-                    [class.text-zinc-500]="!item.isActive"
+                    [class]="
+                      item.isActive
+                        ? 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]'
+                        : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
+                    "
                   >
-                    <span class="h-1.5 w-1.5 rounded-full" [class.bg-emerald-500]="item.isActive" [class.bg-zinc-400]="!item.isActive"></span>
+                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
                     <span>{{ item.isActive ? ('admin.menus.active' | translate) : ('admin.menus.inactive' | translate) }}</span>
                   </button>
                 </td>
@@ -117,7 +119,7 @@
                     <button
                       type="button"
                       (click)="deleteMenuItem(item)"
-                      class="btn-tactile rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition"
+                      class="tone-red btn-tactile rounded-lg p-1.5 text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                       title="Delete"
                     >
                       <ng-icon name="phosphorTrash" class="text-base" />
@@ -134,8 +136,8 @@
 
   <!-- Add / Edit Modal -->
   @if (showModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div class="animate-pop-in w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl space-y-4">
+    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
+      <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
         <h2 class="text-base font-bold text-[var(--color-text)]">
           {{ isEditing() ? ('admin.menus.editTitle' | translate) : ('admin.menus.addTitle' | translate) }}
         </h2>
@@ -148,7 +150,7 @@
               type="text"
               [(ngModel)]="formLabel"
               [placeholder]="'admin.menus.placeholderLabel' | translate"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -159,7 +161,7 @@
               type="text"
               [(ngModel)]="formUrl"
               [placeholder]="'admin.menus.placeholderUrl' | translate"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -168,7 +170,7 @@
             <select
               id="menu-parent-select"
               [(ngModel)]="formParentId"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             >
               <option [ngValue]="null">{{ 'admin.menus.noneTopLevel' | translate }}</option>
               @for (parent of topLevelMenuItems(); track parent.id) {
@@ -187,7 +189,7 @@
                 type="number"
                 [(ngModel)]="formSortOrder"
                 min="1"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               />
             </div>
 
@@ -217,7 +219,7 @@
             type="button"
             (click)="saveMenuItem()"
             [disabled]="isSaving()"
-            class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)] disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
+            class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
           >
             @if (isSaving()) {
               <app-spinner size="xs" color="white" />

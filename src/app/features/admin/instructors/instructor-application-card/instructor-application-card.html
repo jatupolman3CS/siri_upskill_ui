@@ -1,5 +1,5 @@
 <article
-  class="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-sm)] sm:p-5"
+  class="flex flex-col gap-4 rounded-[var(--radius-lg)] glass-card p-4 shadow-[var(--shadow-sm)] sm:p-5"
   [attr.aria-labelledby]="'application-name-' + application().id"
 >
   <div class="min-w-0">
@@ -28,7 +28,7 @@
         (click)="toggleBio()"
         [attr.aria-expanded]="expanded()"
         [attr.aria-controls]="'application-bio-' + application().id"
-        class="mt-1 min-h-11 cursor-pointer rounded-[var(--radius-md)] px-1 text-sm font-medium text-[var(--color-primary)] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        class="mt-1 min-h-11 cursor-pointer rounded-[var(--radius-md)] px-1 text-sm font-medium text-[var(--color-primary-text)] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ (expanded() ? 'admin.instructors.card.showLess' : 'admin.instructors.card.showMore') | translate }}
       </button>
