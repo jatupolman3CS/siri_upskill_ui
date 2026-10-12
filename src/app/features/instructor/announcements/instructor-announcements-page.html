@@ -17,7 +17,7 @@
         <select
           id="announcement-course-select"
           [(ngModel)]="selectedCourseId"
-          class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           @for (course of courses(); track course.id) {
             <option [value]="course.id">
@@ -37,7 +37,7 @@
           type="text"
           [(ngModel)]="announcementTitle"
           placeholder="เช่น อัปเดตเนื้อหาใหม่ประจำสัปดาห์ / แจ้ง Live Q&A"
-          class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         />
       </div>
 
@@ -48,12 +48,12 @@
           [(ngModel)]="announcementMessage"
           rows="5"
           placeholder="พิมพ์ข้อความที่ต้องการแจ้งผู้เรียนที่นี่..."
-          class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+          class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         ></textarea>
       </div>
 
       <div class="flex items-center gap-2 pt-1">
-        <label class="flex items-center gap-2 text-xs font-medium text-[var(--color-text)] cursor-pointer">
+        <label class="hit-44 flex items-center gap-2 text-xs font-medium text-[var(--color-text)] cursor-pointer">
           <input
             type="checkbox"
             [(ngModel)]="sendEmailNotification"
@@ -78,7 +78,7 @@
         type="button"
         (click)="sendAnnouncement()"
         [disabled]="isSending() || !announcementTitle().trim() || !announcementMessage().trim()"
-        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
+        class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
       >
         @if (isSending()) {
           <app-spinner size="xs" color="white" />

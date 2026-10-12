@@ -47,7 +47,7 @@
           #errorSummary
           tabindex="-1"
           role="alert"
-          class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)] bg-[var(--tone-bg)] p-4 focus:outline-none focus-visible:outline-none"
+          class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)] bg-[var(--tone-bg)] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           <p class="font-semibold text-[var(--tone-fg)]">{{ 'auth.common.errorSummaryHeading' | translate }}</p>
           @if (formLevelMessage(); as message) {
