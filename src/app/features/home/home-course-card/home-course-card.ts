@@ -40,9 +40,7 @@ export class HomeCourseCard {
     return this.wishlistStore.isWishlisted(c.id) || (c.isWishlisted ?? false);
   });
 
-  protected toggleWishlist(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
+  protected toggleWishlist(): void {
     const c = this.course();
     this.wishlistStore.toggleWishlist({
       id: c.id,

@@ -2,6 +2,10 @@ import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal } from 
 import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { phosphorCookie } from '@ng-icons/phosphor-icons/regular';
+
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 export interface CookieConsent {
   essential: boolean;
@@ -14,9 +18,10 @@ const STORAGE_KEY = 'siri_pdpa_consent';
 
 @Component({
   selector: 'app-consent-banner',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, NgIcon, TranslatePipe],
   templateUrl: './consent-banner.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons({ phosphorCookie })],
 })
 export class ConsentBanner {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));

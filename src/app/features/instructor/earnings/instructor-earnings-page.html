@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">รายได้และรอบการจ่ายเงิน (Instructor Earnings)</h1>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'instructor.earnings.heading' | translate }}</h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">
         <app-payout-policy-text messageKey="instructor.earnings.policyIntro" />
       </p>
@@ -36,9 +36,9 @@
   } @else if (earningsSummary(); as summary) {
     <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
       <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">รายได้สะสมทั้งหมด (Net)</span>
+        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.cumulativeHeading' | translate }}</span>
         <p class="mt-2 text-2xl font-black text-[var(--color-text)]">{{ summary.cumulativeEarnings | currencyThb }}</p>
-        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">โอนเข้าบัญชีเรียบร้อยแล้ว</p>
+        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.earnings.cumulativeHint' | translate }}</p>
       </div>
 
       <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
@@ -56,7 +56,7 @@
       <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
         <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHeading' | translate }}</span>
         <p class="mt-2 text-2xl font-black text-[var(--color-primary-text)]">{{ summary.estimatedNextPayoutAmount | currencyThb }}</p>
-        <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">ยอดคำนวณแบบ Real-time</p>
+        <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHint' | translate }}</p>
       </div>
     </div>
   }
@@ -66,7 +66,7 @@
 
   <!-- Payout History Table -->
   <div class="animate-fade-in-up stagger-3 space-y-4">
-    <h2 class="text-base font-bold text-[var(--color-text)]">ประวัติการรับเงินโอน (Payout History)</h2>
+    <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.earnings.historyHeading' | translate }}</h2>
 
     @if (earningsLoading()) {
       <div class="overflow-hidden rounded-2xl glass-card shadow-sm p-6 space-y-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
@@ -82,12 +82,12 @@
           <table class="w-full text-left text-sm text-[var(--color-text)]">
             <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>
-                <th class="px-6 py-3">รอบบัญชี</th>
-                <th class="px-6 py-3">ยอดขายรวม (Gross)</th>
+                <th class="px-6 py-3">{{ 'instructor.earnings.colBatch' | translate }}</th>
+                <th class="px-6 py-3">{{ 'instructor.earnings.colGross' | translate }}</th>
                 <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.withholdingHeader" [inline]="true" /></th>
                 <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.netHeader" [inline]="true" /></th>
-                <th class="px-6 py-3">สถานะ</th>
-                <th class="px-6 py-3 text-right">เอกสาร</th>
+                <th class="px-6 py-3">{{ 'instructor.earnings.colStatus' | translate }}</th>
+                <th class="px-6 py-3 text-right">{{ 'instructor.earnings.colDocument' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--color-border)]">
@@ -116,13 +116,22 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right">
-                    <button
-                      type="button"
-                      class="btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
-                    >
-                      <ng-icon name="phosphorDownloadSimple" />
-                      <span>ใบหักภาษี 50 ทวิ</span>
-                    </button>
+                    @if (item.status === 'Transferred') {
+                      <button
+                        type="button"
+                        (click)="taxCertificateItemId.set(item.payoutId)"
+                        [attr.aria-label]="'instructor.earnings.taxCertificate.openFor' | translate: { batch: item.batchNumber }"
+                        class="btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
+                      >
+                        <ng-icon name="phosphorDownloadSimple" aria-hidden="true" />
+                        <span>{{ 'instructor.earnings.taxCertificate.open' | translate }}</span>
+                      </button>
+                    } @else {
+                      <span class="text-xs text-[var(--color-text-muted)]">
+                        <span aria-hidden="true">—</span>
+                        <span class="sr-only">{{ 'instructor.earnings.taxCertificate.unavailable' | translate }}</span>
+                      </span>
+                    }
                   </td>
                 </tr>
               }
@@ -132,4 +141,8 @@
       </div>
     }
   </div>
+
+  @if (taxCertificateItemId(); as itemId) {
+    <app-tax-certificate-dialog [batchItemId]="itemId" (closed)="taxCertificateItemId.set(null)" />
+  }
 </div>

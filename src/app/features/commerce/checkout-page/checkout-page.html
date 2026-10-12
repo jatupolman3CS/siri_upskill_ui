@@ -16,17 +16,17 @@
     <div class="animate-fade-in-up stagger-1 mb-8 flex items-center justify-center gap-2 sm:gap-4 text-xs font-semibold">
       <div class="flex items-center gap-1.5 transition-colors" [class.text-[var(--color-primary-text)]]="currentStep() === 'selection'" [class.text-[var(--color-text-muted)]]="currentStep() !== 'selection'">
         <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all" [class.bg-[var(--color-primary)]]="currentStep() === 'selection'" [class.text-[var(--color-primary-foreground)]]="currentStep() === 'selection'" [class.bg-[var(--color-surface-muted)]]="currentStep() !== 'selection'" [class.text-[var(--color-text-muted)]]="currentStep() !== 'selection'">1</span>
-        <span>เลือกวิธีชำระ</span>
+        <span>{{ 'checkout.steps.selection' | translate }}</span>
       </div>
       <div class="h-0.5 w-6 sm:w-12 bg-[var(--color-border)]"></div>
       <div class="flex items-center gap-1.5 transition-colors" [class.text-[var(--color-primary-text)]]="currentStep() === 'qr_display'" [class.text-[var(--color-text-muted)]]="currentStep() !== 'qr_display'">
         <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all" [class.bg-[var(--color-primary)]]="currentStep() === 'qr_display'" [class.text-[var(--color-primary-foreground)]]="currentStep() === 'qr_display'" [class.bg-[var(--color-surface-muted)]]="currentStep() !== 'qr_display'" [class.text-[var(--color-text-muted)]]="currentStep() !== 'qr_display'">2</span>
-        <span>สแกน QR Code</span>
+        <span>{{ 'checkout.steps.qr' | translate }}</span>
       </div>
       <div class="h-0.5 w-6 sm:w-12 bg-[var(--color-border)]"></div>
       <div class="flex items-center gap-1.5 transition-colors" [class.text-[var(--color-primary-text)]]="currentStep() === 'success'" [class.text-[var(--color-text-muted)]]="currentStep() !== 'success'">
         <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all" [class.bg-[var(--color-primary)]]="currentStep() === 'success'" [class.text-[var(--color-primary-foreground)]]="currentStep() === 'success'" [class.bg-[var(--color-surface-muted)]]="currentStep() !== 'success'" [class.text-[var(--color-text-muted)]]="currentStep() !== 'success'">3</span>
-        <span>เสร็จสมบูรณ์</span>
+        <span>{{ 'checkout.steps.done' | translate }}</span>
       </div>
     </div>
 
@@ -242,7 +242,7 @@
                     <!-- QR Box -->
                     <div class="card-hover w-44 h-44 rounded-xl border border-[var(--color-border)] bg-white flex flex-col items-center justify-center p-3 shadow-inner flex-none">
                       @if (p.qrCodeUrl) {
-                        <img [ngSrc]="p.qrCodeUrl" width="128" height="128" alt="PromptPay QR Code" class="w-32 h-32 object-contain" />
+                        <img [ngSrc]="p.qrCodeUrl" width="128" height="128" [alt]="'checkout.qr.imageAlt' | translate" class="w-32 h-32 object-contain" />
                       } @else {
                         <ng-icon name="phosphorQrCode" class="text-7xl text-[var(--color-primary)] mb-1" />
                       }
@@ -455,7 +455,7 @@
     <div class="animate-slide-in-up fixed bottom-0 left-0 right-0 z-40 glass-card rounded-none border-x-0 border-b-0 p-4 shadow-lg lg:hidden">
       <div class="flex items-center justify-between gap-4">
         <div>
-          <span class="text-[11px] text-[var(--color-text-muted)] block">ยอดชำระทั้งหมด</span>
+          <span class="text-[11px] text-[var(--color-text-muted)] block">{{ 'checkout.mobileBar.total' | translate }}</span>
           <span class="text-lg font-extrabold text-[var(--color-primary-text)]">{{ total() | currencyThb }}</span>
         </div>
         <button
@@ -466,9 +466,9 @@
         >
           @if (isCreatingPayment()) {
             <app-spinner size="xs" color="white" />
-            <span>กำลังดำเนินการ...</span>
+            <span>{{ 'checkout.summary.processing' | translate }}</span>
           } @else {
-            <span>ชำระเงิน</span>
+            <span>{{ 'checkout.mobileBar.pay' | translate }}</span>
           }
         </button>
       </div>

@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
 import { Modal } from '../../../shared/modal/modal';
 import { Spinner } from '../../../shared/spinner/spinner';
@@ -12,7 +14,7 @@ import { AuthApiService } from '../data/auth-api.service';
 
 @Component({
   selector: 'app-account-privacy-page',
-  imports: [FormsModule, Modal, Spinner],
+  imports: [FormsModule, Modal, Spinner, TranslatePipe],
   templateUrl: './account-privacy-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -21,6 +23,7 @@ export class AccountPrivacyPage {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly translation = inject(TranslationService);
 
   readonly isExporting = signal(false);
   readonly isDeleting = signal(false);
@@ -32,8 +35,8 @@ export class AccountPrivacyPage {
 
   constructor() {
     setPageMeta({
-      title: 'ความเป็นส่วนตัวและการจัดการข้อมูล (PDPA) | SiriUpSkill',
-      description: 'ส่งออกข้อมูลส่วนบุคคล หรือลบบัญชีผู้ใช้งานตามสิทธิ์คุ้มครองข้อมูลส่วนบุคคล (PDPA)',
+      title: `${this.translation.t('auth.accountPrivacy.pageTitle')} · ${this.translation.t('common.appName')}`,
+      description: this.translation.t('auth.accountPrivacy.pageDescription'),
     });
   }
 
@@ -52,11 +55,11 @@ export class AccountPrivacyPage {
         a.download = `siriupskill-my-data-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        this.toast.success('ดาวน์โหลดข้อมูลส่วนบุคคลของคุณเรียบร้อยแล้ว');
+        this.toast.success(this.translation.t('auth.accountPrivacy.export.success'));
       },
       error: (err: ApiError) => {
         this.isExporting.set(false);
-        this.toast.error(err.message || 'ไม่สามารถส่งออกข้อมูลได้ในขณะนี้');
+        this.toast.error(err.message || this.translation.t('auth.accountPrivacy.export.error'));
       },
     });
   }
@@ -75,7 +78,7 @@ export class AccountPrivacyPage {
 
   confirmDelete(): void {
     if (this.deleteConfirmation.trim().toUpperCase() !== 'DELETE') {
-      this.deleteError.set('กรุณาพิมพ์คำว่า DELETE เพื่อยืนยัน');
+      this.deleteError.set(this.translation.t('auth.accountPrivacy.deleteModal.confirmRequired'));
       return;
     }
 
@@ -89,13 +92,13 @@ export class AccountPrivacyPage {
       next: (res) => {
         this.isDeleting.set(false);
         this.showDeleteModal.set(false);
-        this.toast.success(res.message || 'บัญชีของคุณถูกลบและทำให้นิรนามเรียบร้อยแล้ว');
+        this.toast.success(res.message || this.translation.t('auth.accountPrivacy.deleteModal.success'));
         this.authService.clearSession();
         this.router.navigate(['/']);
       },
       error: (err: ApiError) => {
         this.isDeleting.set(false);
-        this.deleteError.set(err.message || 'เกิดข้อผิดพลาดในการลบบัญชี');
+        this.deleteError.set(err.message || this.translation.t('auth.accountPrivacy.deleteModal.error'));
       },
     });
   }

@@ -2,13 +2,13 @@
   @if (state() === 'loading') {
     <div class="loading-box">
       <div class="spinner"></div>
-      <p>กำลังโหลดแบบทดสอบ...</p>
+      <p>{{ 'learn.quiz.loading' | translate }}</p>
     </div>
   }
 
   @if (state() === 'no-quiz') {
     <div class="empty-box">
-      <span class="icon">📝</span>
+      <ng-icon name="phosphorNotePencil" class="icon" aria-hidden="true" />
       <p>{{ 'learn.quiz.noQuiz' | translate }}</p>
     </div>
   }
@@ -16,29 +16,29 @@
   @if (state() === 'error') {
     <div class="error-box">
       <p>{{ errorMessage() }}</p>
-      <button type="button" class="btn btn-secondary" (click)="loadQuiz()">ลองใหม่</button>
+      <button type="button" class="btn btn-secondary" (click)="loadQuiz()">{{ 'catalog.retryButton' | translate }}</button>
     </div>
   }
 
   @if (state() === 'idle' && quiz(); as q) {
     <div class="quiz-intro">
-      <div class="quiz-badge">Quiz</div>
+      <div class="quiz-badge">{{ 'learn.tabs.quiz' | translate }}</div>
       <h3>{{ q.title }}</h3>
       <div class="quiz-meta">
-        <span>🎯 {{ 'learn.quiz.passingScore' | translate: { score: q.passingScorePercent } }}</span>
-        <span>🔄 {{ 'learn.quiz.maxAttempts' | translate: { count: q.maxAttempts } }}</span>
-        <span>📋 {{ q.questions.length }} ข้อ</span>
+        <span class="inline-flex items-center gap-1.5"><ng-icon name="phosphorTarget" aria-hidden="true" /> {{ 'learn.quiz.passingScore' | translate: { score: q.passingScorePercent } }}</span>
+        <span class="inline-flex items-center gap-1.5"><ng-icon name="phosphorArrowsClockwise" aria-hidden="true" /> {{ 'learn.quiz.maxAttempts' | translate: { count: q.maxAttempts } }}</span>
+        <span class="inline-flex items-center gap-1.5"><ng-icon name="phosphorListChecks" aria-hidden="true" /> {{ 'learn.quiz.questionCount' | translate: { count: q.questions.length } }}</span>
       </div>
 
       @if (attempts().length > 0) {
         <div class="history-section">
-          <h4>ประวัติการทำแบบทดสอบ</h4>
+          <h4>{{ 'learn.quiz.historyHeading' | translate }}</h4>
           <div class="history-list">
             @for (att of attempts(); track att.id) {
               <div class="history-item" [class.passed]="att.isPassed" [class.failed]="!att.isPassed">
-                <span>ครั้งที่ {{ att.attemptNo }}</span>
+                <span>{{ 'learn.quiz.attemptNumber' | translate: { number: att.attemptNo } }}</span>
                 <span>{{ att.scorePercent }}%</span>
-                <span class="status">{{ att.isPassed ? 'ผ่าน' : 'ไม่ผ่าน' }}</span>
+                <span class="status">{{ (att.isPassed ? 'learn.quiz.statusPassed' : 'learn.quiz.statusFailed') | translate }}</span>
               </div>
             }
           </div>
@@ -55,7 +55,7 @@
             {{ (attempts().length > 0 ? 'learn.quiz.retakeQuiz' : 'learn.quiz.startQuiz') | translate }}
           </button>
         } @else {
-          <p class="limit-reached">คุณทำแบบทดสอบครบจำนวนครั้งสูงสุดที่กำหนดแล้ว</p>
+          <p class="limit-reached">{{ 'learn.quiz.attemptsExhausted' | translate }}</p>
         }
       </div>
     </div>
@@ -65,7 +65,7 @@
     <div class="quiz-taking">
       <div class="quiz-header">
         <h3>{{ q.title }}</h3>
-        <span class="attempt-badge">ครั้งที่ {{ currentAttempt()?.attemptNo }}</span>
+        <span class="attempt-badge">{{ 'learn.quiz.attemptNumber' | translate: { number: currentAttempt()?.attemptNo ?? '' } }}</span>
       </div>
 
       <div class="questions-list">
@@ -115,8 +115,8 @@
 
   @if (state() === 'result' && currentAttempt(); as att) {
     <div class="quiz-result" [class.passed]="att.isPassed" [class.failed]="!att.isPassed">
-      <div class="result-icon">
-        {{ att.isPassed ? '🎉' : '⚠️' }}
+      <div class="result-icon" aria-hidden="true">
+        <ng-icon [name]="att.isPassed ? 'phosphorConfetti' : 'phosphorWarning'" />
       </div>
       <h3>{{ 'learn.quiz.resultTitle' | translate }}</h3>
       <p class="result-message">

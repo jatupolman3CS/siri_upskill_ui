@@ -2,13 +2,20 @@
   <!-- Sidebar Header with Progress Bar -->
   <div class="border-b border-[var(--color-border)] p-4">
     <div class="flex items-center justify-between text-sm mb-2">
-      <span class="font-bold text-[var(--color-text)]">เนื้อหาหลักสูตร</span>
+      <span class="font-bold text-[var(--color-text)]">{{ 'learn.curriculumHeading' | translate }}</span>
       <span class="text-xs font-semibold text-[var(--color-primary-text)]">
-        {{ progress()?.progressPercent ?? 0 }}% สำเร็จ
+        {{ 'learn.sidebar.percentComplete' | translate: { percent: progress()?.progressPercent ?? 0 } }}
       </span>
     </div>
     <!-- Progress Bar -->
-    <div class="h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+    <div
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="progress()?.progressPercent ?? 0"
+      [attr.aria-label]="'a11y.progress.course' | translate"
+      class="h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]"
+    >
       <div
         class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
         [style.width.%]="progress()?.progressPercent ?? 0"
@@ -16,7 +23,7 @@
     </div>
     @if (progress(); as prog) {
       <div class="mt-2 text-right text-[11px] text-[var(--color-text-muted)]">
-        {{ prog.completedEpisodesCount }} / {{ prog.totalEpisodesCount }} ตอน
+        {{ 'learn.sidebar.episodesProgress' | translate: { done: prog.completedEpisodesCount, total: prog.totalEpisodesCount } }}
       </div>
     }
   </div>
@@ -29,11 +36,13 @@
         <button
           type="button"
           (click)="toggleSection(section.id)"
+          [attr.aria-expanded]="isSectionExpanded(section.id, sIdx)"
+          [attr.aria-controls]="isSectionExpanded(section.id, sIdx) ? 'curriculum-section-' + section.id : null"
           class="flex w-full items-center justify-between bg-[var(--color-surface-muted)]/50 px-4 py-3 text-left transition hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-focus-ring)]"
         >
           <div class="min-w-0 pr-2">
             <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] block">
-              ส่วนที่ {{ sIdx + 1 }}
+              {{ 'learn.sidebar.sectionNumber' | translate: { number: sIdx + 1 } }}
             </span>
             <span class="text-sm font-bold text-[var(--color-text)] truncate block">
               {{ section.title }}
@@ -41,6 +50,7 @@
           </div>
           <ng-icon
             name="phosphorCaretDown"
+            aria-hidden="true"
             class="text-[var(--color-text-muted)] transition-transform duration-200"
             [class.rotate-180]="isSectionExpanded(section.id, sIdx)"
           />
@@ -48,7 +58,7 @@
 
         <!-- Episodes List -->
         @if (isSectionExpanded(section.id, sIdx)) {
-          <div class="divide-y divide-[var(--color-border)]/50">
+          <div [id]="'curriculum-section-' + section.id" class="divide-y divide-[var(--color-border)]/50">
             @for (episode of section.episodes; track episode.id; let eIdx = $index) {
               <button
                 type="button"
@@ -58,7 +68,7 @@
                 [class.bg-[var(--color-primary)]/10]="episode.id === activeEpisodeId()"
                 [class.border-l-4]="episode.id === activeEpisodeId()"
                 [class.border-[var(--color-primary)]]="episode.id === activeEpisodeId()"
-                [attr.title]="!isEnrolled() && !episode.isFreePreview ? 'บทเรียนนี้ต้องสมัครเรียนเพื่อเข้าชม' : episode.title"
+                [attr.title]="!isEnrolled() && !episode.isFreePreview ? ('learn.sidebar.lockedEpisodeTitle' | translate) : episode.title"
               >
                 <!-- Status Icon -->
                 <div class="shrink-0 text-base">
@@ -86,7 +96,7 @@
                     </span>
                     @if (episode.isFreePreview && !isEnrolled()) {
                       <span class="tone-green rounded bg-[var(--tone-bg)] px-1.5 py-0.2 text-[9px] font-bold text-[var(--tone-fg)]">
-                        ตัวอย่างฟรี
+                        {{ 'learn.sidebar.freePreviewBadge' | translate }}
                       </span>
                     }
                   </div>

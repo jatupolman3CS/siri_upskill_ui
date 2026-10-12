@@ -107,20 +107,12 @@
 
   <!-- Resolve Modal -->
   @if (selectedMessage()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h3 class="text-base font-bold text-[var(--color-text)]">{{ 'admin.contactMessages.modalTitle' | translate }}</h3>
-          <button
-            type="button"
-            (click)="closeModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <span aria-hidden="true">✕</span>
-          </button>
-        </div>
-
+    <app-modal
+      [open]="true"
+      (openChange)="closeModal()"
+      [titleText]="'admin.contactMessages.modalTitle' | translate"
+    >
+      <div class="space-y-4">
         <div class="space-y-2 text-xs">
           <div><strong>{{ 'admin.contactMessages.lblSender' | translate }}</strong> {{ selectedMessage()?.name }} ({{ selectedMessage()?.email }})</div>
           <div><strong>{{ 'admin.contactMessages.lblSubject' | translate }}</strong> {{ selectedMessage()?.subject }}</div>
@@ -141,30 +133,30 @@
             class="w-full px-3 py-2 rounded-xl glass-card text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
-
-        <div class="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
-          <button
-            type="button"
-            (click)="closeModal()"
-            class="btn-tactile hit-44 px-4 py-2 text-xs font-semibold rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] transition cursor-pointer"
-          >
-            {{ 'admin.contactMessages.btnCancel' | translate }}
-          </button>
-          <button
-            type="button"
-            (click)="submitResolve()"
-            [disabled]="isResolving()"
-            class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--tone-fg)] text-[var(--color-text-inverse)] hover:opacity-90 disabled:opacity-50 transition cursor-pointer"
-          >
-            @if (isResolving()) {
-              <app-spinner size="xs" color="current" />
-              <span>{{ 'admin.contactMessages.saving' | translate }}</span>
-            } @else {
-              <span>{{ 'admin.contactMessages.btnConfirm' | translate }}</span>
-            }
-          </button>
-        </div>
       </div>
-    </div>
+
+      <div modalFooter class="flex gap-2">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="btn-tactile hit-44 px-4 py-2 text-xs font-semibold rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] transition cursor-pointer"
+        >
+          {{ 'admin.contactMessages.btnCancel' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="submitResolve()"
+          [disabled]="isResolving()"
+          class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--tone-fg)] text-[var(--color-text-inverse)] hover:opacity-90 disabled:opacity-50 transition cursor-pointer"
+        >
+          @if (isResolving()) {
+            <app-spinner size="xs" color="current" />
+            <span>{{ 'admin.contactMessages.saving' | translate }}</span>
+          } @else {
+            <span>{{ 'admin.contactMessages.btnConfirm' | translate }}</span>
+          }
+        </button>
+      </div>
+    </app-modal>
   }
 </div>

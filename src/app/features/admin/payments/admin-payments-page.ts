@@ -26,6 +26,8 @@ import {
 
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
+import { Modal } from '../../../shared/modal/modal';
 import { Spinner } from '../../../shared/spinner/spinner';
 import {
   AdminRefundItem,
@@ -39,7 +41,7 @@ import { AdminPaymentsApiService } from './data/admin-payments-api.service';
 @Component({
   selector: 'app-admin-payments-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgIconComponent, CurrencyThbPipe, TranslatePipe, Spinner],
+  imports: [CommonModule, FormsModule, NgIconComponent, CurrencyThbPipe, TranslatePipe, Modal, Spinner],
   templateUrl: './admin-payments-page.html',
   viewProviders: [
     provideIcons({
@@ -68,6 +70,7 @@ import { AdminPaymentsApiService } from './data/admin-payments-api.service';
 })
 export class AdminPaymentsPage implements OnInit {
   private readonly api = inject(AdminPaymentsApiService);
+  private readonly translation = inject(TranslationService);
 
   readonly activeTab = signal<'ops-queue' | 'refunds'>('ops-queue');
   readonly loading = signal<boolean>(false);
@@ -118,7 +121,7 @@ export class AdminPaymentsPage implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.errorMessage.set(err?.error?.detail || 'เกิดข้อผิดพลาดในการโหลดคิวตรวจสอบการชำระเงิน');
+        this.errorMessage.set(err?.error?.detail || this.translation.t('admin.payments.errors.loadOps'));
         this.loading.set(false);
       },
     });
@@ -151,11 +154,11 @@ export class AdminPaymentsPage implements OnInit {
     this.loading.set(true);
     this.api.assignOpsQueue(entry.id).subscribe({
       next: () => {
-        this.successMessage.set(`มอบหมายรายการ ${entry.orderNo || entry.paymentId} ให้คุณเรียบร้อยแล้ว`);
+        this.successMessage.set(this.translation.t('admin.payments.messages.assigned', { ref: entry.orderNo || entry.paymentId }));
         this.loadData();
       },
       error: (err) => {
-        this.errorMessage.set(err?.error?.detail || 'ไม่สามารถมอบหมายรายการได้');
+        this.errorMessage.set(err?.error?.detail || this.translation.t('admin.payments.errors.assign'));
         this.loading.set(false);
       },
     });
@@ -187,12 +190,12 @@ export class AdminPaymentsPage implements OnInit {
       next: () => {
         this.isSubmittingResolve.set(false);
         this.closeResolveModal();
-        this.successMessage.set(`ดำเนินการแก้ไขรายการ ${entry.orderNo || entry.paymentId} สำเร็จ`);
+        this.successMessage.set(this.translation.t('admin.payments.messages.resolved', { ref: entry.orderNo || entry.paymentId }));
         this.loadData();
       },
       error: (err) => {
         this.isSubmittingResolve.set(false);
-        this.errorMessage.set(err?.error?.detail || 'ไม่สามารถดำเนินการแก้ไขรายการได้');
+        this.errorMessage.set(err?.error?.detail || this.translation.t('admin.payments.errors.resolve'));
       },
     });
   }
@@ -215,12 +218,12 @@ export class AdminPaymentsPage implements OnInit {
       next: () => {
         this.isSubmittingDismiss.set(false);
         this.closeDismissModal();
-        this.successMessage.set(`ยกเลิกรายการ ${entry.orderNo || entry.paymentId} เรียบร้อยแล้ว`);
+        this.successMessage.set(this.translation.t('admin.payments.messages.dismissed', { ref: entry.orderNo || entry.paymentId }));
         this.loadData();
       },
       error: (err) => {
         this.isSubmittingDismiss.set(false);
-        this.errorMessage.set(err?.error?.detail || 'ไม่สามารถยกเลิกรายการได้');
+        this.errorMessage.set(err?.error?.detail || this.translation.t('admin.payments.errors.dismiss'));
       },
     });
   }
@@ -242,20 +245,22 @@ export class AdminPaymentsPage implements OnInit {
     const call$ =
       item.action === 'approve'
         ? this.api.approveRefund(item.refund.id, { decisionNote: this.refundDecisionNote().trim() })
-        : this.api.rejectRefund(item.refund.id, { decisionNote: this.refundDecisionNote().trim() || 'คำขอถูกปฏิเสธโดยผู้ดูแลระบบ' });
+        : this.api.rejectRefund(item.refund.id, { decisionNote: this.refundDecisionNote().trim() || this.translation.t('admin.payments.refundModal.defaultRejectNote') });
 
     call$.subscribe({
       next: () => {
         this.isSubmittingRefundAction.set(false);
         this.closeRefundModal();
         this.successMessage.set(
-          item.action === 'approve' ? 'อนุมัติคำขอคืนเงินเรียบร้อยแล้ว' : 'ปฏิเสธคำขอคืนเงินเรียบร้อยแล้ว'
+          this.translation.t(
+            item.action === 'approve' ? 'admin.payments.messages.refundApproved' : 'admin.payments.messages.refundRejected',
+          ),
         );
         this.loadData();
       },
       error: (err) => {
         this.isSubmittingRefundAction.set(false);
-        this.errorMessage.set(err?.error?.detail || 'ไม่สามารถดำเนินการคำขอคืนเงินได้');
+        this.errorMessage.set(err?.error?.detail || this.translation.t('admin.payments.errors.refundAction'));
       },
     });
   }

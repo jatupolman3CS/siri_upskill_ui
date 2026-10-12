@@ -1,10 +1,10 @@
 <div class="animate-fade-in mx-auto max-w-3xl px-4 py-8 space-y-8">
   <div class="animate-fade-in-down space-y-2">
     <h1 class="text-2xl font-bold tracking-tight text-[var(--color-text)]">
-      ความเป็นส่วนตัวและการจัดการข้อมูล (Privacy & PDPA)
+      {{ 'auth.accountPrivacy.heading' | translate }}
     </h1>
     <p class="text-sm text-[var(--color-text-muted)]">
-      จัดการสิทธิ์ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) รวมถึงการส่งออกข้อมูลและการลบบัญชี
+      {{ 'auth.accountPrivacy.subheading' | translate }}
     </p>
   </div>
 
@@ -12,9 +12,9 @@
   <div class="animate-fade-in-up stagger-1 card-hover rounded-[var(--radius-lg)] glass-card p-6 space-y-4 shadow-xs">
     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
       <div class="space-y-1">
-        <h2 class="text-base font-bold text-[var(--color-text)]">สิทธิ์ในการขอรับข้อมูล (Right to Data Portability)</h2>
+        <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'auth.accountPrivacy.export.heading' | translate }}</h2>
         <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-          ดาวน์โหลดสำเนาข้อมูลส่วนบุคคลของคุณในรูปแบบ JSON ที่สามารถอ่านได้ด้วยเครื่อง รวมถึงข้อมูลโปรไฟล์ ประวัติการเข้าสู่ระบบ และบันทึกความปลอดภัย
+          {{ 'auth.accountPrivacy.export.description' | translate }}
         </p>
       </div>
       <button
@@ -25,9 +25,9 @@
       >
         @if (isExporting()) {
           <app-spinner size="xs" />
-          <span>กำลังส่งออก...</span>
+          <span>{{ 'auth.accountPrivacy.export.exporting' | translate }}</span>
         } @else {
-          <span>ส่งออกข้อมูลของฉัน (JSON)</span>
+          <span>{{ 'auth.accountPrivacy.export.button' | translate }}</span>
         }
       </button>
     </div>
@@ -37,9 +37,9 @@
   <div class="animate-fade-in-up stagger-2 card-hover tone-red rounded-[var(--radius-lg)] glass-card border-[var(--tone-fg)]/40 p-6 space-y-4 shadow-xs">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
-        <h2 class="text-base font-bold text-[var(--tone-fg)]">สิทธิ์ในการขอให้ลบข้อมูล (Right to Erasure)</h2>
+        <h2 class="text-base font-bold text-[var(--tone-fg)]">{{ 'auth.accountPrivacy.erase.heading' | translate }}</h2>
         <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-          การดำเนินการนี้จะลบข้อมูลระบุตัวตนของคุณอย่างถาวร (อีเมล, ชื่อ, เบอร์โทร) ยกเลิกการเข้าสู่ระบบทั้งหมด และทำให้นิรนาม (Anonymize) ไม่สามารถกู้คืนได้
+          {{ 'auth.accountPrivacy.erase.description' | translate }}
         </p>
       </div>
       <button
@@ -47,7 +47,7 @@
         (click)="openDeleteModal()"
         class="hit-44 btn-tactile shrink-0 px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:brightness-90 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
       >
-        ลบบัญชีผู้ใช้ถาวร
+        {{ 'auth.accountPrivacy.erase.button' | translate }}
       </button>
     </div>
   </div>
@@ -56,27 +56,27 @@
 <!-- Modal: Confirm Delete Account -->
 <app-modal
   [(open)]="showDeleteModal"
-  titleText="ยืนยันการลบบัญชีผู้ใช้ถาวร"
+  [titleText]="'auth.accountPrivacy.deleteModal.title' | translate"
   [closeOnOverlayClick]="false"
 >
   <div class="space-y-4 text-xs text-[var(--color-text)]">
     <div class="tone-red p-3 rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/40 text-[var(--tone-fg)]">
-      <strong>คำเตือน:</strong> การดำเนินการนี้ไม่สามารถยกเลิกหรือกู้คืนได้ ข้อมูลส่วนตัวของคุณจะถูกแปลงเป็นข้อมูลนิรนาม และคุณจะไม่สามารถเข้าสู่ระบบด้วยบัญชีนี้ได้อีก
+      <strong>{{ 'auth.accountPrivacy.deleteModal.warningLabel' | translate }}</strong> {{ 'auth.accountPrivacy.deleteModal.warningBody' | translate }}
     </div>
 
     <div class="space-y-1.5">
-      <label for="delete-password" class="block font-semibold">รหัสผ่านปัจจุบันของคุณ</label>
+      <label for="delete-password" class="block font-semibold">{{ 'auth.accountPrivacy.deleteModal.passwordLabel' | translate }}</label>
       <input
         type="password"
         id="delete-password"
         [(ngModel)]="deletePassword"
-        placeholder="กรอกรหัสผ่านเพื่อยืนยันตัวตน"
+        [placeholder]="'auth.accountPrivacy.deleteModal.passwordPlaceholder' | translate"
         class="w-full px-3 py-2 text-xs rounded-xl glass-card focus:ring-2 focus:ring-[var(--color-focus-ring)]"
       />
     </div>
 
     <div class="space-y-1.5">
-      <label for="delete-confirm" class="block font-semibold">พิมพ์คำว่า <span class="font-mono text-[var(--hue-red-fg)] font-bold">DELETE</span> เพื่อยืนยัน</label>
+      <label for="delete-confirm" class="block font-semibold">{{ 'auth.accountPrivacy.deleteModal.confirmLabelPrefix' | translate }} <span class="font-mono text-[var(--hue-red-fg)] font-bold">DELETE</span> {{ 'auth.accountPrivacy.deleteModal.confirmLabelSuffix' | translate }}</label>
       <input
         type="text"
         id="delete-confirm"
@@ -96,7 +96,7 @@
         (click)="closeDeleteModal()"
         class="hit-44 btn-tactile px-3 py-1.5 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]"
       >
-        ยกเลิก
+        {{ 'auth.accountPrivacy.deleteModal.cancel' | translate }}
       </button>
       <button
         type="button"
@@ -106,9 +106,9 @@
       >
         @if (isDeleting()) {
           <app-spinner size="xs" color="white" />
-          <span>กำลังลบบัญชี...</span>
+          <span>{{ 'auth.accountPrivacy.deleteModal.deleting' | translate }}</span>
         } @else {
-          <span>ยืนยันลบบัญชีถาวร</span>
+          <span>{{ 'auth.accountPrivacy.deleteModal.confirm' | translate }}</span>
         }
       </button>
     </div>

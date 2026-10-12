@@ -1,7 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorArrowsClockwise,
+  phosphorConfetti,
+  phosphorListChecks,
+  phosphorNotePencil,
+  phosphorTarget,
+  phosphorWarning,
+} from '@ng-icons/phosphor-icons/regular';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 import {
   LearnerQuiz,
@@ -15,12 +25,23 @@ type QuizState = 'loading' | 'no-quiz' | 'idle' | 'taking' | 'result' | 'error';
 @Component({
   selector: 'app-quiz-taking',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe],
   templateUrl: './quiz-taking.component.html',
   styleUrls: ['./quiz-taking.component.scss'],
+  providers: [
+    provideIcons({
+      phosphorArrowsClockwise,
+      phosphorConfetti,
+      phosphorListChecks,
+      phosphorNotePencil,
+      phosphorTarget,
+      phosphorWarning,
+    }),
+  ],
 })
 export class QuizTakingComponent {
   private readonly learningApi = inject(LearningApiService);
+  private readonly translation = inject(TranslationService);
 
   readonly episodeId = input<string | null>(null);
   readonly enrollmentId = input<string | null>(null);
@@ -68,7 +89,7 @@ export class QuizTakingComponent {
           this.state.set('no-quiz');
         } else {
           this.state.set('error');
-          this.errorMessage.set('ไม่สามารถโหลดแบบทดสอบได้');
+          this.errorMessage.set(this.translation.t('learn.quiz.loadFailed'));
         }
       },
     });
@@ -107,7 +128,7 @@ export class QuizTakingComponent {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.error?.detail || 'ไม่สามารถเริ่มทำแบบทดสอบได้');
+        this.errorMessage.set(err.error?.detail || this.translation.t('learn.quiz.startFailed'));
       },
     });
   }
@@ -161,13 +182,13 @@ export class QuizTakingComponent {
           },
           error: (err) => {
             this.isSubmitting.set(false);
-            this.errorMessage.set(err.error?.detail || 'เกิดข้อผิดพลาดในการส่งคำตอบ');
+            this.errorMessage.set(err.error?.detail || this.translation.t('learn.quiz.submitFailed'));
           },
         });
       })
       .catch(() => {
         this.isSubmitting.set(false);
-        this.errorMessage.set('ไม่สามารถบันทึกคำตอบได้');
+        this.errorMessage.set(this.translation.t('learn.quiz.saveAnswersFailed'));
       });
   }
 

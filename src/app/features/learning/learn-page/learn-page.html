@@ -21,7 +21,14 @@
     <div class="flex items-center gap-4">
       <div class="hidden md:flex items-center gap-2">
         <span class="text-xs text-[var(--color-text-muted)]">{{ 'learn.progress' | translate }}:</span>
-        <div class="h-2 w-28 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+        <div
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-valuenow]="courseProgress()?.progressPercent ?? 0"
+          [attr.aria-label]="'a11y.progress.course' | translate"
+          class="h-2 w-28 overflow-hidden rounded-full bg-[var(--color-surface-muted)]"
+        >
           <div
             class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
             [style.width.%]="courseProgress()?.progressPercent ?? 0"
@@ -99,7 +106,7 @@
           } @else {
             <div class="animate-fade-in aspect-video w-full flex flex-col items-center justify-center gap-3 rounded-[var(--radius-xl)] bg-[var(--overlay-scrim)] text-white/70">
               <app-spinner size="md" color="white" />
-              <span class="text-xs font-medium">กำลังเตรียมเครื่องเล่นวิดีโอ...</span>
+              <span class="text-xs font-medium">{{ 'learn.page.preparingPlayer' | translate }}</span>
             </div>
           }
         </div>
@@ -110,7 +117,7 @@
         <div class="tone-green glass-card animate-fade-in-down mx-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border-[var(--tone-fg)]/40 p-5 shadow-sm">
           <div class="flex items-center gap-3">
             <span aria-hidden="true" class="animate-pop-in flex h-10 w-10 items-center justify-center rounded-full bg-[var(--tone-fg)] text-[var(--tone-bg)] font-bold text-xl shadow">
-              🎓
+              <ng-icon name="phosphorGraduationCap" />
             </span>
             <div>
               <p class="text-sm font-bold text-[var(--color-text)]">
@@ -150,11 +157,11 @@
         <div class="tone-green glass-card animate-fade-in mx-4 mt-4 flex items-center justify-between rounded-xl border-[var(--tone-fg)]/40 p-4">
           <div class="flex items-center gap-3">
             <span aria-hidden="true" class="animate-pop-in flex h-8 w-8 items-center justify-center rounded-full bg-[var(--tone-fg)] text-[var(--tone-bg)] font-bold text-sm">
-              ★
+              <ng-icon name="phosphorStarFill" />
             </span>
             <div>
-              <p class="text-sm font-bold text-[var(--color-text)]">คุณกำลังดูตัวอย่างฟรี (Free Preview)</p>
-              <p class="text-xs text-[var(--color-text-muted)]">สมัครเรียนคอร์สนี้เพื่อเข้าถึงทุกบทเรียนและรับใบประกาศนียบัตร</p>
+              <p class="text-sm font-bold text-[var(--color-text)]">{{ 'learn.page.freePreviewHeading' | translate }}</p>
+              <p class="text-xs text-[var(--color-text-muted)]">{{ 'learn.page.freePreviewBody' | translate }}</p>
             </div>
           </div>
           <a
@@ -174,15 +181,15 @@
             {{ currentEpisode()?.title }}
           </h2>
           <div class="mt-2 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-            <span>ความยาว: {{ (currentEpisode()?.durationSeconds | duration) ?? '—' }}</span>
+            <span>{{ 'learn.page.durationLabel' | translate: { duration: ((currentEpisode()?.durationSeconds | duration) ?? '—') } }}</span>
             <span aria-hidden="true">·</span>
             @if (episodeProgress()?.isCompleted) {
               <span class="tone-green inline-flex items-center gap-1 text-[var(--tone-fg)] font-semibold">
                 <ng-icon name="phosphorCheckCircle" />
-                <span>เรียนจบแล้ว</span>
+                <span>{{ 'myCourses.tabs.completed' | translate }}</span>
               </span>
             } @else {
-              <span>กำลังเรียน</span>
+              <span>{{ 'learn.inProgress' | translate }}</span>
             }
           </div>
         </div>
@@ -322,13 +329,13 @@
           @if (activeTab() === 'overview') {
             <div class="space-y-4 text-sm text-[var(--color-text)] leading-relaxed">
               <div class="rounded-xl glass-card p-5 shadow-sm">
-                <h3 class="font-bold text-[var(--color-text)] mb-2">เกี่ยวกับคอร์สนี้</h3>
+                <h3 class="font-bold text-[var(--color-text)] mb-2">{{ 'catalog.detail.descriptionHeading' | translate }}</h3>
                 <p class="text-[var(--color-text-muted)] whitespace-pre-line">{{ course()?.description }}</p>
               </div>
 
               @if (course()?.outcomes && course()!.outcomes.length > 0) {
                 <div class="rounded-xl glass-card p-5 shadow-sm">
-                  <h3 class="font-bold text-[var(--color-text)] mb-2">สิ่งที่คุณจะได้รับ</h3>
+                  <h3 class="font-bold text-[var(--color-text)] mb-2">{{ 'learn.page.outcomesHeading' | translate }}</h3>
                   <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     @for (outcome of course()!.outcomes; track outcome) {
                       <li class="flex items-start gap-2 text-xs text-[var(--color-text)]">
@@ -382,11 +389,11 @@
             <div class="space-y-6">
               <!-- Ask Question Form -->
               <div class="rounded-xl glass-card p-4 shadow-sm">
-                <h3 class="text-sm font-bold text-[var(--color-text)] mb-2">ตั้งคำถามในบทเรียนนี้</h3>
+                <h3 class="text-sm font-bold text-[var(--color-text)] mb-2">{{ 'learn.qa.askHeading' | translate }}</h3>
                 <textarea
                   [(ngModel)]="newQuestionBody"
                   rows="3"
-                  placeholder="พิมพ์คำถามหรือข้อสงสัยของคุณที่นี่..."
+                  [placeholder]="'learn.qa.bodyPlaceholder' | translate"
                   class="w-full rounded-lg glass-card p-3 text-sm text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                 ></textarea>
                 <div class="mt-3 flex justify-end">
@@ -398,10 +405,10 @@
                   >
                     @if (isSubmittingQuestion()) {
                       <app-spinner size="xs" color="white" />
-                      <span>กำลังส่ง...</span>
+                      <span>{{ 'learn.qa.sending' | translate }}</span>
                     } @else {
                       <ng-icon name="phosphorPaperPlaneRight" />
-                      <span>ส่งคำถาม</span>
+                      <span>{{ 'learn.qa.submitQuestion' | translate }}</span>
                     }
                   </button>
                 </div>
@@ -410,7 +417,7 @@
               <!-- Discussions List -->
               @if (discussions().length === 0) {
                 <div class="py-12 text-center text-sm text-[var(--color-text-muted)]">
-                  ยังไม่มีคำถามในบทเรียนนี้ เป็นคนแรกที่ถามเลย!
+                  {{ 'learn.qa.noQuestions' | translate }}
                 </div>
               } @else {
                 <div class="space-y-3">
@@ -420,11 +427,11 @@
                         <div class="space-y-1">
                           <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-[var(--color-text)]">
-                              {{ disc.isInstructorAnswer ? 'ผู้สอน (Instructor)' : 'ผู้เรียน' }}
+                              {{ (disc.isInstructorAnswer ? 'learn.qa.authorInstructor' : 'learn.qa.authorLearner') | translate }}
                             </span>
                             @if (disc.isInstructorAnswer) {
                               <span class="tone-blue rounded bg-[var(--tone-bg)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
-                                ผู้สอน
+                                {{ 'learn.qa.instructorBadge' | translate }}
                               </span>
                             }
                             <span class="text-[11px] text-[var(--color-text-muted)]">

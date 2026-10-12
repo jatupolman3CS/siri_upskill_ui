@@ -1,7 +1,6 @@
-<a
-  [routerLink]="['/courses', course().slug]"
-  class="card-hover glow-border group flex h-full flex-col gap-2 rounded-2xl glass-card p-4
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+<div
+  class="card-hover glow-border group relative flex h-full flex-col gap-2 rounded-2xl glass-card p-4
+    has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-[var(--color-focus-ring)]"
 >
   <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
     @if (course().thumbnailUrl) {
@@ -11,23 +10,17 @@
     }
 
     <app-course-format-badge class="absolute left-2 top-2" [format]="course().deliveryFormat" />
-
-    <!-- after:-inset-1.5 stretches the 32px button's hit area to 44px. (hit-44 can't be used here: its unlayered
-         `position: relative` would override this button's Tailwind `absolute`.) -->
-    <button
-      type="button"
-      (click)="toggleWishlist($event)"
-      [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'เพิ่มในสิ่งที่อยากได้'"
-      class="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full glass-card shadow-sm transition hover:scale-110 after:absolute after:-inset-1.5 after:content-['']"
-    >
-      @if (isWishlisted()) {
-        <ng-icon name="phosphorHeartFill" class="text-base text-[var(--color-primary-text)]" />
-      } @else {
-        <ng-icon name="phosphorHeart" class="text-base text-[var(--color-text-muted)]" />
-      }
-    </button>
   </div>
-  <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">{{ course().title }}</h3>
+  <!-- Stretched link: the title <a>'s ::after covers the whole card so the card stays one big click target
+       without nesting the wishlist <button> inside the <a> (invalid HTML). -->
+  <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)]">
+    <a
+      [routerLink]="['/courses', course().slug]"
+      class="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+    >
+      {{ course().title }}
+    </a>
+  </h3>
   <p class="text-sm text-[var(--color-text-muted)]">{{ course().instructorDisplayName }}</p>
   <app-course-next-session [startsAtUtc]="course().nextStartsAtUtc" />
   @if (course().ratingCount > 0) {
@@ -40,7 +33,7 @@
     @if (salePrice() !== undefined && salePrice()! < course().price) {
       <span class="text-lg font-bold text-[var(--hue-red-fg)]">{{ salePrice()! | currencyThb }}</span>
       <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().price | currencyThb }}</span>
-      <span class="tone-red rounded bg-[var(--tone-bg)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">ลดพิเศษ</span>
+      <span class="tone-red rounded bg-[var(--tone-bg)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">{{ 'home.courseCard.saleBadge' | translate }}</span>
     } @else {
       <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ course().price | currencyThb }}</span>
       @if (course().comparePrice) {
@@ -48,4 +41,21 @@
       }
     }
   </div>
-</a>
+
+  <!-- DOM order: title link first, then this button. top-6/right-6 = the thumbnail's 8px inset inside the card's
+       16px padding. z-10 lifts it above the title link's stretched ::after. after:-inset-1.5 stretches the 32px
+       button's hit area to 44px (hit-44 can't be used here: its unlayered `position: relative` would override
+       this button's Tailwind `absolute`). -->
+  <button
+    type="button"
+    (click)="toggleWishlist()"
+    [attr.aria-label]="(isWishlisted() ? 'wishlist.remove' : 'wishlist.add') | translate"
+    class="absolute top-6 right-6 z-10 flex h-8 w-8 items-center justify-center rounded-full glass-card shadow-sm transition hover:scale-110 after:absolute after:-inset-1.5 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    @if (isWishlisted()) {
+      <ng-icon name="phosphorHeartFill" aria-hidden="true" class="text-base text-[var(--color-primary-text)]" />
+    } @else {
+      <ng-icon name="phosphorHeart" aria-hidden="true" class="text-base text-[var(--color-text-muted)]" />
+    }
+  </button>
+</div>

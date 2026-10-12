@@ -27,7 +27,9 @@
       },
       "posts": {
         "delete": "Delete post"
-      }
+      },
+      "menuActiveToggle": "Show menu {{name}} on the site",
+      "paymentOpsStatusFilter": "Filter the review queue by status"
     },
     "learner": {
       "removeFromCart": "Remove {{name}} from cart",
@@ -41,6 +43,14 @@
     "studio": {
       "removeOutcome": "Remove learning outcome {{index}}",
       "removeRequirement": "Remove requirement {{index}}"
+    },
+    "progress": {
+      "course": "Course progress",
+      "courseNamed": "Progress: {{name}}",
+      "completionRate": "Completion rate: {{name}}"
+    },
+    "rating": {
+      "distributionRow": "{{stars}} stars: {{count}} reviews ({{percent}}%)"
     }
   },
   "studio": {
@@ -69,7 +79,8 @@
       "liveStatus": "Live system status",
       "toInstructor": "Instructor mode",
       "toLearner": "Learner view",
-      "toHome": "Go to home page"
+      "toHome": "Go to home page",
+      "roleBadge": "Administrator (Admin)"
     },
     "categories": {
       "pageTitle": "Manage course categories",
@@ -421,7 +432,14 @@
       "placeholderNotes": "e.g., Followed up via email...",
       "btnCancel": "Cancel",
       "btnConfirm": "Confirm Resolution",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "pageTitle": "Manage Contact Messages | Admin",
+      "pageDescription": "Manage and reply to inquiries from SiriUpSkill users",
+      "toast": {
+        "loadFailed": "Unable to load contact messages",
+        "resolved": "The message was marked as resolved",
+        "updateFailed": "Something went wrong while updating the status"
+      }
     },
     "menus": {
       "title": "Navigation Menus",
@@ -449,10 +467,80 @@
       "lblActive": "Active",
       "btnCancel": "Cancel",
       "btnSave": "Save",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "seo": {
+        "title": "Manage Navigation Menus | SIRI UpSkill Admin",
+        "description": "Manage the structure of the website's main menu and sub-menus"
+      },
+      "toast": {
+        "updated": "Menu \"{{label}}\" was updated successfully",
+        "saveFailed": "Something went wrong while saving the menu",
+        "created": "Menu \"{{label}}\" was added successfully",
+        "createFailed": "Something went wrong while creating the menu",
+        "deleted": "Menu \"{{label}}\" was deleted successfully",
+        "deleteFailed": "Unable to delete the menu (it may still have sub-menus attached)"
+      },
+      "confirmDelete": "Are you sure you want to delete the menu \"{{label}}\"?"
     },
     "dashboard": {
-      "courseTitleUnavailable": "Course title unavailable"
+      "courseTitleUnavailable": "Course title unavailable",
+      "title": "Admin Control Center",
+      "subtitle": "Platform stats overview, plus management of courses, users, finance, and content",
+      "updating": "Updating data...",
+      "errorTitle": "Couldn't load the dashboard summary",
+      "errorDescription": "Please check your API connection or try again",
+      "retryButton": "Try again",
+      "stats": {
+        "todaySales": "Today's sales (THB)",
+        "todaySalesNote": "Calculated live from the order system",
+        "totalLearners": "Total learners",
+        "newLearnersToday": "New sign-ups today: +{{count}}",
+        "pendingCourses": "Courses awaiting approval",
+        "needsReview": "Needs review",
+        "goToReviewQueue": "Go to the course review queue",
+        "pendingRefunds": "Refund requests awaiting approval",
+        "pending": "Pending",
+        "goToRefunds": "Go to refunds"
+      },
+      "topCourses": {
+        "heading": "Top-selling courses, last 30 days",
+        "description": "Rolled-up stats for sales, enrollments, and video views",
+        "empty": "No top-selling course data for the past 30 days yet",
+        "courseName": "Course",
+        "totalSales": "Total sales",
+        "enrollments": "Enrollments",
+        "views": "Views",
+        "learnerCount": "{{count}} enrolled"
+      },
+      "hub": {
+        "enter": "Open",
+        "moderation": {
+          "title": "Course moderation",
+          "description": "Review new course content submitted by instructors, then approve it or send it back for changes"
+        },
+        "users": {
+          "title": "Users & permissions",
+          "description": "Find users, assign roles, suspend accounts, and review audit logs"
+        },
+        "marketing": {
+          "title": "Marketing & promotions",
+          "description": "Create discount codes, run Flash Sale campaigns, and assemble course bundles"
+        },
+        "banners": {
+          "title": "Homepage banners",
+          "description": "Add, remove, and reorder the promotional banners on the platform's homepage"
+        },
+        "posts": {
+          "title": "Articles & news",
+          "description": "Write articles, share study tips, and publish announcements"
+        },
+        "finance": {
+          "title": "Payouts & refunds",
+          "description": "Create instructor payout batches, export bank files, and approve refund requests"
+        }
+      },
+      "seoTitle": "Admin Dashboard | SIRI UpSkill Admin",
+      "seoDescription": "System overview, banner and news management, and payout batches"
     },
     "moderation": {
       "title": "Course Moderation Queue",
@@ -475,7 +563,14 @@
       "rejectReasonPlaceholder": "e.g., Please improve audio quality in episode 3, add study materials in episode 5...",
       "btnCancel": "Cancel",
       "btnConfirmReject": "Confirm Return",
-      "submitting": "Submitting..."
+      "submitting": "Submitting...",
+      "seoTitle": "Course Approval Queue | SIRI UpSkill Admin",
+      "seoDescription": "Review and approve new courses before they are published",
+      "approveSuccess": "The course \"{{title}}\" has been approved and published",
+      "approveError": "Something went wrong while approving the course",
+      "rejectReasonRequired": "Please provide a reason for returning the course for revisions",
+      "rejectSuccess": "The course \"{{title}}\" has been returned for revisions",
+      "rejectError": "Something went wrong while returning the course"
     },
     "payouts": {
       "subtitle": "Process instructor revenue share (standard split: instructor {{percent}} / platform {{platformPercent}}, with payment fees deducted before the split) and approve refund requests.",
@@ -491,6 +586,476 @@
         "payable": "Payable (in a payout batch)",
         "paid": "Paid",
         "reversed": "Reversed"
+      },
+      "title": "Payout Batches & Refund Queue (Finance & Payouts)",
+      "createBatchButton": "Create new payout batch",
+      "tabs": {
+        "batches": "Payout batches",
+        "splits": "Revenue splits",
+        "refunds": "Pending refund requests"
+      },
+      "batches": {
+        "empty": "There are no payout batches yet.",
+        "createFirst": "+ Create the first payout batch",
+        "table": {
+          "period": "Monthly period",
+          "totalAmount": "Net total",
+          "instructors": "Instructors",
+          "createdAt": "Created",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "instructorCount": "{{count}} instructor(s)",
+        "exportTitle": "Export the bank transfer file",
+        "export": "Export file",
+        "execute": "Confirm payout"
+      },
+      "splits": {
+        "searchPlaceholder": "Search by instructor ID...",
+        "searchButton": "Search",
+        "statusLabel": "Status:",
+        "empty": {
+          "title": "No revenue splits found",
+          "description": "There are no revenue split entries matching your search."
+        },
+        "table": {
+          "date": "Transaction date",
+          "instructor": "Instructor (instructor ID)",
+          "gross": "Gross amount",
+          "gatewayFee": "Gateway fee",
+          "platformFee": "Platform fee",
+          "instructorShare": "Instructor share",
+          "status": "Status"
+        }
+      },
+      "refunds": {
+        "empty": {
+          "title": "No pending refund requests",
+          "description": "All refund requests have been reviewed."
+        },
+        "table": {
+          "requestedAt": "Date submitted",
+          "paymentId": "Payment ID",
+          "amount": "Refund amount",
+          "reason": "Buyer's reason",
+          "status": "Status",
+          "decision": "Decision"
+        },
+        "statusPending": "Awaiting approval",
+        "approve": "Approve refund",
+        "reject": "Reject"
+      },
+      "createModal": {
+        "title": "Create new payout batch",
+        "periodKeyLabel": "Period key*",
+        "periodKeyPlaceholder": "YYYY-MM, e.g. 2026-08",
+        "submitting": "Creating batch...",
+        "submit": "Create batch"
+      },
+      "approveModal": {
+        "title": "Confirm refund approval",
+        "amount": "Refund amount: {{amount}}",
+        "reason": "Reason: {{reason}}",
+        "noteLabel": "Additional note (note to buyer, optional)",
+        "notePlaceholder": "e.g. The refund has been approved and returned to the original account.",
+        "submitting": "Processing...",
+        "submit": "Approve refund now"
+      },
+      "rejectModal": {
+        "title": "Reject refund request",
+        "amount": "Amount: {{amount}}",
+        "reason": "Buyer's reason: {{reason}}",
+        "reasonLabel": "Reason for rejection*",
+        "reasonPlaceholder": "State the reason for rejection to notify the buyer, e.g. outside the refund policy window or more than 30% of the content completed.",
+        "submitting": "Saving...",
+        "submit": "Reject request"
+      },
+      "seo": {
+        "title": "Manage payout batches and refunds | SIRI UpSkill Admin",
+        "description": "Manage payout batches, instructor revenue shares and the refund request queue."
+      },
+      "errors": {
+        "periodKeyRequired": "Please enter the period key (e.g. 2026-08).",
+        "createBatch": "Failed to create the payout batch.",
+        "executeBatch": "Failed to process the payout.",
+        "exportBatch": "Failed to export the transfer file.",
+        "approveRefund": "Failed to approve the refund.",
+        "rejectReasonRequired": "Please enter a reason for rejecting the refund request.",
+        "rejectRefund": "Failed to reject the refund."
+      },
+      "messages": {
+        "batchCreated": "Payout batch for period {{periodKey}} has been created.",
+        "batchExecuted": "Payout for period {{periodKey}} was processed successfully.",
+        "batchExported": "Exported {{count}} transfer entries for period {{periodKey}}.",
+        "refundApproved": "Approved the refund request of ฿{{amount}}.",
+        "refundRejected": "The refund request has been rejected."
+      }
+    },
+    "marketing": {
+      "seo": {
+        "title": "Marketing & Promotions | SIRI UpSkill Admin",
+        "description": "Manage promo codes, flash sales and course bundle packages"
+      },
+      "title": "Marketing & Promos",
+      "subtitle": "Manage promo codes, Flash Sale campaigns and Bundle packages",
+      "createPromo": "Create promo code",
+      "createFlashSale": "Create Flash Sale",
+      "createBundle": "Create course Bundle",
+      "tabs": {
+        "promos": "Promo Codes",
+        "flashSales": "Flash Sales",
+        "bundles": "Bundles"
+      },
+      "col": {
+        "status": "Status",
+        "courseCount": "Number of courses"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "promos": {
+        "empty": "There are no promo codes yet",
+        "emptyAction": "+ Create your first code",
+        "colCode": "Code",
+        "colDiscount": "Discount value",
+        "colMinOrder": "Minimum order amount",
+        "colUsage": "Usage",
+        "colPeriod": "Valid period",
+        "discountPercent": "{{value}}% off",
+        "discountFixed": "{{value}} off",
+        "noMinimum": "No minimum",
+        "usageLimit": "/ {{max}} uses"
+      },
+      "flashSales": {
+        "empty": "There are no Flash Sale campaigns yet",
+        "emptyAction": "+ Create your first Flash Sale campaign",
+        "colTitle": "Campaign name",
+        "colStart": "Start time",
+        "colEnd": "End time",
+        "itemCount": "{{count}} item(s)"
+      },
+      "bundles": {
+        "empty": "There are no course Bundles yet",
+        "emptyAction": "+ Create your first Bundle",
+        "colTitle": "Package title",
+        "colSlug": "Slug",
+        "colPrice": "Package price",
+        "courseCount": "{{count}} course(s)"
+      },
+      "promoModal": {
+        "title": "Create Promo Code",
+        "code": "Code*",
+        "codePlaceholder": "e.g. SIRI2026, EARLYBIRD",
+        "discountType": "Discount type*",
+        "typePercentage": "Percentage (%)",
+        "typeFixed": "Fixed amount (฿)",
+        "discountValue": "Discount value*",
+        "minSpend": "Minimum spend (฿)",
+        "maxRedemptions": "Total uses (times)",
+        "maxPerUser": "Uses per user",
+        "startsAt": "Start date",
+        "endsAt": "End date",
+        "submit": "Save code"
+      },
+      "flashSaleModal": {
+        "title": "Create a new Flash Sale campaign",
+        "name": "Flash Sale campaign name*",
+        "namePlaceholder": "e.g. Mega Mid-Year Sale, 24 hours only",
+        "courseId": "Course ID (GUID)*",
+        "courseIdPlaceholder": "Enter the course GUID",
+        "salePrice": "Flash Sale special price (฿)*",
+        "startsAt": "Starts on",
+        "endsAt": "Ends on"
+      },
+      "bundleModal": {
+        "title": "Create a new course Bundle package",
+        "name": "Package title*",
+        "namePlaceholder": "e.g. Full-Stack AI Engineer 3-in-1 Bundle",
+        "slug": "Slug URL*",
+        "price": "Package price (฿)*",
+        "description": "Description",
+        "descriptionPlaceholder": "Highlights of this bundle package",
+        "courseIds": "Course IDs (one per line)*",
+        "submit": "Create Bundle"
+      },
+      "modal": {
+        "cancel": "Cancel",
+        "saving": "Saving..."
+      },
+      "toast": {
+        "promoCodeRequired": "Please enter a promo code",
+        "promoCreated": "Promo code \"{{code}}\" was created successfully",
+        "promoCreateFailed": "Something went wrong while creating the promo code",
+        "flashSaleRequired": "Please enter the campaign name and Course ID",
+        "flashSaleCreated": "Flash Sale \"{{title}}\" was created successfully",
+        "flashSaleCreateFailed": "Something went wrong while creating the Flash Sale",
+        "bundleRequired": "Please enter the title and Slug, and at least one Course ID",
+        "bundleCreated": "Course bundle \"{{title}}\" was created successfully",
+        "bundleCreateFailed": "Something went wrong while creating the Bundle"
+      }
+    },
+    "banners": {
+      "seo": {
+        "title": "Manage Banners | SIRI UpSkill Admin",
+        "description": "Manage homepage banner images"
+      },
+      "title": "Homepage Hero Banners",
+      "subtitle": "Set the promotional images and destination links shown on the website homepage",
+      "addButton": "Add new banner",
+      "form": {
+        "heading": "New banner details",
+        "titleLabel": "Banner title *",
+        "titlePlaceholder": "e.g. New course promotion, 40% off",
+        "imageUrlLabel": "Image URL *",
+        "targetUrlLabel": "Target URL",
+        "targetUrlPlaceholder": "/courses or /courses/slug",
+        "cancel": "Cancel",
+        "submit": "Save banner"
+      },
+      "loading": "Loading banners...",
+      "empty": "There are no banners yet",
+      "row": {
+        "order": "Order #{{order}}",
+        "active": "Active",
+        "inactive": "Inactive",
+        "link": "Link: {{url}}",
+        "noLink": "None",
+        "turnOff": "Turn off",
+        "turnOn": "Turn on"
+      }
+    },
+    "posts": {
+      "seo": {
+        "title": "Manage Articles & Blog | SIRI UpSkill Admin",
+        "description": "CMS for managing articles and news"
+      },
+      "title": "Articles & News (CMS Blog)",
+      "subtitle": "Manage the article content published on the public blog",
+      "writeNew": "Write a new article",
+      "form": {
+        "titleLabel": "Article title *",
+        "titlePlaceholder": "e.g. 5 techniques to learn programming faster",
+        "slugLabel": "URL Slug (in English)",
+        "excerptLabel": "Excerpt",
+        "excerptPlaceholder": "A short summary shown on the article list card",
+        "contentLabel": "Article content (HTML / Text) *",
+        "contentPlaceholder": "Write the article content here...",
+        "coverUrlLabel": "Cover image URL",
+        "cancel": "Cancel",
+        "submit": "Publish article"
+      },
+      "table": {
+        "colArticle": "Article",
+        "colSlug": "URL Slug",
+        "colStatus": "Status",
+        "colPublished": "Published on",
+        "colAction": "Actions"
+      },
+      "loading": "Loading articles...",
+      "empty": "There are no articles yet"
+    },
+    "payments": {
+      "title": "Payment Management & Ops Queue",
+      "subtitle": "Review unusual transactions, manage the review work queue (Ops Queue) and approve refunds.",
+      "notAvailable": "N/A",
+      "btnBack": "Back",
+      "kpi": {
+        "opsQueueTitle": "Ops Queue items awaiting review",
+        "opsQueueHint": "Late / duplicate / unresolved payments",
+        "refundsTitle": "Refund requests awaiting review",
+        "refundsHint": "Learners requesting refunds",
+        "gatewayTitle": "Payment gateway",
+        "gatewayHint": "Webhooks & auto-reconciliation active"
+      },
+      "tabs": {
+        "opsQueue": "Anomaly review queue (Ops Queue)",
+        "refunds": "Refund requests"
+      },
+      "filter": {
+        "all": "All",
+        "open": "Awaiting review",
+        "inProgress": "In progress",
+        "resolved": "Resolved",
+        "dismissed": "Dismissed / closed"
+      },
+      "table": {
+        "actions": "Actions"
+      },
+      "ops": {
+        "table": {
+          "order": "Order / item",
+          "reason": "Reason for review",
+          "buyer": "Buyer (email)",
+          "amount": "Amount paid",
+          "status": "Queue status"
+        },
+        "loading": "Loading Ops Queue data...",
+        "empty": {
+          "title": "No items to review",
+          "description": "The payment system is running normally. There are no open cases in this status."
+        },
+        "note": "Note: {{note}}",
+        "noEmail": "No email found",
+        "status": {
+          "open": "Awaiting review",
+          "inProgress": "In progress",
+          "resolved": "Resolved",
+          "dismissed": "Closed"
+        },
+        "action": {
+          "assign": "Take case",
+          "resolve": "Resolve",
+          "dismiss": "Dismiss",
+          "done": "Done"
+        }
+      },
+      "refunds": {
+        "table": {
+          "id": "Request ID",
+          "reason": "Refund reason",
+          "amount": "Amount requested",
+          "requestedAt": "Requested on",
+          "status": "Status"
+        },
+        "empty": "No refund requests awaiting action",
+        "approve": "Approve refund",
+        "reject": "Reject"
+      },
+      "resolveModal": {
+        "title": "Resolve payment case",
+        "orderLine": "Order: {{orderNo}} ({{amount}})",
+        "chooseAction": "Choose a resolution",
+        "refund": {
+          "title": "Refund the buyer (via Stripe)",
+          "description": "Calls the Stripe API to request a refund, cancels the discount and emails the buyer."
+        },
+        "reopen": {
+          "title": "Reopen the order and grant course access (Reopen & Fulfill)",
+          "description": "Marks the order as paid, enrolls the learner in the course automatically and sends a receipt."
+        },
+        "grant": {
+          "title": "Grant course access only",
+          "description": "Gives the learner access to the courses in the order without changing the account status."
+        },
+        "noteLabel": "Action notes",
+        "notePlaceholder": "Enter the reason or review details...",
+        "submit": "Confirm action"
+      },
+      "dismissModal": {
+        "title": "Close case / dismiss item",
+        "intro": "You are about to dismiss the review of order",
+        "noteLabel": "Reason for dismissal (required)",
+        "notePlaceholder": "e.g. duplicate item, the user has paid again...",
+        "submit": "Confirm dismissal"
+      },
+      "refundModal": {
+        "approveTitle": "Approve refund request",
+        "rejectTitle": "Reject refund request",
+        "amountLabel": "Amount:",
+        "reasonInline": "(Reason: {{reason}})",
+        "noteLabel": "Decision note",
+        "notePlaceholder": "Enter a message to the learner or an internal note...",
+        "submit": "Confirm",
+        "defaultRejectNote": "The request was rejected by an administrator."
+      },
+      "errors": {
+        "loadOps": "Failed to load the payment review queue.",
+        "assign": "Could not assign the item.",
+        "resolve": "Could not resolve the item.",
+        "dismiss": "Could not dismiss the item.",
+        "refundAction": "Could not process the refund request."
+      },
+      "messages": {
+        "assigned": "Item {{ref}} has been assigned to you.",
+        "resolved": "Item {{ref}} was resolved successfully.",
+        "dismissed": "Item {{ref}} has been dismissed.",
+        "refundApproved": "The refund request has been approved.",
+        "refundRejected": "The refund request has been rejected."
+      }
+    },
+    "users": {
+      "title": "Users and access permissions (User Management)",
+      "subtitle": "Manage user roles, suspend or reinstate access, and review the audit trail",
+      "tabs": {
+        "users": "Users ({{count}})",
+        "audit": "Audit logs ({{count}})"
+      },
+      "inviteButton": "Invite new user",
+      "search": {
+        "placeholder": "Search by name or email..."
+      },
+      "filter": {
+        "roleLabel": "Role:",
+        "statusLabel": "Status:",
+        "all": "All"
+      },
+      "roles": {
+        "admin": "Administrator (Admin)",
+        "instructor": "Instructor",
+        "learner": "Learner"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "loadingUsers": "Loading users...",
+      "emptyUsers": "No users match your filters",
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "lastLogin": "Last sign-in",
+        "actions": "Actions"
+      },
+      "never": "Never signed in",
+      "changeRole": "Change role",
+      "suspendAccount": "Suspend account",
+      "reactivate": "Reinstate access",
+      "btnCancel": "Cancel",
+      "audit": {
+        "loading": "Loading audit logs...",
+        "empty": "No security events recorded yet",
+        "action": "Event (Action)",
+        "detail": "Details",
+        "ip": "IP address",
+        "timestamp": "Time of event (Timestamp)"
+      },
+      "editRole": {
+        "title": "Edit user role",
+        "selectLabel": "Select the primary role:",
+        "save": "Save role",
+        "saving": "Saving..."
+      },
+      "suspend": {
+        "title": "Suspend user account",
+        "reasonLabel": "Reason for suspending the account:",
+        "reasonPlaceholder": "e.g. Violated the terms of use, suspicious activity...",
+        "confirm": "Confirm suspension",
+        "processing": "Processing..."
+      },
+      "invite": {
+        "title": "Invite a new user",
+        "intro": "An account will be created and access permissions assigned immediately",
+        "emailLabel": "Email *",
+        "displayNameLabel": "Display name *",
+        "displayNamePlaceholder": "e.g. Somchai Jaidee",
+        "roleLabel": "Role / access level *",
+        "submit": "Invite user",
+        "submitting": "Inviting..."
+      },
+      "seoTitle": "User & Permission Management | SIRI UpSkill Admin",
+      "seoDescription": "Manage users, access permissions, and audit logs",
+      "messages": {
+        "inviteSuccess": "{{email}} has been invited to the platform",
+        "inviteError": "Something went wrong while inviting the user",
+        "roleUpdated": "Role for {{name}} updated to {{role}}",
+        "roleUpdateError": "Something went wrong while updating the role",
+        "defaultSuspendReason": "Suspended by an administrator",
+        "suspended": "The account for {{name}} has been suspended",
+        "suspendError": "Something went wrong while suspending the account",
+        "reactivated": "Access for {{name}} has been reinstated",
+        "reactivateError": "Something went wrong while reinstating access"
       }
     }
   },
@@ -600,7 +1165,8 @@
     "exploreCourses": "Browse Courses",
     "addToCart": "Add to Cart",
     "remove": "Remove from wishlist",
-    "add": "Add to wishlist"
+    "add": "Add to wishlist",
+    "metaDescription": "The courses you have saved to your wishlist."
   },
   "learningPaths": {
     "badge": "Roadmap to Future Careers",
@@ -626,7 +1192,10 @@
     "notFoundTitle": "Learning Path Not Found",
     "notFoundDesc": "This learning path may have been retired or does not exist.",
     "recommendedCurriculum": "Recommended Curriculum • {{count}} courses in this path",
-    "step": "Step {{step}}"
+    "step": "Step {{step}}",
+    "metaDescription": "Learning plans that bring together courses from beginner to expert level, tailored to specific career paths.",
+    "detailMetaTitle": "{{title}} | SIRI UpSkill Learning Paths",
+    "detailMetaDescriptionFallback": "A step-by-step learning path curriculum"
   },
   "nav": {
     "home": "Home",
@@ -716,6 +1285,20 @@
     "newest": {
       "heading": "Newest courses",
       "loadingLabel": "Loading newest courses"
+    },
+    "continue": {
+      "heading": "Continue where you left off",
+      "progress": "Progress {{percent}}%",
+      "cta": "Go to lesson"
+    },
+    "courseCard": {
+      "saleBadge": "Special offer"
+    },
+    "flashSale": {
+      "regionLabel": "Flash sale promotion"
+    },
+    "banners": {
+      "regionLabel": "Promotional banners"
     }
   },
   "catalog": {
@@ -795,7 +1378,20 @@
       "guaranteeMultiDevice": "Learn on mobile and desktop",
       "guaranteeCertificate": "Certificate on completion",
       "guaranteeRefund": "30-day money-back guarantee",
-      "requirementsSidebarHeading": "Requirements"
+      "requirementsSidebarHeading": "Requirements",
+      "ratingFromCount": "From {{count}} learner reviews",
+      "tryFreeWithCount": "Try for free ({{count}} lessons)",
+      "inCartAddAgain": "Already in cart (add another)",
+      "saveToWishlist": "Save to wishlist",
+      "tryFree": "Try for free"
+    },
+    "autocomplete": {
+      "placeholder": "Search for courses, skills or instructors...",
+      "matchingCourses": "Matching courses",
+      "viewAllResults": "View all results for \"{{query}}\"",
+      "recentSearches": "Recent searches",
+      "clearAll": "Clear all",
+      "remove": "Remove"
     }
   },
   "blog": {
@@ -813,8 +1409,22 @@
       "backToBlog": "Back to all articles",
       "errorHeading": "Couldn't load this article",
       "errorDescription": "Something went wrong while loading this article. Please try again.",
-      "retryButton": "Try again"
-    }
+      "retryButton": "Try again",
+      "share": "Share article",
+      "shareCopied": "Article link copied",
+      "shareFailed": "Could not copy the link. Please copy it from the browser address bar.",
+      "officialPublication": "Officially published",
+      "ctaHeading": "Ready to take your skills to the next level?",
+      "ctaDescription": "Browse online courses designed by experts and start practising for real today.",
+      "ctaButton": "Explore all courses"
+    },
+    "metaTitle": "Articles & News | SIRI UpSkill Blog",
+    "metaDescription": "Articles, tips and technology news from the SIRI UpSkill team.",
+    "badge": "SIRI UpSkill Knowledge Hub",
+    "heading": "Articles and technology knowledge",
+    "subheading": "Stay up to date with tech career trends, programming knowledge and self-development guidance from experts.",
+    "authorTeam": "SIRI UpSkill Academic Team",
+    "readMore": "Read more"
   },
   "shared": {
     "modal": {
@@ -838,6 +1448,31 @@
     },
     "field": {
       "required": "required"
+    },
+    "consent": {
+      "regionLabel": "Cookie and personal data consent",
+      "title": "Cookie usage and personal data protection (PDPA)",
+      "body": "SiriUpSkill uses essential cookies to make the website work properly, and analytics cookies to improve your learning experience. You can find out more in our",
+      "privacyLink": "Privacy Policy",
+      "and": "and",
+      "termsLink": "Terms of Use",
+      "settings": "Cookie settings",
+      "rejectAll": "Reject all",
+      "acceptAll": "Accept all",
+      "essential": {
+        "title": "Essential cookies",
+        "badge": "Always on",
+        "description": "Required for signing in and keeping your account secure"
+      },
+      "analytics": {
+        "title": "Analytics cookies",
+        "description": "Help us improve and develop our course content"
+      },
+      "marketing": {
+        "title": "Marketing cookies",
+        "description": "Recommend courses and promotions that match your interests"
+      },
+      "save": "Save settings"
     }
   },
   "auth": {
@@ -940,6 +1575,40 @@
       "confirmAllBody": "This signs out every device, including this one. You'll need to log in again here too.",
       "confirmAllConfirm": "Sign out everywhere",
       "confirmCancel": "Cancel"
+    },
+    "accountPrivacy": {
+      "pageTitle": "Privacy and data management (PDPA)",
+      "pageDescription": "Export your personal data or delete your account under your personal data protection rights (PDPA).",
+      "heading": "Privacy and data management (Privacy & PDPA)",
+      "subheading": "Manage your rights under the Personal Data Protection Act B.E. 2562 (2019) (PDPA), including exporting your data and deleting your account.",
+      "export": {
+        "heading": "Right to data portability",
+        "description": "Download a copy of your personal data as a machine-readable JSON file, including your profile information, sign-in history and security logs.",
+        "button": "Export my data (JSON)",
+        "exporting": "Exporting...",
+        "success": "Your personal data has been downloaded.",
+        "error": "Your data cannot be exported right now."
+      },
+      "erase": {
+        "heading": "Right to erasure",
+        "description": "This permanently removes your identifying information (email, name, phone number), signs you out everywhere and anonymizes your account. It cannot be undone.",
+        "button": "Permanently delete my account"
+      },
+      "deleteModal": {
+        "title": "Confirm permanent account deletion",
+        "warningLabel": "Warning:",
+        "warningBody": "This action cannot be cancelled or reversed. Your personal data will be anonymized and you will no longer be able to sign in with this account.",
+        "passwordLabel": "Your current password",
+        "passwordPlaceholder": "Enter your password to confirm your identity",
+        "confirmLabelPrefix": "Type",
+        "confirmLabelSuffix": "to confirm",
+        "confirmRequired": "Please type DELETE to confirm.",
+        "cancel": "Cancel",
+        "deleting": "Deleting account...",
+        "confirm": "Permanently delete account",
+        "success": "Your account has been deleted and anonymized.",
+        "error": "Something went wrong while deleting your account."
+      }
     }
   },
   "checkout": {
@@ -976,7 +1645,8 @@
       "autoConfirm": "Automatically confirmed upon payment",
       "expired": "QR code has expired. Please create a new order.",
       "waiting": "Waiting for payment confirmation...",
-      "paid": "Payment successful! Redirecting to classroom..."
+      "paid": "Payment successful! Redirecting to classroom...",
+      "imageAlt": "PromptPay QR code for payment"
     },
     "etax": {
       "checkboxLabel": "Request e-Tax invoice — issued automatically upon successful payment",
@@ -999,13 +1669,32 @@
       "payButton": "Pay {{amount}}",
       "processing": "Processing...",
       "guarantee": "30-day money-back guarantee if the course does not meet expectations",
-      "statementDescriptor": "Your card statement / banking app will show the payee as STRIPE PAYMENTS (THAILAND) LTD"
+      "statementDescriptor": "Your card statement / banking app will show the payee as STRIPE PAYMENTS (THAILAND) LTD",
+      "promoEmpty": "Please enter a promo code"
     },
     "error": {
       "orderNotFound": "Order not found",
       "orderMissing": "No order found. Please create an order from your cart.",
       "createPaymentFailed": "Failed to initiate payment. Please try again.",
       "retry": "Try again"
+    },
+    "success": {
+      "heading": "Payment completed successfully!",
+      "subheading": "Your course access has been activated, so you can start learning right away.",
+      "orderNo": "Order number",
+      "coursesHeading": "Courses in this order",
+      "startNow": "Start learning now",
+      "downloadReceipt": "Download receipt (PDF)",
+      "goToMyCourses": "Go to My Courses"
+    },
+    "steps": {
+      "selection": "Choose payment method",
+      "qr": "Scan QR code",
+      "done": "Complete"
+    },
+    "mobileBar": {
+      "total": "Total to pay",
+      "pay": "Pay now"
     }
   },
   "learn": {
@@ -1068,7 +1757,18 @@
       "correct": "Correct",
       "incorrect": "Incorrect",
       "explanation": "Explanation:",
-      "noQuiz": "No quiz available for this lesson"
+      "noQuiz": "No quiz available for this lesson",
+      "loading": "Loading quiz...",
+      "questionCount": "{{count}} question(s)",
+      "historyHeading": "Quiz history",
+      "attemptNumber": "Attempt {{number}}",
+      "statusPassed": "Passed",
+      "statusFailed": "Not passed",
+      "attemptsExhausted": "You have used all of the attempts allowed for this quiz.",
+      "loadFailed": "Couldn't load the quiz.",
+      "startFailed": "Couldn't start the quiz.",
+      "submitFailed": "Something went wrong while submitting your answers.",
+      "saveAnswersFailed": "Couldn't save your answers."
     },
     "assignment": {
       "heading": "Assignment & Task",
@@ -1089,7 +1789,16 @@
       "statusRejected": "Resubmission Requested (Rejected)",
       "score": "Score: {{score}} / 100",
       "feedback": "Instructor Feedback:",
-      "noAssignment": "No assignment available for this lesson"
+      "noAssignment": "No assignment available for this lesson",
+      "loading": "Loading assignment...",
+      "badge": "Assignment",
+      "fileLinkLabel": "File link:",
+      "noteShortLabel": "Note:",
+      "submittedAt": "Submitted: {{date}}",
+      "loadFailed": "Couldn't load the assignment.",
+      "storageKeyRequired": "Please provide a link or storage location for your work.",
+      "submitSuccess": "Your assignment has been submitted.",
+      "submitFailed": "Couldn't submit your assignment. Please try again."
     },
     "resources": {
       "heading": "Lesson Resources & Attachments",
@@ -1115,7 +1824,12 @@
       "upvoted": "Upvoted",
       "reply": "Reply",
       "delete": "Delete",
-      "report": "Report"
+      "report": "Report",
+      "askHeading": "Ask a question about this lesson",
+      "bodyPlaceholder": "Type your question or doubt here...",
+      "sending": "Sending...",
+      "authorInstructor": "Instructor",
+      "authorLearner": "Learner"
     },
     "controls": {
       "play": "Play",
@@ -1124,6 +1838,107 @@
       "unmute": "Unmute",
       "fullscreen": "Fullscreen",
       "speed": "Speed"
+    },
+    "player": {
+      "playVideo": "Play video",
+      "seekBar": "Video seek bar",
+      "pause": "Pause (Space/k)",
+      "play": "Play (Space/k)",
+      "rewind": "Rewind 10 seconds (j/←)",
+      "forward": "Forward 10 seconds (l/→)",
+      "mute": "Mute (m)",
+      "unmute": "Unmute (m)",
+      "volume": "Volume (↑/↓)",
+      "speed": "Playback speed",
+      "speedHeading": "Speed",
+      "quality": "Video quality settings",
+      "qualityHeading": "Video quality",
+      "qualityAuto": "Auto",
+      "captionsOn": "Enable captions (c)",
+      "captionsOff": "Disable captions (c)",
+      "captionsFallback": "Captions",
+      "pip": "Picture in picture",
+      "fullscreen": "Fullscreen (f)",
+      "exitFullscreen": "Exit fullscreen (f)",
+      "freePreviewBadge": "Free preview",
+      "buffering": "Loading video...",
+      "retry": "Try again",
+      "resumeTitle": "Resume where you left off?",
+      "resumeBody": "You stopped at {{time}}",
+      "resumeAction": "Resume",
+      "restartAction": "Start over",
+      "previewEndedTitle": "The free preview has ended",
+      "previewEndedBodyCourse": "Enjoying this lesson? Enroll in {{course}} to unlock every lesson, the course materials and exercises, and earn a certificate when you finish.",
+      "previewEndedBody": "Enroll in the full course to unlock every lesson, the course materials and exercises, and earn a certificate when you finish.",
+      "enrollNow": "Enroll now",
+      "watchPreviewAgain": "Watch the preview again"
+    },
+    "playerError": {
+      "generic": {
+        "title": "Something went wrong playing the video",
+        "message": "Please try again or refresh the page."
+      },
+      "drmExpired": {
+        "title": "Viewing access expired or invalid",
+        "message": "Your viewing session expired or the DRM licence could not be verified. Please refresh to request access again."
+      },
+      "drm": {
+        "title": "Video licence check failed (DRM)",
+        "message": "The video licence could not be verified. Check that your browser supports DRM, or try again."
+      },
+      "networkHttp": {
+        "title": "The video server is not responding",
+        "message": "The video server is temporarily unavailable (HTTP error). Please try again."
+      },
+      "network": {
+        "title": "Internet connection problem",
+        "message": "Could not reach the streaming server. Please check your internet connection."
+      },
+      "media": {
+        "title": "Video decoding error",
+        "message": "Your browser could not decode part of this video. Try another quality or refresh the page."
+      },
+      "manifest": {
+        "title": "Could not load the video structure",
+        "message": "The streaming manifest (HLS/DASH) could not be processed. Please try again."
+      },
+      "streaming": {
+        "title": "Video streaming interrupted",
+        "message": "The video stream stalled. Please press try again."
+      },
+      "nativeAborted": {
+        "title": "Video playback was cancelled",
+        "message": "Loading the video was cancelled by you or the browser."
+      },
+      "nativeNetwork": {
+        "title": "Network error",
+        "message": "Downloading the video failed because of a network problem."
+      },
+      "nativeDecode": {
+        "title": "Decoding failed",
+        "message": "The video file is damaged or cannot be decoded on this device."
+      },
+      "nativeUnsupported": {
+        "title": "This video format is not supported",
+        "message": "Your browser does not support this video encoding."
+      },
+      "fallback": {
+        "message": "The video could not be played. Please try again."
+      }
+    },
+    "page": {
+      "preparingPlayer": "Preparing the video player...",
+      "freePreviewHeading": "You're watching a free preview",
+      "freePreviewBody": "Enroll in this course to unlock every lesson and earn a certificate.",
+      "durationLabel": "Duration: {{duration}}",
+      "outcomesHeading": "What you'll gain"
+    },
+    "sidebar": {
+      "percentComplete": "{{percent}}% complete",
+      "episodesProgress": "{{done}} / {{total}} lesson(s)",
+      "sectionNumber": "Section {{number}}",
+      "lockedEpisodeTitle": "Enroll in this course to watch this lesson",
+      "freePreviewBadge": "Free preview"
     }
   },
   "myCourses": {
@@ -1144,7 +1959,8 @@
     "expiresOn": "Expires: {{date}}",
     "emptyHeading": "You haven't enrolled in any courses yet",
     "emptyDescription": "Explore our catalog to start learning high-impact tech skills today",
-    "browseCourses": "Explore Courses"
+    "browseCourses": "Explore Courses",
+    "completedBadge": "Completed"
   },
   "certificateVerify": {
     "pageTitle": "Verify Certificate | SIRI UpSkill",
@@ -1179,7 +1995,45 @@
   },
   "instructor": {
     "analytics": {
-      "neverActive": "Has not opened the course yet"
+      "neverActive": "Has not opened the course yet",
+      "pageTitle": "Learner analytics and statistics | Instructor Studio",
+      "pageDescription": "Analyze learner numbers, completion rates and lesson statistics",
+      "heading": "Learner Analytics and Statistics",
+      "subheading": "Track views, learner progress and completion rates for each lesson",
+      "allCourses": "All courses",
+      "range": {
+        "days7": "7 days",
+        "days30": "30 days",
+        "days90": "90 days"
+      },
+      "kpi": {
+        "views": "Video views (times)",
+        "viewsHint": "Based on all learners",
+        "watchMinutes": "Total watch time (minutes)",
+        "watchMinutesHint": "Across all time periods",
+        "completionRate": "Average completion rate (%)",
+        "completionRateHint": "Calculated from overall progress"
+      },
+      "retention": {
+        "heading": "Episode Retention Analysis",
+        "description": "Find where learners often stop watching, so you can improve the content or add review activities",
+        "empty": "No viewing data for this period yet",
+        "viewers": "{{count}} learner(s)",
+        "completed": "{{rate}}% completed"
+      },
+      "students": {
+        "heading": "Enrolled Students and Progress",
+        "subheading": "Track learners individually",
+        "exportCsv": "Export CSV",
+        "empty": "No enrolled learners yet",
+        "column": {
+          "student": "Learner",
+          "course": "Course",
+          "progress": "Progress",
+          "lastActive": "Last active"
+        },
+        "episodesProgress": "{{completed}}/{{total}} episodes"
+      }
     },
     "nav": {
       "menuTitle": "Instructor Studio menu",
@@ -1190,7 +2044,8 @@
       "earnings": "Earnings & revenue share",
       "toAdmin": "Admin mode",
       "toLearner": "Switch to learner view",
-      "createCourse": "Create a new course"
+      "createCourse": "Create a new course",
+      "modeBadge": "Instructor mode"
     },
     "builder": {
       "pageTitle": "Course Studio Builder | SIRI UpSkill",
@@ -1342,7 +2197,37 @@
         "pending": "Pending",
         "transferred": "Transferred",
         "failed": "Failed"
-      }
+      },
+      "taxCertificate": {
+        "open": "Withholding tax certificate",
+        "openFor": "View the withholding tax certificate for {{batch}}",
+        "unavailable": "Not available — this payout has not been transferred yet",
+        "title": "Withholding tax certificate (Form 50 Tawi)",
+        "subtitle": "Period {{period}} · Form {{form}}",
+        "issuedAt": "Issue date",
+        "payer": "Payer",
+        "payee": "Payee",
+        "gross": "Income paid (before tax)",
+        "withheld": "Tax withheld ({{percent}}%)",
+        "net": "Net amount transferred",
+        "loading": "Loading the certificate",
+        "errorHeading": "Could not open the certificate",
+        "errorIncomplete": "The certificate cannot be issued yet because your payout account or tax ID is incomplete. Save them in the payout account section above, then try again.",
+        "errorGeneric": "Something went wrong while loading the certificate. Please try again.",
+        "retry": "Try again",
+        "close": "Close"
+      },
+      "pageTitle": "Earnings and payouts | Instructor Studio",
+      "pageDescription": "Summary of your earnings, revenue share and payout history",
+      "heading": "Earnings and Payouts",
+      "cumulativeHeading": "Total cumulative earnings (Net)",
+      "cumulativeHint": "Already transferred to your account",
+      "nextPayoutHint": "Calculated in real time",
+      "historyHeading": "Payout History",
+      "colBatch": "Payout batch",
+      "colGross": "Total sales (Gross)",
+      "colStatus": "Status",
+      "colDocument": "Document"
     },
     "payoutAccount": {
       "heading": "Bank account for payouts",
@@ -1417,7 +2302,9 @@
     "onboarding": {
       "steps": {
         "terms": "Confirm terms",
-        "termsHeading": "Step 2: Revenue-share terms and agreement"
+        "termsHeading": "Step 2: Revenue-share terms and agreement",
+        "profile": "Instructor info",
+        "profileHeading": "Step 1: Instructor details and short bio"
       },
       "payoutAfterApprovalNote": "You don't need to enter a bank account to apply — once your application is approved, add your payout account on the \"Earnings\" page in Studio.",
       "setupPayoutLink": "Set up your payout account on the Earnings page",
@@ -1428,7 +2315,41 @@
       "rejectedDescription": "You can update your details below and submit a new application for the team to review.",
       "termsHeading": "Standard instructor revenue share: {{percent}}",
       "termsRevenueShare": "1. Instructors receive {{percent}} and the platform receives {{platformPercent}} of course sales, after payment fees are deducted.",
-      "termsWithholding": "2. Regular payouts are subject to {{withholdingPercent}} withholding tax under Thai law, and a Form 50 Tawi withholding certificate is issued at the end of each year."
+      "termsWithholding": "2. Regular payouts are subject to {{withholdingPercent}} withholding tax under Thai law, and a Form 50 Tawi withholding certificate is issued at the end of each year.",
+      "pageTitle": "Become an instructor | SIRI UpSkill Studio",
+      "pageDescription": "Start creating and publishing your online courses with SIRI UpSkill",
+      "heading": "Start teaching with SIRI UpSkill Studio",
+      "subheading": "Share your knowledge, skills and experience. Earn income and reach learners across the country.",
+      "errorHeading": "Something went wrong",
+      "approvedHeading": "You are now a SIRI UpSkill instructor",
+      "approvedDescription": "Your account has been approved. You can now create courses and manage your earnings in Studio.",
+      "approvedDashboardLink": "Go to the instructor dashboard",
+      "pendingHeading": "Your application is under review",
+      "pendingDescription": "The SIRI UpSkill team is reviewing your details and will email you the result within 1-2 business days.",
+      "pendingBackHome": "Back to the home page",
+      "profileDescription": "This information appears on your course detail pages and your instructor profile page.",
+      "form": {
+        "displayName": "Full name / teaching pen name",
+        "displayNamePlaceholder": "e.g. Dr. Anon Pattanakul",
+        "headline": "Position / headline",
+        "headlinePlaceholder": "e.g. Senior Cloud Architect & Tech Lead",
+        "bio": "Short bio, work experience or expertise",
+        "bioPlaceholder": "Tell us about your experience, your expertise and your teaching goals..."
+      },
+      "termsDescription": "Please review the terms for teaching on the SIRI UpSkill platform.",
+      "termsCopyright": "3. Courses must contain content whose copyright you own and must not infringe the intellectual property of others.",
+      "termsAgree": "I have read and accept the terms, the instructor conditions and the privacy policy of SIRI UpSkill.",
+      "actions": {
+        "back": "Back",
+        "next": "Next",
+        "submitting": "Submitting your application...",
+        "submit": "Submit instructor application"
+      },
+      "errors": {
+        "profileIncomplete": "Please fill in your instructor name and short bio.",
+        "termsNotAccepted": "Please accept the terms and the revenue-share agreement.",
+        "submitFailed": "Something went wrong while submitting your application. Please try again."
+      }
     },
     "dashboard": {
       "pageTitle": "Instructor dashboard | SIRI UpSkill Studio",
@@ -1488,6 +2409,29 @@
         "Rejected": "Rejected",
         "Archived": "Archived",
         "unknown": "Unknown status"
+      }
+    },
+    "announcements": {
+      "pageTitle": "Send announcements to learners | Instructor Studio",
+      "pageDescription": "Send announcements and email notifications to the learners in your courses",
+      "heading": "Send Announcements to Learners",
+      "subheading": "Share news, announce new lessons or schedule activities for the learners enrolled in your courses",
+      "form": {
+        "heading": "Write a new announcement",
+        "courseLabel": "Select a course *",
+        "noCourses": "You do not have any courses yet",
+        "titleLabel": "Announcement title *",
+        "titlePlaceholder": "e.g. Weekly content update / Live Q&A notice",
+        "messageLabel": "Announcement message *",
+        "messagePlaceholder": "Type the message you want to send to your learners here...",
+        "sendEmail": "Also send an email notification to every learner in this course",
+        "sent": "Announcement sent to your learners",
+        "sending": "Sending announcement...",
+        "send": "Send announcement now"
+      },
+      "history": {
+        "heading": "Past announcements",
+        "recipients": "{{count}} recipient(s)"
       }
     }
   },
@@ -2256,6 +3200,39 @@
       "tooLarge": "The file is larger than the server accepts. Make it smaller and upload it again.",
       "tooManyRequests": "Too many requests. Please wait a moment and try again.",
       "unavailable": "File storage is temporarily unavailable. Please try again."
+    }
+  },
+  "cart": {
+    "pageTitle": "Shopping Cart | SIRI UpSkill",
+    "pageDescription": "Review the courses in your cart and continue to checkout.",
+    "heading": "Shopping Cart",
+    "itemCountText": "You have {{count}} course(s) in your cart.",
+    "checkoutErrorHeading": "We couldn't place your order",
+    "checkoutFailed": "Something went wrong while creating your order. Please try again.",
+    "empty": {
+      "heading": "Your cart is empty",
+      "description": "Find courses you're interested in to build new skills, then come back and check out any time."
+    },
+    "item": {
+      "instructor": "Instructor: {{name}}",
+      "removeTitle": "Remove from cart"
+    },
+    "promo": {
+      "label": "Promo code",
+      "remove": "Remove",
+      "placeholder": "e.g. SIRI2026",
+      "applying": "Applying...",
+      "invalid": "This promo code is invalid or can't be used.",
+      "validateFailed": "Something went wrong while checking the promo code."
+    },
+    "summary": {
+      "subtotal": "Courses subtotal",
+      "creating": "Creating your order...",
+      "proceed": "Proceed to checkout"
+    },
+    "guarantee": {
+      "secure": "Secure payment guaranteed via Stripe PromptPay",
+      "receipt": "Get your e-Tax invoice and receipt by email right away"
     }
   }
 }

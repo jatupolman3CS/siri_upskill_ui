@@ -70,8 +70,8 @@ export class CartPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'ตะกร้าสินค้า | SIRI UpSkill',
-      description: 'ตรวจสอบรายการคอร์สเรียนในตะกร้าและดำเนินการสั่งซื้อ',
+      title: this.translation.t('cart.pageTitle'),
+      description: this.translation.t('cart.pageDescription'),
       path: '/cart',
       robots: 'noindex',
     });
@@ -128,7 +128,7 @@ export class CartPageComponent implements OnInit {
           this.checkoutError.set(
             err?.message
               ? this.translation.t(err.message)
-              : 'เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ กรุณาลองใหม่อีกครั้ง'
+              : this.translation.t('cart.checkoutFailed')
           );
         },
       });

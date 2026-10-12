@@ -15,6 +15,7 @@ import { WishlistCourseItemResponse } from '../data/course-api.models';
 import { WishlistStore } from '../data/wishlist.store';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 
@@ -37,13 +38,14 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
 })
 export class WishlistPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
   protected readonly wishlistStore = inject(WishlistStore);
   protected readonly cartStore = inject(CartStore);
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'สิ่งที่อยากได้ | SIRI UpSkill',
-      description: 'รวมรายการคอร์สเรียนที่คุณบันทึกไว้ในสิ่งที่อยากได้',
+      title: `${this.translation.t('wishlist.title')} | ${this.translation.t('common.appName')}`,
+      description: this.translation.t('wishlist.metaDescription'),
       path: '/wishlist',
       robots: 'noindex',
     });

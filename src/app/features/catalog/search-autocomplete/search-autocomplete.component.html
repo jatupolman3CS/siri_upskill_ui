@@ -12,7 +12,7 @@
       (ngModelChange)="onInput($event)"
       (focus)="onFocus()"
       (keydown)="onKeyDown($event)"
-      [placeholder]="placeholder()"
+      [placeholder]="resolvedPlaceholder()"
       class="w-full rounded-2xl glass-card py-2.5 pl-10 pr-10 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] transition focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] shadow-sm"
       autocomplete="off"
     />
@@ -27,7 +27,7 @@
           (click)="onClear()"
           [attr.aria-label]="'a11y.public.clearSearch' | translate"
           class="hit-44 flex h-5 w-5 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
-          title="ล้างคำค้นหา"
+          [attr.title]="'a11y.public.clearSearch' | translate"
         >
           <ng-icon name="phosphorX" class="text-xs" />
         </button>
@@ -44,7 +44,7 @@
       @if (query().length >= 2 && suggestions().length > 0) {
         <div class="p-2 space-y-1">
           <p class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-            คอร์สเรียนที่ตรงกัน
+            {{ 'catalog.autocomplete.matchingCourses' | translate }}
           </p>
 
           @for (course of suggestions(); track course.id; let idx = $index) {
@@ -79,7 +79,7 @@
             (click)="onSubmit()"
             class="hit-44 w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-surface-muted)] py-2 text-xs font-bold text-[var(--color-primary-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition"
           >
-            <span>ดูผลการค้นหาทั้งหมดสำหรับ "{{ query() }}"</span>
+            <span>{{ 'catalog.autocomplete.viewAllResults' | translate: { query: query() } }}</span>
             <ng-icon name="phosphorArrowRight" />
           </button>
         </div>
@@ -90,14 +90,14 @@
         <div class="p-2 space-y-1">
           <div class="flex items-center justify-between px-3 py-1.5">
             <span class="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-              การค้นหาล่าสุด
+              {{ 'catalog.autocomplete.recentSearches' | translate }}
             </span>
             <button
               type="button"
               (click)="clearAllRecent($event)"
               class="inline-flex min-h-11 items-center px-1 text-[10px] font-semibold text-[var(--hue-red-fg)] hover:underline"
             >
-              ล้างทั้งหมด
+              {{ 'catalog.autocomplete.clearAll' | translate }}
             </button>
           </div>
 
@@ -120,7 +120,7 @@
                 (click)="removeRecent(recent, $event)"
                 [attr.aria-label]="'a11y.public.removeRecentSearch' | translate: { name: recent }"
                 class="hit-44 flex h-5 w-5 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--hue-red-fg)] transition"
-                title="ลบ"
+                [attr.title]="'catalog.autocomplete.remove' | translate"
               >
                 <ng-icon name="phosphorX" class="text-xs" />
               </button>

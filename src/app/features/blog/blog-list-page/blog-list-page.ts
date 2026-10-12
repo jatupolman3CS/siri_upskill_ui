@@ -14,6 +14,7 @@ import {
 import { CmsApiService } from '../../cms/data/cms-api.service';
 import { ReadingMinutesPipe } from '../reading-time.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
@@ -45,6 +46,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
 export class BlogListPage implements OnInit {
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly postsResource = rxResource({
     stream: () => this.cmsApi.getPublishedPosts(),
@@ -58,8 +60,8 @@ export class BlogListPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'บทความ & ข่าวสาร | SIRI UpSkill Blog',
-      description: 'รวมบทความ เทคนิค และข่าวสารความรู้ด้านเทคโนโลยีจากทีมงาน SIRI UpSkill',
+      title: this.translation.t('blog.metaTitle'),
+      description: this.translation.t('blog.metaDescription'),
       path: '/blog',
     });
   }

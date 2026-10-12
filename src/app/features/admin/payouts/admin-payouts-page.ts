@@ -37,13 +37,15 @@ import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-poli
 import { payoutBatchStatusBadge, revenueSplitStatusBadge } from '../../payout/ui/payout-status-badges';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Modal } from '../../../shared/modal/modal';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-payouts-page',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Skeleton, Spinner, PayoutPolicyText],
+  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Modal, Skeleton, Spinner, PayoutPolicyText],
   templateUrl: './admin-payouts-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -74,6 +76,7 @@ export class AdminPayoutsPage implements OnInit {
   private readonly payoutApi = inject(PayoutApiService);
   private readonly refundsApi = inject(AdminRefundsApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly activeTab = signal<'batches' | 'splits' | 'refunds'>('batches');
 
@@ -115,8 +118,8 @@ export class AdminPayoutsPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'จัดการรอบการจ่ายเงินและคืนเงิน | SIRI UpSkill Admin',
-      description: 'ระบบจัดการรอบการจ่ายเงิน ส่วนแบ่งรายได้ผู้สอน และคิวคำขอคืนเงิน',
+      title: this.translation.t('admin.payouts.seo.title'),
+      description: this.translation.t('admin.payouts.seo.description'),
       path: '/admin/payouts',
       robots: 'noindex',
     });
@@ -194,7 +197,7 @@ export class AdminPayoutsPage implements OnInit {
   protected submitCreateBatch(): void {
     const periodKey = this.newPeriodKey().trim();
     if (!periodKey) {
-      this.showMessage('error', 'กรุณาระบุรหัสงวดประจำเดือน (เช่น 2026-08)');
+      this.showMessage('error', this.translation.t('admin.payouts.errors.periodKeyRequired'));
       return;
     }
 
@@ -203,12 +206,12 @@ export class AdminPayoutsPage implements OnInit {
       next: () => {
         this.isSubmittingBatch.set(false);
         this.closeCreateBatchModal();
-        this.showMessage('success', `สร้างรอบการจ่ายเงินงวด ${periodKey} เรียบร้อยแล้ว`);
+        this.showMessage('success', this.translation.t('admin.payouts.messages.batchCreated', { periodKey }));
         this.loadBatches();
       },
       error: (err) => {
         this.isSubmittingBatch.set(false);
-        const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการสร้างรอบจ่ายเงิน';
+        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.createBatch');
         this.showMessage('error', errorDetail);
       },
     });
@@ -218,11 +221,11 @@ export class AdminPayoutsPage implements OnInit {
   protected executeBatch(batch: PayoutBatchItem): void {
     this.payoutApi.executePayoutBatch(batch.id).subscribe({
       next: () => {
-        this.showMessage('success', `ประมวลผลการจ่ายเงินงวด ${batch.periodKey} สำเร็จ`);
+        this.showMessage('success', this.translation.t('admin.payouts.messages.batchExecuted', { periodKey: batch.periodKey }));
         this.loadBatches();
       },
       error: (err) => {
-        const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการประมวลผลการจ่ายเงิน';
+        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.executeBatch');
         this.showMessage('error', errorDetail);
       },
     });
@@ -232,10 +235,13 @@ export class AdminPayoutsPage implements OnInit {
   protected exportBatch(batch: PayoutBatchItem): void {
     this.payoutApi.exportPayoutBatch(batch.id).subscribe({
       next: (res) => {
-        this.showMessage('success', `ส่งออกข้อมูลโอนเงินงวด ${batch.periodKey} จำนวน ${res.totalItems} รายการเรียบร้อยแล้ว`);
+        this.showMessage(
+          'success',
+          this.translation.t('admin.payouts.messages.batchExported', { periodKey: batch.periodKey, count: res.totalItems }),
+        );
       },
       error: () => {
-        this.showMessage('error', 'เกิดข้อผิดพลาดในการส่งออกไฟล์โอนเงิน');
+        this.showMessage('error', this.translation.t('admin.payouts.errors.exportBatch'));
       },
     });
   }
@@ -261,12 +267,15 @@ export class AdminPayoutsPage implements OnInit {
         next: () => {
           this.isSubmittingApprove.set(false);
           this.closeApproveRefundModal();
-          this.showMessage('success', `อนุมัติคำขอคืนเงินจำนวน ฿${refund.amount.toLocaleString()} เรียบร้อยแล้ว`);
+          this.showMessage(
+            'success',
+            this.translation.t('admin.payouts.messages.refundApproved', { amount: refund.amount.toLocaleString() }),
+          );
           this.loadRefunds();
         },
         error: (err) => {
           this.isSubmittingApprove.set(false);
-          const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการอนุมัติคืนเงิน';
+          const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.approveRefund');
           this.showMessage('error', errorDetail);
         },
       });
@@ -288,7 +297,7 @@ export class AdminPayoutsPage implements OnInit {
 
     const reason = this.rejectReason().trim();
     if (!reason) {
-      this.showMessage('error', 'กรุณาระบุเหตุผลในการปฏิเสธคำขอคืนเงิน');
+      this.showMessage('error', this.translation.t('admin.payouts.errors.rejectReasonRequired'));
       return;
     }
 
@@ -297,12 +306,12 @@ export class AdminPayoutsPage implements OnInit {
       next: () => {
         this.isSubmittingReject.set(false);
         this.closeRejectRefundModal();
-        this.showMessage('success', 'ปฏิเสธคำขอคืนเงินเรียบร้อยแล้ว');
+        this.showMessage('success', this.translation.t('admin.payouts.messages.refundRejected'));
         this.loadRefunds();
       },
       error: (err) => {
         this.isSubmittingReject.set(false);
-        const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการปฏิเสธคืนเงิน';
+        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.rejectRefund');
         this.showMessage('error', errorDetail);
       },
     });

@@ -2,13 +2,13 @@
   @if (state() === 'loading') {
     <div class="loading-box">
       <div class="spinner"></div>
-      <p>กำลังโหลดการบ้าน...</p>
+      <p>{{ 'learn.assignment.loading' | translate }}</p>
     </div>
   }
 
   @if (state() === 'no-assignment') {
     <div class="empty-box">
-      <span class="icon">📁</span>
+      <ng-icon name="phosphorFolderOpen" class="icon" aria-hidden="true" />
       <p>{{ 'learn.assignment.noAssignment' | translate }}</p>
     </div>
   }
@@ -16,19 +16,19 @@
   @if (state() === 'error') {
     <div class="error-box">
       <p>{{ errorMessage() }}</p>
-      <button type="button" class="btn btn-secondary" (click)="loadAssignment()">ลองใหม่</button>
+      <button type="button" class="btn btn-secondary" (click)="loadAssignment()">{{ 'catalog.retryButton' | translate }}</button>
     </div>
   }
 
   @if (state() === 'ready' && assignment(); as a) {
     <div class="assignment-card">
-      <div class="assignment-badge">Assignment</div>
+      <div class="assignment-badge">{{ 'learn.assignment.badge' | translate }}</div>
       <h3>{{ a.title }}</h3>
 
       <div class="assignment-meta">
-        <span>⏱️ {{ 'learn.assignment.dueDays' | translate: { days: a.dueDays } }}</span>
-        <span>📦 {{ 'learn.assignment.maxFileSize' | translate: { size: a.maxFileSizeMb } }}</span>
-        <span>📄 {{ 'learn.assignment.allowedExtensions' | translate: { exts: a.allowedExtensions } }}</span>
+        <span class="inline-flex items-center gap-1.5"><ng-icon name="phosphorTimer" aria-hidden="true" /> {{ 'learn.assignment.dueDays' | translate: { days: a.dueDays } }}</span>
+        <span class="inline-flex items-center gap-1.5"><ng-icon name="phosphorPackage" aria-hidden="true" /> {{ 'learn.assignment.maxFileSize' | translate: { size: a.maxFileSizeMb } }}</span>
+        <span class="inline-flex items-center gap-1.5"><ng-icon name="phosphorFile" aria-hidden="true" /> {{ 'learn.assignment.allowedExtensions' | translate: { exts: a.allowedExtensions } }}</span>
       </div>
 
       <div class="instructions-section">
@@ -52,11 +52,11 @@
           </div>
 
           <div class="sub-detail">
-            <p><strong>ลิงก์ไฟล์:</strong> {{ sub.storageKey }}</p>
+            <p><strong>{{ 'learn.assignment.fileLinkLabel' | translate }}</strong> {{ sub.storageKey }}</p>
             @if (sub.note) {
-              <p><strong>บันทึก:</strong> {{ sub.note }}</p>
+              <p><strong>{{ 'learn.assignment.noteShortLabel' | translate }}</strong> {{ sub.note }}</p>
             }
-            <p class="sub-date">ส่งเมื่อ: {{ sub.submittedAtUtc | date:'short' }}</p>
+            <p class="sub-date">{{ 'learn.assignment.submittedAt' | translate: { date: ((sub.submittedAtUtc | date:'short') ?? '') } }}</p>
           </div>
 
           @if (sub.status === 'Graded' || sub.status === 2) {

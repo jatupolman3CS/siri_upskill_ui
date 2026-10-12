@@ -34,13 +34,15 @@ import {
 import { AdminMarketingApiService } from './data/admin-marketing-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Modal } from '../../../shared/modal/modal';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-marketing-page',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Skeleton, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Modal, Skeleton, Spinner],
   templateUrl: './admin-marketing-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -62,6 +64,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 })
 export class AdminMarketingPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
   private readonly marketingApi = inject(AdminMarketingApiService);
 
   protected readonly activeTab = signal<'promos' | 'flashSales' | 'bundles'>('promos');
@@ -110,8 +113,8 @@ export class AdminMarketingPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'การตลาดและโปรโมชัน | SIRI UpSkill Admin',
-      description: 'ระบบจัดการโค้ดส่วนลด แฟลชเซล และชุดคอร์สแพ็กเกจ',
+      title: this.translation.t('admin.marketing.seo.title'),
+      description: this.translation.t('admin.marketing.seo.description'),
       path: '/admin/marketing',
       robots: 'noindex',
     });
@@ -187,7 +190,7 @@ export class AdminMarketingPage implements OnInit {
   protected submitCreatePromo(): void {
     const code = this.promoCode().trim().toUpperCase();
     if (!code) {
-      this.showMessage('error', 'กรุณาระบุรหัสโค้ดส่วนลด');
+      this.showMessage('error', this.translation.t('admin.marketing.toast.promoCodeRequired'));
       return;
     }
 
@@ -212,13 +215,13 @@ export class AdminMarketingPage implements OnInit {
       next: () => {
         this.isSubmittingPromo.set(false);
         this.closePromoModal();
-        this.showMessage('success', `สร้างโค้ดส่วนลด "${code}" สำเร็จแล้ว`);
+        this.showMessage('success', this.translation.t('admin.marketing.toast.promoCreated', { code }));
         this.promoCode.set('');
         this.loadPromos();
       },
       error: (err) => {
         this.isSubmittingPromo.set(false);
-        const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการสร้างโค้ดส่วนลด';
+        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.marketing.toast.promoCreateFailed');
         this.showMessage('error', errorDetail);
       },
     });
@@ -237,7 +240,7 @@ export class AdminMarketingPage implements OnInit {
     const title = this.flashSaleTitle().trim();
     const courseId = this.flashSaleCourseId().trim();
     if (!title || !courseId) {
-      this.showMessage('error', 'กรุณากรอกชื่อแคมเปญและ Course ID');
+      this.showMessage('error', this.translation.t('admin.marketing.toast.flashSaleRequired'));
       return;
     }
 
@@ -261,14 +264,14 @@ export class AdminMarketingPage implements OnInit {
       next: () => {
         this.isSubmittingFlashSale.set(false);
         this.closeFlashSaleModal();
-        this.showMessage('success', `สร้าง Flash Sale "${title}" สำเร็จแล้ว`);
+        this.showMessage('success', this.translation.t('admin.marketing.toast.flashSaleCreated', { title }));
         this.flashSaleTitle.set('');
         this.flashSaleCourseId.set('');
         this.loadFlashSales();
       },
       error: (err) => {
         this.isSubmittingFlashSale.set(false);
-        const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการสร้าง Flash Sale';
+        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.marketing.toast.flashSaleCreateFailed');
         this.showMessage('error', errorDetail);
       },
     });
@@ -294,7 +297,7 @@ export class AdminMarketingPage implements OnInit {
     const courseIds = rawCourseIds ? rawCourseIds.split('\n').map((s) => s.trim()).filter((s) => s.length > 0) : [];
 
     if (!title || !slug || courseIds.length === 0) {
-      this.showMessage('error', 'กรุณากรอกชื่อ Slug และระบุ Course ID อย่างน้อย 1 คอร์ส');
+      this.showMessage('error', this.translation.t('admin.marketing.toast.bundleRequired'));
       return;
     }
 
@@ -311,7 +314,7 @@ export class AdminMarketingPage implements OnInit {
       next: () => {
         this.isSubmittingBundle.set(false);
         this.closeBundleModal();
-        this.showMessage('success', `สร้างแพ็กเกจคอร์ส "${title}" สำเร็จแล้ว`);
+        this.showMessage('success', this.translation.t('admin.marketing.toast.bundleCreated', { title }));
         this.bundleTitle.set('');
         this.bundleSlug.set('');
         this.bundleDescription.set('');
@@ -320,7 +323,7 @@ export class AdminMarketingPage implements OnInit {
       },
       error: (err) => {
         this.isSubmittingBundle.set(false);
-        const errorDetail = err?.error?.detail || err?.error?.title || 'เกิดข้อผิดพลาดในการสร้าง Bundle';
+        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.marketing.toast.bundleCreateFailed');
         this.showMessage('error', errorDetail);
       },
     });

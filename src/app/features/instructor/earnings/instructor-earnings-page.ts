@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -18,10 +18,12 @@ import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-poli
 import { payoutBatchItemStatusBadge } from '../../payout/ui/payout-status-badges';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { PayoutAccountCard } from './payout-account-card/payout-account-card';
+import { TaxCertificateDialog } from './tax-certificate-dialog/tax-certificate-dialog';
 
 /**
  * `/instructor/earnings` — a money screen (cumulative/latest/estimated payout amounts and the payout history), so it
@@ -32,7 +34,7 @@ import { PayoutAccountCard } from './payout-account-card/payout-account-card';
  */
 @Component({
   selector: 'app-instructor-earnings-page',
-  imports: [CommonModule, NgIcon, CurrencyThbPipe, TranslatePipe, EmptyState, Skeleton, PayoutPolicyText, PayoutAccountCard],
+  imports: [CommonModule, NgIcon, CurrencyThbPipe, TranslatePipe, EmptyState, Skeleton, PayoutPolicyText, PayoutAccountCard, TaxCertificateDialog],
   templateUrl: './instructor-earnings-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -61,6 +63,7 @@ import { PayoutAccountCard } from './payout-account-card/payout-account-card';
 export class InstructorEarningsPage implements OnInit {
   private readonly payoutApi = inject(PayoutApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly earningsResource = rxResource({
     stream: () => this.payoutApi.getInstructorEarningsSummary(),
@@ -79,10 +82,13 @@ export class InstructorEarningsPage implements OnInit {
    *  (`Pending` / `Transferred` / `Failed`); an unexpected value shows its raw text on a neutral badge. */
   protected readonly payoutStatusBadge = payoutBatchItemStatusBadge;
 
+  /** `payoutId` of the history row whose 50 ทวิ certificate dialog is open, `null` when closed. */
+  protected readonly taxCertificateItemId = signal<string | null>(null);
+
   ngOnInit(): void {
     this.seoService.set({
-      title: 'รายได้และรอบการจ่ายเงิน | Instructor Studio',
-      description: 'สรุปรายได้ ส่วนแบ่งรายได้ และประวัติการรับเงิน',
+      title: this.translation.t('instructor.earnings.pageTitle'),
+      description: this.translation.t('instructor.earnings.pageDescription'),
       path: '/instructor/earnings',
       robots: 'noindex',
     });

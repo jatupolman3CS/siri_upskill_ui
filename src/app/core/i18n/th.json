@@ -27,7 +27,9 @@
       },
       "posts": {
         "delete": "ลบบทความ"
-      }
+      },
+      "menuActiveToggle": "แสดงเมนู {{name}} บนเว็บไซต์",
+      "paymentOpsStatusFilter": "กรองคิวตรวจสอบตามสถานะ"
     },
     "learner": {
       "removeFromCart": "ลบ {{name}} ออกจากตะกร้า",
@@ -41,6 +43,14 @@
     "studio": {
       "removeOutcome": "ลบสิ่งที่จะได้เรียนรู้ข้อที่ {{index}}",
       "removeRequirement": "ลบสิ่งที่ต้องมีก่อนเรียนข้อที่ {{index}}"
+    },
+    "progress": {
+      "course": "ความคืบหน้าในคอร์ส",
+      "courseNamed": "ความคืบหน้า: {{name}}",
+      "completionRate": "อัตราการเรียนจบ: {{name}}"
+    },
+    "rating": {
+      "distributionRow": "{{stars}} ดาว: {{count}} รีวิว ({{percent}}%)"
     }
   },
   "studio": {
@@ -69,7 +79,8 @@
       "liveStatus": "สถานะระบบสอนสด (Live)",
       "toInstructor": "โหมดผู้สอน (Instructor)",
       "toLearner": "มุมมองผู้เรียน",
-      "toHome": "ไปยังหน้าแรก"
+      "toHome": "ไปยังหน้าแรก",
+      "roleBadge": "ผู้ดูแลระบบ (Admin)"
     },
     "categories": {
       "pageTitle": "จัดการหมวดหมู่คอร์ส",
@@ -421,7 +432,14 @@
       "placeholderNotes": "เช่น ติดต่อกลับทางอีเมลแล้ว...",
       "btnCancel": "ยกเลิก",
       "btnConfirm": "ยืนยันการจัดการ",
-      "saving": "กำลังบันทึก..."
+      "saving": "กำลังบันทึก...",
+      "pageTitle": "จัดการข้อความติดต่อ (Contact Messages) | Admin",
+      "pageDescription": "จัดการและตอบกลับข้อความสอบถามจากผู้ใช้ SiriUpSkill",
+      "toast": {
+        "loadFailed": "ไม่สามารถโหลดข้อความติดต่อได้",
+        "resolved": "ทำเครื่องหมายว่าจัดการข้อความเรียบร้อยแล้ว",
+        "updateFailed": "เกิดข้อผิดพลาดในการอัปเดตสถานะ"
+      }
     },
     "menus": {
       "title": "จัดการเมนูนำทาง (Navigation Menus)",
@@ -449,10 +467,80 @@
       "lblActive": "เปิดใช้งาน",
       "btnCancel": "ยกเลิก",
       "btnSave": "บันทึกข้อมูล",
-      "saving": "กำลังบันทึก..."
+      "saving": "กำลังบันทึก...",
+      "seo": {
+        "title": "จัดการเมนูนำทาง | SIRI UpSkill Admin",
+        "description": "ระบบจัดการโครงสร้างเมนูหลักและเมนูย่อยของเว็บไซต์"
+      },
+      "toast": {
+        "updated": "อัปเดตเมนู \"{{label}}\" สำเร็จ",
+        "saveFailed": "เกิดข้อผิดพลาดในการบันทึกเมนู",
+        "created": "เพิ่มเมนู \"{{label}}\" เรียบร้อยแล้ว",
+        "createFailed": "เกิดข้อผิดพลาดในการสร้างเมนู",
+        "deleted": "ลบเมนู \"{{label}}\" เรียบร้อยแล้ว",
+        "deleteFailed": "ไม่สามารถลบเมนูได้ (อาจมีเมนูย่อยผูกอยู่)"
+      },
+      "confirmDelete": "คุณต้องการลบเมนู \"{{label}}\" ใช่หรือไม่?"
     },
     "dashboard": {
-      "courseTitleUnavailable": "ไม่พบชื่อคอร์ส"
+      "courseTitleUnavailable": "ไม่พบชื่อคอร์ส",
+      "title": "ศูนย์ควบคุมระบบ (Admin Control Center)",
+      "subtitle": "ภาพรวมสถิติแพลตฟอร์ม จัดการคอร์ส ผู้ใช้งาน การเงิน และเนื้อหา",
+      "updating": "กำลังอัปเดตข้อมูล...",
+      "errorTitle": "ไม่สามารถดึงข้อมูลสรุปแดชบอร์ดได้",
+      "errorDescription": "กรุณาตรวจสอบการเชื่อมต่อ API หรือลองใหม่อีกครั้ง",
+      "retryButton": "ลองใหม่อีกครั้ง",
+      "stats": {
+        "todaySales": "ยอดขายวันนี้ (บาท)",
+        "todaySalesNote": "คำนวณสดจากระบบคำสั่งซื้อ",
+        "totalLearners": "ผู้เรียนทั้งหมด (คน)",
+        "newLearnersToday": "+{{count}} สมัครใหม่วันนี้",
+        "pendingCourses": "คอร์สรออนุมัติ (คอร์ส)",
+        "needsReview": "ต้องตรวจสอบ",
+        "goToReviewQueue": "เข้าสู่คิวตรวจสอบคอร์ส",
+        "pendingRefunds": "คำขอคืนเงินรออนุมัติ (รายการ)",
+        "pending": "รอดำเนินการ",
+        "goToRefunds": "ไปยังหน้าคืนเงิน"
+      },
+      "topCourses": {
+        "heading": "คอร์สขายดี 30 วันล่าสุด (Top Performing Courses)",
+        "description": "ข้อมูล Rollup สถิติยอดขาย จำนวนผู้เรียน และยอดการดูวิดีโอ",
+        "empty": "ยังไม่มีข้อมูลสถิติคอร์สขายดีในรอบ 30 วันที่ผ่านมา",
+        "courseName": "ชื่อคอร์ส",
+        "totalSales": "ยอดขายรวม",
+        "enrollments": "ผู้ลงเรียน",
+        "views": "ยอดเข้าชม (วิว)",
+        "learnerCount": "{{count}} คน"
+      },
+      "hub": {
+        "enter": "เข้าสู่ระบบจัดการ",
+        "moderation": {
+          "title": "อนุมัติคอร์ส (Course Moderation)",
+          "description": "ตรวจสอบเนื้อหาคอร์สใหม่ที่ผู้สอนส่งเข้ามา พิจารณาอนุมัติหรือส่งกลับแก้ไข"
+        },
+        "users": {
+          "title": "ผู้ใช้งานและสิทธิ์ (Users & Audit)",
+          "description": "ค้นหาผู้ใช้ กำหนดสิทธิ์บทบาท ระงับการใช้งาน และตรวจสอบ Audit Logs"
+        },
+        "marketing": {
+          "title": "การตลาด & โปรโมชัน (Marketing)",
+          "description": "สร้างโค้ดส่วนลด จัดแคมเปญ Flash Sale และจัดชุดแพ็กเกจคอร์ส Bundle"
+        },
+        "banners": {
+          "title": "จัดการแบนเนอร์หน้าแรก (Banners)",
+          "description": "เพิ่ม ลบ แก้ไขลำดับภาพแบนเนอร์โปรโมชั่นบนหน้าแรกของแพลตฟอร์ม"
+        },
+        "posts": {
+          "title": "บทความ & ข่าวสาร (CMS Posts)",
+          "description": "เขียนบทความ แนะนำเทคนิคการเรียน และประชาสัมพันธ์ข่าวสาร"
+        },
+        "finance": {
+          "title": "รอบจ่ายเงิน & คืนเงิน (Finance)",
+          "description": "สร้างรอบจ่ายเงินโอนผู้สอน ส่งออกไฟล์ธนาคาร และอนุมัติคำขอคืนเงิน"
+        }
+      },
+      "seoTitle": "แดชบอร์ดผู้ดูแลระบบ | SIRI UpSkill Admin",
+      "seoDescription": "ภาพรวมระบบ จัดการแบนเนอร์ ข่าวสาร และรอบจ่ายเงิน"
     },
     "moderation": {
       "title": "คิวอนุมัติคอร์สเรียน (Course Moderation Queue)",
@@ -475,7 +563,14 @@
       "rejectReasonPlaceholder": "เช่น กรุณาปรับปรุงคุณภาพเสียงในบทที่ 3, เพิ่มเอกสารประกอบการเรียนในบทที่ 5...",
       "btnCancel": "ยกเลิก",
       "btnConfirmReject": "ยืนยันการส่งกลับแก้ไข",
-      "submitting": "กำลังส่งข้อมูล..."
+      "submitting": "กำลังส่งข้อมูล...",
+      "seoTitle": "คิวอนุมัติคอร์สเรียน | SIRI UpSkill Admin",
+      "seoDescription": "ระบบตรวจสอบและอนุมัติคอร์สเรียนใหม่ก่อนเผยแพร่",
+      "approveSuccess": "อนุมัติและเผยแพร่คอร์ส \"{{title}}\" เรียบร้อยแล้ว",
+      "approveError": "เกิดข้อผิดพลาดในการอนุมัติคอร์ส",
+      "rejectReasonRequired": "กรุณาระบุเหตุผลในการส่งกลับแก้ไข",
+      "rejectSuccess": "ส่งกลับคอร์ส \"{{title}}\" เพื่อแก้ไขเรียบร้อยแล้ว",
+      "rejectError": "เกิดข้อผิดพลาดในการส่งกลับคอร์ส"
     },
     "payouts": {
       "subtitle": "ประมวลผลส่วนแบ่งรายได้ผู้สอน (ส่วนแบ่งมาตรฐาน ผู้สอน {{percent}} / แพลตฟอร์ม {{platformPercent}} โดยหักค่าธรรมเนียมการชำระเงินก่อนแบ่ง) และอนุมัติคำขอคืนเงิน",
@@ -491,6 +586,476 @@
         "payable": "พร้อมโอน (อยู่ในรอบจ่ายเงิน)",
         "paid": "โอนแล้ว",
         "reversed": "ย้อนรายการ"
+      },
+      "title": "รอบจ่ายเงิน & คิวคำขอคืนเงิน (Finance & Payouts)",
+      "createBatchButton": "เปิดรอบจ่ายเงินใหม่ (Create Batch)",
+      "tabs": {
+        "batches": "รอบการจ่ายเงิน (Payout Batches)",
+        "splits": "ส่วนแบ่งรายได้ (Revenue Splits)",
+        "refunds": "คำขอคืนเงินรออนุมัติ (Pending Refunds)"
+      },
+      "batches": {
+        "empty": "ยังไม่มีรอบการจ่ายเงินในระบบ",
+        "createFirst": "+ เปิดรอบจ่ายเงินงวดแรก",
+        "table": {
+          "period": "งวดประจำเดือน (Period)",
+          "totalAmount": "ยอดเงินรวมสุทธิ",
+          "instructors": "จำนวนผู้สอน",
+          "createdAt": "สร้างเมื่อ",
+          "status": "สถานะ",
+          "actions": "การดำเนินการ"
+        },
+        "instructorCount": "{{count}} คน",
+        "exportTitle": "ส่งออกไฟล์โอนเงินธนาคาร",
+        "export": "ส่งออกไฟล์",
+        "execute": "ยืนยันจ่ายเงิน"
+      },
+      "splits": {
+        "searchPlaceholder": "ค้นหา Instructor ID...",
+        "searchButton": "ค้นหา",
+        "statusLabel": "สถานะ:",
+        "empty": {
+          "title": "ไม่พบข้อมูลส่วนแบ่งรายได้",
+          "description": "ยังไม่มีรายการส่วนแบ่งรายได้ตามเงื่อนไขการค้นหาที่ระบุ"
+        },
+        "table": {
+          "date": "วันที่ทำรายการ",
+          "instructor": "ผู้สอน (Instructor ID)",
+          "gross": "ยอดรวม (Gross)",
+          "gatewayFee": "ค่าธรรมเนียม Gateway",
+          "platformFee": "ค่าธรรมเนียม Platform",
+          "instructorShare": "ส่วนแบ่งผู้สอน (Instructor)",
+          "status": "สถานะ"
+        }
+      },
+      "refunds": {
+        "empty": {
+          "title": "ไม่มีคำขอคืนเงินที่ค้างอยู่",
+          "description": "รายการคำขอคืนเงินทั้งหมดได้รับการพิจารณาเรียบร้อยแล้ว"
+        },
+        "table": {
+          "requestedAt": "วันที่ยื่นขอ",
+          "paymentId": "Payment ID",
+          "amount": "ยอดเงินขอคืน",
+          "reason": "เหตุผลของผู้ซื้อ",
+          "status": "สถานะ",
+          "decision": "การพิจารณา"
+        },
+        "statusPending": "รออนุมัติ",
+        "approve": "อนุมัติคืนเงิน",
+        "reject": "ปฏิเสธ"
+      },
+      "createModal": {
+        "title": "เปิดรอบการจ่ายเงินใหม่ (Create Batch)",
+        "periodKeyLabel": "รหัสงวดประจำเดือน (Period Key)*",
+        "periodKeyPlaceholder": "YYYY-MM เช่น 2026-08",
+        "submitting": "กำลังสร้างรอบ...",
+        "submit": "เปิดรอบจ่ายเงิน"
+      },
+      "approveModal": {
+        "title": "ยืนยันการอนุมัติคืนเงิน",
+        "amount": "ยอดเงินที่จะคืน: {{amount}}",
+        "reason": "เหตุผล: {{reason}}",
+        "noteLabel": "บันทึกเพิ่มเติม (Note to buyer - ไม่บังคับ)",
+        "notePlaceholder": "เช่น อนุมัติการคืนเงินเข้าบัญชีต้นทางเรียบร้อยแล้ว",
+        "submitting": "กำลังดำเนินการ...",
+        "submit": "อนุมัติคืนเงินทันที"
+      },
+      "rejectModal": {
+        "title": "ปฏิเสธคำขอคืนเงิน",
+        "amount": "ยอดเงิน: {{amount}}",
+        "reason": "เหตุผลของผู้ซื้อ: {{reason}}",
+        "reasonLabel": "เหตุผลในการปฏิเสธ*",
+        "reasonPlaceholder": "ระบุเหตุผลในการปฏิเสธเพื่อแจ้งผู้ซื้อ เช่น เกินระยะเวลานโยบายคืนเงิน หรือเรียนเนื้อหาเกิน 30%",
+        "submitting": "กำลังบันทึก...",
+        "submit": "ปฏิเสธคำขอ"
+      },
+      "seo": {
+        "title": "จัดการรอบการจ่ายเงินและคืนเงิน | SIRI UpSkill Admin",
+        "description": "ระบบจัดการรอบการจ่ายเงิน ส่วนแบ่งรายได้ผู้สอน และคิวคำขอคืนเงิน"
+      },
+      "errors": {
+        "periodKeyRequired": "กรุณาระบุรหัสงวดประจำเดือน (เช่น 2026-08)",
+        "createBatch": "เกิดข้อผิดพลาดในการสร้างรอบจ่ายเงิน",
+        "executeBatch": "เกิดข้อผิดพลาดในการประมวลผลการจ่ายเงิน",
+        "exportBatch": "เกิดข้อผิดพลาดในการส่งออกไฟล์โอนเงิน",
+        "approveRefund": "เกิดข้อผิดพลาดในการอนุมัติคืนเงิน",
+        "rejectReasonRequired": "กรุณาระบุเหตุผลในการปฏิเสธคำขอคืนเงิน",
+        "rejectRefund": "เกิดข้อผิดพลาดในการปฏิเสธคืนเงิน"
+      },
+      "messages": {
+        "batchCreated": "สร้างรอบการจ่ายเงินงวด {{periodKey}} เรียบร้อยแล้ว",
+        "batchExecuted": "ประมวลผลการจ่ายเงินงวด {{periodKey}} สำเร็จ",
+        "batchExported": "ส่งออกข้อมูลโอนเงินงวด {{periodKey}} จำนวน {{count}} รายการเรียบร้อยแล้ว",
+        "refundApproved": "อนุมัติคำขอคืนเงินจำนวน ฿{{amount}} เรียบร้อยแล้ว",
+        "refundRejected": "ปฏิเสธคำขอคืนเงินเรียบร้อยแล้ว"
+      }
+    },
+    "marketing": {
+      "seo": {
+        "title": "การตลาดและโปรโมชัน | SIRI UpSkill Admin",
+        "description": "ระบบจัดการโค้ดส่วนลด แฟลชเซล และชุดคอร์สแพ็กเกจ"
+      },
+      "title": "การตลาดและโปรโมชัน (Marketing & Promos)",
+      "subtitle": "จัดการโค้ดส่วนลด แคมเปญ Flash Sale และแพ็กเกจ Bundle",
+      "createPromo": "สร้างโค้ดส่วนลด",
+      "createFlashSale": "สร้าง Flash Sale",
+      "createBundle": "สร้างชุดคอร์ส Bundle",
+      "tabs": {
+        "promos": "โค้ดส่วนลด (Promo Codes)",
+        "flashSales": "แฟลชเซล (Flash Sales)",
+        "bundles": "ชุดแพ็กเกจ (Bundles)"
+      },
+      "col": {
+        "status": "สถานะ",
+        "courseCount": "จำนวนคอร์ส"
+      },
+      "status": {
+        "active": "เปิดใช้งาน",
+        "inactive": "ปิดใช้งาน"
+      },
+      "promos": {
+        "empty": "ยังไม่มีโค้ดส่วนลดในระบบ",
+        "emptyAction": "+ สร้างโค้ดแรกของคุณ",
+        "colCode": "รหัสโค้ด (Code)",
+        "colDiscount": "มูลค่าส่วนลด",
+        "colMinOrder": "ยอดสั่งซื้อขั้นต่ำ",
+        "colUsage": "สิทธิ์ใช้งาน",
+        "colPeriod": "ช่วงเวลาที่ใช้ได้",
+        "discountPercent": "ลด {{value}}%",
+        "discountFixed": "ลด {{value}}",
+        "noMinimum": "ไม่มีขั้นต่ำ",
+        "usageLimit": "/ {{max}} ครั้ง"
+      },
+      "flashSales": {
+        "empty": "ยังไม่มีแคมเปญ Flash Sale ในระบบ",
+        "emptyAction": "+ สร้าง Flash Sale แคมเปญแรก",
+        "colTitle": "ชื่อแคมเปญ",
+        "colStart": "เวลาเริ่มต้น",
+        "colEnd": "เวลาสิ้นสุด",
+        "itemCount": "{{count}} รายการ"
+      },
+      "bundles": {
+        "empty": "ยังไม่มีชุดคอร์ส Bundle ในระบบ",
+        "emptyAction": "+ สร้าง Bundle แรก",
+        "colTitle": "ชื่อแพ็กเกจ (Title)",
+        "colSlug": "Slug",
+        "colPrice": "ราคาแพ็กเกจ",
+        "courseCount": "{{count}} คอร์ส"
+      },
+      "promoModal": {
+        "title": "สร้างโค้ดส่วนลดใหม่ (Create Promo Code)",
+        "code": "รหัสโค้ด (Code)*",
+        "codePlaceholder": "เช่น SIRI2026, EARLYBIRD",
+        "discountType": "ประเภทส่วนลด*",
+        "typePercentage": "เปอร์เซ็นต์ (%)",
+        "typeFixed": "จำนวนเงินคงที่ (฿)",
+        "discountValue": "มูลค่าส่วนลด*",
+        "minSpend": "ยอดขั้นต่ำ (฿)",
+        "maxRedemptions": "สิทธิ์รวม (ครั้ง)",
+        "maxPerUser": "สิทธิ์/คน",
+        "startsAt": "วันที่เริ่มต้น",
+        "endsAt": "วันที่สิ้นสุด",
+        "submit": "บันทึกโค้ด"
+      },
+      "flashSaleModal": {
+        "title": "สร้าง Flash Sale แคมเปญใหม่",
+        "name": "ชื่อแคมเปญ Flash Sale*",
+        "namePlaceholder": "เช่น Mega Mid-Year Sale ลดกระหน่ำ 24 ชม.",
+        "courseId": "Course ID (GUID)*",
+        "courseIdPlaceholder": "ระบุรหัส GUID ของคอร์ส",
+        "salePrice": "ราคาพิเศษ Flash Sale (฿)*",
+        "startsAt": "เริ่มวันที่",
+        "endsAt": "สิ้นสุดวันที่"
+      },
+      "bundleModal": {
+        "title": "สร้างชุดคอร์สแพ็กเกจใหม่ (Bundle)",
+        "name": "ชื่อแพ็กเกจ (Title)*",
+        "namePlaceholder": "เช่น Full-Stack AI Engineer 3-in-1 Bundle",
+        "slug": "Slug URL*",
+        "price": "ราคาแพ็กเกจ (฿)*",
+        "description": "คำอธิบาย",
+        "descriptionPlaceholder": "รายละเอียดจุดเด่นของชุดแพ็กเกจ",
+        "courseIds": "Course IDs (1 รหัสต่อ 1 บรรทัด)*",
+        "submit": "สร้าง Bundle"
+      },
+      "modal": {
+        "cancel": "ยกเลิก",
+        "saving": "กำลังบันทึก..."
+      },
+      "toast": {
+        "promoCodeRequired": "กรุณาระบุรหัสโค้ดส่วนลด",
+        "promoCreated": "สร้างโค้ดส่วนลด \"{{code}}\" สำเร็จแล้ว",
+        "promoCreateFailed": "เกิดข้อผิดพลาดในการสร้างโค้ดส่วนลด",
+        "flashSaleRequired": "กรุณากรอกชื่อแคมเปญและ Course ID",
+        "flashSaleCreated": "สร้าง Flash Sale \"{{title}}\" สำเร็จแล้ว",
+        "flashSaleCreateFailed": "เกิดข้อผิดพลาดในการสร้าง Flash Sale",
+        "bundleRequired": "กรุณากรอกชื่อ Slug และระบุ Course ID อย่างน้อย 1 คอร์ส",
+        "bundleCreated": "สร้างแพ็กเกจคอร์ส \"{{title}}\" สำเร็จแล้ว",
+        "bundleCreateFailed": "เกิดข้อผิดพลาดในการสร้าง Bundle"
+      }
+    },
+    "banners": {
+      "seo": {
+        "title": "จัดการแบนเนอร์ | SIRI UpSkill Admin",
+        "description": "ระบบจัดการภาพแบนเนอร์หน้าแรก"
+      },
+      "title": "จัดการแบนเนอร์หน้าแรก (Hero Banners)",
+      "subtitle": "กำหนดภาพโปรโมชั่นและลิงก์ปลายทางบนหน้าแรกของเว็บ",
+      "addButton": "เพิ่มแบนเนอร์ใหม่",
+      "form": {
+        "heading": "ข้อมูลแบนเนอร์ใหม่",
+        "titleLabel": "หัวข้อแบนเนอร์ *",
+        "titlePlaceholder": "เช่น โปรโมชั่นคอร์สใหม่ ลด 40%",
+        "imageUrlLabel": "ลิงก์รูปภาพ (Image URL) *",
+        "targetUrlLabel": "ลิงก์ปลายทาง (Target URL)",
+        "targetUrlPlaceholder": "/courses หรือ /courses/slug",
+        "cancel": "ยกเลิก",
+        "submit": "บันทึกแบนเนอร์"
+      },
+      "loading": "กำลังโหลดแบนเนอร์...",
+      "empty": "ยังไม่มีแบนเนอร์ในระบบ",
+      "row": {
+        "order": "ลำดับที่ {{order}}",
+        "active": "เปิดใช้งาน",
+        "inactive": "ปิดใช้งาน",
+        "link": "ลิงก์: {{url}}",
+        "noLink": "ไม่มี",
+        "turnOff": "ปิด",
+        "turnOn": "เปิด"
+      }
+    },
+    "posts": {
+      "seo": {
+        "title": "จัดการบทความและบล็อก | SIRI UpSkill Admin",
+        "description": "ระบบ CMS จัดการบทความและข่าวสาร"
+      },
+      "title": "บทความและข่าวสาร (CMS Blog)",
+      "subtitle": "จัดการเนื้อหาบทความเผยแพร่บนหน้าบล็อกสาธารณะ",
+      "writeNew": "เขียนบทความใหม่",
+      "form": {
+        "titleLabel": "หัวข้อบทความ *",
+        "titlePlaceholder": "เช่น 5 เทคนิคการเรียนรู้ Programming ให้เข้าใจเร็ว",
+        "slugLabel": "URL Slug (ภาษาอังกฤษ)",
+        "excerptLabel": "บทคัดย่อ (Excerpt)",
+        "excerptPlaceholder": "สรุปสั้น ๆ สำหรับแสดงในการ์ดหน้ารวมบทความ",
+        "contentLabel": "เนื้อหาบทความ (HTML / Text) *",
+        "contentPlaceholder": "พิมพ์เนื้อหาบทความที่นี่...",
+        "coverUrlLabel": "ลิงก์รูปภาพหน้าปก",
+        "cancel": "ยกเลิก",
+        "submit": "เผยแพร่บทความ"
+      },
+      "table": {
+        "colArticle": "บทความ",
+        "colSlug": "URL Slug",
+        "colStatus": "สถานะ",
+        "colPublished": "วันที่เผยแพร่",
+        "colAction": "การจัดการ"
+      },
+      "loading": "กำลังโหลดบทความ...",
+      "empty": "ยังไม่มีบทความในระบบ"
+    },
+    "payments": {
+      "title": "การจัดการชำระเงิน & Ops Queue",
+      "subtitle": "ตรวจสอบรายการผิดปกติ, จัดการคิวงานที่ต้องตรวจสอบ (Ops Queue) และอนุมัติการคืนเงิน",
+      "notAvailable": "N/A",
+      "btnBack": "ย้อนกลับ",
+      "kpi": {
+        "opsQueueTitle": "Ops Queue ค้างตรวจ (รายการ)",
+        "opsQueueHint": "เคสจ่ายช้า / ซ้ำ / รอเคลียร์",
+        "refundsTitle": "คำขอคืนเงินรอตรวจ (รายการ)",
+        "refundsHint": "ผู้เรียนขอคืนเงิน",
+        "gatewayTitle": "เกตเวย์การชำระเงิน",
+        "gatewayHint": "Webhooks และการกระทบยอดอัตโนมัติทำงานอยู่"
+      },
+      "tabs": {
+        "opsQueue": "คิวตรวจสอบความผิดปกติ (Ops Queue)",
+        "refunds": "คำขอคืนเงิน (Refunds)"
+      },
+      "filter": {
+        "all": "ทั้งหมด",
+        "open": "รอตรวจสอบ (Open)",
+        "inProgress": "กำลังดำเนินการ (In Progress)",
+        "resolved": "แก้ไขแล้ว (Resolved)",
+        "dismissed": "ยกเลิก/ปิดเคส (Dismissed)"
+      },
+      "table": {
+        "actions": "การดำเนินการ"
+      },
+      "ops": {
+        "table": {
+          "order": "คำสั่งซื้อ / รายการ",
+          "reason": "สาเหตุที่ต้องตรวจสอบ",
+          "buyer": "ผู้ซื้อ (Email)",
+          "amount": "ยอดชำระ",
+          "status": "สถานะคิว"
+        },
+        "loading": "กำลังโหลดข้อมูล Ops Queue...",
+        "empty": {
+          "title": "ไม่พบรายการที่ต้องตรวจสอบ",
+          "description": "ระบบการชำระเงินทำงานปกติ ไม่มีเคสค้างในสถานะนี้"
+        },
+        "note": "บันทึก: {{note}}",
+        "noEmail": "ไม่พบอีเมล",
+        "status": {
+          "open": "รอตรวจสอบ",
+          "inProgress": "กำลังดำเนินการ",
+          "resolved": "แก้ไขแล้ว",
+          "dismissed": "ปิดเคส"
+        },
+        "action": {
+          "assign": "รับเรื่อง",
+          "resolve": "ดำเนินการ",
+          "dismiss": "ยกเลิก",
+          "done": "เสร็จสิ้น"
+        }
+      },
+      "refunds": {
+        "table": {
+          "id": "รหัสคำขอ",
+          "reason": "สาเหตุการขอคืนเงิน",
+          "amount": "ยอดขอคืน",
+          "requestedAt": "วันที่ขอคืน",
+          "status": "สถานะ"
+        },
+        "empty": "ไม่มีคำขอคืนเงินที่รอดำเนินการ",
+        "approve": "อนุมัติคืนเงิน",
+        "reject": "ปฏิเสธ"
+      },
+      "resolveModal": {
+        "title": "ดำเนินการแก้ไขเคสการชำระเงิน",
+        "orderLine": "คำสั่งซื้อ: {{orderNo}} ({{amount}})",
+        "chooseAction": "เลือกวิธีการแก้ไข",
+        "refund": {
+          "title": "คืนเงินให้ผู้ซื้อ (Refund via Stripe)",
+          "description": "ยิง API ขอคืนเงินไปยัง Stripe, ยกเลิกส่วนลด และส่งอีเมลแจ้งผู้ซื้อ"
+        },
+        "reopen": {
+          "title": "เปิดออร์เดอร์และมอบสิทธิ์เข้าเรียน (Reopen & Fulfill)",
+          "description": "ปรับสถานะออร์เดอร์เป็นชำระเงินแล้ว, ลงทะเบียนคอร์สให้อัตโนมัติ และส่งใบเสร็จ"
+        },
+        "grant": {
+          "title": "มอบสิทธิ์เข้าเรียนอย่างเดียว (Grant Access Only)",
+          "description": "เปิดสิทธิ์ให้นักเรียนเข้าเรียนคอร์สในออร์เดอร์โดยไม่เปลี่ยนสถานะบัญชี"
+        },
+        "noteLabel": "บันทึกการดำเนินการ (Notes)",
+        "notePlaceholder": "ระบุเหตุผลหรือรายละเอียดการตรวจสอบ...",
+        "submit": "ยืนยันการดำเนินการ"
+      },
+      "dismissModal": {
+        "title": "ปิดเคส / ยกเลิกรายการ",
+        "intro": "คุณกำลังจะยกเลิกการตรวจสอบรายการสำหรับคำสั่งซื้อ",
+        "noteLabel": "เหตุผลในการยกเลิก (จำเป็น)",
+        "notePlaceholder": "เช่น รายการซ้ำซ้อน, ผู้ใช้ชำระเงินใหม่แล้ว...",
+        "submit": "ยืนยันยกเลิกเคส"
+      },
+      "refundModal": {
+        "approveTitle": "อนุมัติคำขอคืนเงิน",
+        "rejectTitle": "ปฏิเสธคำขอคืนเงิน",
+        "amountLabel": "ยอดเงิน:",
+        "reasonInline": "(สาเหตุ: {{reason}})",
+        "noteLabel": "หมายเหตุการพิจารณา",
+        "notePlaceholder": "ระบุข้อความถึงผู้เรียนหรือบันทึกภายใน...",
+        "submit": "ยืนยัน",
+        "defaultRejectNote": "คำขอถูกปฏิเสธโดยผู้ดูแลระบบ"
+      },
+      "errors": {
+        "loadOps": "เกิดข้อผิดพลาดในการโหลดคิวตรวจสอบการชำระเงิน",
+        "assign": "ไม่สามารถมอบหมายรายการได้",
+        "resolve": "ไม่สามารถดำเนินการแก้ไขรายการได้",
+        "dismiss": "ไม่สามารถยกเลิกรายการได้",
+        "refundAction": "ไม่สามารถดำเนินการคำขอคืนเงินได้"
+      },
+      "messages": {
+        "assigned": "มอบหมายรายการ {{ref}} ให้คุณเรียบร้อยแล้ว",
+        "resolved": "ดำเนินการแก้ไขรายการ {{ref}} สำเร็จ",
+        "dismissed": "ยกเลิกรายการ {{ref}} เรียบร้อยแล้ว",
+        "refundApproved": "อนุมัติคำขอคืนเงินเรียบร้อยแล้ว",
+        "refundRejected": "ปฏิเสธคำขอคืนเงินเรียบร้อยแล้ว"
+      }
+    },
+    "users": {
+      "title": "ผู้ใช้งานและสิทธิ์การเข้าถึง (User Management)",
+      "subtitle": "จัดการบทบาทผู้ใช้งาน ระงับ/คืนสิทธิ์ และตรวจสอบ Audit Trail",
+      "tabs": {
+        "users": "รายชื่อผู้ใช้ ({{count}})",
+        "audit": "ประวัติ Audit Logs ({{count}})"
+      },
+      "inviteButton": "เชิญผู้ใช้ใหม่",
+      "search": {
+        "placeholder": "ค้นหาตามชื่อ หรืออีเมลผู้ใช้..."
+      },
+      "filter": {
+        "roleLabel": "บทบาท:",
+        "statusLabel": "สถานะ:",
+        "all": "ทั้งหมด"
+      },
+      "roles": {
+        "admin": "ผู้ดูแลระบบ (Admin)",
+        "instructor": "ผู้สอน (Instructor)",
+        "learner": "ผู้เรียน (Learner)"
+      },
+      "status": {
+        "active": "ใช้งานปกติ",
+        "suspended": "ถูกระงับสิทธิ์"
+      },
+      "loadingUsers": "กำลังโหลดรายชื่อผู้ใช้งาน...",
+      "emptyUsers": "ไม่พบรายชื่อผู้ใช้งานที่ตรงกับเงื่อนไข",
+      "table": {
+        "user": "ผู้ใช้งาน",
+        "role": "บทบาท (Role)",
+        "status": "สถานะ",
+        "lastLogin": "เข้าใช้ล่าสุด",
+        "actions": "การจัดการ"
+      },
+      "never": "ยังไม่เคยเข้าใช้",
+      "changeRole": "เปลี่ยนบทบาท",
+      "suspendAccount": "ระงับบัญชี",
+      "reactivate": "คืนสิทธิ์",
+      "btnCancel": "ยกเลิก",
+      "audit": {
+        "loading": "กำลังโหลดประวัติ Audit Logs...",
+        "empty": "ยังไม่มีรายการประวัติเหตุการณ์ความปลอดภัย",
+        "action": "เหตุการณ์ (Action)",
+        "detail": "รายละเอียด (Detail)",
+        "ip": "IP Address",
+        "timestamp": "เวลาที่เกิด (Timestamp)"
+      },
+      "editRole": {
+        "title": "แก้ไขบทบาทผู้ใช้งาน",
+        "selectLabel": "เลือกบทบาทหลัก:",
+        "save": "บันทึกบทบาท",
+        "saving": "กำลังบันทึก..."
+      },
+      "suspend": {
+        "title": "ระงับการใช้งานบัญชีผู้ใช้",
+        "reasonLabel": "ระบุเหตุผลในการระงับบัญชี:",
+        "reasonPlaceholder": "เช่น ละเมิดข้อกำหนดการใช้งาน, มีพฤติกรรมน่าสงสัย...",
+        "confirm": "ยืนยันการระงับบัญชี",
+        "processing": "กำลังดำเนินการ..."
+      },
+      "invite": {
+        "title": "เชิญผู้ใช้ใหม่เข้าสู่ระบบ",
+        "intro": "ระบบจะสร้างบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึงให้ทันที",
+        "emailLabel": "อีเมล (Email) *",
+        "displayNameLabel": "ชื่อที่แสดง (Display Name) *",
+        "displayNamePlaceholder": "เช่น สมชาย ใจดี",
+        "roleLabel": "บทบาท / สิทธิ์การใช้งาน *",
+        "submit": "เชิญผู้ใช้",
+        "submitting": "กำลังเชิญ..."
+      },
+      "seoTitle": "จัดการผู้ใช้งานและสิทธิ์ | SIRI UpSkill Admin",
+      "seoDescription": "ระบบจัดการผู้ใช้งาน สิทธิ์การเข้าถึง และบันทึก Audit Logs",
+      "messages": {
+        "inviteSuccess": "เชิญผู้ใช้ {{email}} เข้าสู่ระบบเรียบร้อยแล้ว",
+        "inviteError": "เกิดข้อผิดพลาดในการเชิญผู้ใช้",
+        "roleUpdated": "อัปเดตบทบาทของ {{name}} เป็น {{role}} สำเร็จ",
+        "roleUpdateError": "เกิดข้อผิดพลาดในการอัปเดตบทบาท",
+        "defaultSuspendReason": "ระงับโดยผู้ดูแลระบบ",
+        "suspended": "ระงับการใช้งานบัญชี {{name}} เรียบร้อยแล้ว",
+        "suspendError": "เกิดข้อผิดพลาดในการระงับบัญชี",
+        "reactivated": "คืนสิทธิ์การใช้งานบัญชี {{name}} เรียบร้อยแล้ว",
+        "reactivateError": "เกิดข้อผิดพลาดในการคืนสิทธิ์การใช้งาน"
       }
     }
   },
@@ -600,7 +1165,8 @@
     "exploreCourses": "ค้นหาคอร์สเรียน",
     "addToCart": "เพิ่มลงตะกร้า",
     "remove": "นำออกจากสิ่งที่อยากได้",
-    "add": "เพิ่มในสิ่งที่อยากได้"
+    "add": "เพิ่มในสิ่งที่อยากได้",
+    "metaDescription": "รวมรายการคอร์สเรียนที่คุณบันทึกไว้ในสิ่งที่อยากได้"
   },
   "learningPaths": {
     "badge": "แผนที่นำทางสู่สายอาชีพแห่งอนาคต",
@@ -626,7 +1192,10 @@
     "notFoundTitle": "ไม่พบเส้นทางการเรียน",
     "notFoundDesc": "เส้นทางการเรียนนี้อาจถูกปิดปรับปรุงหรือไม่มีอยู่ในระบบ",
     "recommendedCurriculum": "หลักสูตรแนะนำ • {{count}} คอร์สเรียนในเส้นทางนี้",
-    "step": "ขั้นตอนที่ {{step}}"
+    "step": "ขั้นตอนที่ {{step}}",
+    "metaDescription": "แผนการเรียนรู้ที่รวบรวมหลักสูตรตั้งแต่เริ่มต้นจนถึงระดับผู้เชี่ยวชาญ เจาะลึกตามสายอาชีพ",
+    "detailMetaTitle": "{{title}} | เส้นทางการเรียนรู้ SIRI UpSkill",
+    "detailMetaDescriptionFallback": "หลักสูตรเส้นทางการเรียนรู้แบบเป็นขั้นตอน"
   },
   "nav": {
     "home": "หน้าแรก",
@@ -716,6 +1285,20 @@
     "newest": {
       "heading": "คอร์สใหม่ล่าสุด",
       "loadingLabel": "กำลังโหลดคอร์สใหม่"
+    },
+    "continue": {
+      "heading": "เรียนต่อจากจุดเดิม",
+      "progress": "ความคืบหน้า {{percent}}%",
+      "cta": "เข้าสู่บทเรียน"
+    },
+    "courseCard": {
+      "saleBadge": "ลดพิเศษ"
+    },
+    "flashSale": {
+      "regionLabel": "โปรโมชันแฟลชเซลล์"
+    },
+    "banners": {
+      "regionLabel": "แบนเนอร์โปรโมชัน"
     }
   },
   "catalog": {
@@ -795,7 +1378,20 @@
       "guaranteeMultiDevice": "เรียนได้บนมือถือและคอมพิวเตอร์",
       "guaranteeCertificate": "ใบรับรองเมื่อเรียนจบ",
       "guaranteeRefund": "รับประกันคืนเงินภายใน 30 วัน",
-      "requirementsSidebarHeading": "ความต้องการพื้นฐาน"
+      "requirementsSidebarHeading": "ความต้องการพื้นฐาน",
+      "ratingFromCount": "จาก {{count}} รีวิวของผู้เรียน",
+      "tryFreeWithCount": "ทดลองเรียนฟรี ({{count}} บทเรียน)",
+      "inCartAddAgain": "อยู่ในตะกร้าแล้ว (เพิ่มอีก)",
+      "saveToWishlist": "บันทึกในสิ่งที่อยากได้",
+      "tryFree": "ทดลองเรียนฟรี"
+    },
+    "autocomplete": {
+      "placeholder": "ค้นหาคอร์สเรียน ทักษะ หรือผู้สอน...",
+      "matchingCourses": "คอร์สเรียนที่ตรงกัน",
+      "viewAllResults": "ดูผลการค้นหาทั้งหมดสำหรับ \"{{query}}\"",
+      "recentSearches": "การค้นหาล่าสุด",
+      "clearAll": "ล้างทั้งหมด",
+      "remove": "ลบ"
     }
   },
   "blog": {
@@ -813,8 +1409,22 @@
       "backToBlog": "กลับไปยังหน้ารวมบทความ",
       "errorHeading": "โหลดบทความไม่สำเร็จ",
       "errorDescription": "เกิดข้อผิดพลาดระหว่างโหลดบทความ กรุณาลองใหม่อีกครั้ง",
-      "retryButton": "ลองใหม่"
-    }
+      "retryButton": "ลองใหม่",
+      "share": "แชร์บทความ",
+      "shareCopied": "คัดลอกลิงก์บทความแล้ว",
+      "shareFailed": "คัดลอกลิงก์ไม่สำเร็จ กรุณาคัดลอกจากแถบที่อยู่ของเบราว์เซอร์",
+      "officialPublication": "เผยแพร่อย่างเป็นทางการ",
+      "ctaHeading": "พร้อมพัฒนาทักษะสู่ระดับถัดไปหรือยัง?",
+      "ctaDescription": "เลือกดูคอร์สเรียนออนไลน์ที่ออกแบบโดยผู้เชี่ยวชาญ และเริ่มลงมือปฏิบัติจริงวันนี้",
+      "ctaButton": "สำรวจคอร์สเรียนทั้งหมด"
+    },
+    "metaTitle": "บทความ & ข่าวสาร | SIRI UpSkill Blog",
+    "metaDescription": "รวมบทความ เทคนิค และข่าวสารความรู้ด้านเทคโนโลยีจากทีมงาน SIRI UpSkill",
+    "badge": "SIRI UpSkill Knowledge Hub",
+    "heading": "บทความและความรู้เทคโนโลยี",
+    "subheading": "อัปเดตเทรนด์สายงาน Tech ความรู้การเขียนโปรแกรม และแนวทางการพัฒนาตนเองจากผู้เชี่ยวชาญ",
+    "authorTeam": "ทีมวิชาการ SIRI UpSkill",
+    "readMore": "อ่านต่อ"
   },
   "shared": {
     "modal": {
@@ -838,6 +1448,31 @@
     },
     "field": {
       "required": "จำเป็นต้องกรอก"
+    },
+    "consent": {
+      "regionLabel": "การยินยอมคุกกี้และข้อมูลส่วนบุคคล",
+      "title": "การใช้งานคุกกี้และการคุ้มครองข้อมูลส่วนบุคคล (PDPA)",
+      "body": "SiriUpSkill ใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงานได้อย่างถูกต้อง และคุกกี้วิเคราะห์เพื่อพัฒนาประสบการณ์การเรียนรู้ของคุณ คุณสามารถศึกษารายละเอียดเพิ่มเติมได้ที่",
+      "privacyLink": "นโยบายความเป็นส่วนตัว",
+      "and": "และ",
+      "termsLink": "ข้อกำหนดการใช้งาน",
+      "settings": "ตั้งค่าคุกกี้",
+      "rejectAll": "ปฏิเสธทั้งหมด",
+      "acceptAll": "ยอมรับทั้งหมด",
+      "essential": {
+        "title": "คุกกี้ที่จำเป็น (Essential)",
+        "badge": "เปิดตลอดเวลา",
+        "description": "จำเป็นสำหรับการเข้าสู่ระบบและการรักษาความปลอดภัย"
+      },
+      "analytics": {
+        "title": "คุกกี้วิเคราะห์ (Analytics)",
+        "description": "ช่วยให้เราปรับปรุงและพัฒนาเนื้อหาหลักสูตร"
+      },
+      "marketing": {
+        "title": "คุกกี้การตลาด (Marketing)",
+        "description": "แนะนำหลักสูตรและโปรโมชันที่เหมาะกับความสนใจของคุณ"
+      },
+      "save": "บันทึกการตั้งค่า"
     }
   },
   "auth": {
@@ -940,6 +1575,40 @@
       "confirmAllBody": "การดำเนินการนี้จะออกจากระบบทุกอุปกรณ์ รวมถึงอุปกรณ์นี้ด้วย คุณจะต้องเข้าสู่ระบบใหม่ที่นี่ด้วยเช่นกัน",
       "confirmAllConfirm": "ออกจากระบบทุกอุปกรณ์",
       "confirmCancel": "ยกเลิก"
+    },
+    "accountPrivacy": {
+      "pageTitle": "ความเป็นส่วนตัวและการจัดการข้อมูล (PDPA)",
+      "pageDescription": "ส่งออกข้อมูลส่วนบุคคล หรือลบบัญชีผู้ใช้งานตามสิทธิ์คุ้มครองข้อมูลส่วนบุคคล (PDPA)",
+      "heading": "ความเป็นส่วนตัวและการจัดการข้อมูล (Privacy & PDPA)",
+      "subheading": "จัดการสิทธิ์ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) รวมถึงการส่งออกข้อมูลและการลบบัญชี",
+      "export": {
+        "heading": "สิทธิ์ในการขอรับข้อมูล (Right to Data Portability)",
+        "description": "ดาวน์โหลดสำเนาข้อมูลส่วนบุคคลของคุณในรูปแบบ JSON ที่สามารถอ่านได้ด้วยเครื่อง รวมถึงข้อมูลโปรไฟล์ ประวัติการเข้าสู่ระบบ และบันทึกความปลอดภัย",
+        "button": "ส่งออกข้อมูลของฉัน (JSON)",
+        "exporting": "กำลังส่งออก...",
+        "success": "ดาวน์โหลดข้อมูลส่วนบุคคลของคุณเรียบร้อยแล้ว",
+        "error": "ไม่สามารถส่งออกข้อมูลได้ในขณะนี้"
+      },
+      "erase": {
+        "heading": "สิทธิ์ในการขอให้ลบข้อมูล (Right to Erasure)",
+        "description": "การดำเนินการนี้จะลบข้อมูลระบุตัวตนของคุณอย่างถาวร (อีเมล, ชื่อ, เบอร์โทร) ยกเลิกการเข้าสู่ระบบทั้งหมด และทำให้นิรนาม (Anonymize) ไม่สามารถกู้คืนได้",
+        "button": "ลบบัญชีผู้ใช้ถาวร"
+      },
+      "deleteModal": {
+        "title": "ยืนยันการลบบัญชีผู้ใช้ถาวร",
+        "warningLabel": "คำเตือน:",
+        "warningBody": "การดำเนินการนี้ไม่สามารถยกเลิกหรือกู้คืนได้ ข้อมูลส่วนตัวของคุณจะถูกแปลงเป็นข้อมูลนิรนาม และคุณจะไม่สามารถเข้าสู่ระบบด้วยบัญชีนี้ได้อีก",
+        "passwordLabel": "รหัสผ่านปัจจุบันของคุณ",
+        "passwordPlaceholder": "กรอกรหัสผ่านเพื่อยืนยันตัวตน",
+        "confirmLabelPrefix": "พิมพ์คำว่า",
+        "confirmLabelSuffix": "เพื่อยืนยัน",
+        "confirmRequired": "กรุณาพิมพ์คำว่า DELETE เพื่อยืนยัน",
+        "cancel": "ยกเลิก",
+        "deleting": "กำลังลบบัญชี...",
+        "confirm": "ยืนยันลบบัญชีถาวร",
+        "success": "บัญชีของคุณถูกลบและทำให้นิรนามเรียบร้อยแล้ว",
+        "error": "เกิดข้อผิดพลาดในการลบบัญชี"
+      }
     }
   },
   "checkout": {
@@ -976,7 +1645,8 @@
       "autoConfirm": "ยืนยันอัตโนมัติทันทีหลังชำระเงิน",
       "expired": "QR Code หมดอายุแล้ว กรุณาสร้างรายการใหม่",
       "waiting": "กำลังรอการชำระเงิน...",
-      "paid": "ชำระเงินสำเร็จ! กำลังนำคุณเข้าสู่ห้องเรียน..."
+      "paid": "ชำระเงินสำเร็จ! กำลังนำคุณเข้าสู่ห้องเรียน...",
+      "imageAlt": "PromptPay QR Code"
     },
     "etax": {
       "checkboxLabel": "ขอใบกำกับภาษีอิเล็กทรอนิกส์ (e-Tax invoice) — ออกให้อัตโนมัติหลังชำระเงินสำเร็จ",
@@ -999,13 +1669,32 @@
       "payButton": "ชำระเงิน {{amount}}",
       "processing": "กำลังดำเนินการ...",
       "guarantee": "รับประกันคืนเงินภายใน 30 วัน หากคอร์สไม่ตรงตามที่คาดหวัง",
-      "statementDescriptor": "รายการที่ปรากฏบนใบแจ้งยอดบัตร/แอปธนาคารของคุณจะแสดงชื่อผู้รับเงินเป็น STRIPE PAYMENTS (THAILAND) LTD"
+      "statementDescriptor": "รายการที่ปรากฏบนใบแจ้งยอดบัตร/แอปธนาคารของคุณจะแสดงชื่อผู้รับเงินเป็น STRIPE PAYMENTS (THAILAND) LTD",
+      "promoEmpty": "กรุณากรอกรหัสส่วนลด"
     },
     "error": {
       "orderNotFound": "ไม่พบคำสั่งซื้อที่ระบุ",
       "orderMissing": "ไม่พบคำสั่งซื้อ กรุณาสร้างคำสั่งซื้อจากตะกร้าสินค้า",
       "createPaymentFailed": "ไม่สามารถสร้างรายการชำระเงินได้ กรุณาลองใหม่อีกครั้ง",
       "retry": "ลองใหม่อีกครั้ง"
+    },
+    "success": {
+      "heading": "ชำระเงินสำเร็จเรียบร้อยแล้ว!",
+      "subheading": "ระบบได้ทำการเปิดสิทธิ์เข้าเรียนคอร์สของคุณเรียบร้อยแล้ว คุณสามารถเริ่มเรียนได้ทันที",
+      "orderNo": "เลขที่คำสั่งซื้อ",
+      "coursesHeading": "คอร์สเรียนในคำสั่งซื้อนี้",
+      "startNow": "เริ่มเรียนทันที",
+      "downloadReceipt": "ดาวน์โหลดใบเสร็จรับเงิน (PDF)",
+      "goToMyCourses": "ไปยังหน้าคอร์สของฉัน"
+    },
+    "steps": {
+      "selection": "เลือกวิธีชำระ",
+      "qr": "สแกน QR Code",
+      "done": "เสร็จสมบูรณ์"
+    },
+    "mobileBar": {
+      "total": "ยอดชำระทั้งหมด",
+      "pay": "ชำระเงิน"
     }
   },
   "learn": {
@@ -1068,7 +1757,18 @@
       "correct": "ถูกต้อง",
       "incorrect": "ไม่ถูกต้อง",
       "explanation": "คำอธิบาย:",
-      "noQuiz": "ไม่มีแบบทดสอบสำหรับบทเรียนนี้"
+      "noQuiz": "ไม่มีแบบทดสอบสำหรับบทเรียนนี้",
+      "loading": "กำลังโหลดแบบทดสอบ...",
+      "questionCount": "{{count}} ข้อ",
+      "historyHeading": "ประวัติการทำแบบทดสอบ",
+      "attemptNumber": "ครั้งที่ {{number}}",
+      "statusPassed": "ผ่าน",
+      "statusFailed": "ไม่ผ่าน",
+      "attemptsExhausted": "คุณทำแบบทดสอบครบจำนวนครั้งสูงสุดที่กำหนดแล้ว",
+      "loadFailed": "ไม่สามารถโหลดแบบทดสอบได้",
+      "startFailed": "ไม่สามารถเริ่มทำแบบทดสอบได้",
+      "submitFailed": "เกิดข้อผิดพลาดในการส่งคำตอบ",
+      "saveAnswersFailed": "ไม่สามารถบันทึกคำตอบได้"
     },
     "assignment": {
       "heading": "งานที่มอบหมาย / การบ้าน",
@@ -1089,7 +1789,16 @@
       "statusRejected": "ส่งงานใหม่ (ถูกตีกลับ)",
       "score": "คะแนน: {{score}} / 100",
       "feedback": "ความคิดเห็นจากผู้สอน:",
-      "noAssignment": "ไม่มีงานที่มอบหมายสำหรับบทเรียนนี้"
+      "noAssignment": "ไม่มีงานที่มอบหมายสำหรับบทเรียนนี้",
+      "loading": "กำลังโหลดการบ้าน...",
+      "badge": "การบ้าน",
+      "fileLinkLabel": "ลิงก์ไฟล์:",
+      "noteShortLabel": "บันทึก:",
+      "submittedAt": "ส่งเมื่อ: {{date}}",
+      "loadFailed": "ไม่สามารถโหลดการบ้านได้",
+      "storageKeyRequired": "กรุณาระบุลิงก์หรือที่จัดเก็บไฟล์งาน",
+      "submitSuccess": "ส่งงานเรียบร้อยแล้ว",
+      "submitFailed": "ไม่สามารถส่งงานได้ กรุณาลองใหม่อีกครั้ง"
     },
     "resources": {
       "heading": "เอกสารและไฟล์ประกอบการเรียน",
@@ -1115,7 +1824,12 @@
       "upvoted": "โหวตแล้ว",
       "reply": "ตอบกลับ",
       "delete": "ลบ",
-      "report": "รายงาน"
+      "report": "รายงาน",
+      "askHeading": "ตั้งคำถามในบทเรียนนี้",
+      "bodyPlaceholder": "พิมพ์คำถามหรือข้อสงสัยของคุณที่นี่...",
+      "sending": "กำลังส่ง...",
+      "authorInstructor": "ผู้สอน (Instructor)",
+      "authorLearner": "ผู้เรียน"
     },
     "controls": {
       "play": "เล่น",
@@ -1124,6 +1838,107 @@
       "unmute": "เปิดเสียง",
       "fullscreen": "เต็มจอ",
       "speed": "ความเร็ว"
+    },
+    "player": {
+      "playVideo": "เล่นวิดีโอ",
+      "seekBar": "แถบเลื่อนตำแหน่งวิดีโอ",
+      "pause": "หยุดชั่วคราว (Space/k)",
+      "play": "เล่น (Space/k)",
+      "rewind": "ย้อนกลับ 10 วินาที (j/←)",
+      "forward": "ข้ามไปข้างหน้า 10 วินาที (l/→)",
+      "mute": "ปิดเสียง (m)",
+      "unmute": "เปิดเสียง (m)",
+      "volume": "ระดับเสียง (↑/↓)",
+      "speed": "ความเร็วในการเล่น",
+      "speedHeading": "ความเร็ว",
+      "quality": "ตั้งค่าคุณภาพวิดีโอ",
+      "qualityHeading": "คุณภาพวิดีโอ",
+      "qualityAuto": "อัตโนมัติ (Auto)",
+      "captionsOn": "เปิดคำบรรยาย (c)",
+      "captionsOff": "ปิดคำบรรยาย (c)",
+      "captionsFallback": "คำบรรยาย",
+      "pip": "ภาพซ้อนภาพ",
+      "fullscreen": "เต็มหน้าจอ (f)",
+      "exitFullscreen": "ออกจากโหมดเต็มหน้าจอ (f)",
+      "freePreviewBadge": "ตัวอย่างฟรี (Free Preview)",
+      "buffering": "กำลังโหลดวิดีโอ...",
+      "retry": "ลองใหม่อีกครั้ง",
+      "resumeTitle": "ต้องการเล่นต่อจากเดิม?",
+      "resumeBody": "คุณดูค้างไว้ที่นาที {{time}}",
+      "resumeAction": "เล่นต่อจากจุดเดิม",
+      "restartAction": "เริ่มใหม่",
+      "previewEndedTitle": "จบช่วงดูตัวอย่างฟรีแล้ว",
+      "previewEndedBodyCourse": "ชอบเนื้อหาบทเรียนนี้ไหม? สมัครเรียนคอร์ส {{course}} เพื่อเข้าถึงบทเรียนทั้งหมด, เอกสารประกอบการเรียน, แบบฝึกหัด และรับใบประกาศนียบัตรเมื่อเรียนจบ",
+      "previewEndedBody": "สมัครเรียนคอร์สเต็ม เพื่อเข้าถึงบทเรียนทั้งหมด, เอกสารประกอบการเรียน, แบบฝึกหัด และรับใบประกาศนียบัตรเมื่อเรียนจบ",
+      "enrollNow": "สมัครเรียนเลย",
+      "watchPreviewAgain": "ดูตัวอย่างอีกครั้ง"
+    },
+    "playerError": {
+      "generic": {
+        "title": "เกิดข้อผิดพลาดในการเล่นวิดีโอ",
+        "message": "กรุณาลองใหม่อีกครั้ง หรือรีเฟรชหน้าจอ"
+      },
+      "drmExpired": {
+        "title": "สิทธิ์การรับชมหมดอายุหรือไม่ถูกต้อง",
+        "message": "เซสชันการรับชมหมดอายุ หรือไม่สามารถยืนยันสิทธิ์ DRM ได้ กรุณารีเฟรชเพื่อขอสิทธิ์ใหม่"
+      },
+      "drm": {
+        "title": "ข้อผิดพลาดการตรวจสอบสิทธิ์วิดีโอ (DRM)",
+        "message": "ไม่สามารถตรวจสอบสิทธิ์การเข้ารหัสวิดีโอได้ กรุณาตรวจสอบว่าเบราว์เซอร์รองรับ DRM หรือลองใหม่อีกครั้ง"
+      },
+      "networkHttp": {
+        "title": "เซิร์ฟเวอร์วิดีโอไม่ตอบสนอง",
+        "message": "เซิร์ฟเวอร์วิดีโอขัดข้องชั่วคราว (HTTP error) กรุณาลองใหม่อีกครั้ง"
+      },
+      "network": {
+        "title": "ปัญหาการเชื่อมต่ออินเทอร์เน็ต",
+        "message": "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์สตรีมมิ่งได้ กรุณาตรวจสอบสัญญาณอินเทอร์เน็ตของคุณ"
+      },
+      "media": {
+        "title": "เกิดข้อผิดพลาดในการถอดรหัสวิดีโอ",
+        "message": "เบราว์เซอร์ไม่สามารถถอดรหัสชิ้นส่วนวิดีโอนี้ได้ กรุณาลองเปลี่ยนคุณภาพหรือรีเฟรชหน้าเว็บ"
+      },
+      "manifest": {
+        "title": "ไม่สามารถโหลดโครงสร้างวิดีโอได้",
+        "message": "ไม่สามารถประมวลผลไฟล์สตรีมมิ่ง (HLS/DASH manifest) ได้ กรุณาลองใหม่อีกครั้ง"
+      },
+      "streaming": {
+        "title": "การสตรีมวิดีโอขัดข้อง",
+        "message": "การส่งข้อมูลวิดีโอสะดุด กรุณากดปุ่มลองใหม่อีกครั้ง"
+      },
+      "nativeAborted": {
+        "title": "การเล่นวิดีโอถูกยกเลิก",
+        "message": "การโหลดวิดีโอถูกยกเลิกโดยผู้ใช้หรือเบราว์เซอร์"
+      },
+      "nativeNetwork": {
+        "title": "เกิดข้อผิดพลาดเครือข่าย",
+        "message": "การดาวน์โหลดวิดีโอขัดข้องจากปัญหาเครือข่าย"
+      },
+      "nativeDecode": {
+        "title": "การถอดรหัสล้มเหลว",
+        "message": "ไฟล์วิดีโอเสียหายหรือไม่สามารถถอดรหัสบนอุปกรณ์นี้ได้"
+      },
+      "nativeUnsupported": {
+        "title": "ไม่รองรับรูปแบบวิดีโอนี้",
+        "message": "เบราว์เซอร์ของคุณไม่รองรับรูปแบบการเข้ารหัสวิดีโอนี้"
+      },
+      "fallback": {
+        "message": "ไม่สามารถเล่นวิดีโอได้ กรุณาลองใหม่อีกครั้ง"
+      }
+    },
+    "page": {
+      "preparingPlayer": "กำลังเตรียมเครื่องเล่นวิดีโอ...",
+      "freePreviewHeading": "คุณกำลังดูตัวอย่างฟรี (Free Preview)",
+      "freePreviewBody": "สมัครเรียนคอร์สนี้เพื่อเข้าถึงทุกบทเรียนและรับใบประกาศนียบัตร",
+      "durationLabel": "ความยาว: {{duration}}",
+      "outcomesHeading": "สิ่งที่คุณจะได้รับ"
+    },
+    "sidebar": {
+      "percentComplete": "{{percent}}% สำเร็จ",
+      "episodesProgress": "{{done}} / {{total}} ตอน",
+      "sectionNumber": "ส่วนที่ {{number}}",
+      "lockedEpisodeTitle": "บทเรียนนี้ต้องสมัครเรียนเพื่อเข้าชม",
+      "freePreviewBadge": "ตัวอย่างฟรี"
     }
   },
   "myCourses": {
@@ -1144,7 +1959,8 @@
     "expiresOn": "หมดอายุ: {{date}}",
     "emptyHeading": "คุณยังไม่มีคอร์สเรียน",
     "emptyDescription": "เริ่มต้นพัฒนาทักษะใหม่ๆ ด้วยการเลือกดูคอร์สเรียนยอดนิยมของเรา",
-    "browseCourses": "เลือกดูคอร์สทั้งหมด"
+    "browseCourses": "เลือกดูคอร์สทั้งหมด",
+    "completedBadge": "สำเร็จแล้ว"
   },
   "certificateVerify": {
     "pageTitle": "ตรวจสอบใบประกาศนียบัตร | SIRI UpSkill",
@@ -1179,7 +1995,45 @@
   },
   "instructor": {
     "analytics": {
-      "neverActive": "ยังไม่เคยเข้าเรียน"
+      "neverActive": "ยังไม่เคยเข้าเรียน",
+      "pageTitle": "การวิเคราะห์และสถิติผู้เรียน | Instructor Studio",
+      "pageDescription": "วิเคราะห์ยอดผู้เรียน อัตราการดูจบ และสถิติบทเรียน",
+      "heading": "การวิเคราะห์และสถิติผู้เรียน (Analytics)",
+      "subheading": "ติดตามยอดการรับชม ความคืบหน้าของผู้เรียน และอัตราการดูจบในแต่ละบทเรียน",
+      "allCourses": "ทุกคอร์สเรียน",
+      "range": {
+        "days7": "7 วัน",
+        "days30": "30 วัน",
+        "days90": "90 วัน"
+      },
+      "kpi": {
+        "views": "ยอดการเปิดดูวิดีโอ (ครั้ง)",
+        "viewsHint": "สถิติจากผู้เรียนทั้งหมด",
+        "watchMinutes": "เวลารับชมรวม (นาที)",
+        "watchMinutesHint": "รวมทุกช่วงเวลา",
+        "completionRate": "อัตราการเรียนจบเฉลี่ย (%)",
+        "completionRateHint": "คำนวณจากความคืบหน้ารวม"
+      },
+      "retention": {
+        "heading": "การวิเคราะห์อัตราการดูจบรายบทเรียน (Episode Retention)",
+        "description": "ตรวจหาจุดที่ผู้เรียนหยุดดูบ่อย เพื่อปรับปรุงเนื้อหาหรือเพิ่มกิจกรรมทบทวน",
+        "empty": "ยังไม่มีข้อมูลการรับชมในช่วงเวลานี้",
+        "viewers": "{{count}} ผู้เรียน",
+        "completed": "{{rate}}% สำเร็จ"
+      },
+      "students": {
+        "heading": "รายชื่อผู้เรียนและความคืบหน้า (Enrolled Students)",
+        "subheading": "ติดตามผู้เรียนแบบรายบุคคล",
+        "exportCsv": "ส่งออก CSV",
+        "empty": "ยังไม่มีข้อมูลผู้เรียนที่ลงทะเบียน",
+        "column": {
+          "student": "ผู้เรียน",
+          "course": "คอร์สเรียน",
+          "progress": "ความคืบหน้า",
+          "lastActive": "เข้าเรียนล่าสุด"
+        },
+        "episodesProgress": "{{completed}}/{{total}} ตอน"
+      }
     },
     "nav": {
       "menuTitle": "เมนูสตูดิโอผู้สอน",
@@ -1190,7 +2044,8 @@
       "earnings": "รายได้ & ส่วนแบ่ง (Earnings)",
       "toAdmin": "โหมดผู้ดูแลระบบ (Admin)",
       "toLearner": "สลับไปมุมมองผู้เรียน",
-      "createCourse": "สร้างคอร์สใหม่"
+      "createCourse": "สร้างคอร์สใหม่",
+      "modeBadge": "โหมดผู้สอน (Instructor)"
     },
     "builder": {
       "pageTitle": "Course Studio Builder | SIRI UpSkill",
@@ -1342,7 +2197,37 @@
         "pending": "รอโอน",
         "transferred": "โอนเงินแล้ว",
         "failed": "โอนไม่สำเร็จ"
-      }
+      },
+      "taxCertificate": {
+        "open": "ใบหักภาษี 50 ทวิ",
+        "openFor": "ดูใบหักภาษี 50 ทวิ ของรอบ {{batch}}",
+        "unavailable": "ยังไม่มีเอกสาร เพราะยังไม่ได้โอนเงินรอบนี้",
+        "title": "หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)",
+        "subtitle": "รอบบัญชี {{period}} · แบบ {{form}}",
+        "issuedAt": "วันที่ออกเอกสาร",
+        "payer": "ผู้จ่ายเงิน",
+        "payee": "ผู้รับเงิน",
+        "gross": "เงินได้ที่จ่าย (ก่อนหักภาษี)",
+        "withheld": "ภาษีที่หัก ({{percent}}%)",
+        "net": "ยอดโอนสุทธิ",
+        "loading": "กำลังโหลดเอกสาร",
+        "errorHeading": "เปิดเอกสารไม่สำเร็จ",
+        "errorIncomplete": "ยังออกเอกสารไม่ได้ เพราะข้อมูลบัญชีรับเงินหรือเลขประจำตัวผู้เสียภาษีของคุณยังไม่ครบ กรุณาบันทึกข้อมูลในส่วนบัญชีรับเงินด้านบนแล้วลองใหม่",
+        "errorGeneric": "เกิดข้อผิดพลาดระหว่างโหลดเอกสาร กรุณาลองใหม่อีกครั้ง",
+        "retry": "ลองใหม่",
+        "close": "ปิด"
+      },
+      "pageTitle": "รายได้และรอบการจ่ายเงิน | Instructor Studio",
+      "pageDescription": "สรุปรายได้ ส่วนแบ่งรายได้ และประวัติการรับเงิน",
+      "heading": "รายได้และรอบการจ่ายเงิน (Instructor Earnings)",
+      "cumulativeHeading": "รายได้สะสมทั้งหมด (Net)",
+      "cumulativeHint": "โอนเข้าบัญชีเรียบร้อยแล้ว",
+      "nextPayoutHint": "ยอดคำนวณแบบ Real-time",
+      "historyHeading": "ประวัติการรับเงินโอน (Payout History)",
+      "colBatch": "รอบบัญชี",
+      "colGross": "ยอดขายรวม (Gross)",
+      "colStatus": "สถานะ",
+      "colDocument": "เอกสาร"
     },
     "payoutAccount": {
       "heading": "บัญชีธนาคารสำหรับรับเงินโอน",
@@ -1417,7 +2302,9 @@
     "onboarding": {
       "steps": {
         "terms": "ยืนยันเงื่อนไข",
-        "termsHeading": "ขั้นตอนที่ 2: เงื่อนไขและข้อตกลงส่วนแบ่งรายได้"
+        "termsHeading": "ขั้นตอนที่ 2: เงื่อนไขและข้อตกลงส่วนแบ่งรายได้",
+        "profile": "ข้อมูลผู้สอน",
+        "profileHeading": "ขั้นตอนที่ 1: ข้อมูลผู้สอนและประวัติย่อ"
       },
       "payoutAfterApprovalNote": "ไม่ต้องกรอกบัญชีธนาคารตอนสมัคร — เมื่อใบสมัครได้รับอนุมัติแล้ว คุณเพิ่มบัญชีรับเงินได้ที่หน้า \"รายได้\" ใน Studio",
       "setupPayoutLink": "ตั้งค่าบัญชีรับเงินที่หน้ารายได้",
@@ -1428,7 +2315,41 @@
       "rejectedDescription": "คุณปรับปรุงข้อมูลด้านล่างแล้วส่งใบสมัครใหม่เพื่อให้ทีมงานตรวจสอบอีกครั้งได้",
       "termsHeading": "ส่วนแบ่งรายได้มาตรฐาน {{percent}} สำหรับผู้สอน (Revenue Share)",
       "termsRevenueShare": "1. ผู้สอนจะได้รับส่วนแบ่งรายได้ {{percent}} และแพลตฟอร์มได้รับ {{platformPercent}} จากยอดจำหน่ายคอร์สเรียนหลังหักค่าธรรมเนียมการชำระเงิน",
-      "termsWithholding": "2. การจ่ายเงินรอบปกติจะหักภาษี ณ ที่จ่าย {{withholdingPercent}} ตามกฎหมายไทย และออกหนังสือรับรอง 50 ทวิ ให้ทุกสิ้นปี"
+      "termsWithholding": "2. การจ่ายเงินรอบปกติจะหักภาษี ณ ที่จ่าย {{withholdingPercent}} ตามกฎหมายไทย และออกหนังสือรับรอง 50 ทวิ ให้ทุกสิ้นปี",
+      "pageTitle": "สมัครเป็นผู้สอน | SIRI UpSkill Studio",
+      "pageDescription": "เริ่มต้นสร้างและเผยแพร่คอร์สเรียนออนไลน์ของคุณกับ SIRI UpSkill",
+      "heading": "เริ่มต้นเป็นผู้สอนกับ SIRI UpSkill Studio",
+      "subheading": "แบ่งปันความรู้ ทักษะ และประสบการณ์ของคุณ สร้างรายได้และเข้าถึงผู้เรียนทั่วประเทศ",
+      "errorHeading": "เกิดข้อผิดพลาด",
+      "approvedHeading": "คุณเป็นผู้สอนของ SIRI UpSkill แล้ว",
+      "approvedDescription": "บัญชีของคุณได้รับการอนุมัติเรียบร้อยแล้ว คุณสามารถสร้างคอร์สเรียนและจัดการรายได้ใน Studio ได้ทันที",
+      "approvedDashboardLink": "ไปยังแดชบอร์ดผู้สอน",
+      "pendingHeading": "ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ",
+      "pendingDescription": "ทีมงาน SIRI UpSkill กำลังตรวจสอบข้อมูลและจะแจ้งผลการอนุมัติทางอีเมลภายใน 1-2 วันทำการ",
+      "pendingBackHome": "กลับไปยังหน้าหลัก",
+      "profileDescription": "ข้อมูลนี้จะแสดงในหน้ารายละเอียดคอร์สและหน้าโปรไฟล์ผู้สอนของคุณ",
+      "form": {
+        "displayName": "ชื่อ-นามสกุล / นามปากกาที่ใช้สอน",
+        "displayNamePlaceholder": "เช่น ดร. อานนท์ พัฒนากุล",
+        "headline": "ตำแหน่ง / หัวข้อย่อ (Headline)",
+        "headlinePlaceholder": "เช่น Senior Cloud Architect & Tech Lead",
+        "bio": "ประวัติย่อ ประสบการณ์ทำงาน หรือความเชี่ยวชาญ",
+        "bioPlaceholder": "บอกเล่าประสบการณ์ ความเชี่ยวชาญ และเป้าหมายในการสอนของคุณ..."
+      },
+      "termsDescription": "กรุณาตรวจสอบข้อตกลงในการเป็นผู้สอนบนแพลตฟอร์ม SIRI UpSkill",
+      "termsCopyright": "3. คอร์สเรียนจะต้องเป็นเนื้อหาที่เป็นลิขสิทธิ์ของผู้สอนเองและไม่ละเมิดทรัพย์สินทางปัญญาของบุคคลอื่น",
+      "termsAgree": "ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด เงื่อนไขการเป็นผู้สอน และนโยบายความเป็นส่วนตัวของ SIRI UpSkill",
+      "actions": {
+        "back": "ย้อนกลับ",
+        "next": "ถัดไป",
+        "submitting": "กำลังส่งใบสมัคร...",
+        "submit": "ส่งใบสมัครเป็นผู้สอน"
+      },
+      "errors": {
+        "profileIncomplete": "กรุณากรอกชื่อผู้สอนและประวัติย่อให้ครบถ้วน",
+        "termsNotAccepted": "กรุณายอมรับเงื่อนไขและข้อตกลงการแบ่งส่วนแบ่งรายได้",
+        "submitFailed": "เกิดข้อผิดพลาดในการส่งใบสมัคร กรุณาลองใหม่อีกครั้ง"
+      }
     },
     "dashboard": {
       "pageTitle": "แดชบอร์ดผู้สอน | SIRI UpSkill Studio",
@@ -1488,6 +2409,29 @@
         "Rejected": "ไม่ผ่านการตรวจสอบ",
         "Archived": "เก็บถาวร",
         "unknown": "ไม่ทราบสถานะ"
+      }
+    },
+    "announcements": {
+      "pageTitle": "ส่งประกาศถึงผู้เรียน | Instructor Studio",
+      "pageDescription": "ระบบส่งข้อความประกาศและอีเมลแจ้งเตือนถึงผู้เรียนในคอร์ส",
+      "heading": "ส่งประกาศถึงผู้เรียน (Course Announcements)",
+      "subheading": "ส่งข่าวสาร แจ้งอัปเดตบทเรียนใหม่ หรือนัดหมายกิจกรรมไปยังผู้เรียนที่ลงทะเบียนในคอร์สของคุณ",
+      "form": {
+        "heading": "เขียนประกาศใหม่",
+        "courseLabel": "เลือกคอร์สเรียน *",
+        "noCourses": "ยังไม่มีคอร์สเรียนของคุณ",
+        "titleLabel": "หัวข้อประกาศ *",
+        "titlePlaceholder": "เช่น อัปเดตเนื้อหาใหม่ประจำสัปดาห์ / แจ้ง Live Q&A",
+        "messageLabel": "ข้อความประกาศ *",
+        "messagePlaceholder": "พิมพ์ข้อความที่ต้องการแจ้งผู้เรียนที่นี่...",
+        "sendEmail": "ส่งอีเมลแจ้งเตือนไปยังผู้เรียนทุกคนในคอร์สนี้ด้วย",
+        "sent": "ส่งประกาศถึงผู้เรียนเรียบร้อยแล้ว",
+        "sending": "กำลังส่งประกาศ...",
+        "send": "ส่งประกาศทันที"
+      },
+      "history": {
+        "heading": "ประวัติประกาศที่ผ่านมา",
+        "recipients": "ผู้รับ {{count}} คน"
       }
     }
   },
@@ -2256,6 +3200,39 @@
       "tooLarge": "ไฟล์ใหญ่เกินที่เซิร์ฟเวอร์รับได้ ลองลดขนาดไฟล์แล้วอัปโหลดใหม่",
       "tooManyRequests": "ทำรายการถี่เกินไป กรุณารอสักครู่แล้วลองใหม่",
       "unavailable": "ที่เก็บไฟล์ใช้งานไม่ได้ชั่วคราว กรุณาลองใหม่อีกครั้ง"
+    }
+  },
+  "cart": {
+    "pageTitle": "ตะกร้าสินค้า | SIRI UpSkill",
+    "pageDescription": "ตรวจสอบรายการคอร์สเรียนในตะกร้าและดำเนินการสั่งซื้อ",
+    "heading": "ตะกร้าสินค้า",
+    "itemCountText": "มีคอร์สเรียนทั้งหมด {{count}} รายการในตะกร้าของคุณ",
+    "checkoutErrorHeading": "ไม่สามารถดำเนินการสั่งซื้อได้",
+    "checkoutFailed": "เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ กรุณาลองใหม่อีกครั้ง",
+    "empty": {
+      "heading": "ยังไม่มีคอร์สเรียนในตะกร้า",
+      "description": "ค้นหาคอร์สที่คุณสนใจเพื่ออัปสกิลทักษะใหม่ ๆ แล้วกลับมาสั่งซื้อได้ตลอดเวลา"
+    },
+    "item": {
+      "instructor": "ผู้สอน: {{name}}",
+      "removeTitle": "ลบออกจากตะกร้า"
+    },
+    "promo": {
+      "label": "รหัสส่วนลด",
+      "remove": "ลบ",
+      "placeholder": "เช่น SIRI2026",
+      "applying": "กำลังใช้...",
+      "invalid": "รหัสส่วนลดไม่ถูกต้องหรือไม่สามารถใช้ได้",
+      "validateFailed": "เกิดข้อผิดพลาดในการตรวจสอบรหัสส่วนลด"
+    },
+    "summary": {
+      "subtotal": "ยอดรวมคอร์สเรียน",
+      "creating": "กำลังสร้างคำสั่งซื้อ...",
+      "proceed": "ดำเนินการชำระเงิน"
+    },
+    "guarantee": {
+      "secure": "รับประกันการชำระเงินปลอดภัยผ่าน Stripe PromptPay",
+      "receipt": "รับ e-Tax Invoice และใบเสร็จรับเงินทางอีเมลทันที"
     }
   }
 }

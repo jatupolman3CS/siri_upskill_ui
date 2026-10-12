@@ -17,10 +17,11 @@ import {
 import { CourseDetailSection } from '../../catalog/data/course-api.models';
 import { CourseProgressResponse } from '../data/learning-api.models';
 import { DurationPipe } from '../../../core/i18n/duration.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-curriculum-sidebar',
-  imports: [CommonModule, NgIcon, DurationPipe],
+  imports: [CommonModule, NgIcon, DurationPipe, TranslatePipe],
   templateUrl: './curriculum-sidebar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

@@ -1,5 +1,5 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { CommonModule, NgOptimizedImage, isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, PLATFORM_ID, computed, effect, inject } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -19,6 +19,7 @@ import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
+import { ToastService } from '../../../shared/toast/toast.service';
 
 /**
  * `/blog/:slug`. Previously this fabricated a complete fake `PostItem` (fake title, fake HTML body,
@@ -50,6 +51,8 @@ export class BlogDetailPage {
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
   protected readonly translation = inject(TranslationService);
+  private readonly toast = inject(ToastService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private readonly paramMap = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
   protected readonly slug = computed(() => this.paramMap().get('slug') ?? '');
@@ -117,5 +120,36 @@ export class BlogDetailPage {
 
   protected retry(): void {
     this.postResource.reload();
+  }
+
+  /**
+   * Shares the article's canonical URL: the native share sheet when the browser has one (mostly phones), otherwise the
+   * link is copied and a toast confirms it. A dismissed share sheet (`AbortError`) is not an error and stays silent.
+   */
+  protected async share(): Promise<void> {
+    if (!this.isBrowser) {
+      return;
+    }
+    const post = this.postResource.hasValue() ? this.postResource.value() : undefined;
+    const url = `${window.location.origin}/blog/${encodeURIComponent(this.slug())}`;
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: post?.title, url });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+        // Any other share failure falls through to copying the link.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toast.success(this.translation.t('blog.detail.shareCopied'));
+    } catch {
+      this.toast.error(this.translation.t('blog.detail.shareFailed'));
+    }
   }
 }

@@ -106,6 +106,28 @@ export interface PayoutHistoryItem {
   readonly paidAtUtc?: string | null;
 }
 
+/**
+ * `WithholdingTaxCertificateResponse` (`Siri.Modules.Payout/Application/PayoutBatchModels.cs`), returned by
+ * `GET /api/payout/instructor/tax-certificates/{batchItemId}` (the `payoutId` of a history row). Data only — the backend
+ * does not render a PDF. 404 = unknown item, 403 = not the caller's item, 409 = the payout account or tax id is missing.
+ */
+export interface WithholdingTaxCertificate {
+  readonly batchItemId: string;
+  readonly periodKey: string;
+  readonly issuedAtUtc: string;
+  readonly payerName: string;
+  readonly payerTaxId: string;
+  readonly payerAddress: string;
+  readonly payeeName: string;
+  readonly payeeTaxId: string | null;
+  readonly taxPayerType: TaxPayerType;
+  readonly taxFormType: string;
+  readonly grossIncomeAmount: number;
+  readonly withholdingTaxPercent: number;
+  readonly withholdingTaxAmount: number;
+  readonly netIncomeAmount: number;
+}
+
 export interface InstructorEarningsSummary {
   readonly cumulativeEarnings: number;
   readonly latestPayoutAmount: number;

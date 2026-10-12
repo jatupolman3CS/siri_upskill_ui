@@ -135,12 +135,14 @@
 
   <!-- Reject Modal -->
   @if (rejectingCourse(); as course) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-3xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
-        <div>
-          <h2 class="tone-red text-lg font-bold text-[var(--tone-fg)]">{{ 'admin.moderation.rejectModalTitle' | translate }}</h2>
-          <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ course.title }}</p>
-        </div>
+    <app-modal
+      [open]="true"
+      (openChange)="closeRejectModal()"
+      [titleText]="'admin.moderation.rejectModalTitle' | translate"
+      [closeOnOverlayClick]="false"
+    >
+      <div class="space-y-5">
+        <p class="text-xs text-[var(--color-text-muted)]">{{ course.title }}</p>
 
         <div class="space-y-2">
           <label for="course-reject-reason-textarea" class="text-xs font-bold text-[var(--color-text)]">{{ 'admin.moderation.rejectReasonLabel' | translate }}</label>
@@ -152,30 +154,30 @@
             class="w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           ></textarea>
         </div>
-
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            (click)="closeRejectModal()"
-            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-          >
-            {{ 'admin.moderation.btnCancel' | translate }}
-          </button>
-          <button
-            type="button"
-            (click)="confirmReject()"
-            [disabled]="isSubmittingReject() || !rejectionReason().trim()"
-            class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:opacity-90 disabled:opacity-50"
-          >
-            @if (isSubmittingReject()) {
-              <app-spinner size="xs" color="white" />
-              <span>{{ 'admin.moderation.submitting' | translate }}</span>
-            } @else {
-              <span>{{ 'admin.moderation.btnConfirmReject' | translate }}</span>
-            }
-          </button>
-        </div>
       </div>
-    </div>
+
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closeRejectModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.moderation.btnCancel' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="confirmReject()"
+          [disabled]="isSubmittingReject() || !rejectionReason().trim()"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-danger)] px-5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:opacity-90 disabled:opacity-50"
+        >
+          @if (isSubmittingReject()) {
+            <app-spinner size="xs" color="white" />
+            <span>{{ 'admin.moderation.submitting' | translate }}</span>
+          } @else {
+            <span>{{ 'admin.moderation.btnConfirmReject' | translate }}</span>
+          }
+        </button>
+      </div>
+    </app-modal>
   }
 </div>

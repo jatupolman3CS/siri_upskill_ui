@@ -1,24 +1,23 @@
 @if (isVisible()) {
   <aside
     role="region"
-    aria-label="การยินยอมคุกกี้และข้อมูลส่วนบุคคล"
+    [attr.aria-label]="'shared.consent.regionLabel' | translate"
     class="fixed bottom-0 inset-x-0 z-50 glass-panel p-4 sm:p-6 bg-[var(--glass-bg-strong)] border-x-0 border-b-0 transition-all"
   >
     <div class="mx-auto max-w-6xl space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="space-y-1.5 max-w-3xl">
           <div class="flex items-center gap-2">
-            <span class="text-lg" aria-hidden="true">🍪</span>
+            <ng-icon name="phosphorCookie" class="text-lg" aria-hidden="true" />
             <h2 class="text-sm font-bold text-[var(--color-text)]">
-              การใช้งานคุกกี้และการคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+              {{ 'shared.consent.title' | translate }}
             </h2>
           </div>
           <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
-            SiriUpSkill ใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงานได้อย่างถูกต้อง และคุกกี้วิเคราะห์เพื่อพัฒนาประสบการณ์การเรียนรู้ของคุณ
-            คุณสามารถศึกษารายละเอียดเพิ่มเติมได้ที่
-            <a routerLink="/privacy" class="text-[var(--color-primary-text)] underline hover:text-[var(--color-primary-text)]">นโยบายความเป็นส่วนตัว</a>
-            และ
-            <a routerLink="/terms" class="text-[var(--color-primary-text)] underline hover:text-[var(--color-primary-text)]">ข้อกำหนดการใช้งาน</a>
+            {{ 'shared.consent.body' | translate }}
+            <a routerLink="/privacy" class="text-[var(--color-primary-text)] underline hover:text-[var(--color-primary-text)]">{{ 'shared.consent.privacyLink' | translate }}</a>
+            {{ 'shared.consent.and' | translate }}
+            <a routerLink="/terms" class="text-[var(--color-primary-text)] underline hover:text-[var(--color-primary-text)]">{{ 'shared.consent.termsLink' | translate }}</a>
           </p>
         </div>
 
@@ -28,21 +27,21 @@
             (click)="toggleDetails()"
             class="min-h-11 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
-            ตั้งค่าคุกกี้
+            {{ 'shared.consent.settings' | translate }}
           </button>
           <button
             type="button"
             (click)="rejectNonEssential()"
             class="min-h-11 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
-            ปฏิเสธทั้งหมด
+            {{ 'shared.consent.rejectAll' | translate }}
           </button>
           <button
             type="button"
             (click)="acceptAll()"
             class="min-h-11 px-4 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
-            ยอมรับทั้งหมด
+            {{ 'shared.consent.acceptAll' | translate }}
           </button>
         </div>
       </div>
@@ -52,15 +51,15 @@
         <div class="pt-4 border-t border-[var(--color-border)] grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] space-y-1">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-[var(--color-text)]">คุกกี้ที่จำเป็น (Essential)</span>
-              <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[var(--color-border)] text-[var(--color-text-muted)]">เปิดตลอดเวลา</span>
+              <span class="text-xs font-bold text-[var(--color-text)]">{{ 'shared.consent.essential.title' | translate }}</span>
+              <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-[var(--color-border)] text-[var(--color-text-muted)]">{{ 'shared.consent.essential.badge' | translate }}</span>
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-tight">จำเป็นสำหรับการเข้าสู่ระบบและการรักษาความปลอดภัย</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-tight">{{ 'shared.consent.essential.description' | translate }}</p>
           </div>
 
           <div class="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] space-y-1">
             <div class="flex items-center justify-between">
-              <label for="consent-analytics" class="flex min-h-11 flex-1 items-center text-xs font-bold text-[var(--color-text)] cursor-pointer">คุกกี้วิเคราะห์ (Analytics)</label>
+              <label for="consent-analytics" class="flex min-h-11 flex-1 items-center text-xs font-bold text-[var(--color-text)] cursor-pointer">{{ 'shared.consent.analytics.title' | translate }}</label>
               <input
                 type="checkbox"
                 id="consent-analytics"
@@ -69,12 +68,12 @@
                 class="rounded border-[var(--color-border)] text-[var(--color-primary-text)] focus:ring-[var(--color-focus-ring)] cursor-pointer"
               />
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-tight">ช่วยให้เราปรับปรุงและพัฒนาเนื้อหาหลักสูตร</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-tight">{{ 'shared.consent.analytics.description' | translate }}</p>
           </div>
 
           <div class="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] space-y-1">
             <div class="flex items-center justify-between">
-              <label for="consent-marketing" class="flex min-h-11 flex-1 items-center text-xs font-bold text-[var(--color-text)] cursor-pointer">คุกกี้การตลาด (Marketing)</label>
+              <label for="consent-marketing" class="flex min-h-11 flex-1 items-center text-xs font-bold text-[var(--color-text)] cursor-pointer">{{ 'shared.consent.marketing.title' | translate }}</label>
               <input
                 type="checkbox"
                 id="consent-marketing"
@@ -83,7 +82,7 @@
                 class="rounded border-[var(--color-border)] text-[var(--color-primary-text)] focus:ring-[var(--color-focus-ring)] cursor-pointer"
               />
             </div>
-            <p class="text-[11px] text-[var(--color-text-muted)] leading-tight">แนะนำหลักสูตรและโปรโมชันที่เหมาะกับความสนใจของคุณ</p>
+            <p class="text-[11px] text-[var(--color-text-muted)] leading-tight">{{ 'shared.consent.marketing.description' | translate }}</p>
           </div>
         </div>
 
@@ -93,7 +92,7 @@
             (click)="saveCustom()"
             class="min-h-11 px-4 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
-            บันทึกการตั้งค่า
+            {{ 'shared.consent.save' | translate }}
           </button>
         </div>
       }

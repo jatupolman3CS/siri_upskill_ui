@@ -487,7 +487,14 @@
                   </span>
                   <span class="font-bold">{{ trailerUploadProgress() }}%</span>
                 </div>
-                <div class="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden">
+                <div
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-valuenow]="trailerUploadProgress()"
+                  [attr.aria-label]="'instructor.builder.curriculum.uploadingVideo' | translate"
+                  class="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden"
+                >
                   <div
                     class="bg-[var(--color-primary)] h-1.5 rounded-full transition-all duration-300"
                     [style.width.%]="trailerUploadProgress()"

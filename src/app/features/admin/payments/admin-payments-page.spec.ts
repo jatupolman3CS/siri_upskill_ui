@@ -147,7 +147,11 @@ describe('AdminPaymentsPage', () => {
     component.openResolveModal(MOCK_OPS_ENTRIES.items[0]);
     await settle();
 
-    const modalTitle = harness.routeNativeElement?.querySelector('h3')?.textContent ?? '';
+    const dialog = harness.routeNativeElement?.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog).not.toBeNull();
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const titleId = dialog.getAttribute('aria-labelledby') ?? '';
+    const modalTitle = harness.routeNativeElement?.querySelector(`#${titleId}`)?.textContent ?? '';
     expect(modalTitle).toContain('ดำเนินการแก้ไขเคสการชำระเงิน');
 
     component.submitResolve();

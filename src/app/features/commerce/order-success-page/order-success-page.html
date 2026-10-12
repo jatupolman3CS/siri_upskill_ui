@@ -12,10 +12,10 @@
         <ng-icon name="phosphorCheckCircle" class="text-4xl" />
       </div>
       <h1 class="text-2xl font-black text-[var(--color-text)] sm:text-3xl">
-        ชำระเงินสำเร็จเรียบร้อยแล้ว!
+        {{ 'checkout.success.heading' | translate }}
       </h1>
       <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
-        ระบบได้ทำการเปิดสิทธิ์เข้าเรียนคอร์สของคุณเรียบร้อยแล้ว คุณสามารถเริ่มเรียนได้ทันที
+        {{ 'checkout.success.subheading' | translate }}
       </p>
 
     </div>
@@ -24,22 +24,22 @@
     <div class="animate-fade-in-up stagger-1 rounded-3xl glass-card p-6 sm:p-8 space-y-6 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--color-border)] pb-6">
         <div>
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">เลขที่คำสั่งซื้อ</span>
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'checkout.success.orderNo' | translate }}</span>
           <p class="text-base font-mono font-bold text-[var(--color-text)]">{{ ord.orderNo }}</p>
         </div>
         <div>
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">วิธีชำระเงิน</span>
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'checkout.paymentMethodHeading' | translate }}</span>
           <p class="text-xs font-bold text-[var(--color-text)]">{{ ord.paymentMethod | translate }}</p>
         </div>
         <div>
-          <span class="text-xs font-semibold text-[var(--color-text-muted)]">ยอดชำระสุทธิ</span>
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'orders.detail.netTotal' | translate }}</span>
           <p class="text-base font-black text-[var(--color-primary-text)]">{{ ord.totalAmount | currencyThb }}</p>
         </div>
       </div>
 
       <!-- Purchased Courses Section -->
       <div class="space-y-4">
-        <h2 class="text-sm font-bold text-[var(--color-text)]">คอร์สเรียนในคำสั่งซื้อนี้</h2>
+        <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'checkout.success.coursesHeading' | translate }}</h2>
 
         <div class="space-y-3">
           @for (course of ord.purchasedCourses; track course.courseId) {
@@ -61,7 +61,7 @@
                 class="btn-tactile hit-44 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
               >
                 <ng-icon name="phosphorPlayCircle" class="text-base" />
-                <span>เริ่มเรียนทันที</span>
+                <span>{{ 'checkout.success.startNow' | translate }}</span>
               </a>
             </div>
           }
@@ -77,14 +77,14 @@
           class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl glass-card px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
         >
           <ng-icon name="phosphorFilePdf" class="tone-red text-base text-[var(--tone-fg)]" />
-          <span>ดาวน์โหลดใบเสร็จรับเงิน (PDF)</span>
+          <span>{{ 'checkout.success.downloadReceipt' | translate }}</span>
         </button>
 
         <a
           routerLink="/my-courses"
           class="hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
         >
-          <span>ไปยังหน้าคอร์สของฉัน</span>
+          <span>{{ 'checkout.success.goToMyCourses' | translate }}</span>
           <ng-icon name="phosphorArrowRight" />
         </a>
       </div>

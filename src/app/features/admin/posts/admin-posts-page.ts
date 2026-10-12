@@ -19,6 +19,7 @@ import {
 import { PostItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 
@@ -40,6 +41,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 export class AdminPostsPage implements OnInit {
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly posts = signal<PostItem[]>([]);
   protected readonly isLoading = signal(false);
@@ -52,8 +54,8 @@ export class AdminPostsPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'จัดการบทความและบล็อก | SIRI UpSkill Admin',
-      description: 'ระบบ CMS จัดการบทความและข่าวสาร',
+      title: this.translation.t('admin.posts.seo.title'),
+      description: this.translation.t('admin.posts.seo.description'),
       path: '/admin/posts',
       robots: 'noindex',
     });

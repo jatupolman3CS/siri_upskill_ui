@@ -30,6 +30,7 @@ import { AdminDashboardSummaryResponse } from './data/admin-dashboard-api.models
 import { AdminDashboardApiService } from './data/admin-dashboard-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 
@@ -61,6 +62,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
 })
 export class AdminDashboardPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
   private readonly dashboardApi = inject(AdminDashboardApiService);
 
   protected readonly isLoading = signal(true);
@@ -69,8 +71,8 @@ export class AdminDashboardPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'แดชบอร์ดผู้ดูแลระบบ | SIRI UpSkill Admin',
-      description: 'ภาพรวมระบบ จัดการแบนเนอร์ ข่าวสาร และรอบจ่ายเงิน',
+      title: this.translation.t('admin.dashboard.seoTitle'),
+      description: this.translation.t('admin.dashboard.seoDescription'),
       path: '/admin',
       robots: 'noindex',
     });

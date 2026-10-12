@@ -4,7 +4,7 @@
     <div>
       <div class="flex items-center gap-2">
         <h1 class="text-2xl font-black tracking-tight text-[var(--color-text)]">
-          การจัดการชำระเงิน & Ops Queue
+          {{ 'admin.payments.title' | translate }}
         </h1>
         <span class="tone-green inline-flex items-center gap-1.5 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
           <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)] animate-pulse"></span>
@@ -12,7 +12,7 @@
         </span>
       </div>
       <p class="mt-1 text-sm text-[var(--color-text-muted)]">
-        ตรวจสอบรายการผิดปกติ, จัดการคิวงานที่ต้องตรวจสอบ (Ops Queue) และอนุมัติการคืนเงิน
+        {{ 'admin.payments.subtitle' | translate }}
       </p>
     </div>
 
@@ -25,7 +25,7 @@
         class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl glass-card px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
       >
         <ng-icon name="phosphorArrowClockwise" [class.animate-spin]="loading()" class="text-base" />
-        <span>รีเฟรช</span>
+        <span>{{ 'admin.liveStatus.refresh' | translate }}</span>
       </button>
     </div>
   </div>
@@ -37,7 +37,7 @@
         <ng-icon name="phosphorWarningCircle" class="text-lg shrink-0" />
         <span>{{ errorMessage() }}</span>
       </div>
-      <button type="button" (click)="errorMessage.set(null)" class="hit-44 text-xs font-bold hover:underline">ปิด</button>
+      <button type="button" (click)="errorMessage.set(null)" class="hit-44 text-xs font-bold hover:underline">{{ 'shared.modal.close' | translate }}</button>
     </div>
   }
 
@@ -47,7 +47,7 @@
         <ng-icon name="phosphorCheckCircle" class="text-lg shrink-0" />
         <span>{{ successMessage() }}</span>
       </div>
-      <button type="button" (click)="successMessage.set(null)" class="hit-44 text-xs font-bold hover:underline">ปิด</button>
+      <button type="button" (click)="successMessage.set(null)" class="hit-44 text-xs font-bold hover:underline">{{ 'shared.modal.close' | translate }}</button>
     </div>
   }
 
@@ -56,7 +56,7 @@
     <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          Ops Queue ค้างตรวจ (รายการ)
+          {{ 'admin.payments.kpi.opsQueueTitle' | translate }}
         </span>
         <div class="tone-gold flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorWarning" class="text-lg" />
@@ -66,14 +66,14 @@
         <div class="text-3xl font-black tracking-tight text-[var(--color-text)]">
           {{ opsTotalCount() }}
         </div>
-        <p class="mt-1 text-xs text-[var(--color-text-muted)]">เคสจ่ายช้า / ซ้ำ / รอเคลียร์</p>
+        <p class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'admin.payments.kpi.opsQueueHint' | translate }}</p>
       </div>
     </div>
 
     <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          คำขอคืนเงินรอตรวจ (รายการ)
+          {{ 'admin.payments.kpi.refundsTitle' | translate }}
         </span>
         <div class="tone-red flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorArrowsDownUp" class="text-lg" />
@@ -83,14 +83,14 @@
         <div class="text-3xl font-black tracking-tight text-[var(--color-text)]">
           {{ refundsTotalCount() }}
         </div>
-        <p class="mt-1 text-xs text-[var(--color-text-muted)]">ผู้เรียนขอคืนเงิน</p>
+        <p class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'admin.payments.kpi.refundsHint' | translate }}</p>
       </div>
     </div>
 
     <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          เกตเวย์การชำระเงิน
+          {{ 'admin.payments.kpi.gatewayTitle' | translate }}
         </span>
         <div class="tone-blue flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorCreditCard" class="text-lg" />
@@ -100,7 +100,7 @@
         <div class="text-xl font-black tracking-tight text-[var(--color-text)]">
           Stripe PromptPay
         </div>
-        <p class="tone-green mt-1 text-xs text-[var(--tone-fg)] font-semibold">Webhooks & Auto-reconciliation Active</p>
+        <p class="tone-green mt-1 text-xs text-[var(--tone-fg)] font-semibold">{{ 'admin.payments.kpi.gatewayHint' | translate }}</p>
       </div>
     </div>
   </div>
@@ -117,7 +117,7 @@
       class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
     >
       <ng-icon name="phosphorWarningCircle" class="text-base" />
-      <span>คิวตรวจสอบความผิดปกติ (Ops Queue)</span>
+      <span>{{ 'admin.payments.tabs.opsQueue' | translate }}</span>
       <span class="tone-gold rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
         {{ opsTotalCount() }}
       </span>
@@ -133,7 +133,7 @@
       class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
     >
       <ng-icon name="phosphorArrowsDownUp" class="text-base" />
-      <span>คำขอคืนเงิน (Refunds)</span>
+      <span>{{ 'admin.payments.tabs.refunds' | translate }}</span>
       <span class="tone-red rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
         {{ refundsTotalCount() }}
       </span>
@@ -144,10 +144,15 @@
   @if (activeTab() === 'ops-queue') {
     <div class="animate-fade-in-up stagger-3 space-y-4">
       <!-- Status Filter Buttons -->
-      <div class="flex flex-wrap items-center gap-2">
+      <div
+        role="group"
+        [attr.aria-label]="'a11y.admin.paymentOpsStatusFilter' | translate"
+        class="flex flex-wrap items-center gap-2"
+      >
         <button
           type="button"
           (click)="setStatusFilter('ALL')"
+          [attr.aria-pressed]="opsStatusFilter() === 'ALL'"
           [class]="
             opsStatusFilter() === 'ALL'
               ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
@@ -155,11 +160,12 @@
           "
           class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
-          ทั้งหมด
+          {{ 'admin.payments.filter.all' | translate }}
         </button>
         <button
           type="button"
           (click)="setStatusFilter('Open')"
+          [attr.aria-pressed]="opsStatusFilter() === 'Open'"
           [class]="
             opsStatusFilter() === 'Open'
               ? 'tone-gold bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
@@ -167,11 +173,12 @@
           "
           class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
-          รอตรวจสอบ (Open)
+          {{ 'admin.payments.filter.open' | translate }}
         </button>
         <button
           type="button"
           (click)="setStatusFilter('InProgress')"
+          [attr.aria-pressed]="opsStatusFilter() === 'InProgress'"
           [class]="
             opsStatusFilter() === 'InProgress'
               ? 'tone-blue bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
@@ -179,11 +186,12 @@
           "
           class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
-          กำลังดำเนินการ (In Progress)
+          {{ 'admin.payments.filter.inProgress' | translate }}
         </button>
         <button
           type="button"
           (click)="setStatusFilter('Resolved')"
+          [attr.aria-pressed]="opsStatusFilter() === 'Resolved'"
           [class]="
             opsStatusFilter() === 'Resolved'
               ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
@@ -191,11 +199,12 @@
           "
           class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
-          แก้ไขแล้ว (Resolved)
+          {{ 'admin.payments.filter.resolved' | translate }}
         </button>
         <button
           type="button"
           (click)="setStatusFilter('Dismissed')"
+          [attr.aria-pressed]="opsStatusFilter() === 'Dismissed'"
           [class]="
             opsStatusFilter() === 'Dismissed'
               ? 'bg-[var(--color-text-muted)] text-[var(--color-text-inverse)]'
@@ -203,7 +212,7 @@
           "
           class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
         >
-          ยกเลิก/ปิดเคส (Dismissed)
+          {{ 'admin.payments.filter.dismissed' | translate }}
         </button>
       </div>
 
@@ -213,12 +222,12 @@
           <table class="w-full text-left text-sm">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>
-                <th class="px-5 py-3.5">คำสั่งซื้อ / รายการ</th>
-                <th class="px-5 py-3.5">สาเหตุที่ต้องตรวจสอบ</th>
-                <th class="px-5 py-3.5">ผู้ซื้อ (Email)</th>
-                <th class="px-5 py-3.5">ยอดชำระ</th>
-                <th class="px-5 py-3.5">สถานะคิว</th>
-                <th class="px-5 py-3.5 text-right">การดำเนินการ</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.order' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.reason' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.buyer' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.amount' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.status' | translate }}</th>
+                <th class="px-5 py-3.5 text-right">{{ 'admin.payments.table.actions' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--color-border)]">
@@ -227,7 +236,7 @@
                   <td colspan="6" class="px-5 py-16 text-center text-[var(--color-text-muted)]">
                     <div class="flex flex-col items-center gap-3">
                       <app-spinner size="md" />
-                      <span>กำลังโหลดข้อมูล Ops Queue...</span>
+                      <span>{{ 'admin.payments.ops.loading' | translate }}</span>
                     </div>
                   </td>
                 </tr>
@@ -236,8 +245,8 @@
                   <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
                     <div class="flex flex-col items-center gap-2">
                       <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)]" />
-                      <p class="font-bold text-[var(--color-text)]">ไม่พบรายการที่ต้องตรวจสอบ</p>
-                      <p class="text-xs">ระบบการชำระเงินทำงานปกติ ไม่มีเคสค้างในสถานะนี้</p>
+                      <p class="font-bold text-[var(--color-text)]">{{ 'admin.payments.ops.empty.title' | translate }}</p>
+                      <p class="text-xs">{{ 'admin.payments.ops.empty.description' | translate }}</p>
                     </div>
                   </td>
                 </tr>
@@ -246,7 +255,7 @@
               @for (item of opsEntries(); track item.id) {
                 <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
                   <td class="px-5 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
-                    <div>{{ item.orderNo || 'N/A' }}</div>
+                    <div>{{ item.orderNo || ('admin.payments.notAvailable' | translate) }}</div>
                     <div class="text-[10px] text-[var(--color-text-muted)] font-normal truncate max-w-[150px]">
                       {{ item.providerPaymentIntentId || item.paymentId }}
                     </div>
@@ -258,12 +267,12 @@
                     </div>
                     @if (item.note) {
                       <div class="mt-1 text-[11px] text-[var(--color-text-muted)] italic">
-                        บันทึก: {{ item.note }}
+                        {{ 'admin.payments.ops.note' | translate: { note: item.note } }}
                       </div>
                     }
                   </td>
                   <td class="px-5 py-4 text-xs text-[var(--color-text-muted)]">
-                    {{ item.userEmail || 'ไม่พบอีเมล' }}
+                    {{ item.userEmail || ('admin.payments.ops.noEmail' | translate) }}
                   </td>
                   <td class="px-5 py-4 font-bold text-xs text-[var(--color-text)]">
                     {{ item.amount | currencyThb }}
@@ -272,22 +281,22 @@
                     @switch (item.status) {
                       @case ('Open') {
                         <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                          รอตรวจสอบ
+                          {{ 'admin.payments.ops.status.open' | translate }}
                         </span>
                       }
                       @case ('InProgress') {
                         <span class="tone-blue inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                          กำลังดำเนินการ
+                          {{ 'admin.payments.ops.status.inProgress' | translate }}
                         </span>
                       }
                       @case ('Resolved') {
                         <span class="tone-green inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                          แก้ไขแล้ว
+                          {{ 'admin.payments.ops.status.resolved' | translate }}
                         </span>
                       }
                       @case ('Dismissed') {
                         <span class="inline-flex items-center rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-xs font-bold text-[var(--color-text-muted)]">
-                          ปิดเคส
+                          {{ 'admin.payments.ops.status.dismissed' | translate }}
                         </span>
                       }
                     }
@@ -300,7 +309,7 @@
                           (click)="assignToSelf(item)"
                           class="btn-tactile hit-44 rounded-xl glass-card px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
                         >
-                          รับเรื่อง
+                          {{ 'admin.payments.ops.action.assign' | translate }}
                         </button>
                       }
 
@@ -310,17 +319,17 @@
                           (click)="openResolveModal(item)"
                           class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                         >
-                          ดำเนินการ
+                          {{ 'admin.payments.ops.action.resolve' | translate }}
                         </button>
                         <button
                           type="button"
                           (click)="openDismissModal(item)"
                           class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                         >
-                          ยกเลิก
+                          {{ 'admin.payments.ops.action.dismiss' | translate }}
                         </button>
                       } @else {
-                        <span class="text-xs text-[var(--color-text-muted)] italic">เสร็จสิ้น</span>
+                        <span class="text-xs text-[var(--color-text-muted)] italic">{{ 'admin.payments.ops.action.done' | translate }}</span>
                       }
                     </div>
                   </td>
@@ -341,12 +350,12 @@
           <table class="w-full text-left text-sm">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>
-                <th class="px-5 py-3.5">รหัสคำขอ</th>
-                <th class="px-5 py-3.5">สาเหตุการขอคืนเงิน</th>
-                <th class="px-5 py-3.5">ยอดขอคืน</th>
-                <th class="px-5 py-3.5">วันที่ขอคืน</th>
-                <th class="px-5 py-3.5">สถานะ</th>
-                <th class="px-5 py-3.5 text-right">การดำเนินการ</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.id' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.reason' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.amount' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.requestedAt' | translate }}</th>
+                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.status' | translate }}</th>
+                <th class="px-5 py-3.5 text-right">{{ 'admin.payments.table.actions' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--color-border)]">
@@ -355,7 +364,7 @@
                   <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
                     <div class="flex flex-col items-center gap-2">
                       <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)] animate-pop-in" />
-                      <p class="font-bold text-[var(--color-text)]">ไม่มีคำขอคืนเงินที่รอดำเนินการ</p>
+                      <p class="font-bold text-[var(--color-text)]">{{ 'admin.payments.refunds.empty' | translate }}</p>
                     </div>
                   </td>
                 </tr>
@@ -387,14 +396,14 @@
                         (click)="openRefundModal(refund, 'approve')"
                         class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                       >
-                        อนุมัติคืนเงิน
+                        {{ 'admin.payments.refunds.approve' | translate }}
                       </button>
                       <button
                         type="button"
                         (click)="openRefundModal(refund, 'reject')"
                         class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                       >
-                        ปฏิเสธ
+                        {{ 'admin.payments.refunds.reject' | translate }}
                       </button>
                     </div>
                   </td>
@@ -409,247 +418,203 @@
 
   <!-- Resolve Modal -->
   @if (selectedEntryForResolve()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <div class="flex items-center gap-2">
-            <div class="tone-green flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--tone-bg)] text-[var(--tone-fg)] font-bold">
-              <ng-icon name="phosphorCheckCircle" class="text-lg" />
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-[var(--color-text)]">
-                ดำเนินการแก้ไขเคสการชำระเงิน
-              </h3>
-              <p class="text-xs text-[var(--color-text-muted)]">
-                คำสั่งซื้อ: {{ selectedEntryForResolve()?.orderNo }} ({{ selectedEntryForResolve()?.amount | currencyThb }})
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            (click)="closeResolveModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
-          </button>
-        </div>
+    <app-modal
+      [open]="true"
+      (openChange)="closeResolveModal()"
+      [titleText]="'admin.payments.resolveModal.title' | translate"
+      [closeOnOverlayClick]="false"
+    >
+      <p class="mb-4 text-xs text-[var(--color-text-muted)]">
+        {{ 'admin.payments.resolveModal.orderLine' | translate: { orderNo: selectedEntryForResolve()?.orderNo ?? '', amount: ((selectedEntryForResolve()?.amount | currencyThb) ?? '') } }}
+      </p>
 
-        <div class="space-y-4">
-          <div>
-            <span class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-              เลือกวิธีการแก้ไข
-            </span>
-            <div class="grid grid-cols-1 gap-2">
-              <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
-                <input
-                  type="radio"
-                  name="action"
-                  value="Refund"
-                  [(ngModel)]="resolveAction"
-                  class="mt-1 text-[var(--color-primary-text)]"
-                />
-                <div>
-                  <div class="text-xs font-bold text-[var(--color-text)]">คืนเงินให้ผู้ซื้อ (Refund via Stripe)</div>
-                  <div class="text-[11px] text-[var(--color-text-muted)]">ยิง API ขอคืนเงินไปยัง Stripe, ยกเลิกส่วนลด และส่งอีเมลแจ้งผู้ซื้อ</div>
-                </div>
-              </label>
-
-              <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
-                <input
-                  type="radio"
-                  name="action"
-                  value="ReopenAndFulfillOrder"
-                  [(ngModel)]="resolveAction"
-                  class="mt-1 text-[var(--color-primary-text)]"
-                />
-                <div>
-                  <div class="text-xs font-bold text-[var(--color-text)]">เปิดออร์เดอร์และมอบสิทธิ์เข้าเรียน (Reopen & Fulfill)</div>
-                  <div class="text-[11px] text-[var(--color-text-muted)]">ปรับสถานะออร์เดอร์เป็นชำระเงินแล้ว, ลงทะเบียนคอร์สให้อัตโนมัติ และส่งใบเสร็จ</div>
-                </div>
-              </label>
-
-              <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
-                <input
-                  type="radio"
-                  name="action"
-                  value="GrantAccessOnly"
-                  [(ngModel)]="resolveAction"
-                  class="mt-1 text-[var(--color-primary-text)]"
-                />
-                <div>
-                  <div class="text-xs font-bold text-[var(--color-text)]">มอบสิทธิ์เข้าเรียนอย่างเดียว (Grant Access Only)</div>
-                  <div class="text-[11px] text-[var(--color-text-muted)]">เปิดสิทธิ์ให้นักเรียนเข้าเรียนคอร์สในออร์เดอร์โดยไม่เปลี่ยนสถานะบัญชี</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label for="payment-resolve-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
-              บันทึกการดำเนินการ (Notes)
+      <div class="space-y-4">
+        <div>
+          <span class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+            {{ 'admin.payments.resolveModal.chooseAction' | translate }}
+          </span>
+          <div class="grid grid-cols-1 gap-2">
+            <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
+              <input
+                type="radio"
+                name="action"
+                value="Refund"
+                [(ngModel)]="resolveAction"
+                class="mt-1 text-[var(--color-primary-text)]"
+              />
+              <div>
+                <div class="text-xs font-bold text-[var(--color-text)]">{{ 'admin.payments.resolveModal.refund.title' | translate }}</div>
+                <div class="text-[11px] text-[var(--color-text-muted)]">{{ 'admin.payments.resolveModal.refund.description' | translate }}</div>
+              </div>
             </label>
-            <textarea
-              id="payment-resolve-note-textarea"
-              [(ngModel)]="resolveNote"
-              rows="3"
-              placeholder="ระบุเหตุผลหรือรายละเอียดการตรวจสอบ..."
-              class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-            ></textarea>
+
+            <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
+              <input
+                type="radio"
+                name="action"
+                value="ReopenAndFulfillOrder"
+                [(ngModel)]="resolveAction"
+                class="mt-1 text-[var(--color-primary-text)]"
+              />
+              <div>
+                <div class="text-xs font-bold text-[var(--color-text)]">{{ 'admin.payments.resolveModal.reopen.title' | translate }}</div>
+                <div class="text-[11px] text-[var(--color-text-muted)]">{{ 'admin.payments.resolveModal.reopen.description' | translate }}</div>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 rounded-xl border border-[var(--color-border)] p-3 cursor-pointer hover:bg-[var(--color-surface-muted)] transition">
+              <input
+                type="radio"
+                name="action"
+                value="GrantAccessOnly"
+                [(ngModel)]="resolveAction"
+                class="mt-1 text-[var(--color-primary-text)]"
+              />
+              <div>
+                <div class="text-xs font-bold text-[var(--color-text)]">{{ 'admin.payments.resolveModal.grant.title' | translate }}</div>
+                <div class="text-[11px] text-[var(--color-text-muted)]">{{ 'admin.payments.resolveModal.grant.description' | translate }}</div>
+              </div>
+            </label>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 border-t border-[var(--color-border)] pt-4">
-          <button
-            type="button"
-            (click)="closeResolveModal()"
-            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-          >
-            ยกเลิก
-          </button>
-          <button
-            type="button"
-            (click)="submitResolve()"
-            [disabled]="isSubmittingResolve()"
-            class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--tone-fg)] px-4 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
-          >
-            @if (isSubmittingResolve()) {
-              <app-spinner size="xs" color="current" />
-            }
-            <span>ยืนยันการดำเนินการ</span>
-          </button>
+        <div>
+          <label for="payment-resolve-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+            {{ 'admin.payments.resolveModal.noteLabel' | translate }}
+          </label>
+          <textarea
+            id="payment-resolve-note-textarea"
+            [(ngModel)]="resolveNote"
+            rows="3"
+            [placeholder]="'admin.payments.resolveModal.notePlaceholder' | translate"
+            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          ></textarea>
         </div>
       </div>
-    </div>
+
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closeResolveModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.moderation.btnCancel' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="submitResolve()"
+          [disabled]="isSubmittingResolve()"
+          class="tone-green btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--tone-fg)] px-4 py-2 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
+        >
+          @if (isSubmittingResolve()) {
+            <app-spinner size="xs" color="current" />
+          }
+          <span>{{ 'admin.payments.resolveModal.submit' | translate }}</span>
+        </button>
+      </div>
+    </app-modal>
   }
 
   <!-- Dismiss Modal -->
   @if (selectedEntryForDismiss()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h3 class="tone-red text-base font-bold text-[var(--tone-fg)] flex items-center gap-2">
-            <ng-icon name="phosphorWarningCircle" class="text-lg" />
-            <span>ปิดเคส / ยกเลิกรายการ</span>
-          </h3>
-          <button
-            type="button"
-            (click)="closeDismissModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
-          </button>
-        </div>
+    <app-modal
+      [open]="true"
+      (openChange)="closeDismissModal()"
+      [titleText]="'admin.payments.dismissModal.title' | translate"
+      [closeOnOverlayClick]="false"
+    >
+      <p class="text-xs text-[var(--color-text-muted)]">
+        {{ 'admin.payments.dismissModal.intro' | translate }} <strong>{{ selectedEntryForDismiss()?.orderNo }}</strong>
+      </p>
 
-        <p class="text-xs text-[var(--color-text-muted)]">
-          คุณกำลังจะยกเลิกการตรวจสอบรายการสำหรับคำสั่งซื้อ <strong>{{ selectedEntryForDismiss()?.orderNo }}</strong>
-        </p>
-
-        <div>
-          <label for="payment-dismiss-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
-            เหตุผลในการยกเลิก (จำเป็น) <span class="tone-red text-[var(--tone-fg)]">*</span>
-          </label>
-          <textarea
-            id="payment-dismiss-note-textarea"
-            [(ngModel)]="dismissNote"
-            rows="3"
-            placeholder="เช่น รายการซ้ำซ้อน, ผู้ใช้ชำระเงินใหม่แล้ว..."
-            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          ></textarea>
-        </div>
-
-        <div class="flex items-center justify-end gap-3 border-t border-[var(--color-border)] pt-4">
-          <button
-            type="button"
-            (click)="closeDismissModal()"
-            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-          >
-            ย้อนกลับ
-          </button>
-          <button
-            type="button"
-            (click)="submitDismiss()"
-            [disabled]="isSubmittingDismiss() || !dismissNote().trim()"
-            class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
-          >
-            @if (isSubmittingDismiss()) {
-              <app-spinner size="xs" color="white" />
-            }
-            <span>ยืนยันยกเลิกเคส</span>
-          </button>
-        </div>
+      <div>
+        <label for="payment-dismiss-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+          {{ 'admin.payments.dismissModal.noteLabel' | translate }} <span class="tone-red text-[var(--tone-fg)]">*</span>
+        </label>
+        <textarea
+          id="payment-dismiss-note-textarea"
+          [(ngModel)]="dismissNote"
+          rows="3"
+          [placeholder]="'admin.payments.dismissModal.notePlaceholder' | translate"
+          class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        ></textarea>
       </div>
-    </div>
+
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closeDismissModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.payments.btnBack' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="submitDismiss()"
+          [disabled]="isSubmittingDismiss() || !dismissNote().trim()"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-xs hover:opacity-90 transition disabled:opacity-50"
+        >
+          @if (isSubmittingDismiss()) {
+            <app-spinner size="xs" color="white" />
+          }
+          <span>{{ 'admin.payments.dismissModal.submit' | translate }}</span>
+        </button>
+      </div>
+    </app-modal>
   }
 
   <!-- Refund Approve/Reject Modal -->
   @if (selectedRefundForAction()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-md rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h3 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            @if (selectedRefundForAction()?.action === 'approve') {
-              <span class="tone-green text-[var(--tone-fg)]">อนุมัติคำขอคืนเงิน</span>
-            } @else {
-              <span class="tone-red text-[var(--tone-fg)]">ปฏิเสธคำขอคืนเงิน</span>
-            }
-          </h3>
-          <button
-            type="button"
-            (click)="closeRefundModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
-          </button>
-        </div>
+    <app-modal
+      [open]="true"
+      (openChange)="closeRefundModal()"
+      [titleText]="selectedRefundForAction()?.action === 'approve' ? ('admin.payments.refundModal.approveTitle' | translate) : ('admin.payments.refundModal.rejectTitle' | translate)"
+      [closeOnOverlayClick]="false"
+    >
+      <p class="text-xs text-[var(--color-text-muted)]">
+        {{ 'admin.payments.refundModal.amountLabel' | translate }} <strong>{{ selectedRefundForAction()?.refund?.amount | currencyThb }}</strong> {{ 'admin.payments.refundModal.reasonInline' | translate: { reason: selectedRefundForAction()?.refund?.reason ?? '' } }}
+      </p>
 
-        <p class="text-xs text-[var(--color-text-muted)]">
-          ยอดเงิน: <strong>{{ selectedRefundForAction()?.refund?.amount | currencyThb }}</strong> (สาเหตุ: {{ selectedRefundForAction()?.refund?.reason }})
-        </p>
-
-        <div>
-          <label for="payment-refund-decision-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
-            หมายเหตุการพิจารณา
-          </label>
-          <textarea
-            id="payment-refund-decision-note-textarea"
-            [(ngModel)]="refundDecisionNote"
-            rows="3"
-            placeholder="ระบุข้อความถึงผู้เรียนหรือบันทึกภายใน..."
-            class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          ></textarea>
-        </div>
-
-        <div class="flex items-center justify-end gap-3 border-t border-[var(--color-border)] pt-4">
-          <button
-            type="button"
-            (click)="closeRefundModal()"
-            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-          >
-            ย้อนกลับ
-          </button>
-          <button
-            type="button"
-            (click)="submitRefundAction()"
-            [disabled]="isSubmittingRefundAction()"
-            [class]="
-              selectedRefundForAction()?.action === 'approve'
-                ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)] hover:opacity-90'
-                : selectedRefundForAction()?.action === 'reject'
-                  ? 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:opacity-90'
-                  : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
-            "
-            class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition disabled:opacity-50"
-          >
-            @if (isSubmittingRefundAction()) {
-              <app-spinner size="xs" color="current" />
-            }
-            <span>ยืนยัน</span>
-          </button>
-        </div>
+      <div>
+        <label for="payment-refund-decision-note-textarea" class="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
+          {{ 'admin.payments.refundModal.noteLabel' | translate }}
+        </label>
+        <textarea
+          id="payment-refund-decision-note-textarea"
+          [(ngModel)]="refundDecisionNote"
+          rows="3"
+          [placeholder]="'admin.payments.refundModal.notePlaceholder' | translate"
+          class="w-full rounded-xl glass-card px-3 py-2 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        ></textarea>
       </div>
-    </div>
+
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closeRefundModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.payments.btnBack' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="submitRefundAction()"
+          [disabled]="isSubmittingRefundAction()"
+          [class]="
+            selectedRefundForAction()?.action === 'approve'
+              ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)] hover:opacity-90'
+              : selectedRefundForAction()?.action === 'reject'
+                ? 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:opacity-90'
+                : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
+          "
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition disabled:opacity-50"
+        >
+          @if (isSubmittingRefundAction()) {
+            <app-spinner size="xs" color="current" />
+          }
+          <span>{{ 'admin.payments.refundModal.submit' | translate }}</span>
+        </button>
+      </div>
+    </app-modal>
   }
 </div>

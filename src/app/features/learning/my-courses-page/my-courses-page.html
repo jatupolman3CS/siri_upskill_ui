@@ -107,7 +107,7 @@
             @if (enrollment.progressPercent >= 100) {
               <div class="animate-pop-in absolute top-3 right-3 flex items-center gap-1 tone-green rounded-full bg-[var(--tone-fg)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--tone-bg)] shadow">
                 <ng-icon name="phosphorCertificate" />
-                <span>สำเร็จแล้ว</span>
+                <span>{{ 'myCourses.completedBadge' | translate }}</span>
               </div>
             }
           </div>
@@ -133,10 +133,17 @@
             <div class="space-y-3 pt-2 border-t border-[var(--color-border)]/60">
               <div>
                 <div class="flex items-center justify-between text-[11px] font-semibold mb-1">
-                  <span class="text-[var(--color-text-muted)]">ความคืบหน้า</span>
+                  <span class="text-[var(--color-text-muted)]">{{ 'learn.progress' | translate }}</span>
                   <span class="text-[var(--color-primary-text)]">{{ enrollment.progressPercent }}%</span>
                 </div>
-                <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+                <div
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  [attr.aria-valuenow]="enrollment.progressPercent"
+                  [attr.aria-label]="'a11y.progress.courseNamed' | translate: { name: enrollment.title || ('myCourses.courseTitleUnavailable' | translate) }"
+                  class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]"
+                >
                   <div
                     class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
                     [style.width.%]="enrollment.progressPercent"

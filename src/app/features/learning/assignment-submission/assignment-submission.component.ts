@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  phosphorFile,
+  phosphorFolderOpen,
+  phosphorPackage,
+  phosphorTimer,
+} from '@ng-icons/phosphor-icons/regular';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 import {
   AssignmentItem,
@@ -14,12 +22,14 @@ type AssignmentState = 'loading' | 'no-assignment' | 'ready' | 'error';
 @Component({
   selector: 'app-assignment-submission',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe],
   templateUrl: './assignment-submission.component.html',
   styleUrls: ['./assignment-submission.component.scss'],
+  providers: [provideIcons({ phosphorFile, phosphorFolderOpen, phosphorPackage, phosphorTimer })],
 })
 export class AssignmentSubmissionComponent {
   private readonly learningApi = inject(LearningApiService);
+  private readonly translation = inject(TranslationService);
 
   readonly episodeId = input<string | null>(null);
   readonly enrollmentId = input<string | null>(null);
@@ -68,7 +78,7 @@ export class AssignmentSubmissionComponent {
           this.state.set('no-assignment');
         } else {
           this.state.set('error');
-          this.errorMessage.set('ไม่สามารถโหลดการบ้านได้');
+          this.errorMessage.set(this.translation.t('learn.assignment.loadFailed'));
         }
       },
     });
@@ -97,7 +107,7 @@ export class AssignmentSubmissionComponent {
     if (!a || !enrollmentId) return;
 
     if (!this.storageKey().trim()) {
-      this.errorMessage.set('กรุณาระบุลิงก์หรือที่จัดเก็บไฟล์งาน');
+      this.errorMessage.set(this.translation.t('learn.assignment.storageKeyRequired'));
       return;
     }
 
@@ -114,11 +124,11 @@ export class AssignmentSubmissionComponent {
       next: (sub) => {
         this.isSubmitting.set(false);
         this.submission.set(sub);
-        this.successMessage.set('ส่งงานเรียบร้อยแล้ว');
+        this.successMessage.set(this.translation.t('learn.assignment.submitSuccess'));
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.error?.detail || 'ไม่สามารถส่งงานได้ กรุณาลองใหม่อีกครั้ง');
+        this.errorMessage.set(err.error?.detail || this.translation.t('learn.assignment.submitFailed'));
       },
     });
   }

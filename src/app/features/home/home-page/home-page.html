@@ -78,7 +78,7 @@
 
 <!-- Continue Learning Card (For Authenticated Learners) -->
 @if (recentEnrollmentResource.hasValue() && recentEnrollmentResource.value(); as enroll) {
-  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-3" aria-label="Continue Learning">
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-3" [attr.aria-label]="'home.continue.heading' | translate">
     <div class="card-hover glass-card glow-border flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border-[var(--color-primary)]/30 bg-gradient-to-r from-[var(--color-primary)]/10 to-transparent p-5 shadow-sm">
       <div class="flex items-center gap-4 w-full sm:w-auto">
         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-md">
@@ -86,20 +86,27 @@
         </div>
         <div class="min-w-0 flex-1">
           <span class="text-xs font-bold text-[var(--color-primary-text)] uppercase tracking-wider block mb-0.5">
-            เรียนต่อจากจุดเดิม
+            {{ 'home.continue.heading' | translate }}
           </span>
           <h2 class="text-base font-bold text-[var(--color-text)] truncate">
             {{ enroll.courseTitle || ('myCourses.courseTitleUnavailable' | translate) }}
           </h2>
           <div class="mt-1.5 flex items-center gap-3">
-            <div class="h-2 w-32 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+            <div
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="enroll.progressPercent"
+              [attr.aria-label]="'a11y.progress.course' | translate"
+              class="h-2 w-32 overflow-hidden rounded-full bg-[var(--color-surface-muted)]"
+            >
               <div
                 class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
                 [style.width.%]="enroll.progressPercent"
               ></div>
             </div>
             <span class="text-xs font-semibold text-[var(--color-text-muted)]">
-              ความคืบหน้า {{ enroll.progressPercent }}%
+              {{ 'home.continue.progress' | translate: { percent: enroll.progressPercent } }}
             </span>
           </div>
         </div>
@@ -109,7 +116,7 @@
         [routerLink]="['/learn', enroll.courseSlug || enroll.courseId]"
         class="btn-tactile hit-44 inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
       >
-        <span>เข้าสู่บทเรียน</span>
+        <span>{{ 'home.continue.cta' | translate }}</span>
         <ng-icon name="phosphorArrowRight" />
       </a>
     </div>
@@ -118,7 +125,7 @@
 
 <!-- Flash Sale Countdown Banner -->
 @if (activeFlashSale(); as sale) {
-  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-2" aria-label="Flash Sale Promotion">
+  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-2" [attr.aria-label]="'home.flashSale.regionLabel' | translate">
     <app-flash-sale-banner
       [title]="sale.title"
       [endDate]="sale.endsAtUtc"
@@ -129,7 +136,7 @@
 
 <!-- Promotional Banners (CMS) -->
 @if (bannersResource.hasValue() && bannersResource.value().length > 0) {
-  <section class="reveal mx-auto max-w-6xl px-4 py-6" aria-label="Promotional Banners">
+  <section class="reveal mx-auto max-w-6xl px-4 py-6" [attr.aria-label]="'home.banners.regionLabel' | translate">
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
       @for (banner of bannersResource.value(); track banner.id) {
         <a

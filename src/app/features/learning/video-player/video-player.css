@@ -1,0 +1,22 @@
+/*
+ * Range inputs of the player (seek bar, volume). The <input> itself is 44px tall so the pointer target meets the
+ * touch-target rule, while the visible track stays a thin 6px bar (10px on hover) drawn as a centred background.
+ * Colours are fixed on purpose: the controls sit over the video and look the same in every theme.
+ */
+.player-slider {
+  background-image: linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.25));
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 6px;
+  transition: background-size 150ms ease-out;
+}
+
+.player-slider:hover {
+  background-size: 100% 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-slider {
+    transition: none;
+  }
+}

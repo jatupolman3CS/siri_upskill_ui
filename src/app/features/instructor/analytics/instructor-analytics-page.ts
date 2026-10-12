@@ -18,6 +18,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import {
   InstructorAnalyticsService,
@@ -47,6 +48,7 @@ export type StudentProgressItem = InstructorStudentProgress;
 })
 export class InstructorAnalyticsPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
   private readonly analyticsService = inject(InstructorAnalyticsService);
 
   protected readonly selectedTimeRange = signal<'7d' | '30d' | '90d'>('30d');
@@ -63,8 +65,8 @@ export class InstructorAnalyticsPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'การวิเคราะห์และสถิติผู้เรียน | Instructor Studio',
-      description: 'วิเคราะห์ยอดผู้เรียน อัตราการดูจบ และสถิติบทเรียน',
+      title: this.translation.t('instructor.analytics.pageTitle'),
+      description: this.translation.t('instructor.analytics.pageDescription'),
       path: '/instructor/analytics',
       robots: 'noindex',
     });

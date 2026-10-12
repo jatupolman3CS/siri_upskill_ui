@@ -27,12 +27,15 @@ import {
   AdminUserSummary,
 } from './data/admin-users-api.models';
 import { AdminUsersApiService } from './data/admin-users-api.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Modal } from '../../../shared/modal/modal';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-users-page',
-  imports: [CommonModule, FormsModule, NgIcon, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe, Modal, Spinner],
   templateUrl: './admin-users-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -53,6 +56,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 })
 export class AdminUsersPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
   private readonly adminUsersApi = inject(AdminUsersApiService);
 
   protected readonly activeTab = signal<'users' | 'audit'>('users');
@@ -89,8 +93,8 @@ export class AdminUsersPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'จัดการผู้ใช้งานและสิทธิ์ | SIRI UpSkill Admin',
-      description: 'ระบบจัดการผู้ใช้งาน สิทธิ์การเข้าถึง และบันทึก Audit Logs',
+      title: this.translation.t('admin.users.seoTitle'),
+      description: this.translation.t('admin.users.seoDescription'),
       path: '/admin/users',
       robots: 'noindex',
     });
@@ -175,13 +179,13 @@ export class AdminUsersPage implements OnInit {
         next: (res) => {
           this.isSubmittingInvite.set(false);
           this.closeInviteModal();
-          this.showMessage('success', `เชิญผู้ใช้ ${res.email} เข้าสู่ระบบเรียบร้อยแล้ว`);
+          this.showMessage('success', this.translation.t('admin.users.messages.inviteSuccess', { email: res.email }));
           this.loadUsers();
           this.loadAuditLogs();
         },
         error: (err) => {
           this.isSubmittingInvite.set(false);
-          this.showMessage('error', err?.error?.detail || 'เกิดข้อผิดพลาดในการเชิญผู้ใช้');
+          this.showMessage('error', err?.error?.detail || this.translation.t('admin.users.messages.inviteError'));
         },
       });
   }
@@ -206,13 +210,16 @@ export class AdminUsersPage implements OnInit {
       next: () => {
         this.isSavingRole.set(false);
         this.closeEditRoleModal();
-        this.showMessage('success', `อัปเดตบทบาทของ ${user.displayName} เป็น ${newRole} สำเร็จ`);
+        this.showMessage(
+          'success',
+          this.translation.t('admin.users.messages.roleUpdated', { name: user.displayName, role: newRole }),
+        );
         this.loadUsers();
         this.loadAuditLogs();
       },
       error: () => {
         this.isSavingRole.set(false);
-        this.showMessage('error', 'เกิดข้อผิดพลาดในการอัปเดตบทบาท');
+        this.showMessage('error', this.translation.t('admin.users.messages.roleUpdateError'));
       },
     });
   }
@@ -230,20 +237,20 @@ export class AdminUsersPage implements OnInit {
     const user = this.suspendingUser();
     if (!user) return;
 
-    const reason = this.suspendReason().trim() || 'ระงับโดยผู้ดูแลระบบ';
+    const reason = this.suspendReason().trim() || this.translation.t('admin.users.messages.defaultSuspendReason');
     this.isSubmittingSuspend.set(true);
 
     this.adminUsersApi.suspendUser(user.id, { reason }).subscribe({
       next: () => {
         this.isSubmittingSuspend.set(false);
         this.closeSuspendModal();
-        this.showMessage('success', `ระงับการใช้งานบัญชี ${user.displayName} เรียบร้อยแล้ว`);
+        this.showMessage('success', this.translation.t('admin.users.messages.suspended', { name: user.displayName }));
         this.loadUsers();
         this.loadAuditLogs();
       },
       error: () => {
         this.isSubmittingSuspend.set(false);
-        this.showMessage('error', 'เกิดข้อผิดพลาดในการระงับบัญชี');
+        this.showMessage('error', this.translation.t('admin.users.messages.suspendError'));
       },
     });
   }
@@ -251,12 +258,12 @@ export class AdminUsersPage implements OnInit {
   protected reactivateUser(user: AdminUserSummary): void {
     this.adminUsersApi.reactivateUser(user.id).subscribe({
       next: () => {
-        this.showMessage('success', `คืนสิทธิ์การใช้งานบัญชี ${user.displayName} เรียบร้อยแล้ว`);
+        this.showMessage('success', this.translation.t('admin.users.messages.reactivated', { name: user.displayName }));
         this.loadUsers();
         this.loadAuditLogs();
       },
       error: () => {
-        this.showMessage('error', 'เกิดข้อผิดพลาดในการคืนสิทธิ์การใช้งาน');
+        this.showMessage('error', this.translation.t('admin.users.messages.reactivateError'));
       },
     });
   }

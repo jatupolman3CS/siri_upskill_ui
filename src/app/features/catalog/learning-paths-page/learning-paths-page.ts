@@ -20,6 +20,7 @@ import {
 import { LearningPathSummary } from '../data/learning-path-api.models';
 import { LearningPathApiService } from '../data/learning-path-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 
@@ -42,6 +43,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
 export class LearningPathsPage implements OnInit {
   private readonly learningPathApi = inject(LearningPathApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly paths = signal<LearningPathSummary[]>([]);
   protected readonly isLoading = signal(true);
@@ -49,8 +51,8 @@ export class LearningPathsPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'เส้นทางการเรียนรู้ (Learning Paths) | SIRI UpSkill',
-      description: 'แผนการเรียนรู้ที่รวบรวมหลักสูตรตั้งแต่เริ่มต้นจนถึงระดับผู้เชี่ยวชาญ เจาะลึกตามสายอาชีพ',
+      title: `${this.translation.t('learningPaths.title')} | ${this.translation.t('common.appName')}`,
+      description: this.translation.t('learningPaths.metaDescription'),
       path: '/learning-paths',
     });
 

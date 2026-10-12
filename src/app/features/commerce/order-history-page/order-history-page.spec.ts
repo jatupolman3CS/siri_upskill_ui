@@ -117,7 +117,7 @@ describe('OrderHistoryPage', () => {
   });
 
   it('filters orders by paid status when Paid tab is selected', () => {
-    const tabs = fixture.nativeElement.querySelectorAll('button[role="tab"]');
+    const tabs = fixture.nativeElement.querySelectorAll('[role="group"] button[aria-pressed]');
     const paidTab = Array.from(tabs).find((t) => (t as HTMLButtonElement).textContent?.includes('Paid')) as HTMLButtonElement;
     paidTab.click();
     fixture.detectChanges();
@@ -128,8 +128,33 @@ describe('OrderHistoryPage', () => {
     expect(text).not.toContain('SU-260825-003');
   });
 
+  it('exposes the status filter as a pressed-state button group', () => {
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('[role="group"] button[aria-pressed]'),
+    ) as HTMLButtonElement[];
+    expect(buttons.length).toBe(4);
+    expect(buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').length).toBe(1);
+
+    const paid = buttons.find((b) => b.textContent?.includes('Paid')) as HTMLButtonElement;
+    paid.click();
+    fixture.detectChanges();
+    expect(paid.getAttribute('aria-pressed')).toBe('true');
+    expect(buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').length).toBe(1);
+  });
+
+  it('announces the order details disclosure state', () => {
+    const toggle = fixture.nativeElement.querySelector('button[aria-expanded]') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.hasAttribute('aria-controls')).toBe(false);
+    toggle.click();
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    const controlled = fixture.nativeElement.querySelector(`#${toggle.getAttribute('aria-controls')}`);
+    expect(controlled).not.toBeNull();
+  });
+
   it('filters orders by awaiting payment status', () => {
-    const tabs = fixture.nativeElement.querySelectorAll('button[role="tab"]');
+    const tabs = fixture.nativeElement.querySelectorAll('[role="group"] button[aria-pressed]');
     const awaitingTab = Array.from(tabs).find((t) => (t as HTMLButtonElement).textContent?.includes('Awaiting Payment')) as HTMLButtonElement;
     awaitingTab.click();
     fixture.detectChanges();

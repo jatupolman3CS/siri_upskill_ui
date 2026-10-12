@@ -20,13 +20,15 @@ import {
 import { ContactApiService } from '../../legal/data/contact-api.service';
 import { ContactMessageItem } from '../../legal/data/contact-api.models';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { setPageMeta } from '../../../core/seo/page-meta';
+import { Modal } from '../../../shared/modal/modal';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-admin-contact-messages-page',
-  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe, Modal, Spinner],
   templateUrl: './admin-contact-messages-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -43,6 +45,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
 export class AdminContactMessagesPage implements OnInit {
   private readonly contactApi = inject(ContactApiService);
   private readonly toast = inject(ToastService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly messages = signal<readonly ContactMessageItem[]>([]);
   protected readonly isLoading = signal(false);
@@ -57,8 +60,8 @@ export class AdminContactMessagesPage implements OnInit {
 
   constructor() {
     setPageMeta({
-      title: 'จัดการข้อความติดต่อ (Contact Messages) | Admin',
-      description: 'จัดการและตอบกลับข้อความสอบถามจากผู้ใช้ SiriUpSkill',
+      title: this.translation.t('admin.contactMessages.pageTitle'),
+      description: this.translation.t('admin.contactMessages.pageDescription'),
     });
   }
 
@@ -79,7 +82,7 @@ export class AdminContactMessagesPage implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.toast.error('ไม่สามารถโหลดข้อความติดต่อได้');
+        this.toast.error(this.translation.t('admin.contactMessages.toast.loadFailed'));
         this.isLoading.set(false);
       },
     });
@@ -108,13 +111,13 @@ export class AdminContactMessagesPage implements OnInit {
     this.isResolving.set(true);
     this.contactApi.resolveContactMessage(msg.id, this.resolveNotes().trim() || undefined).subscribe({
       next: () => {
-        this.toast.success('ทำเครื่องหมายว่าจัดการข้อความเรียบร้อยแล้ว');
+        this.toast.success(this.translation.t('admin.contactMessages.toast.resolved'));
         this.isResolving.set(false);
         this.closeModal();
         this.loadMessages();
       },
       error: () => {
-        this.toast.error('เกิดข้อผิดพลาดในการอัปเดตสถานะ');
+        this.toast.error(this.translation.t('admin.contactMessages.toast.updateFailed'));
         this.isResolving.set(false);
       },
     });

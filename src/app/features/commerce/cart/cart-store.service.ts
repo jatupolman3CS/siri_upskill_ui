@@ -87,7 +87,7 @@ export class CartStore {
               this.promoError.set(null);
             } else {
               this.appliedPromo.set(null);
-              this.promoError.set(res.errorMessage || 'รหัสส่วนลดไม่ถูกต้องหรือไม่สามารถใช้ได้');
+              this.promoError.set(res.errorMessage || this.translation.t('cart.promo.invalid'));
             }
           },
           error: (err) => {
@@ -96,7 +96,7 @@ export class CartStore {
             this.promoError.set(
               err?.message
                 ? this.translation.t(err.message)
-                : 'เกิดข้อผิดพลาดในการตรวจสอบรหัสส่วนลด'
+                : this.translation.t('cart.promo.validateFailed')
             );
           },
         })

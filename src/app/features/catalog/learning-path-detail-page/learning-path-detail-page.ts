@@ -23,6 +23,7 @@ import { LearningPathDetail } from '../data/learning-path-api.models';
 import { LearningPathApiService } from '../data/learning-path-api.service';
 import { buildLearningPathJsonLd } from '../../../core/seo/schema-org.util';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 
@@ -48,6 +49,7 @@ export class LearningPathDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly learningPathApi = inject(LearningPathApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly path = signal<LearningPathDetail | null>(null);
   protected readonly isLoading = signal(true);
@@ -74,8 +76,8 @@ export class LearningPathDetailPage implements OnInit {
         }));
 
         this.seoService.set({
-          title: `${res.title} | เส้นทางการเรียนรู้ SIRI UpSkill`,
-          description: res.description || 'หลักสูตรเส้นทางการเรียนรู้แบบเป็นขั้นตอน',
+          title: this.translation.t('learningPaths.detailMetaTitle', { title: res.title }),
+          description: res.description || this.translation.t('learningPaths.detailMetaDescriptionFallback'),
           path: `/learning-paths/${res.slug}`,
           jsonLd: [
             buildLearningPathJsonLd({

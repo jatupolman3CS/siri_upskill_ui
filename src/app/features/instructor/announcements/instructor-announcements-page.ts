@@ -18,6 +18,8 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 
 import { CourseApiService } from '../../catalog/data/course-api.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { NotificationApiService } from '../../notification/data/notification-api.service';
 import { Spinner } from '../../../shared/spinner/spinner';
@@ -34,7 +36,7 @@ export interface AnnouncementHistoryItem {
 
 @Component({
   selector: 'app-instructor-announcements-page',
-  imports: [CommonModule, FormsModule, NgIcon, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, Spinner, TranslatePipe],
   templateUrl: './instructor-announcements-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -51,6 +53,7 @@ export class InstructorAnnouncementsPage implements OnInit {
   private readonly notificationApi = inject(NotificationApiService);
   private readonly courseApi = inject(CourseApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly courses = signal<{ id: string; title: string; studentsCount?: number }[]>([]);
   protected readonly isLoadingCourses = signal(false);
@@ -74,8 +77,8 @@ export class InstructorAnnouncementsPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'ส่งประกาศถึงผู้เรียน | Instructor Studio',
-      description: 'ระบบส่งข้อความประกาศและอีเมลแจ้งเตือนถึงผู้เรียนในคอร์ส',
+      title: this.translation.t('instructor.announcements.pageTitle'),
+      description: this.translation.t('instructor.announcements.pageDescription'),
       path: '/instructor/announcements',
       robots: 'noindex',
     });

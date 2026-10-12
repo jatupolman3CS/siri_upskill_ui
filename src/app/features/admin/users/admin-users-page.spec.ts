@@ -150,6 +150,31 @@ describe('AdminUsersPage', () => {
     expect(text).toContain('อัปเดตบทบาทของ สมชาย นักพัฒนา');
   });
 
+  it('exposes the role editor as a named modal dialog that Escape closes', async () => {
+    await navigate();
+    flushInitialRequests();
+    await settle();
+
+    const editRoleBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
+      (b) => b.textContent?.includes('เปลี่ยนบทบาท'),
+    );
+    editRoleBtn?.click();
+    await settle();
+
+    const dialog = harness.routeNativeElement?.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog).not.toBeNull();
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const titleId = dialog.getAttribute('aria-labelledby') ?? '';
+    expect(harness.routeNativeElement?.querySelector(`#${titleId}`)?.textContent).toContain('แก้ไขบทบาทผู้ใช้งาน');
+
+    (dialog.querySelector('select') as HTMLSelectElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
+    await settle();
+
+    expect(harness.routeNativeElement?.querySelector('[role="dialog"]')).toBeNull();
+  });
+
   it('suspends and reactivates a user account', async () => {
     await navigate();
     flushInitialRequests();

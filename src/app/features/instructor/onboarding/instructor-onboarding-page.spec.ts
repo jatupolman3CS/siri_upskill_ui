@@ -79,7 +79,7 @@ describe('InstructorOnboardingPage', () => {
   async function goToTermsStep(): Promise<void> {
     fill('#displayName', 'Test Instructor');
     fill('#bio', 'Test bio');
-    findButtonByText('ถัดไป')?.click();
+    findButtonByText(TestBed.inject(TranslationService).locale() === 'th' ? 'ถัดไป' : 'Next')?.click();
     await settle();
   }
 
@@ -88,7 +88,7 @@ describe('InstructorOnboardingPage', () => {
     agree.checked = true;
     agree.dispatchEvent(new Event('change'));
     await settle();
-    findButtonByText('ส่งใบสมัครเป็นผู้สอน')?.click();
+    findButtonByText('Submit instructor application')?.click();
     await settle();
   }
 
@@ -108,7 +108,7 @@ describe('InstructorOnboardingPage', () => {
     fill('#displayName', '  Somchai  ');
     fill('#headline', '');
     fill('#bio', ' My bio ');
-    findButtonByText('ถัดไป')?.click();
+    findButtonByText('Next')?.click();
     await settle();
     await flushPolicy();
     await agreeAndSubmit();
@@ -130,7 +130,7 @@ describe('InstructorOnboardingPage', () => {
 
     // An applicant is not an approved instructor yet, so the payout endpoint would answer 403 — it must not be called.
     httpMock.expectNone((r) => r.url.includes('/api/payout/instructor/payout-account'));
-    expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+    expect(root().textContent).toContain('Your application is under review');
   });
 
   it('has two steps (profile, terms) and no bank-account fields anywhere in the application flow', async () => {
@@ -146,8 +146,8 @@ describe('InstructorOnboardingPage', () => {
     for (const id of ['#bankName', '#accountNumber', '#accountHolder', '#promptpay']) {
       expect(root().querySelector(id)).toBeNull();
     }
-    expect(findButtonByText('ส่งใบสมัครเป็นผู้สอน')).toBeDefined();
-    expect(findButtonByText('ถัดไป')).toBeUndefined();
+    expect(findButtonByText('Submit instructor application')).toBeDefined();
+    expect(findButtonByText('Next')).toBeUndefined();
   });
 
   it('tells the applicant the bank account is added after approval on the earnings page, without claiming a payout schedule', async () => {
@@ -172,7 +172,7 @@ describe('InstructorOnboardingPage', () => {
     await settle();
 
     expect(root().textContent).toContain('already applied');
-    expect(findButtonByText('ส่งใบสมัครเป็นผู้สอน')).toBeDefined();
+    expect(findButtonByText('Submit instructor application')).toBeDefined();
   });
 
   it('does not fetch the policy (or show any policy copy) on step 1', async () => {
@@ -264,15 +264,15 @@ describe('InstructorOnboardingPage', () => {
     it('shows "waiting for review" and no application form while the application is pending', async () => {
       await openWithProfile('Pending');
 
-      expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+      expect(root().textContent).toContain('Your application is under review');
       expect(root().querySelector('#displayName')).toBeNull();
-      expect(findButtonByText('ส่งใบสมัครเป็นผู้สอน')).toBeUndefined();
+      expect(findButtonByText('Submit instructor application')).toBeUndefined();
     });
 
     it('shows the way into the studio only once the application is approved', async () => {
       await openWithProfile('Approved');
 
-      expect(root().textContent).toContain('คุณเป็นผู้สอนของ SIRI UpSkill แล้ว');
+      expect(root().textContent).toContain('You are now a SIRI UpSkill instructor');
       expect(root().querySelector('a[href="/instructor"]')).not.toBeNull();
       expect(root().querySelector('#displayName')).toBeNull();
     });
@@ -285,7 +285,7 @@ describe('InstructorOnboardingPage', () => {
       expect((root().querySelector('#bio') as HTMLTextAreaElement).value).toBe('Original bio');
 
       fill('#bio', 'Updated bio');
-      findButtonByText('ถัดไป')?.click();
+      findButtonByText('Next')?.click();
       await settle();
       await flushPolicy();
       await agreeAndSubmit();
@@ -295,7 +295,7 @@ describe('InstructorOnboardingPage', () => {
       apply.flush(existingProfile('Pending'));
       await settle();
 
-      expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+      expect(root().textContent).toContain('Your application is under review');
       expect(root().textContent).not.toContain('Your previous application was not approved');
     });
 
@@ -313,7 +313,7 @@ describe('InstructorOnboardingPage', () => {
       httpMock.expectOne('/api/catalog/instructors/me').flush(existingProfile('Pending'));
       await settle();
 
-      expect(root().textContent).toContain('ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ');
+      expect(root().textContent).toContain('Your application is under review');
       expect(root().textContent).not.toContain("Couldn't check your application");
     });
   });

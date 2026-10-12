@@ -2,10 +2,10 @@
   <!-- Page Header -->
   <div class="animate-fade-in-down mb-8 text-center">
     <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
-      เริ่มต้นเป็นผู้สอนกับ SIRI UpSkill Studio
+      {{ 'instructor.onboarding.heading' | translate }}
     </h1>
     <p class="mt-2 text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
-      แบ่งปันความรู้ ทักษะ และประสบการณ์ของคุณ สร้างรายได้และเข้าถึงผู้เรียนทั่วประเทศ
+      {{ 'instructor.onboarding.subheading' | translate }}
     </p>
   </div>
 
@@ -13,7 +13,7 @@
     <div class="tone-red animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)]">
       <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5" />
       <div>
-        <p class="font-bold">เกิดข้อผิดพลาด</p>
+        <p class="font-bold">{{ 'instructor.onboarding.errorHeading' | translate }}</p>
         <p class="mt-0.5">{{ err }}</p>
       </div>
     </div>
@@ -43,16 +43,16 @@
         <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tone-fg)] text-[var(--tone-bg)] shadow-lg">
           <ng-icon name="phosphorCheckCircle" class="text-4xl" />
         </div>
-        <h2 class="text-xl font-bold text-[var(--color-text)]">คุณเป็นผู้สอนของ SIRI UpSkill แล้ว</h2>
+        <h2 class="text-xl font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.approvedHeading' | translate }}</h2>
         <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
-          บัญชีของคุณได้รับการอนุมัติเรียบร้อยแล้ว คุณสามารถสร้างคอร์สเรียนและจัดการรายได้ใน Studio ได้ทันที
+          {{ 'instructor.onboarding.approvedDescription' | translate }}
         </p>
         <div class="pt-2">
           <a
             routerLink="/instructor"
             class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
           >
-            <span>ไปยังแดชบอร์ดผู้สอน</span>
+            <span>{{ 'instructor.onboarding.approvedDashboardLink' | translate }}</span>
             <ng-icon name="phosphorArrowRight" />
           </a>
         </div>
@@ -67,16 +67,16 @@
         <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tone-fg)] text-[var(--tone-bg)] shadow-lg">
           <ng-icon name="phosphorClock" class="text-4xl animate-spin-fast" />
         </div>
-        <h2 class="text-xl font-bold text-[var(--color-text)]">ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ</h2>
+        <h2 class="text-xl font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.pendingHeading' | translate }}</h2>
         <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
-          ทีมงาน SIRI UpSkill กำลังตรวจสอบข้อมูลและจะแจ้งผลการอนุมัติทางอีเมลภายใน 1-2 วันทำการ
+          {{ 'instructor.onboarding.pendingDescription' | translate }}
         </p>
         <div class="pt-2">
           <a
             routerLink="/courses"
             class="btn-tactile hit-44 inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
           >
-            <span>กลับไปยังหน้าหลัก</span>
+            <span>{{ 'instructor.onboarding.pendingBackHome' | translate }}</span>
             <ng-icon name="phosphorArrowRight" />
           </a>
         </div>
@@ -103,7 +103,7 @@
         >
           1
         </span>
-        <span class="text-xs font-semibold text-[var(--color-text)]">ข้อมูลผู้สอน</span>
+        <span class="text-xs font-semibold text-[var(--color-text)]">{{ 'instructor.onboarding.steps.profile' | translate }}</span>
       </div>
       <div class="h-0.5 w-8 bg-[var(--color-border)]"></div>
       <div class="flex items-center gap-2">
@@ -125,48 +125,48 @@
       @if (currentStep() === 1) {
         <div class="space-y-4">
           <div class="border-b border-[var(--color-border)] pb-4">
-            <h2 class="text-base font-bold text-[var(--color-text)]">ขั้นตอนที่ 1: ข้อมูลผู้สอนและประวัติย่อ</h2>
+            <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.steps.profileHeading' | translate }}</h2>
             <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
-              ข้อมูลนี้จะแสดงในหน้ารายละเอียดคอร์สและหน้าโปรไฟล์ผู้สอนของคุณ
+              {{ 'instructor.onboarding.profileDescription' | translate }}
             </p>
           </div>
 
           <div class="space-y-3">
             <div>
               <label for="displayName" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ชื่อ-นามสกุล / นามปากกาที่ใช้สอน <span class="tone-red text-[var(--tone-fg)]">*</span>
+                {{ 'instructor.onboarding.form.displayName' | translate }} <span class="tone-red text-[var(--tone-fg)]">*</span>
               </label>
               <input
                 id="displayName"
                 type="text"
                 [(ngModel)]="displayName"
-                placeholder="เช่น ดร. อานนท์ พัฒนากุล"
+                [placeholder]="'instructor.onboarding.form.displayNamePlaceholder' | translate"
                 class="min-h-11 w-full rounded-xl glass-card px-3.5 py-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
               />
             </div>
 
             <div>
               <label for="headline" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ตำแหน่ง / หัวข้อย่อ (Headline)
+                {{ 'instructor.onboarding.form.headline' | translate }}
               </label>
               <input
                 id="headline"
                 type="text"
                 [(ngModel)]="headline"
-                placeholder="เช่น Senior Cloud Architect & Tech Lead"
+                [placeholder]="'instructor.onboarding.form.headlinePlaceholder' | translate"
                 class="min-h-11 w-full rounded-xl glass-card px-3.5 py-2.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
               />
             </div>
 
             <div>
               <label for="bio" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ประวัติย่อ ประสบการณ์ทำงาน หรือความเชี่ยวชาญ <span class="tone-red text-[var(--tone-fg)]">*</span>
+                {{ 'instructor.onboarding.form.bio' | translate }} <span class="tone-red text-[var(--tone-fg)]">*</span>
               </label>
               <textarea
                 id="bio"
                 [(ngModel)]="bio"
                 rows="4"
-                placeholder="บอกเล่าประสบการณ์ ความเชี่ยวชาญ และเป้าหมายในการสอนของคุณ..."
+                [placeholder]="'instructor.onboarding.form.bioPlaceholder' | translate"
                 class="w-full rounded-xl glass-card p-3.5 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
               ></textarea>
             </div>
@@ -180,7 +180,7 @@
           <div class="border-b border-[var(--color-border)] pb-4">
             <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.steps.termsHeading' | translate }}</h2>
             <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
-              กรุณาตรวจสอบข้อตกลงในการเป็นผู้สอนบนแพลตฟอร์ม SIRI UpSkill
+              {{ 'instructor.onboarding.termsDescription' | translate }}
             </p>
           </div>
 
@@ -191,7 +191,7 @@
             </div>
             <p><app-payout-policy-text messageKey="instructor.onboarding.termsRevenueShare" [retryable]="false" skeletonWidth="90%" /></p>
             <p><app-payout-policy-text messageKey="instructor.onboarding.termsWithholding" [retryable]="false" skeletonWidth="80%" /></p>
-            <p>3. คอร์สเรียนจะต้องเป็นเนื้อหาที่เป็นลิขสิทธิ์ของผู้สอนเองและไม่ละเมิดทรัพย์สินทางปัญญาของบุคคลอื่น</p>
+            <p>{{ 'instructor.onboarding.termsCopyright' | translate }}</p>
           </div>
 
           <p class="flex items-start gap-2 text-xs text-[var(--color-text-muted)]" role="note">
@@ -206,7 +206,7 @@
               class="mt-1 h-4 w-4 rounded text-[var(--color-primary-text)] focus:ring-[var(--color-primary)]"
             />
             <span class="text-xs text-[var(--color-text)]">
-              ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด เงื่อนไขการเป็นผู้สอน และนโยบายความเป็นส่วนตัวของ SIRI UpSkill
+              {{ 'instructor.onboarding.termsAgree' | translate }}
             </span>
           </label>
         </div>
@@ -221,7 +221,7 @@
             class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl glass-card px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             <ng-icon name="phosphorArrowLeft" />
-            <span>ย้อนกลับ</span>
+            <span>{{ 'instructor.onboarding.actions.back' | translate }}</span>
           </button>
         } @else {
           <div></div>
@@ -233,7 +233,7 @@
             (click)="nextStep()"
             class="btn-tactile hit-44 inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
           >
-            <span>ถัดไป</span>
+            <span>{{ 'instructor.onboarding.actions.next' | translate }}</span>
             <ng-icon name="phosphorArrowRight" />
           </button>
         } @else {
@@ -245,10 +245,10 @@
           >
             @if (isSubmitting()) {
               <app-spinner size="xs" color="white" />
-              <span>กำลังส่งใบสมัคร...</span>
+              <span>{{ 'instructor.onboarding.actions.submitting' | translate }}</span>
             } @else {
               <ng-icon name="phosphorCheckCircle" class="text-base" />
-              <span>ส่งใบสมัครเป็นผู้สอน</span>
+              <span>{{ 'instructor.onboarding.actions.submit' | translate }}</span>
             }
           </button>
         }

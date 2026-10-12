@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { TranslationService } from '../../../core/i18n/translation.service';
+import { ToastService } from '../../../shared/toast/toast.service';
 import { PostItem } from '../../cms/data/cms-api.models';
 import { BlogDetailPage } from './blog-detail-page';
 
@@ -139,5 +140,64 @@ describe('BlogDetailPage', () => {
 
     const document = TestBed.inject(DOCUMENT);
     expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, nofollow');
+  });
+
+  describe('share button', () => {
+    function shareButton(): HTMLButtonElement {
+      return Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find((b) =>
+        b.textContent?.includes('Share article'),
+      ) as HTMLButtonElement;
+    }
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('uses the native share sheet with the canonical article URL when the browser has one', async () => {
+      const share = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal('navigator', { ...navigator, share });
+      await navigate('/blog/understanding-angular-signals');
+      await flushPost(POST);
+
+      shareButton().click();
+      await settle();
+
+      expect(share).toHaveBeenCalledWith({
+        title: 'Understanding Angular Signals',
+        url: `${window.location.origin}/blog/understanding-angular-signals`,
+      });
+    });
+
+    it('copies the URL and confirms with a toast when the native share sheet is unavailable', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal('navigator', { clipboard: { writeText } });
+      await navigate('/blog/understanding-angular-signals');
+      await flushPost(POST);
+
+      shareButton().click();
+      await settle();
+      await Promise.resolve();
+
+      expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/blog/understanding-angular-signals`);
+      const messages = TestBed.inject(ToastService)
+        .toasts()
+        .map((t) => t.message);
+      expect(messages).toContain('Article link copied');
+    });
+
+    it('shows an error toast when copying is not possible either', async () => {
+      vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) } });
+      await navigate('/blog/understanding-angular-signals');
+      await flushPost(POST);
+
+      shareButton().click();
+      await settle();
+      await Promise.resolve();
+
+      const toast = TestBed.inject(ToastService)
+        .toasts()
+        .find((t) => t.type === 'error');
+      expect(toast?.message).toContain('Could not copy the link');
+    });
   });
 });

@@ -26,6 +26,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
 import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { InstructorProfileResponse } from '../data/instructor-profile-api.models';
@@ -61,6 +62,7 @@ export class InstructorOnboardingPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly currentStep = signal<1 | 2>(1);
   protected readonly isLoading = signal(false);
@@ -94,8 +96,8 @@ export class InstructorOnboardingPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'สมัครเป็นผู้สอน | SIRI UpSkill Studio',
-      description: 'เริ่มต้นสร้างและเผยแพร่คอร์สเรียนออนไลน์ของคุณกับ SIRI UpSkill',
+      title: this.translation.t('instructor.onboarding.pageTitle'),
+      description: this.translation.t('instructor.onboarding.pageDescription'),
       path: '/instructor/onboarding',
       robots: 'noindex',
     });
@@ -128,7 +130,7 @@ export class InstructorOnboardingPage implements OnInit {
   protected nextStep(): void {
     if (this.currentStep() === 1) {
       if (!this.displayName.trim() || !this.bio.trim()) {
-        this.submitError.set('กรุณากรอกชื่อผู้สอนและประวัติย่อให้ครบถ้วน');
+        this.submitError.set(this.translation.t('instructor.onboarding.errors.profileIncomplete'));
         return;
       }
       this.submitError.set(null);
@@ -145,7 +147,7 @@ export class InstructorOnboardingPage implements OnInit {
 
   protected submitApplication(): void {
     if (!this.agreedToTerms) {
-      this.submitError.set('กรุณายอมรับเงื่อนไขและข้อตกลงการแบ่งส่วนแบ่งรายได้');
+      this.submitError.set(this.translation.t('instructor.onboarding.errors.termsNotAccepted'));
       return;
     }
 
@@ -167,7 +169,7 @@ export class InstructorOnboardingPage implements OnInit {
         error: (err) => {
           this.isSubmitting.set(false);
           this.submitError.set(
-            err?.error?.detail || err?.message || 'เกิดข้อผิดพลาดในการส่งใบสมัคร กรุณาลองใหม่อีกครั้ง'
+            err?.error?.detail || err?.message || this.translation.t('instructor.onboarding.errors.submitFailed'),
           );
         },
       });

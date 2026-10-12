@@ -22,12 +22,14 @@ import { PendingCourseReviewSummary } from './data/admin-moderation-api.models';
 import { AdminModerationApiService } from './data/admin-moderation-api.service';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Modal } from '../../../shared/modal/modal';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-course-moderation-page',
-  imports: [CommonModule, FormsModule, RouterLink, NgIcon, NgOptimizedImage, CurrencyThbPipe, TranslatePipe, Spinner],
+  imports: [CommonModule, FormsModule, RouterLink, NgIcon, NgOptimizedImage, CurrencyThbPipe, TranslatePipe, Modal, Spinner],
   templateUrl: './admin-course-moderation-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -44,6 +46,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 })
 export class AdminCourseModerationPage implements OnInit {
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
   private readonly moderationApi = inject(AdminModerationApiService);
 
   protected readonly isLoading = signal(false);
@@ -60,8 +63,8 @@ export class AdminCourseModerationPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'คิวอนุมัติคอร์สเรียน | SIRI UpSkill Admin',
-      description: 'ระบบตรวจสอบและอนุมัติคอร์สเรียนใหม่ก่อนเผยแพร่',
+      title: this.translation.t('admin.moderation.seoTitle'),
+      description: this.translation.t('admin.moderation.seoDescription'),
       path: '/admin/courses',
       robots: 'noindex',
     });
@@ -87,11 +90,11 @@ export class AdminCourseModerationPage implements OnInit {
   protected approveCourse(course: PendingCourseReviewSummary): void {
     this.moderationApi.approveCourse(course.id).subscribe({
       next: () => {
-        this.showMessage('success', `อนุมัติและเผยแพร่คอร์ส "${course.title}" เรียบร้อยแล้ว`);
+        this.showMessage('success', this.translation.t('admin.moderation.approveSuccess', { title: course.title }));
         this.loadPendingCourses();
       },
       error: () => {
-        this.showMessage('error', 'เกิดข้อผิดพลาดในการอนุมัติคอร์ส');
+        this.showMessage('error', this.translation.t('admin.moderation.approveError'));
       },
     });
   }
@@ -111,7 +114,7 @@ export class AdminCourseModerationPage implements OnInit {
 
     const reason = this.rejectionReason().trim();
     if (!reason) {
-      this.showMessage('error', 'กรุณาระบุเหตุผลในการส่งกลับแก้ไข');
+      this.showMessage('error', this.translation.t('admin.moderation.rejectReasonRequired'));
       return;
     }
 
@@ -120,12 +123,12 @@ export class AdminCourseModerationPage implements OnInit {
       next: () => {
         this.isSubmittingReject.set(false);
         this.closeRejectModal();
-        this.showMessage('success', `ส่งกลับคอร์ส "${course.title}" เพื่อแก้ไขเรียบร้อยแล้ว`);
+        this.showMessage('success', this.translation.t('admin.moderation.rejectSuccess', { title: course.title }));
         this.loadPendingCourses();
       },
       error: () => {
         this.isSubmittingReject.set(false);
-        this.showMessage('error', 'เกิดข้อผิดพลาดในการส่งกลับคอร์ส');
+        this.showMessage('error', this.translation.t('admin.moderation.rejectError'));
       },
     });
   }

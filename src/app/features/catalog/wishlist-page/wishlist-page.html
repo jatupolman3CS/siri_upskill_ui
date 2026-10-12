@@ -46,33 +46,37 @@
         @for (item of wishlistStore.items(); track item.courseId) {
           <div class="card-hover glow-border group flex flex-col justify-between overflow-hidden rounded-2xl glass-card shadow-sm">
             <div>
-              <!-- Course Thumbnail -->
-              <a [routerLink]="['/courses', item.slug]" class="relative block aspect-video overflow-hidden bg-[var(--color-surface-muted)]">
-                @if (item.thumbnailUrl) {
-                  <!-- fill: only the anchor's 16/9 aspect ratio is known, not the thumbnail's own size. -->
-                  <img
-                    [ngSrc]="item.thumbnailUrl"
-                    [alt]="item.title"
-                    fill
-                    class="object-cover transition duration-300 group-hover:scale-105"
-                  />
-                } @else {
-                  <div class="flex h-full w-full items-center justify-center text-[var(--color-text-muted)] font-bold">
-                    {{ item.title }}
-                  </div>
-                }
+              <!-- Course Thumbnail. The remove <button> is a sibling of the <a>, never nested inside it (invalid HTML,
+                   double activation). -->
+              <div class="relative">
+                <a [routerLink]="['/courses', item.slug]" class="relative block aspect-video overflow-hidden bg-[var(--color-surface-muted)]">
+                  @if (item.thumbnailUrl) {
+                    <!-- fill: only the anchor's 16/9 aspect ratio is known, not the thumbnail's own size. -->
+                    <img
+                      [ngSrc]="item.thumbnailUrl"
+                      [alt]="item.title"
+                      fill
+                      class="object-cover transition duration-300 group-hover:scale-105"
+                    />
+                  } @else {
+                    <div class="flex h-full w-full items-center justify-center text-[var(--color-text-muted)] font-bold">
+                      {{ item.title }}
+                    </div>
+                  }
+                </a>
 
-                <!-- Remove Button overlay. after:-inset-1.5 stretches the 32px hit area to 44px (hit-44 can't be
-                     used on an already-absolute element: its unlayered `position: relative` would override it). -->
+                <!-- Remove button overlay. z-10 keeps it above the link; after:-inset-1.5 stretches the 32px hit area to
+                     44px (hit-44 can't be used on an already-absolute element: its unlayered `position: relative` would
+                     override it). -->
                 <button
                   type="button"
-                  (click)="removeItem(item); $event.preventDefault(); $event.stopPropagation()"
-                  class="btn-tactile absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full glass-card text-[var(--hue-red-fg)] shadow-sm transition hover:bg-[var(--color-surface-muted)] after:absolute after:-inset-1.5 after:content-['']"
+                  (click)="removeItem(item)"
+                  class="btn-tactile absolute top-2.5 right-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full glass-card text-[var(--hue-red-fg)] shadow-sm transition hover:bg-[var(--color-surface-muted)] after:absolute after:-inset-1.5 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                   [attr.aria-label]="'wishlist.remove' | translate"
                 >
-                  <ng-icon name="phosphorTrash" class="text-base" />
+                  <ng-icon name="phosphorTrash" aria-hidden="true" class="text-base" />
                 </button>
-              </a>
+              </div>
 
               <!-- Course Info -->
               <div class="p-5">

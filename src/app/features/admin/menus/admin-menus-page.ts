@@ -24,12 +24,14 @@ import {
 import { MenuItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
+import { Modal } from '../../../shared/modal/modal';
 import { Spinner } from '../../../shared/spinner/spinner';
 
 @Component({
   selector: 'app-admin-menus-page',
-  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe, Spinner],
+  imports: [CommonModule, FormsModule, NgIcon, TranslatePipe, Modal, Spinner],
   templateUrl: './admin-menus-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -49,6 +51,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 export class AdminMenusPage implements OnInit {
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly menuItems = signal<MenuItem[]>([]);
   protected readonly isLoading = signal(false);
@@ -74,8 +77,8 @@ export class AdminMenusPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'จัดการเมนูนำทาง | SIRI UpSkill Admin',
-      description: 'ระบบจัดการโครงสร้างเมนูหลักและเมนูย่อยของเว็บไซต์',
+      title: this.translation.t('admin.menus.seo.title'),
+      description: this.translation.t('admin.menus.seo.description'),
       path: '/admin/menus',
       robots: 'noindex',
     });
@@ -149,12 +152,12 @@ export class AdminMenusPage implements OnInit {
           next: () => {
             this.isSaving.set(false);
             this.closeModal();
-            this.showMessage('success', `อัปเดตเมนู "${label}" สำเร็จ`);
+            this.showMessage('success', this.translation.t('admin.menus.toast.updated', { label }));
             this.loadMenuItems();
           },
           error: () => {
             this.isSaving.set(false);
-            this.showMessage('error', 'เกิดข้อผิดพลาดในการบันทึกเมนู');
+            this.showMessage('error', this.translation.t('admin.menus.toast.saveFailed'));
           },
         });
     } else {
@@ -170,12 +173,12 @@ export class AdminMenusPage implements OnInit {
           next: () => {
             this.isSaving.set(false);
             this.closeModal();
-            this.showMessage('success', `เพิ่มเมนู "${label}" เรียบร้อยแล้ว`);
+            this.showMessage('success', this.translation.t('admin.menus.toast.created', { label }));
             this.loadMenuItems();
           },
           error: () => {
             this.isSaving.set(false);
-            this.showMessage('error', 'เกิดข้อผิดพลาดในการสร้างเมนู');
+            this.showMessage('error', this.translation.t('admin.menus.toast.createFailed'));
           },
         });
     }
@@ -206,15 +209,15 @@ export class AdminMenusPage implements OnInit {
   }
 
   protected deleteMenuItem(item: MenuItem): void {
-    if (!confirm(`คุณต้องการลบเมนู "${item.label}" ใช่หรือไม่?`)) return;
+    if (!confirm(this.translation.t('admin.menus.confirmDelete', { label: item.label }))) return;
 
     this.cmsApi.deleteMenuItem(item.id).subscribe({
       next: () => {
-        this.showMessage('success', `ลบเมนู "${item.label}" เรียบร้อยแล้ว`);
+        this.showMessage('success', this.translation.t('admin.menus.toast.deleted', { label: item.label }));
         this.loadMenuItems();
       },
       error: () => {
-        this.showMessage('error', 'ไม่สามารถลบเมนูได้ (อาจมีเมนูย่อยผูกอยู่)');
+        this.showMessage('error', this.translation.t('admin.menus.toast.deleteFailed'));
       },
     });
   }

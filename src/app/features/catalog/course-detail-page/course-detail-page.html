@@ -281,7 +281,7 @@
                   <ng-icon name="phosphorStar" class="text-[var(--color-accent)]" />
                 </div>
                 <span class="text-xs text-[var(--color-text-muted)]">
-                  จาก {{ course.ratingCount }} รีวิวของผู้เรียน
+                  {{ 'catalog.detail.ratingFromCount' | translate: { count: course.ratingCount } }}
                 </span>
               </div>
 
@@ -289,17 +289,20 @@
               <div class="flex flex-col gap-2">
                 @for (dist of ratingDistribution(); track dist.stars) {
                   <div class="flex items-center gap-3 text-xs">
-                    <span class="w-12 shrink-0 font-medium text-[var(--color-text-muted)] flex items-center gap-1">
+                    <span class="sr-only">
+                      {{ 'a11y.rating.distributionRow' | translate: { stars: dist.stars, count: dist.count, percent: dist.percent } }}
+                    </span>
+                    <span class="w-12 shrink-0 font-medium text-[var(--color-text-muted)] flex items-center gap-1" aria-hidden="true">
                       <span>{{ dist.stars }}</span>
                       <ng-icon name="phosphorStar" class="text-[var(--color-accent)] text-[10px]" />
                     </span>
-                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-surface-muted)]" aria-hidden="true">
                       <div
                         class="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500 ease-out"
                         [style.width.%]="dist.percent"
                       ></div>
                     </div>
-                    <span class="w-8 shrink-0 text-right text-[var(--color-text-muted)] font-mono">
+                    <span class="w-8 shrink-0 text-right text-[var(--color-text-muted)] font-mono" aria-hidden="true">
                       {{ dist.count }}
                     </span>
                   </div>
@@ -384,7 +387,7 @@
                 class="hit-44 tone-green btn-tactile inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] py-2.5 text-xs font-bold text-[var(--tone-fg)] hover:border-[var(--tone-fg)] transition cursor-pointer"
               >
                 <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
-                <span>ทดลองเรียนฟรี ({{ freePreviewCount() }} บทเรียน)</span>
+                <span>{{ 'catalog.detail.tryFreeWithCount' | translate: { count: freePreviewCount() } }}</span>
               </a>
             }
             <div class="flex items-center gap-2">
@@ -394,12 +397,12 @@
                 class="hit-44 btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] glass-card py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
               >
                 <ng-icon name="phosphorShoppingCart" class="text-base" />
-                <span>{{ isAddedToCart() ? 'อยู่ในตะกร้าแล้ว (เพิ่มอีก)' : 'เพิ่มลงตะกร้า' }}</span>
+                <span>{{ (isAddedToCart() ? 'catalog.detail.inCartAddAgain' : 'wishlist.addToCart') | translate }}</span>
               </button>
               <button
                 type="button"
                 (click)="toggleWishlist()"
-                [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'บันทึกในสิ่งที่อยากได้'"
+                [attr.aria-label]="(isWishlisted() ? 'wishlist.remove' : 'catalog.detail.saveToWishlist') | translate"
                 class="hit-44 btn-tactile flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] glass-card transition hover:bg-[var(--color-surface-muted)]"
               >
                 @if (isWishlisted()) {
@@ -477,13 +480,13 @@
             class="hit-44 tone-green inline-flex items-center justify-center gap-1 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-2 text-xs font-bold text-[var(--tone-fg)]"
           >
             <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
-            <span>ทดลองเรียนฟรี</span>
+            <span>{{ 'catalog.detail.tryFree' | translate }}</span>
           </a>
         }
         <button
           type="button"
           (click)="toggleWishlist()"
-          [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'บันทึกในสิ่งที่อยากได้'"
+          [attr.aria-label]="(isWishlisted() ? 'wishlist.remove' : 'catalog.detail.saveToWishlist') | translate"
           class="hit-44 flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card"
         >
           @if (isWishlisted()) {

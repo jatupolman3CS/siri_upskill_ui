@@ -8,6 +8,7 @@ import {
   REVENUE_SPLIT_STATUSES,
   RevenueSplitStatus,
   UpsertPayoutAccountRequest,
+  WithholdingTaxCertificate,
 } from './payout-api.models';
 import { PayoutApiService } from './payout-api.service';
 
@@ -23,6 +24,33 @@ describe('PayoutApiService', () => {
   });
 
   afterEach(() => httpMock.verify());
+
+  it('getMyTaxCertificate() GETs the caller-scoped certificate for one payout item', () => {
+    const body: WithholdingTaxCertificate = {
+      batchItemId: 'item-1',
+      periodKey: '2026-08',
+      issuedAtUtc: '2026-09-05T10:00:00Z',
+      payerName: 'Siri Co., Ltd.',
+      payerTaxId: '0105500000000',
+      payerAddress: 'Bangkok',
+      payeeName: 'Somchai',
+      payeeTaxId: '1234567890123',
+      taxPayerType: 'Individual',
+      taxFormType: 'PND3',
+      grossIncomeAmount: 1000,
+      withholdingTaxPercent: 3,
+      withholdingTaxAmount: 30,
+      netIncomeAmount: 970,
+    };
+    let received: WithholdingTaxCertificate | undefined;
+    service.getMyTaxCertificate('item-1').subscribe((cert) => (received = cert));
+
+    const req = httpMock.expectOne('/api/payout/instructor/tax-certificates/item-1');
+    expect(req.request.method).toBe('GET');
+    req.flush(body);
+
+    expect(received).toEqual(body);
+  });
 
   it('getPayoutPolicy() GETs /api/payout/policy and passes the server shape through untouched', () => {
     const body: PayoutPolicy = {

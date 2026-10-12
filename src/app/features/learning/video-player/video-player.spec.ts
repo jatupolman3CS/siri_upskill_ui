@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { VideoPlayer } from './video-player';
 import { mapShakaPlaybackError } from './shaka-error-mapper';
 import { AuthPrefixRewrite, PLAYBACK_RENEWAL_MARGIN_MS } from './playback-url-renewal';
@@ -91,6 +92,37 @@ describe('VideoPlayer Component', () => {
 
     const overlay = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="playback-watermark"]');
     expect(overlay?.textContent?.trim()).toBe('Somchai · somchai@example.com');
+  });
+
+  it('names every control through i18n in both languages and gives the range sliders a 44px pointer target', () => {
+    const translation = TestBed.inject(TranslationService);
+    for (const locale of ['th', 'en'] as const) {
+      translation.setLocale(locale);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const labelled = Array.from(root.querySelectorAll('[aria-label]'));
+      expect(labelled.length).toBeGreaterThanOrEqual(10);
+      for (const el of labelled) {
+        expect(el.getAttribute('aria-label')).not.toContain('learn.player');
+      }
+      const seekBar = root.querySelector('input[type="range"]') as HTMLInputElement;
+      expect(seekBar.getAttribute('aria-label')).toBe(locale === 'th' ? 'แถบเลื่อนตำแหน่งวิดีโอ' : 'Video seek bar');
+      for (const slider of Array.from(root.querySelectorAll('input[type="range"]'))) {
+        expect(slider.classList.contains('h-11')).toBe(true);
+      }
+    }
+  });
+
+  it('keeps the speed menu rows at 44px and scrollable', () => {
+    fixture.detectChanges();
+    (internals(component) as unknown as { showSpeedMenu: WritableSignal<boolean> }).showSpeedMenu.set(true);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const rows = Array.from(root.querySelectorAll('button')).filter(
+      (b) => b.className.includes('min-h-[44px]') && b.className.includes('w-full'),
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0].parentElement?.classList.contains('overflow-y-auto')).toBe(true);
   });
 
   it('should format seconds into mm:ss or hh:mm:ss correctly', () => {
@@ -388,9 +420,18 @@ describe('VideoPlayer Component', () => {
 });
 
 describe('mapShakaPlaybackError', () => {
+  let translate: (key: string) => string;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    const translation = TestBed.inject(TranslationService);
+    translation.setLocale('th');
+    translate = (key) => translation.t(key);
+  });
+
   it('should map DRM license failure (category 6, code 6007/6008) to user-friendly message', () => {
     const error = { category: 6, code: 6007 };
-    const mapped = mapShakaPlaybackError(error);
+    const mapped = mapShakaPlaybackError(error, translate);
 
     expect(mapped.title).toContain('สิทธิ์การรับชมหมดอายุ');
     expect(mapped.isRecoverable).toBe(true);
@@ -398,35 +439,72 @@ describe('mapShakaPlaybackError', () => {
 
   it('should map network HTTP errors (category 1, code 1002) correctly', () => {
     const error = { category: 1, code: 1002 };
-    const mapped = mapShakaPlaybackError(error);
+    const mapped = mapShakaPlaybackError(error, translate);
 
     expect(mapped.title).toContain('เซิร์ฟเวอร์วิดีโอไม่ตอบสนอง');
   });
 
   it('should map general network errors (category 1) to internet connection prompt', () => {
     const error = { category: 1, code: 1001 };
-    const mapped = mapShakaPlaybackError(error);
+    const mapped = mapShakaPlaybackError(error, translate);
 
     expect(mapped.title).toContain('ปัญหาการเชื่อมต่ออินเทอร์เน็ต');
   });
 
   it('should map media decode errors (category 3)', () => {
     const error = { category: 3, code: 3016 };
-    const mapped = mapShakaPlaybackError(error);
+    const mapped = mapShakaPlaybackError(error, translate);
 
     expect(mapped.title).toContain('การถอดรหัสวิดีโอ');
   });
 
   it('should map manifest errors (category 4)', () => {
     const error = { category: 4, code: 4001 };
-    const mapped = mapShakaPlaybackError(error);
+    const mapped = mapShakaPlaybackError(error, translate);
 
     expect(mapped.title).toContain('ไม่สามารถโหลดโครงสร้างวิดีโอ');
   });
 
   it('should return fallback message on null or unknown errors', () => {
-    const mapped = mapShakaPlaybackError(null);
+    const mapped = mapShakaPlaybackError(null, translate);
     expect(mapped.title).toContain('เกิดข้อผิดพลาดในการเล่นวิดีโอ');
     expect(mapped.isRecoverable).toBe(true);
+  });
+
+  it('resolves every message to real text in both languages (never a raw i18n key)', () => {
+    const translation = TestBed.inject(TranslationService);
+    const samples: unknown[] = [
+      null,
+      { category: 6, code: 6007 },
+      { category: 6, code: 6001 },
+      { category: 1, code: 1002 },
+      { category: 1, code: 1001 },
+      { category: 3 },
+      { category: 4 },
+      { category: 5 },
+      {},
+    ];
+    for (const locale of ['th', 'en'] as const) {
+      translation.setLocale(locale);
+      for (const sample of samples) {
+        const mapped = mapShakaPlaybackError(sample, (key) => translation.t(key));
+        expect(mapped.title).not.toContain('learn.playerError');
+        expect(mapped.message).not.toContain('learn.playerError');
+        expect(mapped.title.length).toBeGreaterThan(0);
+      }
+    }
+    translation.setLocale('en');
+    expect(mapShakaPlaybackError({ category: 5 }, (key) => translation.t(key)).title).toBe('Video streaming interrupted');
+  });
+
+  it('maps native MediaError codes, marking decode/unsupported as not recoverable', () => {
+    const nativeError = (code: number): Event => {
+      const event = new Event('error');
+      Object.defineProperty(event, 'target', { value: { error: { code } } });
+      return event;
+    };
+    expect(mapShakaPlaybackError(nativeError(2), translate).isRecoverable).toBe(true);
+    expect(mapShakaPlaybackError(nativeError(3), translate).isRecoverable).toBe(false);
+    expect(mapShakaPlaybackError(nativeError(4), translate).isRecoverable).toBe(false);
   });
 });

@@ -1,19 +1,19 @@
 <div class="animate-fade-in max-w-5xl mx-auto space-y-8">
   <!-- Header -->
   <div class="animate-fade-in-down">
-    <h1 class="text-2xl font-extrabold text-[var(--color-text)]">ส่งประกาศถึงผู้เรียน (Course Announcements)</h1>
+    <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'instructor.announcements.heading' | translate }}</h1>
     <p class="text-xs text-[var(--color-text-muted)] mt-1">
-      ส่งข่าวสาร แจ้งอัปเดตบทเรียนใหม่ หรือนัดหมายกิจกรรมไปยังผู้เรียนที่ลงทะเบียนในคอร์สของคุณ
+      {{ 'instructor.announcements.subheading' | translate }}
     </p>
   </div>
 
   <!-- New Announcement Form -->
   <div class="animate-fade-in-up stagger-1 rounded-2xl glass-card p-6 sm:p-8 space-y-6 shadow-sm">
-    <h2 class="text-sm font-bold text-[var(--color-text)]">เขียนประกาศใหม่</h2>
+    <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'instructor.announcements.form.heading' | translate }}</h2>
 
     <div class="space-y-4">
       <div>
-        <label for="announcement-course-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">เลือกคอร์สเรียน *</label>
+        <label for="announcement-course-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.courseLabel' | translate }}</label>
         <select
           id="announcement-course-select"
           [(ngModel)]="selectedCourseId"
@@ -25,29 +25,29 @@
             </option>
           }
           @if (courses().length === 0) {
-            <option value="" disabled selected>ยังไม่มีคอร์สเรียนของคุณ</option>
+            <option value="" disabled selected>{{ 'instructor.announcements.form.noCourses' | translate }}</option>
           }
         </select>
       </div>
 
       <div>
-        <label for="announcement-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">หัวข้อประกาศ *</label>
+        <label for="announcement-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.titleLabel' | translate }}</label>
         <input
           id="announcement-title-input"
           type="text"
           [(ngModel)]="announcementTitle"
-          placeholder="เช่น อัปเดตเนื้อหาใหม่ประจำสัปดาห์ / แจ้ง Live Q&A"
+          [placeholder]="'instructor.announcements.form.titlePlaceholder' | translate"
           class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         />
       </div>
 
       <div>
-        <label for="announcement-message-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">ข้อความประกาศ *</label>
+        <label for="announcement-message-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.messageLabel' | translate }}</label>
         <textarea
           id="announcement-message-textarea"
           [(ngModel)]="announcementMessage"
           rows="5"
-          placeholder="พิมพ์ข้อความที่ต้องการแจ้งผู้เรียนที่นี่..."
+          [placeholder]="'instructor.announcements.form.messagePlaceholder' | translate"
           class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         ></textarea>
       </div>
@@ -59,7 +59,7 @@
             [(ngModel)]="sendEmailNotification"
             class="rounded accent-[var(--color-primary)]"
           />
-          <span>ส่งอีเมลแจ้งเตือนไปยังผู้เรียนทุกคนในคอร์สนี้ด้วย</span>
+          <span>{{ 'instructor.announcements.form.sendEmail' | translate }}</span>
         </label>
       </div>
     </div>
@@ -68,7 +68,7 @@
       @if (sendSuccess()) {
         <span class="animate-fade-in inline-flex items-center gap-1 text-xs font-bold tone-green text-[var(--tone-fg)]">
           <ng-icon name="phosphorCheckCircle" />
-          <span>ส่งประกาศถึงผู้เรียนเรียบร้อยแล้ว</span>
+          <span>{{ 'instructor.announcements.form.sent' | translate }}</span>
         </span>
       } @else {
         <span></span>
@@ -82,10 +82,10 @@
       >
         @if (isSending()) {
           <app-spinner size="xs" color="white" />
-          <span>กำลังส่งประกาศ...</span>
+          <span>{{ 'instructor.announcements.form.sending' | translate }}</span>
         } @else {
           <ng-icon name="phosphorPaperPlaneTilt" />
-          <span>ส่งประกาศทันที</span>
+          <span>{{ 'instructor.announcements.form.send' | translate }}</span>
         }
       </button>
     </div>
@@ -93,7 +93,7 @@
 
   <!-- Past Announcements History -->
   <div class="animate-fade-in-up stagger-2 space-y-4">
-    <h2 class="text-base font-bold text-[var(--color-text)]">ประวัติประกาศที่ผ่านมา</h2>
+    <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.announcements.history.heading' | translate }}</h2>
 
     <div class="space-y-3">
       @for (item of announcementRows(); track item.id) {
@@ -112,7 +112,7 @@
               <span>·</span>
               <span class="flex items-center gap-1">
                 <ng-icon name="phosphorUsers" />
-                <span>ผู้รับ {{ item.recipientsCount }} คน</span>
+                <span>{{ 'instructor.announcements.history.recipients' | translate: { count: item.recipientsCount } }}</span>
               </span>
             </div>
           </div>

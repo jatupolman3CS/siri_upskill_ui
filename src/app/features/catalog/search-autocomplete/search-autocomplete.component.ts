@@ -5,6 +5,7 @@ import {
   ElementRef,
   HostListener,
   OnInit,
+  computed,
   inject,
   input,
   output,
@@ -29,6 +30,7 @@ import { CourseApiService } from '../data/course-api.service';
 import { CourseSearchResultItem } from '../data/course-api.models';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 
 const RECENT_SEARCHES_KEY = 'siri_recent_searches_v1';
 const MAX_RECENT = 6;
@@ -53,8 +55,13 @@ export class SearchAutocompleteComponent implements OnInit {
   private readonly courseApi = inject(CourseApiService);
   private readonly router = inject(Router);
   private readonly hostRef = inject(ElementRef);
+  private readonly translation = inject(TranslationService);
 
-  readonly placeholder = input('ค้นหาคอร์สเรียน ทักษะ หรือผู้สอน...');
+  /** Explicit placeholder wins; otherwise the translated default. */
+  readonly placeholder = input<string | undefined>(undefined);
+  protected readonly resolvedPlaceholder = computed(
+    () => this.placeholder() ?? this.translation.t('catalog.autocomplete.placeholder'),
+  );
   readonly initialQuery = input('');
   readonly queryChange = output<string>();
   readonly searchSubmit = output<string>();

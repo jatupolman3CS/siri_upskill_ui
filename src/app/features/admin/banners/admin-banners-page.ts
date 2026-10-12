@@ -19,6 +19,7 @@ import {
 import { BannerItem } from '../../cms/data/cms-api.models';
 import { CmsApiService } from '../../cms/data/cms-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 
@@ -40,6 +41,7 @@ import { Spinner } from '../../../shared/spinner/spinner';
 export class AdminBannersPage implements OnInit {
   private readonly cmsApi = inject(CmsApiService);
   private readonly seoService = inject(SeoService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly banners = signal<BannerItem[]>([]);
   protected readonly isLoading = signal(false);
@@ -50,8 +52,8 @@ export class AdminBannersPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: 'จัดการแบนเนอร์ | SIRI UpSkill Admin',
-      description: 'ระบบจัดการภาพแบนเนอร์หน้าแรก',
+      title: this.translation.t('admin.banners.seo.title'),
+      description: this.translation.t('admin.banners.seo.description'),
       path: '/admin/banners',
       robots: 'noindex',
     });

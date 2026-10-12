@@ -12,6 +12,7 @@ import {
   InstructorPayoutAccount,
   PayoutBatchItemStatus,
   PayoutPolicy,
+  WithholdingTaxCertificate,
 } from '../../payout/data/payout-api.models';
 import { InstructorEarningsPage } from './instructor-earnings-page';
 
@@ -83,6 +84,23 @@ const EARNINGS_SUMMARY_WITH_MIXED_STATUSES: InstructorEarningsSummary = {
       paidAtUtc: null,
     },
   ],
+};
+
+const CERTIFICATE: WithholdingTaxCertificate = {
+  batchItemId: 'payout-1',
+  periodKey: '2026-08',
+  issuedAtUtc: '2026-09-05T10:00:00Z',
+  payerName: 'Siri Upskill Co., Ltd.',
+  payerTaxId: '0105500000001',
+  payerAddress: '1 Test Road, Bangkok',
+  payeeName: 'Somchai Test',
+  payeeTaxId: '1234567890123',
+  taxPayerType: 'Individual',
+  taxFormType: 'PND3',
+  grossIncomeAmount: 17857,
+  withholdingTaxPercent: 3,
+  withholdingTaxAmount: 536,
+  netIncomeAmount: 12500,
 };
 
 const EMPTY_EARNINGS_SUMMARY: InstructorEarningsSummary = {
@@ -440,6 +458,57 @@ describe('InstructorEarningsPage', () => {
       expect(text).toContain('Your revenue share is 80%');
       expect(text).toContain('Withholding tax (5%)');
       expect(findButtonByText("Couldn't load the policy figures — try again")).toBeUndefined();
+    });
+  });
+
+  describe('withholding tax certificate (50 Tawi)', () => {
+    function certificateButtons(): HTMLButtonElement[] {
+      return Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).filter((b) =>
+        b.getAttribute('aria-label')?.startsWith('View the withholding tax certificate'),
+      ) as HTMLButtonElement[];
+    }
+
+    async function loadPage(summary: InstructorEarningsSummary): Promise<void> {
+      await navigate();
+      await flushPolicy();
+      await flushEarnings(summary);
+      await flushAccount();
+    }
+
+    it('offers the certificate only for transferred payouts and opens a dialog with the server figures', async () => {
+      await loadPage(EARNINGS_SUMMARY_WITH_MIXED_STATUSES);
+      const transferred = EARNINGS_SUMMARY_WITH_MIXED_STATUSES.history.filter((h) => h.status === 'Transferred').length;
+      expect(certificateButtons().length).toBe(transferred);
+
+      certificateButtons()[0].click();
+      await settle();
+
+      const req = httpMock.expectOne(`/api/payout/instructor/tax-certificates/${EARNINGS_SUMMARY_WITH_MIXED_STATUSES.history[0].payoutId}`);
+      expect(req.request.method).toBe('GET');
+      req.flush(CERTIFICATE);
+      await settle();
+
+      const dialog = harness.routeNativeElement?.querySelector('[role="dialog"]') as HTMLElement;
+      expect(dialog).not.toBeNull();
+      const text = dialog.textContent ?? '';
+      expect(text).toContain('Siri Upskill Co., Ltd.');
+      expect(text).toContain('Somchai Test');
+      expect(text).toContain('PND3');
+    });
+
+    it('explains how to fix an incomplete payout account when the server answers 409', async () => {
+      await loadPage(EARNINGS_SUMMARY);
+      certificateButtons()[0].click();
+      await settle();
+
+      httpMock
+        .expectOne('/api/payout/instructor/tax-certificates/payout-1')
+        .flush({ title: 'Conflict' }, { status: 409, statusText: 'Conflict' });
+      await settle();
+
+      const alert = harness.routeNativeElement?.querySelector('[role="dialog"] [role="alert"]') as HTMLElement;
+      expect(alert).not.toBeNull();
+      expect(alert.textContent).toContain('incomplete');
     });
   });
 });

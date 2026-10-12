@@ -1,4 +1,6 @@
-﻿import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+
+import { TranslationService } from '../../core/i18n/translation.service';
 
 export type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg';
 export type SpinnerColor = 'primary' | 'white' | 'current' | 'muted';
@@ -11,14 +13,21 @@ export type SpinnerColor = 'primary' | 'white' | 'current' | 'muted';
   host: {
     class: 'inline-flex items-center justify-center gap-2',
     role: 'status',
-    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-label]': 'resolvedAriaLabel()',
   },
 })
 export class Spinner {
+  private readonly translation = inject(TranslationService);
+
   readonly size = input<SpinnerSize>('md');
   readonly color = input<SpinnerColor>('primary');
   readonly label = input<string | undefined>(undefined);
-  readonly ariaLabel = input<string>('กำลังโหลด...');
+  /** Explicit label wins; otherwise the translated default ("Loading..."). */
+  readonly ariaLabel = input<string | undefined>(undefined);
+
+  protected readonly resolvedAriaLabel = computed(
+    () => this.ariaLabel() ?? this.translation.t('common.loading'),
+  );
 
   protected readonly sizeClasses = computed(() => {
     switch (this.size()) {

@@ -24,6 +24,7 @@ import {
   phosphorArrowCounterClockwise,
   phosphorArrowRight,
   phosphorArrowsClockwise,
+  phosphorCheck,
   phosphorClosedCaptioning,
   phosphorCornersIn,
   phosphorCornersOut,
@@ -40,6 +41,7 @@ import {
 } from '@ng-icons/phosphor-icons/regular';
 import shaka from 'shaka-player';
 
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { PlaybackWatermark } from '../data/learning-api.models';
 import { LearningApiService } from '../data/learning-api.service';
@@ -63,11 +65,13 @@ export interface TextTrackOption {
 
 @Component({
   selector: 'app-video-player',
-  imports: [CommonModule, NgIcon, PlaybackWatermarkOverlay],
+  imports: [CommonModule, NgIcon, PlaybackWatermarkOverlay, TranslatePipe],
   templateUrl: './video-player.html',
+  styleUrl: './video-player.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     provideIcons({
+      phosphorCheck,
       phosphorPlay,
       phosphorPause,
       phosphorSpeakerHigh,
@@ -301,7 +305,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
       // Listen for Shaka events
       player.addEventListener('error', (event: unknown) => {
         const errorDetail = (event as { detail?: unknown }).detail || event;
-        const mapped = mapShakaPlaybackError(errorDetail);
+        const mapped = mapShakaPlaybackError(errorDetail, (key) => this.translation.t(key));
         this.playbackError.set(mapped);
         this.isPlaying.set(false);
       });
@@ -326,7 +330,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
       }
     }).catch((err) => {
       this.isInitializingPlayer = false;
-      this.playbackError.set(mapShakaPlaybackError(err));
+      this.playbackError.set(mapShakaPlaybackError(err, (key) => this.translation.t(key)));
     });
   }
 
@@ -358,7 +362,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
         videoElementRef.nativeElement.src = url;
         videoElementRef.nativeElement.load();
       } else {
-        this.playbackError.set(mapShakaPlaybackError(err));
+        this.playbackError.set(mapShakaPlaybackError(err, (key) => this.translation.t(key)));
       }
     });
   }
@@ -481,7 +485,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
     const mappedTextTracks: TextTrackOption[] = textTracks.map((t) => ({
       id: t.id,
       language: t.language,
-      label: t.label || t.language || 'คำบรรยาย',
+      label: t.label || t.language || this.translation.t('learn.player.captionsFallback'),
     }));
     this.textTrackOptions.set(mappedTextTracks);
   }
@@ -814,7 +818,7 @@ export class VideoPlayer implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected onNativeError(event: Event): void {
-    this.playbackError.set(mapShakaPlaybackError(event));
+    this.playbackError.set(mapShakaPlaybackError(event, (key) => this.translation.t(key)));
     this.isPlaying.set(false);
   }
 

@@ -13,6 +13,7 @@ import {
   RevenueSplitItem,
   RevenueSplitStatus,
   UpsertPayoutAccountRequest,
+  WithholdingTaxCertificate,
   isRevenueSplitStatus,
 } from './payout-api.models';
 
@@ -56,6 +57,11 @@ export class PayoutApiService {
   getInstructorPayoutHistory(page = 1, pageSize = 50): Observable<PagedResponse<PayoutHistoryItem>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
     return this.http.get<PagedResponse<PayoutHistoryItem>>('/api/payout/instructor/history', { params });
+  }
+
+  // `batchItemId` is a history row's `payoutId`. Ownership is enforced server-side (403 for someone else's item).
+  getMyTaxCertificate(batchItemId: string): Observable<WithholdingTaxCertificate> {
+    return this.http.get<WithholdingTaxCertificate>(`/api/payout/instructor/tax-certificates/${encodeURIComponent(batchItemId)}`);
   }
 
   // Admin

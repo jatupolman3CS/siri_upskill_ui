@@ -23,11 +23,13 @@ import {
   phosphorCheckCircle,
   phosphorDownloadSimple,
   phosphorFileText,
+  phosphorGraduationCap,
   phosphorInfo,
   phosphorPaperPlaneRight,
   phosphorSealCheck,
   phosphorThumbsUp,
 } from '@ng-icons/phosphor-icons/regular';
+import { phosphorStarFill } from '@ng-icons/phosphor-icons/fill';
 
 import { LiveTab } from '../../live/learner/live-tab/live-tab';
 import { CurriculumSidebar } from '../curriculum-sidebar/curriculum-sidebar';
@@ -75,6 +77,8 @@ import { ToastService } from '../../../shared/toast/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     provideIcons({
+      phosphorGraduationCap,
+      phosphorStarFill,
       phosphorArrowLeft,
       phosphorBookOpen,
       phosphorBroadcast,

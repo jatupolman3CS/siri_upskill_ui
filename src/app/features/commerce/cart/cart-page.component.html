@@ -2,10 +2,10 @@
   <!-- Page Header -->
   <div class="animate-fade-in-down mb-8">
     <h1 class="text-2xl font-black tracking-tight text-[var(--color-text)] sm:text-3xl">
-      ตะกร้าสินค้า
+      {{ 'cart.heading' | translate }}
     </h1>
     <p class="mt-1 text-xs text-[var(--color-text-muted)]">
-      มีคอร์สเรียนทั้งหมด {{ cart.itemCount() }} รายการในตะกร้าของคุณ
+      {{ 'cart.itemCountText' | translate: { count: cart.itemCount() } }}
     </p>
   </div>
 
@@ -13,7 +13,7 @@
     <div class="animate-fade-in mb-6 flex items-start gap-3 tone-red rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)]">
       <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5" />
       <div>
-        <p class="font-bold">ไม่สามารถดำเนินการสั่งซื้อได้</p>
+        <p class="font-bold">{{ 'cart.checkoutErrorHeading' | translate }}</p>
         <p class="mt-0.5">{{ errorMsg }}</p>
       </div>
     </div>
@@ -25,16 +25,16 @@
       <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
         <ng-icon name="phosphorShoppingBag" class="text-4xl" />
       </div>
-      <h2 class="mt-4 text-lg font-bold text-[var(--color-text)]">ยังไม่มีคอร์สเรียนในตะกร้า</h2>
+      <h2 class="mt-4 text-lg font-bold text-[var(--color-text)]">{{ 'cart.empty.heading' | translate }}</h2>
       <p class="mt-1 text-xs text-[var(--color-text-muted)] max-w-sm mx-auto">
-        ค้นหาคอร์สที่คุณสนใจเพื่ออัปสกิลทักษะใหม่ ๆ แล้วกลับมาสั่งซื้อได้ตลอดเวลา
+        {{ 'cart.empty.description' | translate }}
       </p>
       <div class="mt-6">
         <a
           routerLink="/courses"
           class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)]"
         >
-          <span>เลือกดูคอร์สเรียน</span>
+          <span>{{ 'orders.empty.browseCourses' | translate }}</span>
           <ng-icon name="phosphorArrowRight" />
         </a>
       </div>
@@ -63,7 +63,7 @@
                   {{ item.title }}
                 </a>
                 @if (item.instructorName) {
-                  <p class="text-xs text-[var(--color-text-muted)]">ผู้สอน: {{ item.instructorName }}</p>
+                  <p class="text-xs text-[var(--color-text-muted)]">{{ 'cart.item.instructor' | translate: { name: item.instructorName } }}</p>
                 }
                 <p class="text-sm font-extrabold text-[var(--color-primary-text)] sm:hidden">
                   {{ item.price | currencyThb }}
@@ -81,7 +81,7 @@
                 type="button"
                 (click)="cart.removeItem(item.courseId)"
                 class="tone-red btn-tactile hit-44 flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--tone-bg)] hover:text-[var(--tone-fg)] transition"
-                title="ลบออกจากตะกร้า"
+                [attr.title]="'cart.item.removeTitle' | translate"
                 [attr.aria-label]="'a11y.learner.removeFromCart' | translate: { name: item.title }"
               >
                 <ng-icon name="phosphorTrash" class="text-lg" />
@@ -94,11 +94,11 @@
       <!-- Order Summary Card -->
       <div class="animate-fade-in-up stagger-2 lg:col-span-4">
         <div class="sticky top-24 rounded-3xl glass-card p-6 space-y-6 shadow-sm">
-          <h2 class="text-base font-bold text-[var(--color-text)]">สรุปคำสั่งซื้อ</h2>
+          <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'checkout.summary.heading' | translate }}</h2>
 
           <!-- Promo Code Section -->
           <div class="space-y-2">
-            <label for="promoInput" class="text-xs font-semibold text-[var(--color-text)]">รหัสส่วนลด</label>
+            <label for="promoInput" class="text-xs font-semibold text-[var(--color-text)]">{{ 'cart.promo.label' | translate }}</label>
             @if (cart.appliedPromo(); as promo) {
               <div class="tone-green flex items-center justify-between rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/30 px-3.5 py-2.5 text-xs text-[var(--tone-fg)]">
                 <div class="flex items-center gap-2">
@@ -113,7 +113,7 @@
                   (click)="removePromo()"
                   class="tone-red hit-44 text-[11px] font-bold text-[var(--tone-fg)] hover:underline"
                 >
-                  ลบ
+                  {{ 'cart.promo.remove' | translate }}
                 </button>
               </div>
             } @else {
@@ -122,7 +122,7 @@
                   id="promoInput"
                   type="text"
                   [(ngModel)]="promoCodeInput"
-                  placeholder="เช่น SIRI2026"
+                  [placeholder]="'cart.promo.placeholder' | translate"
                   class="min-h-11 w-full rounded-xl glass-card px-3.5 py-2 text-xs uppercase text-[var(--color-text)] focus-visible:outline-none focus:border-[var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                 />
                 <button
@@ -134,7 +134,7 @@
                   @if (cart.isApplyingPromo()) {
                     <app-spinner size="xs" color="muted" />
                   }
-                  <span>{{ cart.isApplyingPromo() ? 'กำลังใช้...' : 'ใช้โค้ด' }}</span>
+                  <span>{{ (cart.isApplyingPromo() ? 'cart.promo.applying' : 'checkout.summary.applyPromo') | translate }}</span>
                 </button>
               </div>
               @if (cart.promoError(); as err) {
@@ -146,19 +146,19 @@
           <!-- Price Calculation -->
           <div class="space-y-3 border-t border-[var(--color-border)] pt-4 text-xs">
             <div class="flex justify-between text-[var(--color-text-muted)]">
-              <span>ยอดรวมคอร์สเรียน</span>
+              <span>{{ 'cart.summary.subtotal' | translate }}</span>
               <span class="font-medium text-[var(--color-text)]">{{ cart.subtotal() | currencyThb }}</span>
             </div>
 
             @if (cart.discount() > 0) {
               <div class="tone-green flex justify-between text-[var(--tone-fg)] font-semibold animate-fade-in">
-                <span>ส่วนลด</span>
+                <span>{{ 'checkout.summary.discount' | translate }}</span>
                 <span>-{{ cart.discount() | currencyThb }}</span>
               </div>
             }
 
             <div class="flex justify-between border-t border-[var(--color-border)] pt-3 text-sm font-black text-[var(--color-text)]">
-              <span>ยอดชำระสุทธิ</span>
+              <span>{{ 'orders.detail.netTotal' | translate }}</span>
               <span class="text-base text-[var(--color-primary-text)]">{{ cart.total() | currencyThb }}</span>
             </div>
           </div>
@@ -172,10 +172,10 @@
           >
             @if (isCreatingOrder()) {
               <app-spinner size="sm" color="white" />
-              <span>กำลังสร้างคำสั่งซื้อ...</span>
+              <span>{{ 'cart.summary.creating' | translate }}</span>
             } @else {
               <ng-icon name="phosphorLockSimple" class="text-sm" />
-              <span>ดำเนินการชำระเงิน</span>
+              <span>{{ 'cart.summary.proceed' | translate }}</span>
             }
           </button>
 
@@ -183,11 +183,11 @@
           <div class="space-y-2 pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
             <div class="flex items-center gap-2">
               <ng-icon name="phosphorShieldCheck" class="tone-green text-[var(--tone-fg)] text-sm" />
-              <span>รับประกันการชำระเงินปลอดภัยผ่าน Stripe PromptPay</span>
+              <span>{{ 'cart.guarantee.secure' | translate }}</span>
             </div>
             <div class="flex items-center gap-2">
               <ng-icon name="phosphorCheckCircle" class="tone-green text-[var(--tone-fg)] text-sm" />
-              <span>รับ e-Tax Invoice และใบเสร็จรับเงินทางอีเมลทันที</span>
+              <span>{{ 'cart.guarantee.receipt' | translate }}</span>
             </div>
           </div>
         </div>

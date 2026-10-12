@@ -3,10 +3,10 @@
   <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
-        การตลาดและโปรโมชัน (Marketing & Promos)
+        {{ 'admin.marketing.title' | translate }}
       </h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">
-        จัดการโค้ดส่วนลด แคมเปญ Flash Sale และแพ็กเกจ Bundle
+        {{ 'admin.marketing.subtitle' | translate }}
       </p>
     </div>
 
@@ -19,7 +19,7 @@
           class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
         >
           <ng-icon name="phosphorPlusCircle" class="text-base" />
-          <span>สร้างโค้ดส่วนลด</span>
+          <span>{{ 'admin.marketing.createPromo' | translate }}</span>
         </button>
       } @else if (activeTab() === 'flashSales') {
         <button
@@ -28,7 +28,7 @@
           class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
         >
           <ng-icon name="phosphorLightning" class="text-base" />
-          <span>สร้าง Flash Sale</span>
+          <span>{{ 'admin.marketing.createFlashSale' | translate }}</span>
         </button>
       } @else {
         <button
@@ -37,7 +37,7 @@
           class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 transition"
         >
           <ng-icon name="phosphorFolder" class="text-base" />
-          <span>สร้างชุดคอร์ส Bundle</span>
+          <span>{{ 'admin.marketing.createBundle' | translate }}</span>
         </button>
       }
     </div>
@@ -73,7 +73,7 @@
       class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorTag" class="text-base" />
-      <span>โค้ดส่วนลด (Promo Codes)</span>
+      <span>{{ 'admin.marketing.tabs.promos' | translate }}</span>
       <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalPromos() }}</span>
     </button>
 
@@ -84,7 +84,7 @@
       class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorLightning" class="text-base" />
-      <span>แฟลชเซล (Flash Sales)</span>
+      <span>{{ 'admin.marketing.tabs.flashSales' | translate }}</span>
       <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalFlashSales() }}</span>
     </button>
 
@@ -95,7 +95,7 @@
       class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
     >
       <ng-icon name="phosphorFolder" class="text-base" />
-      <span>ชุดแพ็กเกจ (Bundles)</span>
+      <span>{{ 'admin.marketing.tabs.bundles' | translate }}</span>
       <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalBundles() }}</span>
     </button>
   </div>
@@ -112,13 +112,13 @@
       } @else if (promos().length === 0) {
         <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
           <ng-icon name="phosphorTag" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>ยังไม่มีโค้ดส่วนลดในระบบ</p>
+          <p>{{ 'admin.marketing.promos.empty' | translate }}</p>
           <button
             type="button"
             (click)="openPromoModal()"
             class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
-            <span>+ สร้างโค้ดแรกของคุณ</span>
+            <span>{{ 'admin.marketing.promos.emptyAction' | translate }}</span>
           </button>
         </div>
       } @else {
@@ -126,12 +126,12 @@
           <table class="w-full text-left text-xs text-[var(--color-text)]">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
               <tr>
-                <th class="py-3.5 px-4">รหัสโค้ด (Code)</th>
-                <th class="py-3.5 px-4">มูลค่าส่วนลด</th>
-                <th class="py-3.5 px-4">ยอดสั่งซื้อขั้นต่ำ</th>
-                <th class="py-3.5 px-4">สิทธิ์ใช้งาน</th>
-                <th class="py-3.5 px-4">ช่วงเวลาที่ใช้ได้</th>
-                <th class="py-3.5 px-4 text-center">สถานะ</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colCode' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colDiscount' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colMinOrder' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colUsage' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colPeriod' | translate }}</th>
+                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--color-border)]">
@@ -143,20 +143,20 @@
                   <td class="py-3.5 px-4 font-semibold">
                     @if (item.discountType === 'Percentage') {
                       <span class="tone-red rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
-                        ลด {{ item.discountValue }}%
+                        {{ 'admin.marketing.promos.discountPercent' | translate: { value: item.discountValue } }}
                       </span>
                     } @else {
                       <span class="tone-green rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
-                        ลด {{ item.discountValue | currencyThb }}
+                        {{ 'admin.marketing.promos.discountFixed' | translate: { value: (item.discountValue | currencyThb) ?? '' } }}
                       </span>
                     }
                   </td>
                   <td class="py-3.5 px-4 text-[var(--color-text-muted)]">
-                    {{ item.minOrderAmount > 0 ? (item.minOrderAmount | currencyThb) : 'ไม่มีขั้นต่ำ' }}
+                    {{ item.minOrderAmount > 0 ? (item.minOrderAmount | currencyThb) : ('admin.marketing.promos.noMinimum' | translate) }}
                   </td>
                   <td class="py-3.5 px-4">
                     <span class="font-bold text-[var(--color-text)]">{{ item.redeemedCount }}</span>
-                    <span class="text-[var(--color-text-muted)]"> / {{ item.maxRedemptions }} ครั้ง</span>
+                    <span class="text-[var(--color-text-muted)]"> {{ 'admin.marketing.promos.usageLimit' | translate: { max: item.maxRedemptions } }}</span>
                   </td>
                   <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
                     {{ item.endsAtUtc | date:'d/M/yyyy HH:mm' }}
@@ -165,11 +165,11 @@
                     @if (item.isActive) {
                       <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
                         <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
-                        เปิดใช้งาน
+                        {{ 'admin.marketing.status.active' | translate }}
                       </span>
                     } @else {
                       <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
-                        ปิดใช้งาน
+                        {{ 'admin.marketing.status.inactive' | translate }}
                       </span>
                     }
                   </td>
@@ -193,13 +193,13 @@
       } @else if (flashSales().length === 0) {
         <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
           <ng-icon name="phosphorLightning" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>ยังไม่มีแคมเปญ Flash Sale ในระบบ</p>
+          <p>{{ 'admin.marketing.flashSales.empty' | translate }}</p>
           <button
             type="button"
             (click)="openFlashSaleModal()"
             class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
-            <span>+ สร้าง Flash Sale แคมเปญแรก</span>
+            <span>{{ 'admin.marketing.flashSales.emptyAction' | translate }}</span>
           </button>
         </div>
       } @else {
@@ -207,11 +207,11 @@
           <table class="w-full text-left text-xs text-[var(--color-text)]">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
               <tr>
-                <th class="py-3.5 px-4">ชื่อแคมเปญ</th>
-                <th class="py-3.5 px-4">เวลาเริ่มต้น</th>
-                <th class="py-3.5 px-4">เวลาสิ้นสุด</th>
-                <th class="py-3.5 px-4 text-center">จำนวนคอร์ส</th>
-                <th class="py-3.5 px-4 text-center">สถานะ</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colTitle' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colStart' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colEnd' | translate }}</th>
+                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.courseCount' | translate }}</th>
+                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--color-border)]">
@@ -220,16 +220,16 @@
                   <td class="py-3.5 px-4 font-bold text-[var(--color-text)]">{{ sale.title }}</td>
                   <td class="py-3.5 px-4 text-[var(--color-text-muted)]">{{ sale.startsAtUtc | date:'d/M/yyyy HH:mm' }}</td>
                   <td class="py-3.5 px-4 text-[var(--color-text-muted)]">{{ sale.endsAtUtc | date:'d/M/yyyy HH:mm' }}</td>
-                  <td class="py-3.5 px-4 text-center font-bold">{{ sale.items.length }} รายการ</td>
+                  <td class="py-3.5 px-4 text-center font-bold">{{ 'admin.marketing.flashSales.itemCount' | translate: { count: sale.items.length } }}</td>
                   <td class="py-3.5 px-4 text-center">
                     @if (sale.isActive) {
                       <span class="tone-gold inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
                         <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
-                        Active
+                        {{ 'admin.marketing.status.active' | translate }}
                       </span>
                     } @else {
                       <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
-                        Inactive
+                        {{ 'admin.marketing.status.inactive' | translate }}
                       </span>
                     }
                   </td>
@@ -253,13 +253,13 @@
       } @else if (bundles().length === 0) {
         <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
           <ng-icon name="phosphorFolder" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>ยังไม่มีชุดคอร์ส Bundle ในระบบ</p>
+          <p>{{ 'admin.marketing.bundles.empty' | translate }}</p>
           <button
             type="button"
             (click)="openBundleModal()"
             class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
           >
-            <span>+ สร้าง Bundle แรก</span>
+            <span>{{ 'admin.marketing.bundles.emptyAction' | translate }}</span>
           </button>
         </div>
       } @else {
@@ -267,11 +267,11 @@
           <table class="w-full text-left text-xs text-[var(--color-text)]">
             <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
               <tr>
-                <th class="py-3.5 px-4">ชื่อแพ็กเกจ (Title)</th>
-                <th class="py-3.5 px-4">Slug</th>
-                <th class="py-3.5 px-4 text-right">ราคาแพ็กเกจ</th>
-                <th class="py-3.5 px-4 text-center">จำนวนคอร์ส</th>
-                <th class="py-3.5 px-4 text-center">สถานะ</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.bundles.colTitle' | translate }}</th>
+                <th class="py-3.5 px-4">{{ 'admin.marketing.bundles.colSlug' | translate }}</th>
+                <th class="py-3.5 px-4 text-right">{{ 'admin.marketing.bundles.colPrice' | translate }}</th>
+                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.courseCount' | translate }}</th>
+                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--color-border)]">
@@ -285,16 +285,16 @@
                   </td>
                   <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">{{ bundle.slug }}</td>
                   <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">{{ bundle.price | currencyThb }}</td>
-                  <td class="py-3.5 px-4 text-center font-bold">{{ bundle.items.length }} คอร์ส</td>
+                  <td class="py-3.5 px-4 text-center font-bold">{{ 'admin.marketing.bundles.courseCount' | translate: { count: bundle.items.length } }}</td>
                   <td class="py-3.5 px-4 text-center">
                     @if (bundle.isActive) {
                       <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
                         <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
-                        Active
+                        {{ 'admin.marketing.status.active' | translate }}
                       </span>
                     } @else {
                       <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
-                        Inactive
+                        {{ 'admin.marketing.status.inactive' | translate }}
                       </span>
                     }
                   </td>
@@ -309,389 +309,353 @@
 
   <!-- MODAL 1: CREATE PROMO CODE -->
   @if (showPromoModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            <ng-icon name="phosphorTag" class="tone-red text-[var(--tone-fg)] text-lg" />
-            <span>สร้างโค้ดส่วนลดใหม่ (Create Promo Code)</span>
-          </h2>
-          <button
-            type="button"
-            (click)="closePromoModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
-          </button>
+    <app-modal
+      [open]="true"
+      (openChange)="closePromoModal()"
+      [titleText]="'admin.marketing.promoModal.title' | translate"
+      [closeOnOverlayClick]="false"
+    >
+      <form id="promo-form" (ngSubmit)="submitCreatePromo()" class="space-y-4 text-xs">
+        <!-- Code -->
+        <div>
+          <label for="promo-code-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.code' | translate }}</label>
+          <input
+            id="promo-code-input"
+            type="text"
+            [ngModel]="promoCode()"
+            (ngModelChange)="promoCode.set($event)"
+            name="promoCode"
+            required
+            [placeholder]="'admin.marketing.promoModal.codePlaceholder' | translate"
+            class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 uppercase font-mono font-bold text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          />
         </div>
 
-        <form (ngSubmit)="submitCreatePromo()" class="space-y-4 text-xs">
-          <!-- Code -->
+        <!-- Type & Value -->
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="promo-code-input" class="block font-bold text-[var(--color-text)] mb-1">รหัสโค้ด (Code)*</label>
+            <label for="promo-discount-type-select" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.discountType' | translate }}</label>
+            <select
+              id="promo-discount-type-select"
+              [ngModel]="promoDiscountType()"
+              (ngModelChange)="promoDiscountType.set($event)"
+              name="discountType"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <option value="Percentage">{{ 'admin.marketing.promoModal.typePercentage' | translate }}</option>
+              <option value="Fixed">{{ 'admin.marketing.promoModal.typeFixed' | translate }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="promo-discount-value-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.discountValue' | translate }}</label>
             <input
-              id="promo-code-input"
-              type="text"
-              [ngModel]="promoCode()"
-              (ngModelChange)="promoCode.set($event)"
-              name="promoCode"
+              id="promo-discount-value-input"
+              type="number"
+              [ngModel]="promoDiscountValue()"
+              (ngModelChange)="promoDiscountValue.set($event)"
+              name="discountValue"
+              min="1"
               required
-              placeholder="เช่น SIRI2026, EARLYBIRD"
-              class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 uppercase font-mono font-bold text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             />
           </div>
+        </div>
 
-          <!-- Type & Value -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="promo-discount-type-select" class="block font-bold text-[var(--color-text)] mb-1">ประเภทส่วนลด*</label>
-              <select
-                id="promo-discount-type-select"
-                [ngModel]="promoDiscountType()"
-                (ngModelChange)="promoDiscountType.set($event)"
-                name="discountType"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              >
-                <option value="Percentage">เปอร์เซ็นต์ (%)</option>
-                <option value="Fixed">จำนวนเงินคงที่ (฿)</option>
-              </select>
-            </div>
-            <div>
-              <label for="promo-discount-value-input" class="block font-bold text-[var(--color-text)] mb-1">มูลค่าส่วนลด*</label>
-              <input
-                id="promo-discount-value-input"
-                type="number"
-                [ngModel]="promoDiscountValue()"
-                (ngModelChange)="promoDiscountValue.set($event)"
-                name="discountValue"
-                min="1"
-                required
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
+        <!-- Limits -->
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label for="promo-min-spend-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.minSpend' | translate }}</label>
+            <input
+              id="promo-min-spend-input"
+              type="number"
+              [ngModel]="promoMinSpend()"
+              (ngModelChange)="promoMinSpend.set($event)"
+              name="minSpend"
+              min="0"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
           </div>
+          <div>
+            <label for="promo-max-redemptions-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.maxRedemptions' | translate }}</label>
+            <input
+              id="promo-max-redemptions-input"
+              type="number"
+              [ngModel]="promoMaxRedemptions()"
+              (ngModelChange)="promoMaxRedemptions.set($event)"
+              name="maxRedemptions"
+              min="1"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+          <div>
+            <label for="promo-max-per-user-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.maxPerUser' | translate }}</label>
+            <input
+              id="promo-max-per-user-input"
+              type="number"
+              [ngModel]="promoMaxPerUser()"
+              (ngModelChange)="promoMaxPerUser.set($event)"
+              name="maxPerUser"
+              min="1"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+        </div>
 
-          <!-- Limits -->
-          <div class="grid grid-cols-3 gap-3">
-            <div>
-              <label for="promo-min-spend-input" class="block font-bold text-[var(--color-text)] mb-1">ยอดขั้นต่ำ (฿)</label>
-              <input
-                id="promo-min-spend-input"
-                type="number"
-                [ngModel]="promoMinSpend()"
-                (ngModelChange)="promoMinSpend.set($event)"
-                name="minSpend"
-                min="0"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-            <div>
-              <label for="promo-max-redemptions-input" class="block font-bold text-[var(--color-text)] mb-1">สิทธิ์รวม (ครั้ง)</label>
-              <input
-                id="promo-max-redemptions-input"
-                type="number"
-                [ngModel]="promoMaxRedemptions()"
-                (ngModelChange)="promoMaxRedemptions.set($event)"
-                name="maxRedemptions"
-                min="1"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-            <div>
-              <label for="promo-max-per-user-input" class="block font-bold text-[var(--color-text)] mb-1">สิทธิ์/คน</label>
-              <input
-                id="promo-max-per-user-input"
-                type="number"
-                [ngModel]="promoMaxPerUser()"
-                (ngModelChange)="promoMaxPerUser.set($event)"
-                name="maxPerUser"
-                min="1"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="promo-starts-at-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.startsAt' | translate }}</label>
+            <input
+              id="promo-starts-at-input"
+              type="datetime-local"
+              [ngModel]="promoStartsAt()"
+              (ngModelChange)="promoStartsAt.set($event)"
+              name="startsAt"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
           </div>
+          <div>
+            <label for="promo-ends-at-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.promoModal.endsAt' | translate }}</label>
+            <input
+              id="promo-ends-at-input"
+              type="datetime-local"
+              [ngModel]="promoEndsAt()"
+              (ngModelChange)="promoEndsAt.set($event)"
+              name="endsAt"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+        </div>
+      </form>
 
-          <!-- Dates -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="promo-starts-at-input" class="block font-bold text-[var(--color-text)] mb-1">วันที่เริ่มต้น</label>
-              <input
-                id="promo-starts-at-input"
-                type="datetime-local"
-                [ngModel]="promoStartsAt()"
-                (ngModelChange)="promoStartsAt.set($event)"
-                name="startsAt"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-            <div>
-              <label for="promo-ends-at-input" class="block font-bold text-[var(--color-text)] mb-1">วันที่สิ้นสุด</label>
-              <input
-                id="promo-ends-at-input"
-                type="datetime-local"
-                [ngModel]="promoEndsAt()"
-                (ngModelChange)="promoEndsAt.set($event)"
-                name="endsAt"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-            <button
-              type="button"
-              (click)="closePromoModal()"
-              class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-            >
-              ยกเลิก
-            </button>
-            <button
-              type="submit"
-              [disabled]="isSubmittingPromo()"
-              class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
-            >
-              @if (isSubmittingPromo()) {
-                <app-spinner size="xs" color="white" />
-                <span>กำลังบันทึก...</span>
-              } @else {
-                <span>บันทึกโค้ด</span>
-              }
-            </button>
-          </div>
-        </form>
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closePromoModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.marketing.modal.cancel' | translate }}
+        </button>
+        <button
+          type="submit" form="promo-form"
+          [disabled]="isSubmittingPromo()"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+        >
+          @if (isSubmittingPromo()) {
+            <app-spinner size="xs" color="white" />
+            <span>{{ 'admin.marketing.modal.saving' | translate }}</span>
+          } @else {
+            <span>{{ 'admin.marketing.promoModal.submit' | translate }}</span>
+          }
+        </button>
       </div>
-    </div>
+    </app-modal>
   }
 
   <!-- MODAL 2: CREATE FLASH SALE -->
   @if (showFlashSaleModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            <ng-icon name="phosphorLightning" class="tone-gold text-[var(--tone-fg)] text-lg" />
-            <span>สร้าง Flash Sale แคมเปญใหม่</span>
-          </h2>
-          <button
-            type="button"
-            (click)="closeFlashSaleModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
-          </button>
+    <app-modal
+      [open]="true"
+      (openChange)="closeFlashSaleModal()"
+      [titleText]="'admin.marketing.flashSaleModal.title' | translate"
+      [closeOnOverlayClick]="false"
+    >
+      <form id="flash-sale-form" (ngSubmit)="submitCreateFlashSale()" class="space-y-4 text-xs">
+        <div>
+          <label for="flash-sale-title-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.flashSaleModal.name' | translate }}</label>
+          <input
+            id="flash-sale-title-input"
+            type="text"
+            [ngModel]="flashSaleTitle()"
+            (ngModelChange)="flashSaleTitle.set($event)"
+            name="flashTitle"
+            required
+            [placeholder]="'admin.marketing.flashSaleModal.namePlaceholder' | translate"
+            class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          />
         </div>
 
-        <form (ngSubmit)="submitCreateFlashSale()" class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="flash-sale-title-input" class="block font-bold text-[var(--color-text)] mb-1">ชื่อแคมเปญ Flash Sale*</label>
+            <label for="flash-sale-course-id-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.flashSaleModal.courseId' | translate }}</label>
             <input
-              id="flash-sale-title-input"
+              id="flash-sale-course-id-input"
               type="text"
-              [ngModel]="flashSaleTitle()"
-              (ngModelChange)="flashSaleTitle.set($event)"
-              name="flashTitle"
+              [ngModel]="flashSaleCourseId()"
+              (ngModelChange)="flashSaleCourseId.set($event)"
+              name="courseId"
               required
-              placeholder="เช่น Mega Mid-Year Sale ลดกระหน่ำ 24 ชม."
+              [placeholder]="'admin.marketing.flashSaleModal.courseIdPlaceholder' | translate"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+          <div>
+            <label for="flash-sale-price-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.flashSaleModal.salePrice' | translate }}</label>
+            <input
+              id="flash-sale-price-input"
+              type="number"
+              [ngModel]="flashSalePrice()"
+              (ngModelChange)="flashSalePrice.set($event)"
+              name="salePrice"
+              min="0"
+              required
               class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             />
           </div>
+        </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="flash-sale-course-id-input" class="block font-bold text-[var(--color-text)] mb-1">Course ID (GUID)*</label>
-              <input
-                id="flash-sale-course-id-input"
-                type="text"
-                [ngModel]="flashSaleCourseId()"
-                (ngModelChange)="flashSaleCourseId.set($event)"
-                name="courseId"
-                required
-                placeholder="ระบุรหัส GUID ของคอร์ส"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-            <div>
-              <label for="flash-sale-price-input" class="block font-bold text-[var(--color-text)] mb-1">ราคาพิเศษ Flash Sale (฿)*</label>
-              <input
-                id="flash-sale-price-input"
-                type="number"
-                [ngModel]="flashSalePrice()"
-                (ngModelChange)="flashSalePrice.set($event)"
-                name="salePrice"
-                min="0"
-                required
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="flash-sale-starts-at-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.flashSaleModal.startsAt' | translate }}</label>
+            <input
+              id="flash-sale-starts-at-input"
+              type="datetime-local"
+              [ngModel]="flashSaleStartsAt()"
+              (ngModelChange)="flashSaleStartsAt.set($event)"
+              name="fsStarts"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
           </div>
+          <div>
+            <label for="flash-sale-ends-at-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.flashSaleModal.endsAt' | translate }}</label>
+            <input
+              id="flash-sale-ends-at-input"
+              type="datetime-local"
+              [ngModel]="flashSaleEndsAt()"
+              (ngModelChange)="flashSaleEndsAt.set($event)"
+              name="fsEnds"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+        </div>
+      </form>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="flash-sale-starts-at-input" class="block font-bold text-[var(--color-text)] mb-1">เริ่มวันที่</label>
-              <input
-                id="flash-sale-starts-at-input"
-                type="datetime-local"
-                [ngModel]="flashSaleStartsAt()"
-                (ngModelChange)="flashSaleStartsAt.set($event)"
-                name="fsStarts"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-            <div>
-              <label for="flash-sale-ends-at-input" class="block font-bold text-[var(--color-text)] mb-1">สิ้นสุดวันที่</label>
-              <input
-                id="flash-sale-ends-at-input"
-                type="datetime-local"
-                [ngModel]="flashSaleEndsAt()"
-                (ngModelChange)="flashSaleEndsAt.set($event)"
-                name="fsEnds"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-            <button
-              type="button"
-              (click)="closeFlashSaleModal()"
-              class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-            >
-              ยกเลิก
-            </button>
-            <button
-              type="submit"
-              [disabled]="isSubmittingFlashSale()"
-              class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
-            >
-              @if (isSubmittingFlashSale()) {
-                <app-spinner size="xs" color="white" />
-                <span>กำลังบันทึก...</span>
-              } @else {
-                <span>สร้าง Flash Sale</span>
-              }
-            </button>
-          </div>
-        </form>
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closeFlashSaleModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.marketing.modal.cancel' | translate }}
+        </button>
+        <button
+          type="submit" form="flash-sale-form"
+          [disabled]="isSubmittingFlashSale()"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+        >
+          @if (isSubmittingFlashSale()) {
+            <app-spinner size="xs" color="white" />
+            <span>{{ 'admin.marketing.modal.saving' | translate }}</span>
+          } @else {
+            <span>{{ 'admin.marketing.createFlashSale' | translate }}</span>
+          }
+        </button>
       </div>
-    </div>
+    </app-modal>
   }
 
   <!-- MODAL 3: CREATE BUNDLE -->
   @if (showBundleModal()) {
-    <div class="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] p-4">
-      <div class="animate-pop-in w-full max-w-lg rounded-2xl glass-panel bg-[var(--glass-bg-strong)] p-6 space-y-5">
-        <div class="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
-          <h2 class="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
-            <ng-icon name="phosphorFolder" class="tone-blue text-[var(--tone-fg)] text-lg" />
-            <span>สร้างชุดคอร์สแพ็กเกจใหม่ (Bundle)</span>
-          </h2>
-          <button
-            type="button"
-            (click)="closeBundleModal()"
-            class="hit-44 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            [attr.aria-label]="'shared.modal.close' | translate"
-          >
-            <ng-icon name="phosphorXCircle" class="text-xl" aria-hidden="true" />
-          </button>
+    <app-modal
+      [open]="true"
+      (openChange)="closeBundleModal()"
+      [titleText]="'admin.marketing.bundleModal.title' | translate"
+      [closeOnOverlayClick]="false"
+    >
+      <form id="bundle-form" (ngSubmit)="submitCreateBundle()" class="space-y-4 text-xs">
+        <div>
+          <label for="bundle-title-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.bundleModal.name' | translate }}</label>
+          <input
+            id="bundle-title-input"
+            type="text"
+            [ngModel]="bundleTitle()"
+            (ngModelChange)="bundleTitle.set($event)"
+            name="bTitle"
+            required
+            [placeholder]="'admin.marketing.bundleModal.namePlaceholder' | translate"
+            class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          />
         </div>
 
-        <form (ngSubmit)="submitCreateBundle()" class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="bundle-title-input" class="block font-bold text-[var(--color-text)] mb-1">ชื่อแพ็กเกจ (Title)*</label>
+            <label for="bundle-slug-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.bundleModal.slug' | translate }}</label>
             <input
-              id="bundle-title-input"
+              id="bundle-slug-input"
               type="text"
-              [ngModel]="bundleTitle()"
-              (ngModelChange)="bundleTitle.set($event)"
-              name="bTitle"
+              [ngModel]="bundleSlug()"
+              (ngModelChange)="bundleSlug.set($event)"
+              name="bSlug"
+              placeholder="full-stack-ai-bundle"
+              class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            />
+          </div>
+          <div>
+            <label for="bundle-price-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.bundleModal.price' | translate }}</label>
+            <input
+              id="bundle-price-input"
+              type="number"
+              [ngModel]="bundlePrice()"
+              (ngModelChange)="bundlePrice.set($event)"
+              name="bPrice"
+              min="0"
               required
-              placeholder="เช่น Full-Stack AI Engineer 3-in-1 Bundle"
               class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             />
           </div>
+        </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="bundle-slug-input" class="block font-bold text-[var(--color-text)] mb-1">Slug URL*</label>
-              <input
-                id="bundle-slug-input"
-                type="text"
-                [ngModel]="bundleSlug()"
-                (ngModelChange)="bundleSlug.set($event)"
-                name="bSlug"
-                placeholder="full-stack-ai-bundle"
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-            <div>
-              <label for="bundle-price-input" class="block font-bold text-[var(--color-text)] mb-1">ราคาแพ็กเกจ (฿)*</label>
-              <input
-                id="bundle-price-input"
-                type="number"
-                [ngModel]="bundlePrice()"
-                (ngModelChange)="bundlePrice.set($event)"
-                name="bPrice"
-                min="0"
-                required
-                class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-              />
-            </div>
-          </div>
+        <div>
+          <label for="bundle-description-textarea" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.marketing.bundleModal.description' | translate }}</label>
+          <textarea
+            id="bundle-description-textarea"
+            [ngModel]="bundleDescription()"
+            (ngModelChange)="bundleDescription.set($event)"
+            name="bDesc"
+            rows="2"
+            [placeholder]="'admin.marketing.bundleModal.descriptionPlaceholder' | translate"
+            class="w-full rounded-xl glass-card p-3 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          ></textarea>
+        </div>
 
-          <div>
-            <label for="bundle-description-textarea" class="block font-bold text-[var(--color-text)] mb-1">คำอธิบาย</label>
-            <textarea
-              id="bundle-description-textarea"
-              [ngModel]="bundleDescription()"
-              (ngModelChange)="bundleDescription.set($event)"
-              name="bDesc"
-              rows="2"
-              placeholder="รายละเอียดจุดเด่นของชุดแพ็กเกจ"
-              class="w-full rounded-xl glass-card p-3 text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-            ></textarea>
-          </div>
+        <div>
+          <label for="bundle-course-ids-textarea" class="block font-bold text-[var(--color-text)] mb-1">
+            {{ 'admin.marketing.bundleModal.courseIds' | translate }}
+          </label>
+          <textarea
+            id="bundle-course-ids-textarea"
+            [ngModel]="bundleCourseIdsRaw()"
+            (ngModelChange)="bundleCourseIdsRaw.set($event)"
+            name="bCourses"
+            rows="3"
+            required
+            placeholder="88888888-8888-8888-8888-888888888888&#10;99999999-9999-9999-9999-999999999999"
+            class="w-full rounded-xl glass-card p-3 font-mono text-[11px] text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          ></textarea>
+        </div>
+      </form>
 
-          <div>
-            <label for="bundle-course-ids-textarea" class="block font-bold text-[var(--color-text)] mb-1">
-              Course IDs (1 รหัสต่อ 1 บรรทัด)*
-            </label>
-            <textarea
-              id="bundle-course-ids-textarea"
-              [ngModel]="bundleCourseIdsRaw()"
-              (ngModelChange)="bundleCourseIdsRaw.set($event)"
-              name="bCourses"
-              rows="3"
-              required
-              placeholder="88888888-8888-8888-8888-888888888888&#10;99999999-9999-9999-9999-999999999999"
-              class="w-full rounded-xl glass-card p-3 font-mono text-[11px] text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-            ></textarea>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-            <button
-              type="button"
-              (click)="closeBundleModal()"
-              class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-            >
-              ยกเลิก
-            </button>
-            <button
-              type="submit"
-              [disabled]="isSubmittingBundle()"
-              class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
-            >
-              @if (isSubmittingBundle()) {
-                <app-spinner size="xs" color="white" />
-                <span>กำลังบันทึก...</span>
-              } @else {
-                <span>สร้าง Bundle</span>
-              }
-            </button>
-          </div>
-        </form>
+      <div modalFooter class="flex items-center gap-3">
+        <button
+          type="button"
+          (click)="closeBundleModal()"
+          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+        >
+          {{ 'admin.marketing.modal.cancel' | translate }}
+        </button>
+        <button
+          type="submit" form="bundle-form"
+          [disabled]="isSubmittingBundle()"
+          class="btn-tactile hit-44 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 font-bold text-[var(--color-primary-foreground)] shadow-sm hover:opacity-95 disabled:opacity-50 transition"
+        >
+          @if (isSubmittingBundle()) {
+            <app-spinner size="xs" color="white" />
+            <span>{{ 'admin.marketing.modal.saving' | translate }}</span>
+          } @else {
+            <span>{{ 'admin.marketing.bundleModal.submit' | translate }}</span>
+          }
+        </button>
       </div>
-    </div>
+    </app-modal>
   }
 </div>
