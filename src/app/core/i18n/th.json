@@ -2454,7 +2454,7 @@
     "searchPlaceholder": "ค้นหาตามเลขที่คำสั่งซื้อ...",
     "status": {
       "pending": "รอดำเนินการ",
-      "awaitingPayment": "รอการชำระเงิน",
+      "awaitingpayment": "รอการชำระเงิน",
       "paid": "ชำระเงินแล้ว",
       "failed": "ไม่สำเร็จ",
       "cancelled": "ยกเลิกแล้ว",

@@ -437,3 +437,23 @@ html {
     transform: translate(-50%, -50%);
   }
 }
+
+/* Page shell for learner / buyer pages inside the public layout. Same rhythm as the studio pages
+   (a flex column with 2rem between sections) but kept at the header/footer content width (max-w-6xl,
+   px-4) so page content lines up with the site chrome. `-narrow` is for focused single-task pages
+   (order confirmation, account settings, certificate lookup). */
+@layer components {
+  .page-shell {
+    display: flex;
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page-shell-narrow {
+    max-width: 48rem;
+  }
+}

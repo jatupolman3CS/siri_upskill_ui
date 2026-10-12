@@ -2454,7 +2454,7 @@
     "searchPlaceholder": "Search by order number...",
     "status": {
       "pending": "Pending",
-      "awaitingPayment": "Awaiting Payment",
+      "awaitingpayment": "Awaiting Payment",
       "paid": "Paid",
       "failed": "Failed",
       "cancelled": "Cancelled",
