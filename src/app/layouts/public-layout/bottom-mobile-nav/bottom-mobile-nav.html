@@ -6,7 +6,7 @@
     <!-- Home -->
     <a
       routerLink="/"
-      routerLinkActive="text-[var(--color-primary-text)]"
+      routerLinkActive="text-[var(--color-primary-text)]!"
       [routerLinkActiveOptions]="{ exact: true }"
       class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary-text)]"
     >
@@ -17,7 +17,7 @@
     <!-- Browse / Search -->
     <a
       routerLink="/courses"
-      routerLinkActive="text-[var(--color-primary-text)]"
+      routerLinkActive="text-[var(--color-primary-text)]!"
       class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary-text)]"
     >
       <ng-icon name="phosphorMagnifyingGlass" class="text-xl" />
@@ -27,7 +27,7 @@
     <!-- My Courses (Learn) -->
     <a
       routerLink="/my-courses"
-      routerLinkActive="text-[var(--color-primary-text)]"
+      routerLinkActive="text-[var(--color-primary-text)]!"
       class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary-text)]"
     >
       <ng-icon name="phosphorGraduationCap" class="text-xl" />
@@ -44,7 +44,7 @@
     } @else {
       <a
         [routerLink]="auth.isAuthenticated() ? '/account/orders' : '/login'"
-        routerLinkActive="text-[var(--color-primary-text)]"
+        routerLinkActive="text-[var(--color-primary-text)]!"
         class="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary-text)]"
       >
         <ng-icon [name]="auth.isAuthenticated() ? 'phosphorReceipt' : 'phosphorUser'" class="text-xl" />

@@ -56,7 +56,7 @@
           <a
             [routerLink]="link.path"
             [queryParams]="link.queryParams"
-            routerLinkActive="font-semibold text-[var(--color-primary-text)]"
+            routerLinkActive="font-semibold text-[var(--color-primary-text)]!"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="link.activeOptions ?? { exact: link.exact }"
             (click)="requestClose()"
