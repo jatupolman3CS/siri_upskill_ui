@@ -10,7 +10,7 @@
   </div>
 
   @if (submitError(); as err) {
-    <div class="animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs text-rose-700">
+    <div class="tone-red animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)]">
       <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5" />
       <div>
         <p class="font-bold">เกิดข้อผิดพลาด</p>
@@ -24,8 +24,8 @@
       <app-spinner size="lg" />
     </div>
   } @else if (loadError()) {
-    <div role="alert" class="animate-fade-in-up rounded-3xl border border-rose-500/20 bg-rose-500/5 p-8 text-center space-y-4">
-      <ng-icon name="phosphorWarningCircle" class="text-4xl text-rose-600" aria-hidden="true" />
+    <div role="alert" class="tone-red animate-fade-in-up rounded-3xl glass-card border-[var(--tone-fg)]/40 p-8 text-center space-y-4">
+      <ng-icon name="phosphorWarningCircle" class="text-4xl text-[var(--tone-fg)]" aria-hidden="true" />
       <h2 class="text-xl font-bold text-[var(--color-text)]">{{ 'instructor.onboarding.loadErrorHeading' | translate }}</h2>
       <p class="text-xs text-[var(--color-text-muted)] max-w-md mx-auto">
         {{ 'instructor.onboarding.loadErrorDescription' | translate }}
@@ -33,14 +33,14 @@
       <button
         type="button"
         (click)="checkExistingProfile()"
-        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+        class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
       >
         {{ 'instructor.onboarding.retry' | translate }}
       </button>
     </div>
   } @else if (isApproved()) {
-      <div class="animate-fade-in-up rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 text-center space-y-4">
-        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+      <div class="tone-green animate-fade-in-up rounded-3xl glass-card border-[var(--tone-fg)]/40 p-8 text-center space-y-4">
+        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tone-fg)] text-[var(--tone-bg)] shadow-lg">
           <ng-icon name="phosphorCheckCircle" class="text-4xl animate-bounce-subtle" />
         </div>
         <h2 class="text-xl font-bold text-[var(--color-text)]">คุณเป็นผู้สอนของ SIRI UpSkill แล้ว</h2>
@@ -50,21 +50,21 @@
         <div class="pt-2">
           <a
             routerLink="/instructor"
-            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
           >
             <span>ไปยังแดชบอร์ดผู้สอน</span>
             <ng-icon name="phosphorArrowRight" />
           </a>
         </div>
         <p class="text-xs text-[var(--color-text-muted)]">
-          <a routerLink="/instructor/earnings" class="font-bold text-[var(--color-primary)] hover:underline">
+          <a routerLink="/instructor/earnings" class="font-bold text-[var(--color-primary-text)] hover:underline">
             {{ 'instructor.onboarding.setupPayoutLink' | translate }}
           </a>
         </p>
       </div>
   } @else if (isPending()) {
-      <div class="animate-fade-in-up rounded-3xl border border-amber-500/20 bg-amber-500/5 p-8 text-center space-y-4">
-        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-500/20">
+      <div class="tone-gold animate-fade-in-up rounded-3xl glass-card border-[var(--tone-fg)]/40 p-8 text-center space-y-4">
+        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tone-fg)] text-[var(--tone-bg)] shadow-lg">
           <ng-icon name="phosphorClock" class="text-4xl animate-spin-fast" />
         </div>
         <h2 class="text-xl font-bold text-[var(--color-text)]">ใบสมัครของคุณอยู่ระหว่างการตรวจสอบ</h2>
@@ -74,7 +74,7 @@
         <div class="pt-2">
           <a
             routerLink="/courses"
-            class="btn-tactile inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary)] hover:underline"
+            class="btn-tactile inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
           >
             <span>กลับไปยังหน้าหลัก</span>
             <ng-icon name="phosphorArrowRight" />
@@ -83,8 +83,8 @@
       </div>
   } @else {
     @if (isRejected()) {
-      <div role="status" class="animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-[var(--color-text)]">
-        <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5 text-amber-600" aria-hidden="true" />
+      <div role="status" class="tone-gold animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--color-text)]">
+        <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5 text-[var(--tone-fg)]" aria-hidden="true" />
         <div>
           <p class="font-bold">{{ 'instructor.onboarding.rejectedHeading' | translate }}</p>
           <p class="mt-0.5 text-[var(--color-text-muted)]">{{ 'instructor.onboarding.rejectedDescription' | translate }}</p>
@@ -98,7 +98,7 @@
         <span
           class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
           [class.bg-[var(--color-primary)]]="currentStep() >= 1"
-          [class.text-white]="currentStep() >= 1"
+          [class.text-[var(--color-primary-foreground)]]="currentStep() >= 1"
           [class.bg-[var(--color-surface-muted)]]="currentStep() < 1"
         >
           1
@@ -110,7 +110,7 @@
         <span
           class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
           [class.bg-[var(--color-primary)]]="currentStep() >= 2"
-          [class.text-white]="currentStep() >= 2"
+          [class.text-[var(--color-primary-foreground)]]="currentStep() >= 2"
           [class.bg-[var(--color-surface-muted)]]="currentStep() < 2"
         >
           2
@@ -120,7 +120,7 @@
     </div>
 
     <!-- Onboarding Step Card -->
-    <div class="animate-fade-in-up stagger-2 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8 shadow-sm space-y-6">
+    <div class="animate-fade-in-up stagger-2 rounded-3xl glass-card p-6 sm:p-8 shadow-sm space-y-6">
       <!-- Step 1: Profile Info -->
       @if (currentStep() === 1) {
         <div class="space-y-4">
@@ -134,14 +134,14 @@
           <div class="space-y-3">
             <div>
               <label for="displayName" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ชื่อ-นามสกุล / นามปากกาที่ใช้สอน <span class="text-rose-500">*</span>
+                ชื่อ-นามสกุล / นามปากกาที่ใช้สอน <span class="tone-red text-[var(--tone-fg)]">*</span>
               </label>
               <input
                 id="displayName"
                 type="text"
                 [(ngModel)]="displayName"
                 placeholder="เช่น ดร. อานนท์ พัฒนากุล"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+                class="w-full rounded-xl glass-card px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
               />
             </div>
 
@@ -154,20 +154,20 @@
                 type="text"
                 [(ngModel)]="headline"
                 placeholder="เช่น Senior Cloud Architect & Tech Lead"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+                class="w-full rounded-xl glass-card px-3.5 py-2.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
               />
             </div>
 
             <div>
               <label for="bio" class="block text-xs font-semibold text-[var(--color-text)] mb-1">
-                ประวัติย่อ ประสบการณ์ทำงาน หรือความเชี่ยวชาญ <span class="text-rose-500">*</span>
+                ประวัติย่อ ประสบการณ์ทำงาน หรือความเชี่ยวชาญ <span class="tone-red text-[var(--tone-fg)]">*</span>
               </label>
               <textarea
                 id="bio"
                 [(ngModel)]="bio"
                 rows="4"
                 placeholder="บอกเล่าประสบการณ์ ความเชี่ยวชาญ และเป้าหมายในการสอนของคุณ..."
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+                class="w-full rounded-xl glass-card p-3.5 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
               ></textarea>
             </div>
           </div>
@@ -184,9 +184,9 @@
             </p>
           </div>
 
-          <div class="rounded-2xl bg-[var(--color-bg)] p-4 text-xs text-[var(--color-text-muted)] space-y-2 border border-[var(--color-border)]">
+          <div class="rounded-2xl bg-[var(--color-surface-muted)]/50 p-4 text-xs text-[var(--color-text-muted)] space-y-2 border border-[var(--color-border)]">
             <div class="flex items-center gap-2 font-bold text-[var(--color-text)]">
-              <ng-icon name="phosphorShieldCheck" class="text-emerald-600 text-base" />
+              <ng-icon name="phosphorShieldCheck" class="tone-green text-[var(--tone-fg)] text-base" />
               <span><app-payout-policy-text messageKey="instructor.onboarding.termsHeading" skeletonWidth="12rem" /></span>
             </div>
             <p><app-payout-policy-text messageKey="instructor.onboarding.termsRevenueShare" [retryable]="false" skeletonWidth="90%" /></p>
@@ -195,7 +195,7 @@
           </div>
 
           <p class="flex items-start gap-2 text-xs text-[var(--color-text-muted)]" role="note">
-            <ng-icon name="phosphorBank" class="mt-0.5 shrink-0 text-base text-[var(--color-primary)]" aria-hidden="true" />
+            <ng-icon name="phosphorBank" class="mt-0.5 shrink-0 text-base text-[var(--color-primary-text)]" aria-hidden="true" />
             <span>{{ 'instructor.onboarding.payoutAfterApprovalNote' | translate }}</span>
           </p>
 
@@ -203,7 +203,7 @@
             <input
               type="checkbox"
               [(ngModel)]="agreedToTerms"
-              class="mt-1 h-4 w-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+              class="mt-1 h-4 w-4 rounded text-[var(--color-primary-text)] focus:ring-[var(--color-primary)]"
             />
             <span class="text-xs text-[var(--color-text)]">
               ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด เงื่อนไขการเป็นผู้สอน และนโยบายความเป็นส่วนตัวของ SIRI UpSkill
@@ -218,7 +218,7 @@
           <button
             type="button"
             (click)="prevStep()"
-            class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+            class="btn-tactile inline-flex items-center gap-1.5 rounded-xl glass-card px-4 py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
           >
             <ng-icon name="phosphorArrowLeft" />
             <span>ย้อนกลับ</span>
@@ -231,7 +231,7 @@
           <button
             type="button"
             (click)="nextStep()"
-            class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+            class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
           >
             <span>ถัดไป</span>
             <ng-icon name="phosphorArrowRight" />
@@ -241,7 +241,7 @@
             type="button"
             (click)="submitApplication()"
             [disabled]="!agreedToTerms || isSubmitting()"
-            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
           >
             @if (isSubmitting()) {
               <app-spinner size="xs" color="white" />

@@ -23,15 +23,15 @@
     <!-- Autosave Status, Undo/Redo, and Action Buttons -->
     <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
       <!-- Autosave Status Indicator -->
-      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium glass-card text-[var(--color-text-muted)]">
         @switch (saveStatus()) {
           @case ('saving') {
             <app-spinner size="xs" />
-            <span class="text-[var(--color-primary)]">{{ 'instructor.builder.status.saving' | translate }}</span>
+            <span class="text-[var(--color-primary-text)]">{{ 'instructor.builder.status.saving' | translate }}</span>
           }
           @case ('saved') {
-            <ng-icon name="phosphorCheckCircle" class="text-sm text-emerald-600 animate-pop-in" />
-            <span class="text-emerald-600 font-semibold">
+            <ng-icon name="phosphorCheckCircle" class="tone-green text-sm text-[var(--tone-fg)] animate-pop-in" />
+            <span class="tone-green text-[var(--tone-fg)] font-semibold">
               @if (lastSavedTime()) {
                 {{ 'instructor.builder.status.savedAt' | translate:{ time: lastSavedTime()! } }}
               } @else {
@@ -40,16 +40,16 @@
             </span>
           }
           @case ('unsaved') {
-            <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse-subtle"></span>
-            <span class="text-amber-700 dark:text-amber-400">{{ 'instructor.builder.status.unsaved' | translate }}</span>
+            <span class="inline-block w-2 h-2 rounded-full bg-[var(--color-warning)] animate-pulse-subtle"></span>
+            <span class="tone-gold text-[var(--tone-fg)]">{{ 'instructor.builder.status.unsaved' | translate }}</span>
           }
           @case ('conflict') {
-            <ng-icon name="phosphorWarningCircle" class="text-sm text-rose-600" />
-            <span class="text-rose-600 font-semibold">{{ 'instructor.builder.status.conflict' | translate }}</span>
+            <ng-icon name="phosphorWarningCircle" class="tone-red text-sm text-[var(--tone-fg)]" />
+            <span class="tone-red text-[var(--tone-fg)] font-semibold">{{ 'instructor.builder.status.conflict' | translate }}</span>
           }
           @case ('error') {
-            <ng-icon name="phosphorWarningCircle" class="text-sm text-rose-500" />
-            <span class="text-rose-500">{{ 'instructor.builder.status.error' | translate }}</span>
+            <ng-icon name="phosphorWarningCircle" class="tone-red text-sm text-[var(--tone-fg)]" />
+            <span class="tone-red text-[var(--tone-fg)]">{{ 'instructor.builder.status.error' | translate }}</span>
           }
           @default {
             <span class="text-[var(--color-text-muted)]">{{ 'instructor.builder.status.saved' | translate }}</span>
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Undo / Redo Buttons -->
-      <div class="flex items-center gap-1 border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] p-0.5">
+      <div class="flex items-center gap-1 rounded-xl glass-card p-0.5">
         <button
           type="button"
           (click)="undo()"
@@ -87,7 +87,7 @@
         type="button"
         (click)="saveCourse()"
         [disabled]="isSaving() || isLoading()"
-        class="btn-tactile inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 py-2 text-xs font-bold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
+        class="btn-tactile inline-flex items-center gap-1.5 rounded-xl glass-card px-3.5 py-2 text-xs font-bold text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
       >
         @if (isSaving()) {
           <app-spinner size="xs" />
@@ -102,7 +102,7 @@
         type="button"
         (click)="publishCourse()"
         [disabled]="isSaving() || isLoading()"
-        class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+        class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-3.5 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
       >
         <ng-icon name="phosphorSparkle" />
         <span>{{ 'instructor.builder.publishCourse' | translate }}</span>
@@ -113,10 +113,10 @@
   <!-- Undo/Redo Transient Notification Toast -->
   @if (historyToast()) {
     <div
-      class="fixed bottom-6 right-6 z-50 rounded-xl bg-zinc-900/90 text-white px-4 py-2.5 text-xs font-medium shadow-lg backdrop-blur transition transform animate-pop-in flex items-center gap-2"
+      class="fixed bottom-6 right-6 z-50 rounded-xl glass-card text-[var(--color-text)] px-4 py-2.5 text-xs font-medium shadow-lg transition transform animate-pop-in flex items-center gap-2"
       role="status"
     >
-      <ng-icon name="phosphorCheckCircle" class="text-emerald-400 text-sm" />
+      <ng-icon name="phosphorCheckCircle" class="tone-green text-[var(--tone-fg)] text-sm" />
       <span>{{ historyToast()! | translate }}</span>
     </div>
   }
@@ -124,13 +124,9 @@
   <!-- Error / Conflict Alert -->
   @if (errorMessage()) {
     <div
-      class="animate-fade-in flex items-center justify-between rounded-xl border p-4 text-xs font-medium"
-      [class.border-amber-500]="isConflict()"
-      [class.bg-amber-50]="isConflict()"
-      [class.text-amber-900]="isConflict()"
-      [class.border-rose-500]="!isConflict()"
-      [class.bg-rose-50]="!isConflict()"
-      [class.text-rose-900]="!isConflict()"
+      class="animate-fade-in flex items-center justify-between rounded-xl border border-[var(--tone-fg)] bg-[var(--tone-bg)] p-4 text-xs font-medium text-[var(--tone-fg)]"
+      [class.tone-gold]="isConflict()"
+      [class.tone-red]="!isConflict()"
       role="alert"
     >
       <div class="flex items-center gap-2">
@@ -142,7 +138,7 @@
         <button
           type="button"
           (click)="reloadCourse()"
-          class="btn-tactile inline-flex items-center gap-1 rounded-lg bg-amber-200 px-3 py-1 text-xs font-bold text-amber-900 transition hover:bg-amber-300"
+          class="btn-tactile inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--tone-bg)] transition hover:opacity-85"
         >
           <ng-icon name="phosphorArrowClockwise" />
           <span>{{ 'catalog.retryButton' | translate }}</span>
@@ -153,7 +149,7 @@
 
   <!-- Loading State -->
   @if (isLoading()) {
-    <div class="animate-fade-in flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-16 text-center text-sm text-[var(--color-text-muted)]">
+    <div class="animate-fade-in flex flex-col items-center justify-center gap-3 rounded-2xl glass-card p-16 text-center text-sm text-[var(--color-text-muted)]">
       <app-spinner size="lg" />
       <span>{{ 'common.loading' | translate }}</span>
     </div>
@@ -165,7 +161,7 @@
         (click)="activeTab.set('basic')"
         class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
         [class.bg-[var(--color-primary)]]="activeTab() === 'basic'"
-        [class.text-white]="activeTab() === 'basic'"
+        [class.text-[var(--color-primary-foreground)]]="activeTab() === 'basic'"
         [class.text-[var(--color-text-muted)]]="activeTab() !== 'basic'"
         [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'basic'"
       >
@@ -177,7 +173,7 @@
         (click)="activeTab.set('curriculum')"
         class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
         [class.bg-[var(--color-primary)]]="activeTab() === 'curriculum'"
-        [class.text-white]="activeTab() === 'curriculum'"
+        [class.text-[var(--color-primary-foreground)]]="activeTab() === 'curriculum'"
         [class.text-[var(--color-text-muted)]]="activeTab() !== 'curriculum'"
         [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'curriculum'"
       >
@@ -189,7 +185,7 @@
         (click)="activeTab.set('live')"
         class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
         [class.bg-[var(--color-primary)]]="activeTab() === 'live'"
-        [class.text-white]="activeTab() === 'live'"
+        [class.text-[var(--color-primary-foreground)]]="activeTab() === 'live'"
         [class.text-[var(--color-text-muted)]]="activeTab() !== 'live'"
         [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'live'"
       >
@@ -201,7 +197,7 @@
         (click)="showPublishTab()"
         class="btn-tactile rounded-xl px-4 py-2 text-xs font-bold transition focus:outline-none"
         [class.bg-[var(--color-primary)]]="activeTab() === 'publish'"
-        [class.text-white]="activeTab() === 'publish'"
+        [class.text-[var(--color-primary-foreground)]]="activeTab() === 'publish'"
         [class.text-[var(--color-text-muted)]]="activeTab() !== 'publish'"
         [class.hover:bg-[var(--color-surface-muted)]]="activeTab() !== 'publish'"
       >
@@ -211,10 +207,10 @@
 
     <!-- Tab 1: Basic Info -->
     @if (activeTab() === 'basic') {
-      <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6 shadow-sm">
+      <div class="animate-fade-in-up rounded-2xl glass-card p-6 space-y-6 shadow-sm">
         <div class="space-y-4">
           <!-- Delivery Format Selection -->
-          <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-3 shadow-xs">
+          <div class="rounded-2xl glass-card p-4 space-y-3 shadow-xs">
             <div>
               <label class="text-xs font-bold text-[var(--color-text)] block">
                 {{ 'instructor.builder.basic.deliveryFormat' | translate }}
@@ -235,10 +231,10 @@
                 [class.ring-2]="selectedDeliveryFormat() === 'OnDemand'"
                 [class.ring-[var(--color-primary)]/30]="selectedDeliveryFormat() === 'OnDemand'"
                 [class.border-[var(--color-border)]]="selectedDeliveryFormat() !== 'OnDemand'"
-                [class.bg-[var(--color-surface)]]="selectedDeliveryFormat() !== 'OnDemand'"
+                [class.glass-card]="selectedDeliveryFormat() !== 'OnDemand'"
               >
                 <div class="flex items-center gap-2">
-                  <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--color-primary)]" />
+                  <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--color-primary-text)]" />
                   <span class="text-xs font-bold text-[var(--color-text)]">
                     {{ 'instructor.builder.basic.formatOnDemand' | translate }}
                   </span>
@@ -252,17 +248,17 @@
               <button
                 type="button"
                 (click)="selectDeliveryFormat('Live')"
-                class="btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
-                [class.border-rose-500]="selectedDeliveryFormat() === 'Live'"
-                [class.bg-rose-500/10]="selectedDeliveryFormat() === 'Live'"
+                class="tone-red btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
+                [class.border-[var(--tone-fg)]]="selectedDeliveryFormat() === 'Live'"
+                [class.bg-[var(--tone-bg)]]="selectedDeliveryFormat() === 'Live'"
                 [class.ring-2]="selectedDeliveryFormat() === 'Live'"
-                [class.ring-rose-500/30]="selectedDeliveryFormat() === 'Live'"
+                [class.ring-[var(--tone-fg)]/30]="selectedDeliveryFormat() === 'Live'"
                 [class.border-[var(--color-border)]]="selectedDeliveryFormat() !== 'Live'"
-                [class.bg-[var(--color-surface)]]="selectedDeliveryFormat() !== 'Live'"
+                [class.glass-card]="selectedDeliveryFormat() !== 'Live'"
               >
                 <div class="flex items-center gap-2">
-                  <ng-icon name="phosphorVideoCamera" class="text-base text-rose-500" />
-                  <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
+                  <ng-icon name="phosphorVideoCamera" class="text-base text-[var(--tone-fg)]" />
+                  <span class="text-xs font-bold text-[var(--tone-fg)]">
                     {{ 'instructor.builder.basic.formatLive' | translate }}
                   </span>
                 </div>
@@ -275,17 +271,17 @@
               <button
                 type="button"
                 (click)="selectDeliveryFormat('Hybrid')"
-                class="btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
-                [class.border-amber-500]="selectedDeliveryFormat() === 'Hybrid'"
-                [class.bg-amber-500/10]="selectedDeliveryFormat() === 'Hybrid'"
+                class="tone-gold btn-tactile flex flex-col items-start gap-1.5 rounded-xl border p-3.5 text-left transition focus:outline-none"
+                [class.border-[var(--tone-fg)]]="selectedDeliveryFormat() === 'Hybrid'"
+                [class.bg-[var(--tone-bg)]]="selectedDeliveryFormat() === 'Hybrid'"
                 [class.ring-2]="selectedDeliveryFormat() === 'Hybrid'"
-                [class.ring-amber-500/30]="selectedDeliveryFormat() === 'Hybrid'"
+                [class.ring-[var(--tone-fg)]/30]="selectedDeliveryFormat() === 'Hybrid'"
                 [class.border-[var(--color-border)]]="selectedDeliveryFormat() !== 'Hybrid'"
-                [class.bg-[var(--color-surface)]]="selectedDeliveryFormat() !== 'Hybrid'"
+                [class.glass-card]="selectedDeliveryFormat() !== 'Hybrid'"
               >
                 <div class="flex items-center gap-2">
-                  <ng-icon name="phosphorArrowClockwise" class="text-base text-amber-500" />
-                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                  <ng-icon name="phosphorArrowClockwise" class="text-base text-[var(--tone-fg)]" />
+                  <span class="text-xs font-bold text-[var(--tone-fg)]">
                     {{ 'instructor.builder.basic.formatHybrid' | translate }}
                   </span>
                 </div>
@@ -296,9 +292,9 @@
             </div>
 
             @if (selectedDeliveryFormat() !== 'OnDemand') {
-              <div class="rounded-xl border border-sky-200 bg-sky-50/70 p-3 text-xs text-sky-950 flex items-start gap-2.5">
-                <ng-icon name="phosphorSparkle" class="text-sm text-sky-600 flex-shrink-0 mt-0.5" />
-                <p class="text-sky-800 leading-relaxed font-medium">
+              <div class="tone-blue rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-3 text-xs text-[var(--tone-fg)] flex items-start gap-2.5">
+                <ng-icon name="phosphorSparkle" class="text-sm text-[var(--tone-fg)] flex-shrink-0 mt-0.5" />
+                <p class="text-[var(--tone-fg)] leading-relaxed font-medium">
                   {{ 'instructor.builder.basic.liveFormatSelectedNote' | translate }}
                 </p>
               </div>
@@ -314,7 +310,7 @@
               [(ngModel)]="courseTitle"
               (ngModelChange)="onFieldChange()"
               [placeholder]="'instructor.builder.basic.titlePlaceholder' | translate"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -328,7 +324,7 @@
               [(ngModel)]="courseSubtitle"
               (ngModelChange)="onFieldChange()"
               [placeholder]="'instructor.builder.basic.subtitlePlaceholder' | translate"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -342,7 +338,7 @@
               (ngModelChange)="onFieldChange()"
               rows="5"
               [placeholder]="'instructor.builder.basic.descriptionPlaceholder' | translate"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             ></textarea>
           </div>
 
@@ -355,7 +351,7 @@
                 id="builderCategoryId"
                 [(ngModel)]="categoryId"
                 (ngModelChange)="onFieldChange()"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               >
                 <option value="" disabled>{{ 'instructor.builder.basic.selectCategory' | translate }}</option>
                 @for (cat of categories(); track cat.id) {
@@ -370,7 +366,7 @@
                   @if (auth.isAdmin()) {
                     <a
                       routerLink="/admin/categories"
-                      class="mt-1 inline-flex min-h-11 items-center font-bold text-[var(--color-primary)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                      class="mt-1 inline-flex min-h-11 items-center font-bold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                     >
                       {{ 'instructor.builder.basic.noCategoriesAdminAction' | translate }}
                     </a>
@@ -390,7 +386,7 @@
                 type="number"
                 [(ngModel)]="coursePrice"
                 (ngModelChange)="onFieldChange()"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               />
             </div>
 
@@ -403,7 +399,7 @@
                 type="number"
                 [(ngModel)]="comparePrice"
                 (ngModelChange)="onFieldChange()"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               />
             </div>
 
@@ -415,7 +411,7 @@
                 id="builderCourseLevel"
                 [(ngModel)]="courseLevel"
                 (ngModelChange)="onFieldChange()"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               >
                 <option value="Beginner">{{ 'instructor.builder.basic.levelBeginner' | translate }}</option>
                 <option value="Intermediate">{{ 'instructor.builder.basic.levelIntermediate' | translate }}</option>
@@ -435,7 +431,7 @@
               [(ngModel)]="thumbnailUrl"
               (ngModelChange)="onFieldChange()"
               [placeholder]="'instructor.builder.basic.thumbnailPlaceholder' | translate"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+              class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
 
@@ -453,14 +449,14 @@
 
               @if (trailerStatus() === 'ready') {
                 <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <span class="tone-green inline-flex items-center gap-1 rounded-lg bg-[var(--tone-bg)] px-2.5 py-1 text-xs font-medium text-[var(--tone-fg)]">
                     <ng-icon name="phosphorCheckCircle" class="text-sm" />
                     <span>{{ 'instructor.builder.basic.trailerUploaded' | translate }}</span>
                   </span>
                   <button
                     type="button"
                     (click)="removeTrailer()"
-                    class="btn-tactile text-[var(--color-danger)] p-1.5 hover:bg-red-500/10 rounded-lg transition text-xs"
+                    class="btn-tactile text-[var(--color-danger)] p-1.5 hover:bg-[var(--hue-red-bg)] rounded-lg transition text-xs"
                     [title]="'instructor.builder.basic.removeTrailer' | translate"
                   >
                     <ng-icon name="phosphorTrash" />
@@ -479,9 +475,9 @@
             />
 
             @if (trailerStatus() === 'uploading') {
-              <div class="space-y-2 p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <div class="space-y-2 p-3 rounded-lg glass-card">
                 <div class="flex items-center justify-between text-xs text-[var(--color-text-muted)]">
-                  <span class="flex items-center gap-1.5 font-medium text-[var(--color-primary)]">
+                  <span class="flex items-center gap-1.5 font-medium text-[var(--color-primary-text)]">
                     <ng-icon name="phosphorSpinner" class="animate-spin text-sm" />
                     <span>{{ 'instructor.builder.curriculum.uploadingVideo' | translate }}</span>
                   </span>
@@ -495,7 +491,7 @@
                 </div>
               </div>
             } @else if (trailerStatus() === 'processing') {
-              <p role="status" class="flex items-center gap-2 text-xs text-[var(--color-primary)]">
+              <p role="status" class="flex items-center gap-2 text-xs text-[var(--color-primary-text)]">
                 <ng-icon name="phosphorSpinner" class="animate-spin" />
                 {{ 'instructor.builder.upload.processing' | translate }}
               </p>
@@ -506,7 +502,7 @@
               <button
                 type="button"
                 (click)="trailerFileInput.click()"
-                class="btn-tactile w-full py-4 border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-primary)] rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] bg-[var(--color-surface)] transition"
+                class="btn-tactile w-full py-4 border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-primary)] rounded-xl flex flex-col items-center justify-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary-text)] transition"
               >
                 <ng-icon name="phosphorUploadSimple" class="text-xl" />
                 <span class="font-semibold">{{ 'instructor.builder.basic.uploadTrailer' | translate }}</span>
@@ -528,19 +524,19 @@
             <div class="space-y-2">
               @for (outcome of outcomes(); track $index) {
                 <div class="flex items-center gap-2">
-                  <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-subtle)] text-[11px] font-bold text-[var(--color-primary)]">
+                  <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-[11px] font-bold text-[var(--color-primary-text)]">
                     {{ $index + 1 }}
                   </span>
                   <input
                     type="text"
                     [ngModel]="outcome"
                     (ngModelChange)="updateOutcome($index, $event)"
-                    class="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                    class="flex-1 rounded-xl glass-card px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
                   />
                   <button
                     type="button"
                     (click)="removeOutcome($index)"
-                    class="btn-tactile inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-red-500 transition"
+                    class="btn-tactile inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--hue-red-fg)] transition"
                   >
                     <ng-icon name="phosphorTrash" />
                   </button>
@@ -553,7 +549,7 @@
                   [(ngModel)]="newOutcome"
                   (keydown.enter)="$event.preventDefault(); addOutcome()"
                   [placeholder]="'instructor.builder.basic.outcomePlaceholder' | translate"
-                  class="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                  class="flex-1 rounded-xl glass-card px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
                 />
                 <button
                   type="button"
@@ -588,12 +584,12 @@
                     type="text"
                     [ngModel]="req"
                     (ngModelChange)="updateRequirement($index, $event)"
-                    class="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                    class="flex-1 rounded-xl glass-card px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
                   />
                   <button
                     type="button"
                     (click)="removeRequirement($index)"
-                    class="btn-tactile inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-red-500 transition"
+                    class="btn-tactile inline-flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--hue-red-fg)] transition"
                   >
                     <ng-icon name="phosphorTrash" />
                   </button>
@@ -606,7 +602,7 @@
                   [(ngModel)]="newRequirement"
                   (keydown.enter)="$event.preventDefault(); addRequirement()"
                   [placeholder]="'instructor.builder.basic.requirementPlaceholder' | translate"
-                  class="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                  class="flex-1 rounded-xl glass-card px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
                 />
                 <button
                   type="button"
@@ -641,7 +637,7 @@
                 [(ngModel)]="seoTitle"
                 (ngModelChange)="onFieldChange()"
                 [placeholder]="'instructor.builder.basic.seoTitlePlaceholder' | translate"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               />
             </div>
 
@@ -655,7 +651,7 @@
                 (ngModelChange)="onFieldChange()"
                 rows="3"
                 [placeholder]="'instructor.builder.basic.seoDescriptionPlaceholder' | translate"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                class="w-full rounded-xl glass-card p-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
               ></textarea>
             </div>
           </div>
@@ -683,12 +679,12 @@
         </div>
 
         @if (sections().length === 0) {
-          <div class="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
+          <div class="rounded-2xl glass-card border-dashed p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
             <p>{{ 'instructor.builder.curriculum.emptySections' | translate }}</p>
             <button
               type="button"
               (click)="addSection()"
-              class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)]"
+              class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)]"
             >
               <ng-icon name="phosphorPlus" />
               <span>{{ 'instructor.builder.curriculum.addSection' | translate }}</span>
@@ -707,7 +703,7 @@
             <div
               cdkDrag
               [cdkDragData]="section"
-              class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-4 shadow-sm transition-shadow"
+              class="rounded-2xl glass-card p-5 space-y-4 shadow-sm transition-shadow"
             >
               <!-- Section Drag Placeholder -->
               <div *cdkDragPlaceholder class="rounded-2xl border-2 border-dashed border-[var(--color-primary)]/40 bg-[var(--color-surface-muted)]/30 min-h-[120px]"></div>
@@ -755,14 +751,14 @@
                   [ngModel]="section.title"
                   (ngModelChange)="updateSectionTitle(sIdx, $event)"
                   [attr.aria-label]="'Section Title ' + (sIdx + 1)"
-                  class="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm font-bold text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
+                  class="flex-1 rounded-xl glass-card px-3 py-2 text-sm font-bold text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
                 />
 
                 <!-- Delete Section Button -->
                 <button
                   type="button"
                   (click)="removeSection(sIdx)"
-                  class="btn-tactile text-[var(--color-danger)] p-2 hover:bg-red-500/10 rounded-lg transition"
+                  class="btn-tactile text-[var(--color-danger)] p-2 hover:bg-[var(--hue-red-bg)] rounded-lg transition"
                   [title]="'instructor.builder.curriculum.deleteSection' | translate"
                   [attr.aria-label]="('instructor.builder.curriculum.deleteSection' | translate) + ' ' + (sIdx + 1)"
                 >
@@ -789,7 +785,7 @@
                   <div
                     cdkDrag
                     [cdkDragData]="episode"
-                    class="flex flex-wrap items-center gap-2.5 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-bg)] p-3 shadow-xs"
+                    class="flex flex-wrap items-center gap-2.5 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)]/60 p-3 shadow-xs"
                   >
                     <!-- Episode Drag Placeholder -->
                     <div *cdkDragPlaceholder class="rounded-xl border-2 border-dashed border-[var(--color-primary)]/40 bg-[var(--color-surface-muted)]/40 min-h-[44px]"></div>
@@ -829,14 +825,14 @@
                       </button>
                     </div>
 
-                    <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--color-primary)] flex-shrink-0" />
+                    <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--color-primary-text)] flex-shrink-0" />
 
                     <input
                       type="text"
                       [ngModel]="episode.title"
                       (ngModelChange)="updateEpisodeTitle(sIdx, eIdx, $event)"
                       [attr.aria-label]="'Episode Title ' + (eIdx + 1)"
-                      class="flex-1 min-w-[180px] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)]"
+                      class="flex-1 min-w-[180px] rounded-lg glass-card px-3 py-1.5 text-xs font-medium text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)]"
                     />
 
                     <div class="flex items-center gap-2">
@@ -850,36 +846,36 @@
                       />
 
                       @if (episode.videoStatus === 'uploading') {
-                        <div class="flex items-center gap-1.5 rounded-lg bg-[var(--color-primary-subtle)] px-2 py-1 text-[11px] font-semibold text-[var(--color-primary)]">
+                        <div class="flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)]/10 px-2 py-1 text-[11px] font-semibold text-[var(--color-primary-text)]">
                           <ng-icon name="phosphorSpinner" class="animate-spin text-sm" />
                           <span>{{ episode.uploadProgress ?? 0 }}%</span>
                         </div>
                       } @else if (episode.videoStatus === 'processing') {
-                        <div role="status" class="flex items-center gap-1.5 rounded-lg bg-[var(--color-primary-subtle)] px-2 py-1 text-[11px] font-medium text-[var(--color-primary)]">
+                        <div role="status" class="flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)]/10 px-2 py-1 text-[11px] font-medium text-[var(--color-primary-text)]">
                           <ng-icon name="phosphorSpinner" class="animate-spin text-sm" />
                           <span>{{ 'instructor.builder.upload.processing' | translate }}</span>
                         </div>
                       } @else if (episode.videoStatus === 'ready') {
-                        <div class="flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2 py-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                        <div class="tone-green flex items-center gap-1.5 rounded-lg bg-[var(--tone-bg)] px-2 py-1 text-[11px] font-medium text-[var(--tone-fg)]">
                           <ng-icon name="phosphorCheckCircle" class="text-xs" />
                           <span>{{ formatDuration(episode.durationSeconds) }}</span>
                           <button
                             type="button"
                             (click)="removeEpisodeVideo(sIdx, eIdx)"
-                            class="hover:text-red-500 ml-0.5"
+                            class="hover:text-[var(--hue-red-fg)] ml-0.5"
                             [title]="'instructor.builder.curriculum.removeVideo' | translate"
                           >
                             <ng-icon name="phosphorTrash" class="text-xs" />
                           </button>
                         </div>
                       } @else if (episode.videoStatus === 'failed') {
-                        <div role="alert" class="flex items-center gap-1 rounded-lg bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-600">
+                        <div role="alert" class="tone-red flex items-center gap-1 rounded-lg bg-[var(--tone-bg)] px-2 py-1 text-[11px] font-medium text-[var(--tone-fg)]">
                           <ng-icon name="phosphorWarningCircle" class="text-xs" />
                           <span>{{ (episode.errorMessage || 'instructor.builder.curriculum.uploadFailed') | translate }}</span>
                           <button
                             type="button"
                             (click)="episodeFileInput.click()"
-                            class="underline font-bold hover:text-red-700 ml-1"
+                            class="underline font-bold hover:opacity-80 ml-1"
                           >
                             {{ 'instructor.builder.curriculum.retry' | translate }}
                           </button>
@@ -888,7 +884,7 @@
                         <button
                           type="button"
                           (click)="episodeFileInput.click()"
-                          class="btn-tactile inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-[11px] font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition"
+                          class="btn-tactile inline-flex items-center gap-1 rounded-lg glass-card px-2 py-1 text-[11px] font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition"
                           [title]="'instructor.builder.curriculum.uploadVideo' | translate"
                         >
                           <ng-icon name="phosphorUploadSimple" class="text-xs" />
@@ -909,7 +905,7 @@
                       <button
                         type="button"
                         (click)="removeEpisode(sIdx, eIdx)"
-                        class="btn-tactile text-zinc-400 hover:text-red-500 p-1 rounded transition"
+                        class="btn-tactile text-[var(--color-text-muted)] hover:text-[var(--hue-red-fg)] p-1 rounded transition"
                         [title]="'instructor.builder.curriculum.deleteEpisode' | translate"
                         [attr.aria-label]="('instructor.builder.curriculum.deleteEpisode' | translate) + ' ' + (eIdx + 1)"
                       >
@@ -930,7 +926,7 @@
                 <button
                   type="button"
                   (click)="addEpisode(sIdx)"
-                  class="btn-tactile mt-2 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+                  class="btn-tactile mt-2 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
                 >
                   <ng-icon name="phosphorPlus" />
                   <span>{{ 'instructor.builder.curriculum.addEpisode' | translate }}</span>
@@ -951,8 +947,8 @@
           (courseChanged)="onLiveCourseChanged()"
         />
       } @else {
-        <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center space-y-4 shadow-sm">
-          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-600">
+        <div class="animate-fade-in-up rounded-2xl glass-card p-8 text-center space-y-4 shadow-sm">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]">
             <ng-icon name="phosphorVideoCamera" class="text-4xl" />
           </div>
           <h3 class="text-xl font-bold text-[var(--color-text)]">
@@ -966,7 +962,7 @@
               type="button"
               (click)="saveAndOpenLive()"
               [disabled]="isSaving() || isLoading()"
-              class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+              class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-sm font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
             >
               @if (isSaving()) {
                 <app-spinner size="xs" color="white" />
@@ -983,8 +979,8 @@
 
     <!-- Tab 3: Publish -->
     @if (activeTab() === 'publish') {
-      <div class="animate-fade-in-up rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center space-y-4 shadow-sm">
-        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+      <div class="animate-fade-in-up rounded-2xl glass-card p-8 text-center space-y-4 shadow-sm">
+        <div class="animate-pop-in mx-auto flex h-16 w-16 items-center justify-center rounded-2xl tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]">
           <ng-icon name="phosphorCheckCircle" class="text-4xl" />
         </div>
         <h3 class="text-xl font-bold text-[var(--color-text)]">
@@ -1000,7 +996,7 @@
             type="button"
             (click)="publishCourse()"
             [disabled]="isSaving() || isLoading()"
-            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 py-3 text-sm font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+            class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 py-3 text-sm font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
           >
             @if (isSaving()) {
               <app-spinner size="xs" color="white" />

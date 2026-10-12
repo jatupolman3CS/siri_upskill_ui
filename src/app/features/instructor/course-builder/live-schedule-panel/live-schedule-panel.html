@@ -17,7 +17,7 @@
       <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'live.builder.subheading' | translate }}</p>
     </header>
 
-    <section class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
+    <section class="rounded-[var(--radius-lg)] glass-card p-4 sm:p-5">
       <div class="max-w-md">
         <app-select
           [label]="'live.builder.format.label' | translate"
@@ -51,9 +51,9 @@
         @if (roomsMissing() > 0) {
           <p
             role="status"
-            class="flex items-start gap-2 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)] p-3 text-sm text-[var(--color-text)]"
+            class="tone-gold flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]"
           >
-            <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--color-warning)]" />
+            <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
             {{ 'live.builder.sessions.roomsMissing' | translate: { count: roomsMissing() } }}
           </p>
         }

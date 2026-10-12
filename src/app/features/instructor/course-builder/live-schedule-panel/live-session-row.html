@@ -1,5 +1,5 @@
 <article
-  class="rounded-[var(--radius-lg)] border bg-[var(--color-surface)] p-4"
+  class="rounded-[var(--radius-lg)] glass-card border p-4"
   [class]="highlighted() ? 'border-2 border-[var(--color-warning)]' : 'border-[var(--color-border)]'"
   [attr.aria-label]="session().title"
 >
@@ -31,9 +31,9 @@
   @if (highlighted()) {
     <p
       role="alert"
-      class="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)] p-3 text-sm text-[var(--color-text)]"
+      class="tone-gold mt-3 flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]"
     >
-      <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--color-warning)]" />
+      <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
       <span>{{ 'live.builder.row.notReady' | translate }}</span>
     </p>
   }
@@ -86,7 +86,7 @@
     }
     <a
       [routerLink]="['/instructor/sessions', session().id]"
-      class="ml-auto inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] px-2 text-sm font-medium text-[var(--color-primary)] hover:underline
+      class="ml-auto inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] px-2 text-sm font-medium text-[var(--color-primary-text)] hover:underline
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
     >
       {{ 'live.builder.row.details' | translate }}

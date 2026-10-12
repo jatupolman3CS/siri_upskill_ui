@@ -1,6 +1,6 @@
 <div class="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <!-- Net revenue this month -->
-  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)]">
+  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-sm)]">
     <div class="flex items-center justify-between gap-2">
       <h2 class="text-sm font-semibold text-[var(--color-text-muted)]">
         {{ 'instructor.dashboard.kpi.revenue' | translate: { month: (monthInstant() | bangkokDate: 'month') } }}
@@ -29,7 +29,7 @@
   </article>
 
   <!-- Total students -->
-  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)]">
+  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-sm)]">
     <div class="flex items-center justify-between gap-2">
       <h2 class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'instructor.dashboard.kpi.students' | translate }}</h2>
       <span class="tone-blue flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--tone-bg)] text-[var(--tone-fg)]">
@@ -55,7 +55,7 @@
   </article>
 
   <!-- Published courses -->
-  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)]">
+  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-sm)]">
     <div class="flex items-center justify-between gap-2">
       <h2 class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'instructor.dashboard.kpi.courses' | translate }}</h2>
       <span class="tone-violet flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--tone-bg)] text-[var(--tone-fg)]">
@@ -81,7 +81,7 @@
   </article>
 
   <!-- Rating -->
-  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)]">
+  <article class="flex flex-col justify-between rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-sm)]">
     <div class="flex items-center justify-between gap-2">
       <h2 class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'instructor.dashboard.kpi.rating' | translate }}</h2>
       <span class="tone-gold flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--tone-bg)] text-[var(--tone-fg)]">

@@ -43,7 +43,7 @@ const NO_VALUE = '—';
         <button
           type="button"
           (click)="store.reload()"
-          class="ml-1 inline-flex min-h-11 items-center font-semibold text-[var(--color-primary)] underline"
+          class="ml-1 inline-flex min-h-11 items-center font-semibold text-[var(--color-primary-text)] underline"
         >
           {{ 'payout.policy.reload' | translate }}
         </button>

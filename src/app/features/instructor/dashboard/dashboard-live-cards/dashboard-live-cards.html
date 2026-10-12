@@ -1,7 +1,7 @@
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
   <!-- Next live session -->
   <section
-    class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)]"
+    class="flex flex-col rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-sm)]"
     [attr.aria-label]="'instructor.dashboard.live.nextHeading' | translate"
   >
     <h2 class="text-base font-semibold text-[var(--color-text)]">{{ 'instructor.dashboard.live.nextHeading' | translate }}</h2>
@@ -24,16 +24,16 @@
         @if (!next.meetingUsable) {
           <div
             role="status"
-            class="flex items-start gap-2 rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--color-warning)_55%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] p-3 text-sm text-[var(--color-text)]"
+            class="tone-gold flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]"
           >
-            <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--color-warning)]" />
+            <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
             <span>{{ 'instructor.dashboard.live.roomNotReady' | translate }}</span>
           </div>
         }
 
         <a
           [routerLink]="['/instructor/sessions', next.sessionId]"
-          class="mt-auto inline-flex min-h-11 w-fit items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary)]
+          class="mt-auto inline-flex min-h-11 w-fit items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary-text)]
             hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           {{ (next.meetingUsable ? 'instructor.dashboard.live.manage' : 'instructor.dashboard.live.fixRoom') | translate }}
@@ -44,7 +44,7 @@
       <p class="mt-3 text-sm text-[var(--color-text-muted)]">{{ 'instructor.dashboard.live.noNext' | translate }}</p>
       <a
         routerLink="/instructor/sessions"
-        class="mt-3 inline-flex min-h-11 w-fit items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary)]
+        class="mt-3 inline-flex min-h-11 w-fit items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary-text)]
           hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ 'instructor.dashboard.live.allSessions' | translate }}
@@ -55,7 +55,7 @@
 
   <!-- Recent attendance -->
   <section
-    class="flex flex-col rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-sm)]"
+    class="flex flex-col rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-sm)]"
     [attr.aria-label]="'instructor.dashboard.live.attendanceHeading' | translate"
   >
     <h2 class="text-base font-semibold text-[var(--color-text)]">{{ 'instructor.dashboard.live.attendanceHeading' | translate }}</h2>

@@ -13,7 +13,7 @@
   @if (earningsLoading()) {
     <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
       @for (placeholder of [0, 1, 2]; track placeholder) {
-        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm flex flex-col gap-3">
+        <div class="rounded-2xl glass-card p-6 shadow-sm flex flex-col gap-3">
           <app-skeleton variant="text" width="60%" />
           <app-skeleton variant="text" width="45%" height="1.75rem" />
           <app-skeleton variant="text" width="55%" />
@@ -21,13 +21,13 @@
       }
     </div>
   } @else if (earningsError()) {
-    <div class="animate-fade-in-up stagger-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+    <div class="animate-fade-in-up stagger-1 rounded-2xl glass-card shadow-sm">
       <app-empty-state [heading]="'instructor.earnings.summaryErrorHeading' | translate" [description]="'instructor.earnings.summaryErrorDescription' | translate">
         <button
           emptyStateAction
           type="button"
           (click)="retryEarnings()"
-          class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--color-primary-hover)]"
+          class="btn-tactile rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)]"
         >
           {{ 'instructor.earnings.retryButton' | translate }}
         </button>
@@ -35,15 +35,15 @@
     </div>
   } @else if (earningsSummary(); as summary) {
     <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
         <span class="text-xs font-semibold text-[var(--color-text-muted)]">รายได้สะสมทั้งหมด (Net)</span>
         <p class="mt-2 text-2xl font-black text-[var(--color-text)]">{{ summary.cumulativeEarnings | currencyThb }}</p>
-        <p class="mt-1 text-[11px] text-emerald-600 font-medium">โอนเข้าบัญชีเรียบร้อยแล้ว</p>
+        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">โอนเข้าบัญชีเรียบร้อยแล้ว</p>
       </div>
 
-      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
         <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutHeading' | translate }}</span>
-        <p class="mt-2 text-2xl font-black text-emerald-600">{{ summary.latestPayoutAmount | currencyThb }}</p>
+        <p class="tone-green mt-2 text-2xl font-black text-[var(--tone-fg)]">{{ summary.latestPayoutAmount | currencyThb }}</p>
         @if (latestPaidHistoryItem(); as latest) {
           <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
             {{ 'instructor.earnings.latestPayoutPaidOn' | translate: { date: (latest.paidAtUtc | date: 'dd/MM/yyyy') || '' } }}
@@ -53,9 +53,9 @@
         }
       </div>
 
-      <div class="card-hover rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+      <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
         <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHeading' | translate }}</span>
-        <p class="mt-2 text-2xl font-black text-[var(--color-primary)]">{{ summary.estimatedNextPayoutAmount | currencyThb }}</p>
+        <p class="mt-2 text-2xl font-black text-[var(--color-primary-text)]">{{ summary.estimatedNextPayoutAmount | currencyThb }}</p>
         <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">ยอดคำนวณแบบ Real-time</p>
       </div>
     </div>
@@ -69,15 +69,15 @@
     <h2 class="text-base font-bold text-[var(--color-text)]">ประวัติการรับเงินโอน (Payout History)</h2>
 
     @if (earningsLoading()) {
-      <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm p-6 space-y-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
+      <div class="overflow-hidden rounded-2xl glass-card shadow-sm p-6 space-y-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
         <app-skeleton variant="text" [lines]="4" />
       </div>
     } @else if (!earningsError() && payoutHistory().length === 0) {
-      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+      <div class="rounded-2xl glass-card shadow-sm">
         <app-empty-state [heading]="'instructor.earnings.historyEmptyHeading' | translate" [description]="'instructor.earnings.historyEmptyDescription' | translate" />
       </div>
     } @else if (!earningsError()) {
-      <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+      <div class="overflow-hidden rounded-2xl glass-card shadow-sm">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm text-[var(--color-text)]">
             <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -99,10 +99,10 @@
                   <td class="px-6 py-4 text-xs font-medium">
                     {{ item.grossAmount | currencyThb }}
                   </td>
-                  <td class="px-6 py-4 text-xs text-rose-500 font-medium">
+                  <td class="tone-red px-6 py-4 text-xs text-[var(--tone-fg)] font-medium">
                     -{{ item.withholdingTaxAmount | currencyThb }}
                   </td>
-                  <td class="px-6 py-4 font-bold text-emerald-600">
+                  <td class="tone-green px-6 py-4 font-bold text-[var(--tone-fg)]">
                     {{ item.netAmount | currencyThb }}
                   </td>
                   <td class="px-6 py-4">
@@ -118,7 +118,7 @@
                   <td class="px-6 py-4 text-right">
                     <button
                       type="button"
-                      class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
+                      class="btn-tactile inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
                     >
                       <ng-icon name="phosphorDownloadSimple" />
                       <span>ใบหักภาษี 50 ทวิ</span>

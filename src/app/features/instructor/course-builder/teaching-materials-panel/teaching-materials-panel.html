@@ -1,4 +1,4 @@
-<section class="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+<section class="rounded-[var(--radius-md)] glass-card">
   <button
     #headerButton
     type="button"
@@ -46,7 +46,7 @@
             } @else {
               <ul class="flex flex-col gap-2" [attr.aria-label]="'teachingMaterials.listLabel' | translate">
                 @for (material of materials(); track material.id) {
-                  <li class="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-2 pl-3">
+                  <li class="flex items-center gap-2 rounded-[var(--radius-md)] glass-card p-2 pl-3">
                     <ng-icon size="1.5rem" name="phosphorFileText" aria-hidden="true" class="shrink-0 text-[var(--color-text-muted)]" />
                     <div class="min-w-0 flex-1">
                       <p class="break-words text-sm font-medium text-[var(--color-text)]">{{ material.fileName }}</p>

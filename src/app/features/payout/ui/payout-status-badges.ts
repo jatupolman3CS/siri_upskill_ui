@@ -15,32 +15,32 @@ export interface PayoutStatusBadge {
   readonly badgeClass: string;
 }
 
-const AMBER = 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20';
-const SKY = 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20';
-const EMERALD = 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20';
-const ROSE = 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20';
+const GOLD = 'tone-gold bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
+const BLUE = 'tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
+const GREEN = 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
+const RED = 'tone-red bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
 const NEUTRAL = 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]';
 
 /** `PayoutBatchStatus` — the whole run: created `Draft`, then `Executed` (or `Failed`). */
 const BATCH_STATUS_BADGES: Readonly<Record<PayoutBatchStatus, PayoutStatusBadge>> = {
-  Draft: { labelKey: 'admin.payouts.batchStatus.draft', icon: 'phosphorClock', badgeClass: SKY },
-  Executed: { labelKey: 'admin.payouts.batchStatus.executed', icon: 'phosphorCheckCircle', badgeClass: EMERALD },
-  Failed: { labelKey: 'admin.payouts.batchStatus.failed', icon: 'phosphorXCircle', badgeClass: ROSE },
+  Draft: { labelKey: 'admin.payouts.batchStatus.draft', icon: 'phosphorClock', badgeClass: BLUE },
+  Executed: { labelKey: 'admin.payouts.batchStatus.executed', icon: 'phosphorCheckCircle', badgeClass: GREEN },
+  Failed: { labelKey: 'admin.payouts.batchStatus.failed', icon: 'phosphorXCircle', badgeClass: RED },
 };
 
 /** `RevenueSplitStatus` — one order item's instructor share. */
 const SPLIT_STATUS_BADGES: Readonly<Record<RevenueSplitStatus, PayoutStatusBadge>> = {
-  Pending: { labelKey: 'admin.payouts.splitStatus.pending', icon: 'phosphorClock', badgeClass: AMBER },
-  Payable: { labelKey: 'admin.payouts.splitStatus.payable', icon: 'phosphorHandCoins', badgeClass: SKY },
-  Paid: { labelKey: 'admin.payouts.splitStatus.paid', icon: 'phosphorCheckCircle', badgeClass: EMERALD },
+  Pending: { labelKey: 'admin.payouts.splitStatus.pending', icon: 'phosphorClock', badgeClass: GOLD },
+  Payable: { labelKey: 'admin.payouts.splitStatus.payable', icon: 'phosphorHandCoins', badgeClass: BLUE },
+  Paid: { labelKey: 'admin.payouts.splitStatus.paid', icon: 'phosphorCheckCircle', badgeClass: GREEN },
   Reversed: { labelKey: 'admin.payouts.splitStatus.reversed', icon: 'phosphorArrowCounterClockwise', badgeClass: NEUTRAL },
 };
 
 /** `PayoutBatchItemStatus` — one instructor's transfer inside a batch (also every row of the instructor history). */
 const BATCH_ITEM_STATUS_BADGES: Readonly<Record<PayoutBatchItemStatus, PayoutStatusBadge>> = {
-  Pending: { labelKey: 'instructor.earnings.status.pending', icon: 'phosphorClock', badgeClass: AMBER },
-  Transferred: { labelKey: 'instructor.earnings.status.transferred', icon: 'phosphorCheckCircle', badgeClass: EMERALD },
-  Failed: { labelKey: 'instructor.earnings.status.failed', icon: 'phosphorXCircle', badgeClass: ROSE },
+  Pending: { labelKey: 'instructor.earnings.status.pending', icon: 'phosphorClock', badgeClass: GOLD },
+  Transferred: { labelKey: 'instructor.earnings.status.transferred', icon: 'phosphorCheckCircle', badgeClass: GREEN },
+  Failed: { labelKey: 'instructor.earnings.status.failed', icon: 'phosphorXCircle', badgeClass: RED },
 };
 
 const UNKNOWN_STATUS_BADGE: PayoutStatusBadge = { labelKey: null, icon: 'phosphorQuestion', badgeClass: NEUTRAL };

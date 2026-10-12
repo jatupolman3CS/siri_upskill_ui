@@ -1,5 +1,5 @@
 <form
-  class="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--color-primary)] bg-[var(--color-surface)] p-4 sm:p-5"
+  class="flex flex-col gap-4 rounded-[var(--radius-lg)] glass-card border border-[var(--color-primary)] p-4 sm:p-5"
   [attr.aria-label]="(isEditing() ? 'live.builder.form.editHeading' : 'live.builder.form.addHeading') | translate"
   (submit)="submit($event)"
   novalidate
@@ -24,7 +24,7 @@
       rows="2"
       maxlength="2000"
       [formControl]="form.controls.description"
-      class="block w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-base text-[var(--color-text)]
+      class="block w-full rounded-[var(--radius-md)] glass-card px-3.5 py-2.5 text-base text-[var(--color-text)]
         focus-visible:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
     ></textarea>
   </div>

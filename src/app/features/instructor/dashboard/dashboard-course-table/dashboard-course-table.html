@@ -1,9 +1,9 @@
-<section class="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)]">
+<section class="overflow-hidden rounded-[var(--radius-lg)] glass-card shadow-[var(--shadow-sm)]">
   <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4 sm:px-6">
     <h2 class="text-base font-semibold text-[var(--color-text)]">{{ 'instructor.dashboard.courses.heading' | translate }}</h2>
     <a
       routerLink="/instructor/courses"
-      class="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary)]
+      class="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary-text)]
         hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
     >
       {{ 'instructor.dashboard.courses.viewAll' | translate }}
@@ -20,7 +20,7 @@
         emptyStateAction
         routerLink="/instructor/courses/new"
         class="inline-flex h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
-          hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ 'instructor.dashboard.createCourse' | translate }}
       </a>
@@ -87,7 +87,7 @@
                   }
                   <a
                     [routerLink]="['/instructor/courses', row.course.courseId, 'builder']"
-                    class="inline-flex h-11 items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 text-sm font-medium text-[var(--color-text)]
+                    class="inline-flex h-11 items-center gap-1.5 rounded-[var(--radius-md)] glass-card px-3 text-sm font-medium text-[var(--color-text)]
                       transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                   >
                     <ng-icon name="phosphorPencilSimple" aria-hidden="true" />

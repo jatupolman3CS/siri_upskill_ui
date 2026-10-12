@@ -17,7 +17,7 @@ import type { UploadItem } from './material-upload-queue';
   templateUrl: './material-upload-row.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ phosphorArrowClockwise, phosphorSpinner, phosphorWarningCircle, phosphorX })],
-  host: { class: 'flex flex-col gap-1.5 rounded-[var(--radius-md)] border border-dashed border-[var(--color-border)] bg-[var(--color-bg)] p-3' },
+  host: { class: 'flex flex-col gap-1.5 rounded-[var(--radius-md)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-3' },
 })
 export class MaterialUploadRow {
   readonly upload = input.required<UploadItem>();

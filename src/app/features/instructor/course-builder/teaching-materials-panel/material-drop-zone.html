@@ -3,14 +3,14 @@
   [class]="
     dragging()
       ? 'border-[var(--color-primary)] bg-[var(--color-surface-muted)]'
-      : 'border-[var(--color-border)] bg-[var(--color-bg)]'
+      : 'border-[var(--color-border)] bg-transparent'
   "
   (dragenter)="onDragOver($event)"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
-  <ng-icon size="2rem" name="phosphorCloudArrowUp" aria-hidden="true" class="text-[var(--color-primary)]" />
+  <ng-icon size="2rem" name="phosphorCloudArrowUp" aria-hidden="true" class="text-[var(--color-primary-text)]" />
   <p class="text-sm font-medium text-[var(--color-text)]">
     {{ (dragging() ? 'teachingMaterials.drop.dropping' : 'teachingMaterials.drop.title') | translate }}
   </p>
