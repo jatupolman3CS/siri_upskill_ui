@@ -7,6 +7,7 @@ import { phosphorX } from '@ng-icons/phosphor-icons/regular';
 import { AuthService } from '../../core/auth/auth.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { UserAvatar } from '../../shared/user-avatar/user-avatar';
+import { ThemeToggle } from '../../shared/theme-toggle/theme-toggle';
 import { StudioNavLink } from './studio-nav-link';
 
 /**
@@ -18,7 +19,7 @@ import { StudioNavLink } from './studio-nav-link';
  */
 @Component({
   selector: 'app-studio-mobile-nav',
-  imports: [NgIcon, TranslatePipe, CdkTrapFocus, RouterLink, RouterLinkActive, UserAvatar],
+  imports: [NgIcon, TranslatePipe, CdkTrapFocus, RouterLink, RouterLinkActive, UserAvatar, ThemeToggle],
   templateUrl: './studio-mobile-nav.html',
   styleUrl: './studio-mobile-nav.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

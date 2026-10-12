@@ -26,6 +26,7 @@ import { HeaderAuth } from './header-auth/header-auth';
 import { HeaderIconLink } from './header-icon-link/header-icon-link';
 import { HeaderSearch } from './header-search/header-search';
 import { LanguageMenu } from './language-menu/language-menu';
+import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 
 /**
  * Site header for `PublicLayout`: a slim top strip (tagline + language dropdown), the sticky main row
@@ -56,6 +57,7 @@ import { LanguageMenu } from './language-menu/language-menu';
     HeaderIconLink,
     HeaderAuth,
     LanguageMenu,
+    ThemeToggle,
   ],
   templateUrl: './site-header.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

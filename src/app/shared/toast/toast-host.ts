@@ -21,7 +21,7 @@ const ICON_BY_TYPE: Record<ToastType, string> = {
 const COLOR_CLASS_BY_TYPE: Record<ToastType, string> = {
   success: 'text-[var(--color-success)]',
   error: 'text-[var(--color-danger)]',
-  info: 'text-[var(--color-primary)]',
+  info: 'text-[var(--color-primary-text)]',
   warning: 'text-[var(--color-warning)]',
 };
 

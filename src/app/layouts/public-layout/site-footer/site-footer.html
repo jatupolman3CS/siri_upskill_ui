@@ -1,5 +1,5 @@
 <!-- Bottom padding on small screens clears the fixed bottom mobile nav (h-14 + safe area). -->
-<footer class="border-t border-[var(--color-border)] bg-[var(--color-surface)] pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+<footer class="glass-pill rounded-none border-x-0 border-b-0 pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
   <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8">
     <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
       <div class="max-w-sm space-y-3">
@@ -14,7 +14,7 @@
               <a
                 [routerLink]="link.path"
                 class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-text)]
-                  transition-colors duration-200 ease-out hover:text-[var(--color-primary-hover)]
+                  transition-colors duration-200 ease-out hover:text-[var(--color-primary-text)]
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
               >
                 {{ link.labelKey | translate }}
@@ -37,7 +37,7 @@
               <a
                 [routerLink]="link.path"
                 class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm text-[var(--color-text-muted)]
-                  transition-colors duration-200 ease-out hover:text-[var(--color-primary-hover)]
+                  transition-colors duration-200 ease-out hover:text-[var(--color-primary-text)]
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
               >
                 {{ link.labelKey | translate }}

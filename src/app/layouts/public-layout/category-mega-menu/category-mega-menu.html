@@ -13,7 +13,7 @@
     [attr.aria-expanded]="open()"
     [attr.aria-controls]="panelId"
     class="flex h-11 cursor-pointer items-center gap-2 rounded-full bg-[var(--color-surface-muted)] px-4 text-sm font-semibold
-      text-[var(--color-primary-hover)] transition-colors duration-200 ease-out hover:bg-[var(--color-border)]
+      text-[var(--color-primary-text)] transition-colors duration-200 ease-out hover:bg-[var(--color-border)]
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
   >
     <ng-icon name="phosphorSquaresFour" aria-hidden="true" class="text-base" />
@@ -36,8 +36,7 @@
     <div
       [id]="panelId"
       class="app-category-mega-menu-panel absolute left-0 top-full z-50 mt-2 w-max min-w-[36rem] max-w-3xl
-        rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6
-        shadow-[var(--shadow-lg)]"
+        rounded-[var(--radius-lg)] glass-panel bg-[var(--glass-bg-strong)] p-6"
     >
       <div class="grid grid-cols-3 gap-6">
         @for (category of categories(); track category.id) {
@@ -47,7 +46,7 @@
               [queryParams]="{ category: category.slug }"
               (click)="close()"
               class="flex items-center gap-2 rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-text)]
-                hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                hover:text-[var(--color-primary-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" [class]="resolveTone(category.iconKey) + ' text-[var(--tone-fg)]'" />
               {{ categoryName(category) }}
@@ -62,7 +61,7 @@
                       [queryParams]="{ category: child.slug }"
                       (click)="close()"
                       class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm text-[var(--color-text-muted)]
-                        hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                        hover:text-[var(--color-primary-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                     >
                       {{ categoryName(child) }}
                     </a>
@@ -78,7 +77,7 @@
         <a
           routerLink="/courses"
           (click)="close()"
-          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-primary)]
+          class="flex min-h-11 items-center rounded-[var(--radius-sm)] text-sm font-medium text-[var(--color-primary-text)]
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           {{ 'nav.allCourses' | translate }}

@@ -8,7 +8,7 @@
       (mouseleave)="toastService.resume(toast.id)"
       (focusin)="toastService.pause(toast.id)"
       (focusout)="toastService.resume(toast.id)"
-      class="app-toast pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-4 shadow-[var(--shadow-lg)]"
+      class="app-toast pointer-events-auto flex w-full max-w-sm items-start gap-3 glass-panel rounded-[var(--radius-lg)] bg-[var(--glass-bg-strong)] p-4"
     >
       <ng-icon
         [name]="iconFor(toast.type)"

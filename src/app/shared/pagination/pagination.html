@@ -6,7 +6,7 @@
         [disabled]="isFirstPage()"
         (click)="goToPrevious()"
         [attr.aria-label]="'shared.pagination.previous' | translate"
-        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)]
+        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-full)] text-[var(--color-text)]
           transition-colors duration-200 ease-out
           hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
@@ -27,7 +27,7 @@
             (click)="goToPage(item)"
             [attr.aria-label]="'shared.pagination.goToPage' | translate: { page: item }"
             [attr.aria-current]="item === currentPage() ? 'page' : null"
-            class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-sm font-medium
+            class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-full)] text-sm font-medium
               transition-colors duration-200 ease-out
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             [class]="
@@ -48,7 +48,7 @@
         [disabled]="isLastPage()"
         (click)="goToNext()"
         [attr.aria-label]="'shared.pagination.next' | translate"
-        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)]
+        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--radius-full)] text-[var(--color-text)]
           transition-colors duration-200 ease-out
           hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"

@@ -20,13 +20,14 @@ import {
 import { AuthService } from '../../core/auth/auth.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { UserAvatar } from '../../shared/user-avatar/user-avatar';
+import { ThemeToggle } from '../../shared/theme-toggle/theme-toggle';
 import { StudioMobileNav } from '../studio-mobile-nav/studio-mobile-nav';
 import { StudioNavLink } from '../studio-mobile-nav/studio-nav-link';
 import { INSTRUCTOR_ADMIN_SWITCH_LINK, INSTRUCTOR_NAV_LINKS, INSTRUCTOR_SWITCH_LINKS } from './instructor-nav';
 
 @Component({
   selector: 'app-instructor-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgIcon, TranslatePipe, UserAvatar, StudioMobileNav],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgIcon, TranslatePipe, UserAvatar, StudioMobileNav, ThemeToggle],
   templateUrl: './instructor-layout.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

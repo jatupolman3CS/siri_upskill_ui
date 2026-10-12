@@ -25,9 +25,9 @@
 
     <div
       class="app-account-menu-panel absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden
-        rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] shadow-[var(--shadow-lg)]"
+        rounded-[var(--radius-lg)] glass-panel bg-[var(--glass-bg-strong)]"
     >
-      <div class="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+      <div class="flex items-center gap-3 border-b border-[var(--glass-border)] bg-[var(--color-surface-muted)] px-4 py-3">
         <app-user-avatar size="lg" [name]="user()?.displayName" [src]="user()?.avatarUrl" />
         <div class="min-w-0">
           <p class="truncate text-sm font-semibold text-[var(--color-text)]">

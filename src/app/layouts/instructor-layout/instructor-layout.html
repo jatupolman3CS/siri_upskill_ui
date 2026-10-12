@@ -1,6 +1,6 @@
-<div class="flex h-screen flex-col bg-[var(--color-bg)] overflow-hidden select-none">
+<div class="flex h-screen flex-col overflow-hidden select-none">
   <!-- Top Navigation Bar -->
-  <header class="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:px-6">
+  <header class="flex h-16 shrink-0 items-center justify-between gap-3 glass-panel rounded-none border-x-0 border-t-0 px-4 md:px-6">
     <div class="flex min-w-0 items-center gap-2 md:gap-4">
       <!-- Below md the sidebar is hidden: this opens the drawer that carries the same navigation. -->
       <button
@@ -16,20 +16,21 @@
         <ng-icon name="phosphorList" class="text-xl" aria-hidden="true" />
       </button>
 
-      <a routerLink="/" class="truncate text-lg font-extrabold tracking-tight text-[var(--color-primary)]">
+      <a routerLink="/" class="truncate text-lg font-extrabold tracking-tight text-[var(--color-primary-text)]">
         SIRI UpSkill <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] ml-1">Studio</span>
       </a>
-      <span class="hidden rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-600 lg:inline-flex">
+      <span class="hidden rounded-full tone-blue bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)] lg:inline-flex">
         โหมดผู้สอน (Instructor)
       </span>
     </div>
 
     <!-- Right Header CTA & Switcher (hidden below md; the drawer repeats these links) -->
     <div class="hidden items-center gap-3 md:flex">
+      <app-theme-toggle />
       @if (auth.isAdmin()) {
         <a
           routerLink="/admin"
-          class="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/20"
+          class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--tone-fg)]/30 tone-red bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] transition hover:brightness-95"
         >
           <span>{{ 'instructor.nav.toAdmin' | translate }}</span>
         </a>
@@ -37,7 +38,7 @@
 
       <a
         routerLink="/my-courses"
-        class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-500/20"
+        class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--tone-fg)]/30 tone-green bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] transition hover:brightness-95"
       >
         <ng-icon name="phosphorArrowLeft" />
         <span>{{ 'instructor.nav.toLearner' | translate }}</span>
@@ -45,7 +46,7 @@
 
       <a
         routerLink="/instructor/courses/new"
-        class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)]"
+        class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)] hover:shadow-[var(--shadow-glow)]"
       >
         <ng-icon name="phosphorPlusCircle" class="text-sm" />
         <span>{{ 'instructor.nav.createCourse' | translate }}</span>
@@ -63,12 +64,12 @@
   <!-- Studio Shell: Sidebar + Content Outlet -->
   <div class="flex flex-1 min-h-0 overflow-hidden">
     <!-- Left Navigation Sidebar -->
-    <aside class="w-64 shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col justify-between p-4 hidden md:flex">
+    <aside class="glass-panel w-64 shrink-0 rounded-none border-y-0 border-l-0 flex flex-col justify-between p-4 hidden md:flex">
       <nav [attr.aria-label]="'instructor.nav.menuTitle' | translate" class="space-y-1">
         @for (item of navLinks; track item.id) {
           <a
             [routerLink]="item.route"
-            routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
+            routerLinkActive="bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-sm font-bold"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
             class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
@@ -95,7 +96,7 @@
     </aside>
 
     <!-- Main Workspace Content -->
-    <main class="flex-1 overflow-y-auto bg-[var(--color-bg)] p-6 lg:p-8">
+    <main class="flex-1 overflow-y-auto p-6 lg:p-8">
       <router-outlet />
     </main>
   </div>

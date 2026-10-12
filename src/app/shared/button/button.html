@@ -2,8 +2,8 @@
   [type]="type()"
   [disabled]="isInactive()"
   [attr.aria-busy]="loading() ? 'true' : null"
-  class="inline-flex select-none items-center justify-center rounded-[var(--radius-md)] font-medium
-    transition-colors duration-200 ease-out
+  class="inline-flex select-none items-center justify-center rounded-[var(--radius-full)] font-medium
+    transition-[background-color,box-shadow,color] duration-200 ease-out motion-reduce:transition-none
     cursor-pointer disabled:cursor-not-allowed disabled:opacity-60
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
   [class]="sizeClasses() + ' ' + variantClasses() + (fullWidth() ? ' w-full' : '')"

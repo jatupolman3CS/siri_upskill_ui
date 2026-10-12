@@ -18,7 +18,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
         focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
     >
       <span
-        class="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary)]
+        class="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-primary)] shadow-[var(--shadow-glow)]
           text-xl text-[var(--color-primary-foreground)]"
       >
         <ng-icon name="phosphorGraduationCap" aria-hidden="true" />

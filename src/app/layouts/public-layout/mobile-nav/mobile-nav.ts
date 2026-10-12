@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { CategoryTreeNode } from '../../../features/catalog/data/category-api.models';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { Locale, TranslationService } from '../../../core/i18n/translation.service';
+import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 import { UserAvatar } from '../../../shared/user-avatar/user-avatar';
 import { SITE_NAV_LINKS } from '../site-nav';
 import { ACCOUNT_MENU_ICONS, buildAccountMenuItems } from '../site-header/account-menu/account-menu-items';
@@ -31,7 +32,7 @@ import { CategoryAccordionItem } from './category-accordion-item/category-accord
  */
 @Component({
   selector: 'app-mobile-nav',
-  imports: [NgIcon, TranslatePipe, CdkTrapFocus, RouterLink, RouterLinkActive, CategoryAccordionItem, UserAvatar],
+  imports: [NgIcon, TranslatePipe, CdkTrapFocus, RouterLink, RouterLinkActive, CategoryAccordionItem, UserAvatar, ThemeToggle],
   templateUrl: './mobile-nav.html',
   styleUrl: './mobile-nav.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

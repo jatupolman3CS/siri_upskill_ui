@@ -5,7 +5,7 @@
   -->
   <div
     role="presentation"
-    class="studio-mobile-nav-overlay fixed inset-0 z-50 flex justify-start bg-[rgb(15_23_42_/_0.6)]"
+    class="studio-mobile-nav-overlay fixed inset-0 z-50 flex justify-start bg-[var(--overlay-scrim)]"
     (click)="onOverlayClick($event)"
     (keydown.escape)="requestClose()"
   >
@@ -16,7 +16,7 @@
       [attr.aria-labelledby]="titleId"
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
-      class="studio-mobile-nav-panel flex h-full w-full max-w-xs flex-col gap-4 overflow-y-auto bg-[var(--color-bg)] p-6 shadow-[var(--shadow-lg)]"
+      class="studio-mobile-nav-panel flex h-full w-full max-w-xs flex-col gap-4 glass-panel overflow-y-auto rounded-none border-y-0 bg-[var(--glass-bg-strong)] p-6"
     >
       <div class="flex items-center justify-between gap-4">
         <h2 [id]="titleId" class="text-lg font-semibold text-[var(--color-text)]">
@@ -39,7 +39,7 @@
         @for (item of items(); track item.id) {
           <a
             [routerLink]="item.route"
-            routerLinkActive="bg-[var(--color-primary)] text-white shadow-sm font-bold"
+            routerLinkActive="bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-sm font-bold"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
             (click)="requestClose()"
@@ -76,7 +76,11 @@
         </nav>
       }
 
-      <div class="mt-auto flex items-center gap-3 border-t border-[var(--color-border)] pt-4">
+      <div class="mt-auto flex items-center justify-between border-t border-[var(--color-border)] pt-4">
+        <app-theme-toggle size="comfortable" />
+      </div>
+
+      <div class="flex items-center gap-3 border-t border-[var(--color-border)] pt-4">
         <app-user-avatar [name]="auth.currentUser()?.displayName" [src]="auth.currentUser()?.avatarUrl" />
         <div class="min-w-0 flex-1">
           <p class="truncate text-xs font-bold text-[var(--color-text)]">

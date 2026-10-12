@@ -58,7 +58,7 @@ export class Button {
   protected readonly variantClasses = computed<string>(() => {
     switch (this.variant()) {
       case 'secondary':
-        return 'border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] active:bg-[var(--color-surface-muted)]';
+        return 'glass-card text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] active:bg-[var(--color-surface-muted)]';
       case 'danger':
         // No dedicated "on-danger" token exists in tokens.css; reusing
         // --color-primary-foreground (pure white in both themes) is
@@ -66,10 +66,10 @@ export class Button {
         // brand surface" token, and danger/primary buttons share that need.
         return 'bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:brightness-90 active:brightness-95';
       case 'ghost':
-        return 'bg-transparent text-[var(--color-primary)] hover:bg-[var(--color-surface-muted)] active:bg-[var(--color-surface-muted)]';
+        return 'bg-transparent text-[var(--color-primary-text)] hover:bg-[var(--color-surface-muted)] active:bg-[var(--color-surface-muted)]';
       case 'primary':
       default:
-        return 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-hover)] active:bg-[var(--color-primary-hover)]';
+        return 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] hover:shadow-[var(--shadow-glow)] active:bg-[var(--color-primary-pressed)]';
     }
   });
 }

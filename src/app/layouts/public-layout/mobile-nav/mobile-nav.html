@@ -7,7 +7,7 @@
   -->
   <div
     role="presentation"
-    class="app-mobile-nav-overlay fixed inset-0 z-50 flex justify-end bg-[rgb(15_23_42_/_0.6)]"
+    class="app-mobile-nav-overlay fixed inset-0 z-50 flex justify-end bg-[var(--overlay-scrim)]"
     (click)="onOverlayClick($event)"
     (keydown.escape)="requestClose()"
   >
@@ -18,7 +18,7 @@
       [attr.aria-labelledby]="titleId"
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
-      class="app-mobile-nav-panel flex h-full w-full max-w-xs flex-col gap-4 overflow-y-auto bg-[var(--color-bg)] p-6 shadow-[var(--shadow-lg)]"
+      class="app-mobile-nav-panel flex h-full w-full max-w-xs flex-col gap-4 glass-panel overflow-y-auto rounded-none border-y-0 bg-[var(--glass-bg-strong)] p-6"
     >
       <div class="flex items-center justify-between gap-4">
         <h2 [id]="titleId" class="text-lg font-semibold text-[var(--color-text)]">
@@ -38,7 +38,7 @@
       </div>
 
       @if (authService.isAuthenticated()) {
-        <div class="flex items-center gap-3 rounded-[var(--radius-lg)] bg-[var(--color-surface)] p-3">
+        <div class="flex items-center gap-3 glass-card rounded-[var(--radius-lg)] p-3">
           <app-user-avatar size="lg" [name]="user()?.displayName" [src]="user()?.avatarUrl" />
           <div class="min-w-0">
             <p class="truncate text-sm font-semibold text-[var(--color-text)]">
@@ -56,7 +56,7 @@
           <a
             [routerLink]="link.path"
             [queryParams]="link.queryParams"
-            routerLinkActive="font-semibold text-[var(--color-primary-hover)]"
+            routerLinkActive="font-semibold text-[var(--color-primary-text)]"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="link.activeOptions ?? { exact: link.exact }"
             (click)="requestClose()"
@@ -122,7 +122,7 @@
                 routerLink="/register"
                 (click)="requestClose()"
                 class="flex h-11 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-semibold
-                  text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-none
+                  text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none
                   focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
               >
                 {{ 'nav.register' | translate }}
@@ -146,6 +146,7 @@
             {{ option.labelKey | translate }}
           </button>
         }
+        <app-theme-toggle size="comfortable" class="ml-auto" />
       </div>
     </div>
   </div>

@@ -1,12 +1,15 @@
 <!-- Slim top strip: tagline + language dropdown (desktop chrome; the drawer has its own language toggle). -->
-<div class="hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] md:block">
+<div class="hidden border-b border-[var(--glass-border)] bg-[var(--glass-bg)] md:block">
   <div class="mx-auto flex h-9 max-w-6xl items-center justify-between gap-4 px-4">
     <p class="truncate text-[13px] text-[var(--color-text-muted)]">{{ 'nav.tagline' | translate }}</p>
-    <app-language-menu />
+    <div class="flex items-center gap-3">
+      <app-theme-toggle />
+      <app-language-menu />
+    </div>
   </div>
 </div>
 
-<header class="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
+<header class="glass-panel sticky top-0 z-30 rounded-none border-x-0 border-t-0">
   <div class="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 md:h-[4.5rem] md:gap-4">
     <app-brand-logo class="shrink-0" />
 
@@ -18,8 +21,8 @@
       <a
         [routerLink]="instructorCta().route"
         class="mr-1 hidden h-11 items-center gap-2 rounded-full bg-[var(--color-primary)] px-5 text-sm font-semibold
-          text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] transition-colors duration-200 ease-out
-          hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2
+          text-[var(--color-primary-foreground)] shadow-[var(--shadow-sm)] transition-[background-color,box-shadow] duration-200 ease-out motion-reduce:transition-none hover:shadow-[var(--shadow-glow)]
+          hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2
           focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2
           focus-visible:ring-offset-[var(--color-bg)] lg:flex"
       >
@@ -64,31 +67,33 @@
   <!-- Secondary nav row (lg+): Categories mega menu pill + primary links. -->
   <nav
     [attr.aria-label]="'nav.mainNavLabel' | translate"
-    class="hidden border-t border-[var(--color-border)] bg-[var(--color-surface)] lg:block"
+    class="hidden border-t border-[var(--glass-border)] lg:block"
   >
     <div class="mx-auto flex h-12 max-w-6xl items-center gap-1 px-4">
       <app-category-mega-menu class="mr-2" [categories]="categories()" />
+      <div class="glass-pill flex items-center gap-1 rounded-full px-2">
       @for (link of navLinks; track link.id) {
         <a
           [routerLink]="link.path"
           [queryParams]="link.queryParams"
-          routerLinkActive="font-semibold text-[var(--color-primary-hover)]"
+          routerLinkActive="font-semibold text-[var(--color-primary-text)]"
           ariaCurrentWhenActive="page"
           [routerLinkActiveOptions]="link.activeOptions ?? { exact: link.exact }"
           class="flex h-11 items-center rounded-full px-3 text-sm font-medium text-[var(--color-text)] transition-colors
-            duration-200 ease-out hover:text-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2
+            duration-200 ease-out hover:text-[var(--color-primary-text)] focus-visible:outline-none focus-visible:ring-2
             focus-visible:ring-[var(--color-focus-ring)]"
         >
           {{ link.labelKey | translate }}
         </a>
       }
+      </div>
     </div>
   </nav>
 
 </header>
 
 <!-- Search sits on its own row below the sticky bar on small screens, scrolling away with the page. -->
-<div class="border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 pb-3 pt-1 md:hidden">
+<div class="border-b border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 pb-3 pt-1 md:hidden">
   <app-header-search />
 </div>
 
