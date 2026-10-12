@@ -1,145 +1,152 @@
-<div class="animate-fade-in max-w-5xl mx-auto space-y-8">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Header -->
-  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-1">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'instructor.earnings.heading' | translate }}</h1>
-      <p class="text-xs text-[var(--color-text-muted)] mt-1">
+      <p class="text-xs text-[var(--color-text-muted)]">
         <app-payout-policy-text messageKey="instructor.earnings.policyIntro" />
       </p>
     </div>
   </div>
 
-  <!-- Metric Statistics Cards -->
-  @if (earningsLoading()) {
-    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
-      @for (placeholder of [0, 1, 2]; track placeholder) {
-        <div class="rounded-2xl glass-card p-6 shadow-sm flex flex-col gap-3">
-          <app-skeleton variant="text" width="60%" />
-          <app-skeleton variant="text" width="45%" height="1.75rem" />
-          <app-skeleton variant="text" width="55%" />
-        </div>
-      }
-    </div>
-  } @else if (earningsError()) {
-    <div class="animate-fade-in-up stagger-1 rounded-2xl glass-card shadow-sm">
-      <app-empty-state [heading]="'instructor.earnings.summaryErrorHeading' | translate" [description]="'instructor.earnings.summaryErrorDescription' | translate">
-        <button
-          emptyStateAction
-          type="button"
-          (click)="retryEarnings()"
-          class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)]"
-        >
-          {{ 'instructor.earnings.retryButton' | translate }}
-        </button>
-      </app-empty-state>
-    </div>
-  } @else if (earningsSummary(); as summary) {
-    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.cumulativeHeading' | translate }}</span>
-        <p class="mt-2 text-2xl font-black text-[var(--color-text)]">{{ summary.cumulativeEarnings | currencyThb }}</p>
-        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.earnings.cumulativeHint' | translate }}</p>
-      </div>
-
-      <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutHeading' | translate }}</span>
-        <p class="tone-green mt-2 text-2xl font-black text-[var(--tone-fg)]">{{ summary.latestPayoutAmount | currencyThb }}</p>
-        @if (latestPaidHistoryItem(); as latest) {
-          <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
-            {{ 'instructor.earnings.latestPayoutPaidOn' | translate: { date: (latest.paidAtUtc | date: 'dd/MM/yyyy') || '' } }}
-          </p>
-        } @else {
-          <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutNone' | translate }}</p>
+  <!-- Main column (payout account + history) beside the totals column. Totals lead in the DOM so they also lead
+       on small screens; from xl they sit in the right-hand column. -->
+  <div class="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,1fr)_24rem] 2xl:items-start">
+    <!-- Metric Statistics Cards -->
+    @if (earningsLoading()) {
+      <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1 2xl:grid-cols-1" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
+        @for (placeholder of [0, 1, 2]; track placeholder) {
+          <div class="flex flex-col gap-3 rounded-2xl glass-card p-6 shadow-sm">
+            <app-skeleton variant="text" width="60%" />
+            <app-skeleton variant="text" width="45%" height="1.75rem" />
+            <app-skeleton variant="text" width="55%" />
+          </div>
         }
       </div>
-
-      <div class="card-hover rounded-2xl glass-card p-6 shadow-sm">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHeading' | translate }}</span>
-        <p class="mt-2 text-2xl font-black text-[var(--color-primary-text)]">{{ summary.estimatedNextPayoutAmount | currencyThb }}</p>
-        <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHint' | translate }}</p>
+    } @else if (earningsError()) {
+      <div class="animate-fade-in-up stagger-1 rounded-2xl glass-card shadow-sm 2xl:col-start-2 2xl:row-start-1">
+        <app-empty-state [heading]="'instructor.earnings.summaryErrorHeading' | translate" [description]="'instructor.earnings.summaryErrorDescription' | translate">
+          <button
+            emptyStateAction
+            type="button"
+            (click)="retryEarnings()"
+            class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)]"
+          >
+            {{ 'instructor.earnings.retryButton' | translate }}
+          </button>
+        </app-empty-state>
       </div>
-    </div>
-  }
+    } @else if (earningsSummary(); as summary) {
+      <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1 2xl:grid-cols-1">
+        <div class="card-hover flex flex-col gap-1 rounded-2xl glass-card p-6 shadow-sm">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.cumulativeHeading' | translate }}</span>
+          <p class="mt-1 text-2xl font-black text-[var(--color-text)]">{{ summary.cumulativeEarnings | currencyThb }}</p>
+          <p class="tone-green text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.earnings.cumulativeHint' | translate }}</p>
+        </div>
 
-  <!-- Bank account (payout account): own component, GET 404 = "no account yet", PUT upsert -->
-  <app-payout-account-card />
+        <div class="card-hover flex flex-col gap-1 rounded-2xl glass-card p-6 shadow-sm">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutHeading' | translate }}</span>
+          <p class="tone-green mt-1 text-2xl font-black text-[var(--tone-fg)]">{{ summary.latestPayoutAmount | currencyThb }}</p>
+          @if (latestPaidHistoryItem(); as latest) {
+            <p class="text-[11px] text-[var(--color-text-muted)]">
+              {{ 'instructor.earnings.latestPayoutPaidOn' | translate: { date: (latest.paidAtUtc | date: 'dd/MM/yyyy') || '' } }}
+            </p>
+          } @else {
+            <p class="text-[11px] text-[var(--color-text-muted)]">{{ 'instructor.earnings.latestPayoutNone' | translate }}</p>
+          }
+        </div>
 
-  <!-- Payout History Table -->
-  <div class="animate-fade-in-up stagger-3 space-y-4">
-    <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.earnings.historyHeading' | translate }}</h2>
-
-    @if (earningsLoading()) {
-      <div class="overflow-hidden rounded-2xl glass-card shadow-sm p-6 space-y-3" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
-        <app-skeleton variant="text" [lines]="4" />
-      </div>
-    } @else if (!earningsError() && payoutHistory().length === 0) {
-      <div class="rounded-2xl glass-card shadow-sm">
-        <app-empty-state [heading]="'instructor.earnings.historyEmptyHeading' | translate" [description]="'instructor.earnings.historyEmptyDescription' | translate" />
-      </div>
-    } @else if (!earningsError()) {
-      <div class="overflow-hidden rounded-2xl glass-card shadow-sm">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-[var(--color-text)]">
-            <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-              <tr>
-                <th class="px-6 py-3">{{ 'instructor.earnings.colBatch' | translate }}</th>
-                <th class="px-6 py-3">{{ 'instructor.earnings.colGross' | translate }}</th>
-                <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.withholdingHeader" [inline]="true" /></th>
-                <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.netHeader" [inline]="true" /></th>
-                <th class="px-6 py-3">{{ 'instructor.earnings.colStatus' | translate }}</th>
-                <th class="px-6 py-3 text-right">{{ 'instructor.earnings.colDocument' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @for (item of payoutHistory(); track item.payoutId) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="px-6 py-4 font-mono font-bold text-xs">
-                    {{ item.batchNumber }}
-                  </td>
-                  <td class="px-6 py-4 text-xs font-medium">
-                    {{ item.grossAmount | currencyThb }}
-                  </td>
-                  <td class="tone-red px-6 py-4 text-xs text-[var(--tone-fg)] font-medium">
-                    -{{ item.withholdingTaxAmount | currencyThb }}
-                  </td>
-                  <td class="tone-green px-6 py-4 font-bold text-[var(--tone-fg)]">
-                    {{ item.netAmount | currencyThb }}
-                  </td>
-                  <td class="px-6 py-4">
-                    @let badge = payoutStatusBadge(item.status);
-                    <span
-                      class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold"
-                      [ngClass]="badge.badgeClass"
-                    >
-                      <ng-icon [name]="badge.icon" aria-hidden="true" />
-                      <span>{{ badge.labelKey ? (badge.labelKey | translate) : item.status }}</span>
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    @if (item.status === 'Transferred') {
-                      <button
-                        type="button"
-                        (click)="taxCertificateItemId.set(item.payoutId)"
-                        [attr.aria-label]="'instructor.earnings.taxCertificate.openFor' | translate: { batch: item.batchNumber }"
-                        class="btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
-                      >
-                        <ng-icon name="phosphorDownloadSimple" aria-hidden="true" />
-                        <span>{{ 'instructor.earnings.taxCertificate.open' | translate }}</span>
-                      </button>
-                    } @else {
-                      <span class="text-xs text-[var(--color-text-muted)]">
-                        <span aria-hidden="true">—</span>
-                        <span class="sr-only">{{ 'instructor.earnings.taxCertificate.unavailable' | translate }}</span>
-                      </span>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+        <div class="card-hover flex flex-col gap-1 rounded-2xl glass-card p-6 shadow-sm">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHeading' | translate }}</span>
+          <p class="mt-1 text-2xl font-black text-[var(--color-primary-text)]">{{ summary.estimatedNextPayoutAmount | currencyThb }}</p>
+          <p class="text-[11px] text-[var(--color-text-muted)]">{{ 'instructor.earnings.nextPayoutHint' | translate }}</p>
         </div>
       </div>
     }
+
+    <!-- Main column: bank account + payout history -->
+    <div class="flex flex-col gap-8 2xl:col-start-1 2xl:row-start-1">
+      <!-- Bank account (payout account): own component, GET 404 = "no account yet", PUT upsert -->
+      <app-payout-account-card />
+
+      <!-- Payout History: one panel (heading + table) -->
+      <section class="animate-fade-in-up stagger-3 flex flex-col overflow-hidden rounded-2xl glass-card shadow-sm">
+        <h2 class="border-b border-[var(--color-border)] px-6 py-5 text-base font-bold text-[var(--color-text)]">
+          {{ 'instructor.earnings.historyHeading' | translate }}
+        </h2>
+
+        @if (earningsLoading()) {
+          <div class="flex flex-col gap-3 p-6" aria-busy="true" [attr.aria-label]="'instructor.earnings.loadingLabel' | translate">
+            <app-skeleton variant="text" [lines]="4" />
+          </div>
+        } @else if (!earningsError() && payoutHistory().length === 0) {
+          <app-empty-state [heading]="'instructor.earnings.historyEmptyHeading' | translate" [description]="'instructor.earnings.historyEmptyDescription' | translate" />
+        } @else if (!earningsError()) {
+          <div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-[var(--color-text)]">
+                <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                  <tr>
+                    <th class="px-6 py-3">{{ 'instructor.earnings.colBatch' | translate }}</th>
+                    <th class="px-6 py-3">{{ 'instructor.earnings.colGross' | translate }}</th>
+                    <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.withholdingHeader" [inline]="true" /></th>
+                    <th class="px-6 py-3"><app-payout-policy-text messageKey="instructor.earnings.netHeader" [inline]="true" /></th>
+                    <th class="px-6 py-3">{{ 'instructor.earnings.colStatus' | translate }}</th>
+                    <th class="px-6 py-3 text-right">{{ 'instructor.earnings.colDocument' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--color-border)]">
+                  @for (item of payoutHistory(); track item.payoutId) {
+                    <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                      <td class="px-6 py-4 font-mono font-bold text-xs">
+                        {{ item.batchNumber }}
+                      </td>
+                      <td class="px-6 py-4 text-xs font-medium">
+                        {{ item.grossAmount | currencyThb }}
+                      </td>
+                      <td class="tone-red px-6 py-4 text-xs text-[var(--tone-fg)] font-medium">
+                        -{{ item.withholdingTaxAmount | currencyThb }}
+                      </td>
+                      <td class="tone-green px-6 py-4 font-bold text-[var(--tone-fg)]">
+                        {{ item.netAmount | currencyThb }}
+                      </td>
+                      <td class="px-6 py-4">
+                        @let badge = payoutStatusBadge(item.status);
+                        <span
+                          class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-bold"
+                          [ngClass]="badge.badgeClass"
+                        >
+                          <ng-icon [name]="badge.icon" aria-hidden="true" />
+                          <span>{{ badge.labelKey ? (badge.labelKey | translate) : item.status }}</span>
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-right">
+                        @if (item.status === 'Transferred') {
+                          <button
+                            type="button"
+                            (click)="taxCertificateItemId.set(item.payoutId)"
+                            [attr.aria-label]="'instructor.earnings.taxCertificate.openFor' | translate: { batch: item.batchNumber }"
+                            class="btn-tactile hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
+                          >
+                            <ng-icon name="phosphorDownloadSimple" aria-hidden="true" />
+                            <span>{{ 'instructor.earnings.taxCertificate.open' | translate }}</span>
+                          </button>
+                        } @else {
+                          <span class="text-xs text-[var(--color-text-muted)]">
+                            <span aria-hidden="true">—</span>
+                            <span class="sr-only">{{ 'instructor.earnings.taxCertificate.unavailable' | translate }}</span>
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
   </div>
 
   @if (taxCertificateItemId(); as itemId) {

@@ -1,5 +1,5 @@
 <form
-  class="flex flex-col gap-3 rounded-[var(--radius-lg)] glass-card p-4 sm:p-5"
+  class="flex flex-col gap-4 rounded-[var(--radius-lg)] glass-card p-6"
   [attr.aria-label]="'live.builder.policy.heading' | translate"
   (submit)="submit($event)"
   novalidate
@@ -9,7 +9,7 @@
     <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'live.builder.policy.help' | translate }}</p>
   </div>
 
-  <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
     <app-input type="date" [label]="'live.builder.policy.deadlineDate' | translate" [formControl]="form.controls.deadlineDate" />
     <app-input type="time" [label]="'live.builder.policy.deadlineTime' | translate" [formControl]="form.controls.deadlineTime" />
     <app-input

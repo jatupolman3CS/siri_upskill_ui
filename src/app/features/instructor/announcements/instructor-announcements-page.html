@@ -1,128 +1,136 @@
-<div class="animate-fade-in max-w-5xl mx-auto space-y-8">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Header -->
-  <div class="animate-fade-in-down">
+  <div class="animate-fade-in-down flex flex-col gap-1">
     <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'instructor.announcements.heading' | translate }}</h1>
-    <p class="text-xs text-[var(--color-text-muted)] mt-1">
+    <p class="text-xs text-[var(--color-text-muted)]">
       {{ 'instructor.announcements.subheading' | translate }}
     </p>
   </div>
 
-  <!-- New Announcement Form -->
-  <div class="animate-fade-in-up stagger-1 rounded-2xl glass-card p-6 sm:p-8 space-y-6 shadow-sm">
-    <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'instructor.announcements.form.heading' | translate }}</h2>
+  <!-- Compose form (main) | past announcements (side column, only once there is history to show) -->
+  <div
+    class="grid grid-cols-1 gap-8 2xl:items-start"
+    [class.2xl:grid-cols-[minmax(0,1fr)_24rem]]="announcementRows().length > 0"
+  >
+    <!-- New Announcement Form -->
+    <div class="animate-fade-in-up stagger-1 flex flex-col gap-6 rounded-2xl glass-card p-6 sm:p-8 shadow-sm">
+      <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'instructor.announcements.form.heading' | translate }}</h2>
 
-    <div class="space-y-4">
-      <div>
-        <label for="announcement-course-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.courseLabel' | translate }}</label>
-        <select
-          id="announcement-course-select"
-          [(ngModel)]="selectedCourseId"
-          class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        >
-          @for (course of courses(); track course.id) {
-            <option [value]="course.id">
-              {{ course.title }}
-            </option>
-          }
-          @if (courses().length === 0) {
-            <option value="" disabled selected>{{ 'instructor.announcements.form.noCourses' | translate }}</option>
-          }
-        </select>
-      </div>
-
-      <div>
-        <label for="announcement-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.titleLabel' | translate }}</label>
-        <input
-          id="announcement-title-input"
-          type="text"
-          [(ngModel)]="announcementTitle"
-          [placeholder]="'instructor.announcements.form.titlePlaceholder' | translate"
-          class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        />
-      </div>
-
-      <div>
-        <label for="announcement-message-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.messageLabel' | translate }}</label>
-        <textarea
-          id="announcement-message-textarea"
-          [(ngModel)]="announcementMessage"
-          rows="5"
-          [placeholder]="'instructor.announcements.form.messagePlaceholder' | translate"
-          class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        ></textarea>
-      </div>
-
-      <div class="flex items-center gap-2 pt-1">
-        <label class="hit-44 flex items-center gap-2 text-xs font-medium text-[var(--color-text)] cursor-pointer">
-          <input
-            type="checkbox"
-            [(ngModel)]="sendEmailNotification"
-            class="rounded accent-[var(--color-primary)]"
-          />
-          <span>{{ 'instructor.announcements.form.sendEmail' | translate }}</span>
-        </label>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
-      @if (sendSuccess()) {
-        <span class="animate-fade-in inline-flex items-center gap-1 text-xs font-bold tone-green text-[var(--tone-fg)]">
-          <ng-icon name="phosphorCheckCircle" />
-          <span>{{ 'instructor.announcements.form.sent' | translate }}</span>
-        </span>
-      } @else {
-        <span></span>
-      }
-
-      <button
-        type="button"
-        (click)="sendAnnouncement()"
-        [disabled]="isSending() || !announcementTitle().trim() || !announcementMessage().trim()"
-        class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
-      >
-        @if (isSending()) {
-          <app-spinner size="xs" color="white" />
-          <span>{{ 'instructor.announcements.form.sending' | translate }}</span>
-        } @else {
-          <ng-icon name="phosphorPaperPlaneTilt" />
-          <span>{{ 'instructor.announcements.form.send' | translate }}</span>
-        }
-      </button>
-    </div>
-  </div>
-
-  <!-- Past Announcements History -->
-  <div class="animate-fade-in-up stagger-2 space-y-4">
-    <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.announcements.history.heading' | translate }}</h2>
-
-    <div class="space-y-3">
-      @for (item of announcementRows(); track item.id) {
-        <div class="card-hover rounded-2xl glass-card p-5 space-y-2 shadow-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            @if (item.courseTitle) {
-              <span class="rounded bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-primary-text)]">
-                {{ item.courseTitle }}
-              </span>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div>
+          <label for="announcement-course-select" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.courseLabel' | translate }}</label>
+          <select
+            id="announcement-course-select"
+            [(ngModel)]="selectedCourseId"
+            class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          >
+            @for (course of courses(); track course.id) {
+              <option [value]="course.id">
+                {{ course.title }}
+              </option>
             }
-            <div class="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-              <span class="flex items-center gap-1">
-                <ng-icon name="phosphorCalendar" />
-                <span>{{ item.sentAtUtc | date: 'dd/MM/yyyy HH:mm' }}</span>
-              </span>
-              <span>·</span>
-              <span class="flex items-center gap-1">
-                <ng-icon name="phosphorUsers" />
-                <span>{{ 'instructor.announcements.history.recipients' | translate: { count: item.recipientsCount } }}</span>
-              </span>
-            </div>
-          </div>
-
-          <h3 class="text-sm font-bold text-[var(--color-text)]">{{ item.title }}</h3>
-          <p class="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
-            {{ item.message }}
-          </p>
+            @if (courses().length === 0) {
+              <option value="" disabled selected>{{ 'instructor.announcements.form.noCourses' | translate }}</option>
+            }
+          </select>
         </div>
-      }
+
+        <div>
+          <label for="announcement-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.titleLabel' | translate }}</label>
+          <input
+            id="announcement-title-input"
+            type="text"
+            [(ngModel)]="announcementTitle"
+            [placeholder]="'instructor.announcements.form.titlePlaceholder' | translate"
+            class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          />
+        </div>
+
+        <div class="md:col-span-2">
+          <label for="announcement-message-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'instructor.announcements.form.messageLabel' | translate }}</label>
+          <textarea
+            id="announcement-message-textarea"
+            [(ngModel)]="announcementMessage"
+            rows="5"
+            [placeholder]="'instructor.announcements.form.messagePlaceholder' | translate"
+            class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 md:col-span-2">
+          <label class="hit-44 flex items-center gap-2 text-xs font-medium text-[var(--color-text)] cursor-pointer">
+            <input
+              type="checkbox"
+              [(ngModel)]="sendEmailNotification"
+              class="rounded accent-[var(--color-primary)]"
+            />
+            <span>{{ 'instructor.announcements.form.sendEmail' | translate }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-border)] pt-4">
+        @if (sendSuccess()) {
+          <span class="animate-fade-in inline-flex items-center gap-1 text-xs font-bold tone-green text-[var(--tone-fg)]">
+            <ng-icon name="phosphorCheckCircle" />
+            <span>{{ 'instructor.announcements.form.sent' | translate }}</span>
+          </span>
+        } @else {
+          <span></span>
+        }
+
+        <button
+          type="button"
+          (click)="sendAnnouncement()"
+          [disabled]="isSending() || !announcementTitle().trim() || !announcementMessage().trim()"
+          class="btn-tactile hit-44 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
+        >
+          @if (isSending()) {
+            <app-spinner size="xs" color="white" />
+            <span>{{ 'instructor.announcements.form.sending' | translate }}</span>
+          } @else {
+            <ng-icon name="phosphorPaperPlaneTilt" />
+            <span>{{ 'instructor.announcements.form.send' | translate }}</span>
+          }
+        </button>
+      </div>
     </div>
+
+    <!-- Past Announcements History -->
+    @if (announcementRows().length > 0) {
+      <section class="animate-fade-in-up stagger-2 flex flex-col gap-4 rounded-2xl glass-card p-6 shadow-sm">
+        <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.announcements.history.heading' | translate }}</h2>
+
+        <div class="flex flex-col gap-3">
+          @for (item of announcementRows(); track item.id) {
+            <div class="card-hover flex flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 p-4">
+              <div class="flex flex-col gap-2">
+                @if (item.courseTitle) {
+                  <span class="w-fit rounded bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-primary-text)]">
+                    {{ item.courseTitle }}
+                  </span>
+                }
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)]">
+                  <span class="flex items-center gap-1">
+                    <ng-icon name="phosphorCalendar" />
+                    <span>{{ item.sentAtUtc | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span class="flex items-center gap-1">
+                    <ng-icon name="phosphorUsers" />
+                    <span>{{ 'instructor.announcements.history.recipients' | translate: { count: item.recipientsCount } }}</span>
+                  </span>
+                </div>
+              </div>
+
+              <h3 class="text-sm font-bold text-[var(--color-text)]">{{ item.title }}</h3>
+              <p class="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+                {{ item.message }}
+              </p>
+            </div>
+          }
+        </div>
+      </section>
+    }
   </div>
 </div>

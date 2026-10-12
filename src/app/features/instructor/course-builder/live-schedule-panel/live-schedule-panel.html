@@ -1,6 +1,6 @@
-<div class="animate-fade-in-up flex flex-col gap-5">
+<div class="animate-fade-in-up flex flex-col gap-8">
   @if (isLoading()) {
-    <div class="flex flex-col gap-3" role="status" [attr.aria-label]="'common.loading' | translate">
+    <div class="flex flex-col gap-6" role="status" [attr.aria-label]="'common.loading' | translate">
       <app-skeleton variant="block" height="6rem" radius="lg" />
       <app-skeleton variant="block" height="10rem" radius="lg" />
     </div>
@@ -12,95 +12,111 @@
       <app-button emptyStateAction variant="secondary" (click)="retry()">{{ 'live.builder.retry' | translate }}</app-button>
     </app-empty-state>
   } @else if (schedule(); as current) {
-    <header>
+    <header class="flex flex-col gap-1">
       <h2 class="text-lg font-semibold text-[var(--color-text)]">{{ 'live.builder.heading' | translate }}</h2>
-      <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'live.builder.subheading' | translate }}</p>
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'live.builder.subheading' | translate }}</p>
     </header>
 
-    <section class="rounded-[var(--radius-lg)] glass-card p-4 sm:p-5">
-      <div class="max-w-md">
-        <app-select
-          [label]="'live.builder.format.label' | translate"
-          [options]="formatOptions()"
-          [helperText]="(hasScheduledSessions() ? 'live.builder.format.lockedHint' : 'live.builder.format.hint') | translate"
-          [formControl]="formatControl"
-          (change)="changeFormat()"
-        />
-      </div>
-    </section>
+    <!-- Format + sessions (main) beside Google room settings + enrolment policy (side column, xl+). Below xl the two
+         columns dissolve (`contents`) into one stack ordered format, Google, sessions, policy. -->
+    <div
+      class="grid grid-cols-1 gap-6 xl:items-start xl:gap-8"
+      [class.xl:grid-cols-[minmax(0,1fr)_22rem]]="!isOnDemand()"
+    >
+      <div class="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6">
+        <section class="flex flex-col gap-4 rounded-[var(--radius-lg)] glass-card p-6 shadow-[var(--shadow-sm)]">
+          <div class="max-w-md">
+            <app-select
+              [label]="'live.builder.format.label' | translate"
+              [options]="formatOptions()"
+              [helperText]="(hasScheduledSessions() ? 'live.builder.format.lockedHint' : 'live.builder.format.hint') | translate"
+              [formControl]="formatControl"
+              (change)="changeFormat()"
+            />
+          </div>
 
-    @if (isOnDemand()) {
-      <p class="text-sm text-[var(--color-text-muted)]">{{ 'live.builder.onDemandNote' | translate }}</p>
-    } @else {
-      <app-live-google-settings
-        [courseId]="courseId()"
-        [status]="googleStatus()"
-        [attendeeSyncEnabled]="current.googleAttendeeSyncEnabled"
-        (attendeeSyncChange)="onAttendeeSync()"
-      />
+          @if (isOnDemand()) {
+            <p class="text-sm text-[var(--color-text-muted)]">{{ 'live.builder.onDemandNote' | translate }}</p>
+          }
+        </section>
 
-      <section class="flex flex-col gap-3">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <h3 class="text-base font-semibold text-[var(--color-text)]">{{ 'live.builder.sessions.heading' | translate }}</h3>
-          <app-button size="sm" [disabled]="editing() === 'new'" (click)="editing.set('new')">
-            <ng-icon leading name="phosphorPlus" aria-hidden="true" />
-            {{ 'live.builder.sessions.add' | translate }}
-          </app-button>
-        </div>
+        @if (!isOnDemand()) {
+          <section class="order-2 flex flex-col gap-4 rounded-[var(--radius-lg)] glass-card p-6 shadow-[var(--shadow-sm)] xl:order-none">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h3 class="text-base font-semibold text-[var(--color-text)]">{{ 'live.builder.sessions.heading' | translate }}</h3>
+              <app-button size="sm" [disabled]="editing() === 'new'" (click)="editing.set('new')">
+                <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+                {{ 'live.builder.sessions.add' | translate }}
+              </app-button>
+            </div>
 
-        @if (roomsMissing() > 0) {
-          <p
-            role="status"
-            class="tone-gold flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]"
-          >
-            <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
-            {{ 'live.builder.sessions.roomsMissing' | translate: { count: roomsMissing() } }}
-          </p>
-        }
-
-        @if (editing() !== null) {
-          <app-live-session-form
-            [courseId]="courseId()"
-            [session]="editingSession()"
-            (saved)="onSessionSaved()"
-            (closed)="editing.set(null)"
-          />
-        }
-
-        @if (rows().length === 0) {
-          <p class="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] p-5 text-center text-sm text-[var(--color-text-muted)]">
-            {{ 'live.builder.sessions.empty' | translate }}
-          </p>
-        } @else {
-          <ul class="flex flex-col gap-3">
-            @for (row of rows(); track row.session.id) {
-              <li>
-                <app-live-session-row
-                  [session]="row.session"
-                  [courseId]="courseId()"
-                  [displayState]="row.state"
-                  [meeting]="row.meeting"
-                  [recordingImport]="row.recordingImport"
-                  [googleConfigured]="googleStatus()?.configured ?? null"
-                  [highlighted]="row.highlighted"
-                  (editRequested)="editing.set($event)"
-                  (cancelRequested)="askCancel($event)"
-                  (changed)="reloadAll()"
-                />
-              </li>
+            @if (roomsMissing() > 0) {
+              <p
+                role="status"
+                class="tone-gold flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]"
+              >
+                <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
+                {{ 'live.builder.sessions.roomsMissing' | translate: { count: roomsMissing() } }}
+              </p>
             }
-          </ul>
-        }
-      </section>
 
-      <app-live-policy-form
-        [courseId]="courseId()"
-        [deadlineUtc]="current.enrollmentDeadlineUtc"
-        [maxSeats]="current.maxSeats"
-        [seatsUsed]="current.seatsUsed"
-        (saved)="onPolicySaved()"
-      />
-    }
+            @if (editing() !== null) {
+              <app-live-session-form
+                [courseId]="courseId()"
+                [session]="editingSession()"
+                (saved)="onSessionSaved()"
+                (closed)="editing.set(null)"
+              />
+            }
+
+            @if (rows().length === 0) {
+              <p class="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] p-5 text-center text-sm text-[var(--color-text-muted)]">
+                {{ 'live.builder.sessions.empty' | translate }}
+              </p>
+            } @else {
+              <ul class="flex flex-col gap-3">
+                @for (row of rows(); track row.session.id) {
+                  <li>
+                    <app-live-session-row
+                      [session]="row.session"
+                      [courseId]="courseId()"
+                      [displayState]="row.state"
+                      [meeting]="row.meeting"
+                      [recordingImport]="row.recordingImport"
+                      [googleConfigured]="googleStatus()?.configured ?? null"
+                      [highlighted]="row.highlighted"
+                      (editRequested)="editing.set($event)"
+                      (cancelRequested)="askCancel($event)"
+                      (changed)="reloadAll()"
+                    />
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        }
+      </div>
+
+      @if (!isOnDemand()) {
+        <div class="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-6">
+          <app-live-google-settings
+            [courseId]="courseId()"
+            [status]="googleStatus()"
+            [attendeeSyncEnabled]="current.googleAttendeeSyncEnabled"
+            (attendeeSyncChange)="onAttendeeSync()"
+          />
+
+          <app-live-policy-form
+            class="order-3 xl:order-none"
+            [courseId]="courseId()"
+            [deadlineUtc]="current.enrollmentDeadlineUtc"
+            [maxSeats]="current.maxSeats"
+            [seatsUsed]="current.seatsUsed"
+            (saved)="onPolicySaved()"
+          />
+        </div>
+      }
+    </div>
   }
 
   @if (cancelTarget(); as target) {

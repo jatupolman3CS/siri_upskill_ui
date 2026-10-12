@@ -1,20 +1,20 @@
-<div class="animate-fade-in max-w-5xl mx-auto space-y-8">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Header & Filters -->
-  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex min-w-0 flex-col gap-1">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'instructor.analytics.heading' | translate }}</h1>
-      <p class="text-xs text-[var(--color-text-muted)] mt-1">
+      <p class="text-xs text-[var(--color-text-muted)]">
         {{ 'instructor.analytics.subheading' | translate }}
       </p>
     </div>
 
     <!-- Time Range & Course Selector -->
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="flex shrink-0 flex-wrap items-center gap-3">
       @if (courses().length > 0) {
         <select
           [ngModel]="selectedCourse()"
           (ngModelChange)="setCourse($event)"
-          class="min-h-11 rounded-xl glass-card px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          class="min-h-11 w-full max-w-full truncate rounded-xl glass-card px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] sm:w-64 focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           <option value="all">{{ 'instructor.analytics.allCourses' | translate }}</option>
           @for (c of courses(); track c.id) {
@@ -58,100 +58,103 @@
     </div>
   </div>
 
-  <!-- Metric Statistics Cards -->
-  <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-3 items-stretch">
-    <div class="card-hover rounded-2xl glass-card p-6 shadow-sm flex flex-col justify-between h-full">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.analytics.kpi.views' | translate }}</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]">
-          <ng-icon name="phosphorEye" class="text-lg" />
+  <!-- Summary tiles + retention chart: stacked below xl, chart beside the tile column from xl up -->
+  <div class="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+    <!-- Metric Statistics Cards -->
+    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3 xl:col-start-2 xl:row-start-1 xl:grid-cols-1 xl:self-start">
+      <div class="card-hover flex h-full flex-col justify-between gap-4 rounded-2xl glass-card p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.analytics.kpi.views' | translate }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]">
+            <ng-icon name="phosphorEye" class="text-lg" />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-2xl font-black text-[var(--color-text)]">{{ totalViews() | number }}</p>
+          <p class="tone-green text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.analytics.kpi.viewsHint' | translate }}</p>
         </div>
       </div>
-      <div class="mt-3">
-        <p class="text-2xl font-black text-[var(--color-text)]">{{ totalViews() | number }}</p>
-        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.analytics.kpi.viewsHint' | translate }}</p>
-      </div>
-    </div>
 
-    <div class="card-hover rounded-2xl glass-card p-6 shadow-sm flex flex-col justify-between h-full">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.analytics.kpi.watchMinutes' | translate }}</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]">
-          <ng-icon name="phosphorTrendUp" class="text-lg" />
+      <div class="card-hover flex h-full flex-col justify-between gap-4 rounded-2xl glass-card p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.analytics.kpi.watchMinutes' | translate }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]">
+            <ng-icon name="phosphorTrendUp" class="text-lg" />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-2xl font-black text-[var(--color-text)]">{{ totalWatchMinutes() | number }}</p>
+          <p class="tone-green text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.analytics.kpi.watchMinutesHint' | translate }}</p>
         </div>
       </div>
-      <div class="mt-3">
-        <p class="text-2xl font-black text-[var(--color-text)]">{{ totalWatchMinutes() | number }}</p>
-        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.analytics.kpi.watchMinutesHint' | translate }}</p>
-      </div>
-    </div>
 
-    <div class="card-hover rounded-2xl glass-card p-6 shadow-sm flex flex-col justify-between h-full">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.analytics.kpi.completionRate' | translate }}</span>
-        <div class="flex h-9 w-9 items-center justify-center rounded-xl tone-gold bg-[var(--tone-bg)] text-[var(--tone-fg)]">
-          <ng-icon name="phosphorGraduationCap" class="text-lg" />
+      <div class="card-hover flex h-full flex-col justify-between gap-4 rounded-2xl glass-card p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'instructor.analytics.kpi.completionRate' | translate }}</span>
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl tone-gold bg-[var(--tone-bg)] text-[var(--tone-fg)]">
+            <ng-icon name="phosphorGraduationCap" class="text-lg" />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-2xl font-black text-[var(--color-text)]">{{ avgCompletionRate() }}%</p>
+          <p class="tone-green text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.analytics.kpi.completionRateHint' | translate }}</p>
         </div>
       </div>
-      <div class="mt-3">
-        <p class="text-2xl font-black text-[var(--color-text)]">{{ avgCompletionRate() }}%</p>
-        <p class="tone-green mt-1 text-[11px] text-[var(--tone-fg)] font-medium">{{ 'instructor.analytics.kpi.completionRateHint' | translate }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Episode Drop-Off Analysis -->
-  <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card p-6 shadow-sm space-y-6">
-    <div>
-      <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.analytics.retention.heading' | translate }}</h2>
-      <p class="text-xs text-[var(--color-text-muted)] mt-0.5">
-        {{ 'instructor.analytics.retention.description' | translate }}
-      </p>
     </div>
 
-    @if (dropOffStats().length === 0) {
-      <div class="py-8 text-center text-xs text-[var(--color-text-muted)]">
-        {{ 'instructor.analytics.retention.empty' | translate }}
+    <!-- Episode Drop-Off Analysis -->
+    <div class="animate-fade-in-up stagger-2 flex flex-col gap-6 rounded-2xl glass-card p-6 shadow-sm xl:col-start-1 xl:row-start-1">
+      <div class="flex flex-col gap-0.5">
+        <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.analytics.retention.heading' | translate }}</h2>
+        <p class="text-xs text-[var(--color-text-muted)]">
+          {{ 'instructor.analytics.retention.description' | translate }}
+        </p>
       </div>
-    } @else {
-      <div class="space-y-4">
-        @for (item of dropOffStats(); track item.episodeNumber) {
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-[var(--color-text)] truncate max-w-md">{{ item.title }}</span>
-              <div class="flex items-center gap-3">
-                <span class="text-[var(--color-text-muted)]">{{ 'instructor.analytics.retention.viewers' | translate: { count: item.viewersCount } }}</span>
-                <span class="font-bold text-[var(--tone-fg)]" [class.tone-green]="item.completionRate >= 80" [class.tone-gold]="item.completionRate < 80">
-                  {{ 'instructor.analytics.retention.completed' | translate: { rate: item.completionRate } }}
-                </span>
+
+      @if (dropOffStats().length === 0) {
+        <div class="flex flex-1 items-center justify-center py-8 text-center text-xs text-[var(--color-text-muted)]">
+          {{ 'instructor.analytics.retention.empty' | translate }}
+        </div>
+      } @else {
+        <div class="flex flex-col gap-4">
+          @for (item of dropOffStats(); track item.episodeNumber) {
+            <div class="flex flex-col gap-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-[var(--color-text)] truncate max-w-md">{{ item.title }}</span>
+                <div class="flex items-center gap-3">
+                  <span class="text-[var(--color-text-muted)]">{{ 'instructor.analytics.retention.viewers' | translate: { count: item.viewersCount } }}</span>
+                  <span class="font-bold text-[var(--tone-fg)]" [class.tone-green]="item.completionRate >= 80" [class.tone-gold]="item.completionRate < 80">
+                    {{ 'instructor.analytics.retention.completed' | translate: { rate: item.completionRate } }}
+                  </span>
+                </div>
+              </div>
+              <!-- Progress Bar -->
+              <div
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="item.completionRate"
+                [attr.aria-label]="'a11y.progress.completionRate' | translate: { name: item.title }"
+                class="h-2.5 w-full rounded-full bg-[var(--color-surface-muted)] overflow-hidden"
+              >
+                <div
+                  class="h-full rounded-full bg-[var(--tone-fg)] transition-all duration-500"
+                  [style.width.%]="item.completionRate"
+                  [class.tone-green]="item.completionRate >= 80"
+                  [class.tone-gold]="item.completionRate < 80"
+                ></div>
               </div>
             </div>
-            <!-- Progress Bar -->
-            <div
-              role="progressbar"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              [attr.aria-valuenow]="item.completionRate"
-              [attr.aria-label]="'a11y.progress.completionRate' | translate: { name: item.title }"
-              class="h-2.5 w-full rounded-full bg-[var(--color-surface-muted)] overflow-hidden"
-            >
-              <div
-                class="h-full rounded-full bg-[var(--tone-fg)] transition-all duration-500"
-                [style.width.%]="item.completionRate"
-                [class.tone-green]="item.completionRate >= 80"
-                [class.tone-gold]="item.completionRate < 80"
-              ></div>
-            </div>
-          </div>
-        }
-      </div>
-    }
+          }
+        </div>
+      }
+    </div>
   </div>
 
-  <!-- Active Students List Table -->
-  <div class="animate-fade-in-up stagger-3 space-y-4">
-    <div class="flex items-center justify-between">
-      <div>
+  <!-- Active Students List Table: one full-width panel (header + table) -->
+  <section class="animate-fade-in-up stagger-3 overflow-hidden rounded-2xl glass-card shadow-sm">
+    <div class="flex flex-col gap-4 border-b border-[var(--color-border)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex flex-col gap-0.5">
         <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'instructor.analytics.students.heading' | translate }}</h2>
         <p class="text-xs text-[var(--color-text-muted)]">{{ 'instructor.analytics.students.subheading' | translate }}</p>
       </div>
@@ -167,7 +170,7 @@
       </button>
     </div>
 
-    <div class="overflow-hidden rounded-2xl glass-card shadow-sm">
+    <div>
       @if (students().length === 0) {
         <div class="py-8 text-center text-xs text-[var(--color-text-muted)]">
           {{ 'instructor.analytics.students.empty' | translate }}
@@ -225,5 +228,5 @@
         </div>
       }
     </div>
-  </div>
+  </section>
 </div>

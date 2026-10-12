@@ -50,7 +50,7 @@
                     }
                   </div>
                   <div class="min-w-0">
-                    <p class="max-w-xs truncate font-semibold">{{ row.course.title }}</p>
+                    <p class="max-w-[12rem] truncate font-semibold 2xl:max-w-xs">{{ row.course.title }}</p>
                     @if (row.isLive) {
                       <p class="text-xs text-[var(--color-text-muted)]">
                         {{ 'live.catalog.format.' + row.course.deliveryFormat | translate }}
@@ -59,9 +59,9 @@
                   </div>
                 </div>
               </td>
-              <td class="px-3 py-3 font-semibold">{{ row.course.price | currencyThb }}</td>
-              <td class="px-3 py-3">{{ 'instructor.dashboard.courses.studentCount' | translate: { count: row.course.enrollmentCount } }}</td>
-              <td class="px-3 py-3">
+              <td class="whitespace-nowrap px-3 py-3 font-semibold">{{ row.course.price | currencyThb }}</td>
+              <td class="whitespace-nowrap px-3 py-3">{{ 'instructor.dashboard.courses.studentCount' | translate: { count: row.course.enrollmentCount } }}</td>
+              <td class="whitespace-nowrap px-3 py-3">
                 @if (row.rating; as rating) {
                   <span class="inline-flex items-center gap-1">
                     <ng-icon name="phosphorStar" aria-hidden="true" class="text-[var(--color-accent)]" />
@@ -72,7 +72,7 @@
                   <span class="text-[var(--color-text-muted)]">{{ 'instructor.dashboard.courses.noReviews' | translate }}</span>
                 }
               </td>
-              <td class="px-3 py-3"><app-status-chip [view]="row.status" /></td>
+              <td class="whitespace-nowrap px-3 py-3"><app-status-chip [view]="row.status" /></td>
               <td class="px-5 py-3 text-right sm:px-6">
                 <div class="inline-flex items-center gap-1">
                   @if (row.isPublished) {

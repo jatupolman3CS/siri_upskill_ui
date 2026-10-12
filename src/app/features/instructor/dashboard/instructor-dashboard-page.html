@@ -1,8 +1,8 @@
-<div class="animate-fade-in mx-auto flex max-w-6xl flex-col gap-6">
-  <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div>
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex flex-col gap-1">
       <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'instructor.dashboard.heading' | translate }}</h1>
-      <p class="mt-1 text-[var(--color-text-muted)]">{{ 'instructor.dashboard.subheading' | translate }}</p>
+      <p class="text-[var(--color-text-muted)]">{{ 'instructor.dashboard.subheading' | translate }}</p>
     </div>
     <a
       routerLink="/instructor/courses/new"
@@ -15,13 +15,16 @@
   </header>
 
   @if (isLoading()) {
-    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'common.loading' | translate">
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="flex flex-col gap-8" role="status" [attr.aria-label]="'common.loading' | translate">
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
         @for (card of [0, 1, 2, 3]; track card) {
           <app-skeleton variant="block" height="7.5rem" radius="lg" />
         }
       </div>
-      <app-skeleton variant="block" height="9rem" radius="lg" />
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <app-skeleton variant="block" height="9rem" radius="lg" />
+        <app-skeleton variant="block" height="9rem" radius="lg" />
+      </div>
       <app-skeleton variant="block" height="14rem" radius="lg" />
     </div>
   } @else if (hasError()) {
