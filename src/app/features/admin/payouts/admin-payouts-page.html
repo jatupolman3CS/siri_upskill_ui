@@ -1,7 +1,7 @@
-<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Header -->
-  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
         {{ 'admin.payouts.title' | translate }}
       </h1>
@@ -43,233 +43,123 @@
     </div>
   }
 
-  <!-- Navigation Tabs -->
-  <div class="animate-fade-in-up stagger-1 flex border-b border-[var(--color-border)] gap-6">
-    <button
-      type="button"
-      (click)="activeTab.set('batches')"
-      [class]="activeTab() === 'batches' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorCurrencyDollar" class="text-base" />
-      <span>{{ 'admin.payouts.tabs.batches' | translate }}</span>
-      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalBatches() }}</span>
-    </button>
+  <!-- Panel: tabs + tab content -->
+  <section class="animate-fade-in-up stagger-1 overflow-hidden rounded-2xl glass-card shadow-sm">
+    <div class="flex gap-6 border-b border-[var(--color-border)] px-6 pt-2">
+      <button
+        type="button"
+        (click)="activeTab.set('batches')"
+        [class]="activeTab() === 'batches' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+        class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorCurrencyDollar" class="text-base" />
+        <span>{{ 'admin.payouts.tabs.batches' | translate }}</span>
+        <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalBatches() }}</span>
+      </button>
 
-    <button
-      type="button"
-      (click)="activeTab.set('splits')"
-      [class]="activeTab() === 'splits' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorChartPieSlice" class="text-base" />
-      <span>{{ 'admin.payouts.tabs.splits' | translate }}</span>
-      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalSplits() }}</span>
-    </button>
+      <button
+        type="button"
+        (click)="activeTab.set('splits')"
+        [class]="activeTab() === 'splits' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+        class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorChartPieSlice" class="text-base" />
+        <span>{{ 'admin.payouts.tabs.splits' | translate }}</span>
+        <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalSplits() }}</span>
+      </button>
 
-    <button
-      type="button"
-      (click)="activeTab.set('refunds')"
-      [class]="activeTab() === 'refunds' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorReceipt" class="text-base" />
-      <span>{{ 'admin.payouts.tabs.refunds' | translate }}</span>
-      <span class="tone-red rounded-full bg-[var(--tone-bg)] text-[var(--tone-fg)] px-2 py-0.5 text-[10px] font-bold">{{ totalRefunds() }}</span>
-    </button>
-  </div>
-
-  <!-- TAB 1: PAYOUT BATCHES -->
-  @if (activeTab() === 'batches') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
-      @if (isLoadingBatches() && batches().length === 0) {
-        <div class="p-6 space-y-4">
-          <app-skeleton className="h-12 w-full" />
-          <app-skeleton className="h-12 w-full" />
-        </div>
-      } @else if (batches().length === 0) {
-        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
-          <ng-icon name="phosphorCurrencyDollar" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>{{ 'admin.payouts.batches.empty' | translate }}</p>
-          <button
-            type="button"
-            (click)="openCreateBatchModal()"
-            class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
-          >
-            <span>{{ 'admin.payouts.batches.createFirst' | translate }}</span>
-          </button>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-[var(--color-text)]">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
-              <tr>
-                <th class="py-3.5 px-4">{{ 'admin.payouts.batches.table.period' | translate }}</th>
-                <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.batches.table.totalAmount' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.batches.table.instructors' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.payouts.batches.table.createdAt' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.batches.table.status' | translate }}</th>
-                <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.batches.table.actions' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @for (batch of batches(); track batch.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-text)]">
-                    {{ batch.periodKey }}
-                  </td>
-                  <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">
-                    {{ batch.totalAmount | currencyThb }}
-                  </td>
-                  <td class="py-3.5 px-4 text-center font-semibold">
-                    {{ 'admin.payouts.batches.instructorCount' | translate: { count: batch.items ? batch.items.length : 0 } }}
-                  </td>
-                  <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
-                    {{ batch.createdAtUtc | date:'d/M/yyyy HH:mm' }}
-                  </td>
-                  <td class="py-3.5 px-4 text-center">
-                    @let badge = batchStatusBadge(batch.status);
-                    <span
-                      class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold"
-                      [ngClass]="badge.badgeClass"
-                    >
-                      <ng-icon [name]="badge.icon" aria-hidden="true" />
-                      <span>{{ badge.labelKey ? (badge.labelKey | translate) : batch.status }}</span>
-                    </span>
-                  </td>
-                  <td class="py-3.5 px-4 text-right space-x-2">
-                    <button
-                      type="button"
-                      (click)="exportBatch(batch)"
-                      class="btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-                      [attr.title]="'admin.payouts.batches.exportTitle' | translate"
-                    >
-                      <ng-icon name="phosphorDownloadSimple" />
-                      <span>{{ 'admin.payouts.batches.export' | translate }}</span>
-                    </button>
-
-                    <!-- Backend execute answers 409 for anything but a Draft batch -->
-                    @if (batch.status === 'Draft') {
-                      <button
-                        type="button"
-                        (click)="executeBatch(batch)"
-                        class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
-                      >
-                        <ng-icon name="phosphorPlay" />
-                        <span>{{ 'admin.payouts.batches.execute' | translate }}</span>
-                      </button>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+      <button
+        type="button"
+        (click)="activeTab.set('refunds')"
+        [class]="activeTab() === 'refunds' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+        class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorReceipt" class="text-base" />
+        <span>{{ 'admin.payouts.tabs.refunds' | translate }}</span>
+        <span class="tone-red rounded-full bg-[var(--tone-bg)] text-[var(--tone-fg)] px-2 py-0.5 text-[10px] font-bold">{{ totalRefunds() }}</span>
+      </button>
     </div>
-  }
 
-  <!-- TAB 2: REVENUE SPLITS REPORT -->
-  @if (activeTab() === 'splits') {
-    <div class="animate-fade-in-up stagger-2 space-y-4">
-      <!-- Filter Bar -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl glass-card p-4 shadow-sm">
-        <div class="flex items-center gap-2 flex-1 max-w-sm">
-          <div class="relative w-full">
-            <ng-icon name="phosphorMagnifyingGlass" class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--color-text-muted)]" />
-            <input
-              type="text"
-              [(ngModel)]="splitSearchInstructor"
-              (keyup.enter)="onFilterSplits()"
-              [placeholder]="'admin.payouts.splits.searchPlaceholder' | translate"
-              class="min-h-11 w-full rounded-xl glass-card py-2 pl-9 pr-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-            />
-          </div>
-          <button
-            type="button"
-            (click)="onFilterSplits()"
-            class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition shrink-0"
-          >
-            {{ 'admin.payouts.splits.searchButton' | translate }}
-          </button>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <label for="split-status-filter" class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'admin.payouts.splits.statusLabel' | translate }}</label>
-          <select
-            id="split-status-filter"
-            [(ngModel)]="splitFilterStatus"
-            (change)="onFilterSplits()"
-            class="min-h-11 rounded-xl glass-card py-2 px-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          >
-            <option value="All">{{ 'admin.payouts.splitStatus.all' | translate }}</option>
-            <!-- Only the backend's RevenueSplitStatus members: any other value makes the endpoint answer 400 -->
-            @for (option of splitStatusOptions; track option.value) {
-              <option [value]="option.value">{{ option.badge.labelKey ? (option.badge.labelKey | translate) : option.value }}</option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <!-- Splits Table -->
-      <div class="rounded-2xl glass-card shadow-sm overflow-hidden">
-        @if (isLoadingSplits() && revenueSplits().length === 0) {
-          <div class="p-6 space-y-4">
+    <!-- TAB 1: PAYOUT BATCHES -->
+    @if (activeTab() === 'batches') {
+      <div class="animate-fade-in-up">
+        @if (isLoadingBatches() && batches().length === 0) {
+          <div class="flex flex-col gap-4 p-6">
             <app-skeleton className="h-12 w-full" />
             <app-skeleton className="h-12 w-full" />
           </div>
-        } @else if (revenueSplits().length === 0) {
-          <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
-              <ng-icon name="phosphorChartPieSlice" class="text-2xl" />
-            </div>
-            <p class="font-bold text-sm text-[var(--color-text)]">{{ 'admin.payouts.splits.empty.title' | translate }}</p>
-            <p>{{ 'admin.payouts.splits.empty.description' | translate }}</p>
+        } @else if (batches().length === 0) {
+          <div class="flex flex-col items-center gap-3 p-12 text-center text-xs text-[var(--color-text-muted)]">
+            <ng-icon name="phosphorCurrencyDollar" class="text-3xl text-[var(--color-text-muted)]" />
+            <p>{{ 'admin.payouts.batches.empty' | translate }}</p>
+            <button
+              type="button"
+              (click)="openCreateBatchModal()"
+              class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
+            >
+              <span>{{ 'admin.payouts.batches.createFirst' | translate }}</span>
+            </button>
           </div>
         } @else {
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-[var(--color-surface-muted)]/50 font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+            <table class="w-full text-left text-xs text-[var(--color-text)]">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
                 <tr>
-                  <th class="py-3.5 px-4">{{ 'admin.payouts.splits.table.date' | translate }}</th>
-                  <th class="py-3.5 px-4">{{ 'admin.payouts.splits.table.instructor' | translate }}</th>
-                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.splits.table.gross' | translate }}</th>
-                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.splits.table.gatewayFee' | translate }}</th>
-                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.splits.table.platformFee' | translate }}</th>
-                  <th class="tone-green py-3.5 px-4 text-right font-bold text-[var(--tone-fg)]">{{ 'admin.payouts.splits.table.instructorShare' | translate }}</th>
-                  <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.splits.table.status' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.payouts.batches.table.period' | translate }}</th>
+                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.batches.table.totalAmount' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.batches.table.instructors' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.payouts.batches.table.createdAt' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.batches.table.status' | translate }}</th>
+                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.batches.table.actions' | translate }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[var(--color-border)]">
-                @for (item of revenueSplits(); track item.id) {
+                @for (batch of batches(); track batch.id) {
                   <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                    <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">
-                      {{ item.createdAtUtc | date: 'dd/MM/yyyy HH:mm' }}
+                    <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-text)]">
+                      {{ batch.periodKey }}
                     </td>
-                    <td class="py-3.5 px-4 font-mono font-semibold text-[var(--color-text)]">
-                      {{ item.instructorId }}
+                    <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">
+                      {{ batch.totalAmount | currencyThb }}
                     </td>
-                    <td class="py-3.5 px-4 text-right font-semibold text-[var(--color-text)]">
-                      {{ item.grossAmount | currencyThb }}
+                    <td class="py-3.5 px-4 text-center font-semibold">
+                      {{ 'admin.payouts.batches.instructorCount' | translate: { count: batch.items ? batch.items.length : 0 } }}
                     </td>
-                    <td class="tone-red py-3.5 px-4 text-right text-[var(--tone-fg)] font-medium">
-                      -{{ item.paymentFeeAmount | currencyThb }}
-                    </td>
-                    <td class="py-3.5 px-4 text-right text-[var(--color-text-muted)] font-medium">
-                      -{{ item.platformFeeAmount | currencyThb }}
-                    </td>
-                    <td class="tone-green py-3.5 px-4 text-right font-bold text-[var(--tone-fg)]">
-                      {{ item.instructorAmount | currencyThb }}
+                    <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
+                      {{ batch.createdAtUtc | date:'d/M/yyyy HH:mm' }}
                     </td>
                     <td class="py-3.5 px-4 text-center">
-                      @let splitBadge = splitStatusBadge(item.status);
+                      @let badge = batchStatusBadge(batch.status);
                       <span
                         class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold"
-                        [ngClass]="splitBadge.badgeClass"
+                        [ngClass]="badge.badgeClass"
                       >
-                        <ng-icon [name]="splitBadge.icon" aria-hidden="true" />
-                        <span>{{ splitBadge.labelKey ? (splitBadge.labelKey | translate) : item.status }}</span>
+                        <ng-icon [name]="badge.icon" aria-hidden="true" />
+                        <span>{{ badge.labelKey ? (badge.labelKey | translate) : batch.status }}</span>
                       </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right space-x-2">
+                      <button
+                        type="button"
+                        (click)="exportBatch(batch)"
+                        class="btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                        [attr.title]="'admin.payouts.batches.exportTitle' | translate"
+                      >
+                        <ng-icon name="phosphorDownloadSimple" />
+                        <span>{{ 'admin.payouts.batches.export' | translate }}</span>
+                      </button>
+
+                      <!-- Backend execute answers 409 for anything but a Draft batch -->
+                      @if (batch.status === 'Draft') {
+                        <button
+                          type="button"
+                          (click)="executeBatch(batch)"
+                          class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
+                        >
+                          <ng-icon name="phosphorPlay" />
+                          <span>{{ 'admin.payouts.batches.execute' | translate }}</span>
+                        </button>
+                      }
                     </td>
                   </tr>
                 }
@@ -278,84 +168,198 @@
           </div>
         }
       </div>
-    </div>
-  }
+    }
 
-  <!-- TAB 3: PENDING REFUNDS -->
-  @if (activeTab() === 'refunds') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
-      @if (isLoadingRefunds() && pendingRefunds().length === 0) {
-        <div class="p-6 space-y-4">
-          <app-skeleton className="h-12 w-full" />
-          <app-skeleton className="h-12 w-full" />
-        </div>
-      } @else if (pendingRefunds().length === 0) {
-        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-2">
-          <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)] animate-pop-in" />
-          <p class="font-bold text-[var(--color-text)]">{{ 'admin.payouts.refunds.empty.title' | translate }}</p>
-          <p>{{ 'admin.payouts.refunds.empty.description' | translate }}</p>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-[var(--color-text)]">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
-              <tr>
-                <th class="py-3.5 px-4">{{ 'admin.payouts.refunds.table.requestedAt' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.payouts.refunds.table.paymentId' | translate }}</th>
-                <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.refunds.table.amount' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.payouts.refunds.table.reason' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.refunds.table.status' | translate }}</th>
-                <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.refunds.table.decision' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @for (refund of pendingRefunds(); track refund.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
-                    {{ refund.requestedAtUtc | date:'d/M/yyyy HH:mm' }}
-                  </td>
-                  <td class="py-3.5 px-4 font-mono text-[11px] text-[var(--color-text-muted)]">
-                    {{ refund.paymentId }}
-                  </td>
-                  <td class="tone-red py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">
-                    {{ refund.amount | currencyThb }}
-                  </td>
-                  <td class="py-3.5 px-4 max-w-xs truncate text-[var(--color-text)] font-medium">
-                    {{ refund.reason }}
-                  </td>
-                  <td class="py-3.5 px-4 text-center">
-                    <span class="tone-red inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
-                      {{ 'admin.payouts.refunds.statusPending' | translate }}
-                    </span>
-                  </td>
-                  <td class="py-3.5 px-4 text-right space-x-2">
-                    <button
-                      type="button"
-                      (click)="openApproveRefundModal(refund)"
-                      class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-3 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
-                    >
-                      <span>{{ 'admin.payouts.refunds.approve' | translate }}</span>
-                    </button>
-                    <button
-                      type="button"
-                      (click)="openRejectRefundModal(refund)"
-                      class="tone-red btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
-                    >
-                      <span>{{ 'admin.payouts.refunds.reject' | translate }}</span>
-                    </button>
-                  </td>
-                </tr>
+    <!-- TAB 2: REVENUE SPLITS REPORT -->
+    @if (activeTab() === 'splits') {
+      <div class="animate-fade-in-up">
+        <!-- Filter Bar -->
+        <div class="flex flex-col gap-3 border-b border-[var(--color-border)] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-2 flex-1 max-w-sm">
+            <div class="relative w-full">
+              <ng-icon name="phosphorMagnifyingGlass" class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--color-text-muted)]" />
+              <input
+                type="text"
+                [(ngModel)]="splitSearchInstructor"
+                (keyup.enter)="onFilterSplits()"
+                [placeholder]="'admin.payouts.splits.searchPlaceholder' | translate"
+                class="min-h-11 w-full rounded-xl glass-card py-2 pl-9 pr-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              />
+            </div>
+            <button
+              type="button"
+              (click)="onFilterSplits()"
+              class="btn-tactile hit-44 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition shrink-0"
+            >
+              {{ 'admin.payouts.splits.searchButton' | translate }}
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label for="split-status-filter" class="text-xs font-semibold text-[var(--color-text-muted)]">{{ 'admin.payouts.splits.statusLabel' | translate }}</label>
+            <select
+              id="split-status-filter"
+              [(ngModel)]="splitFilterStatus"
+              (change)="onFilterSplits()"
+              class="min-h-11 rounded-xl glass-card py-2 px-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              <option value="All">{{ 'admin.payouts.splitStatus.all' | translate }}</option>
+              <!-- Only the backend's RevenueSplitStatus members: any other value makes the endpoint answer 400 -->
+              @for (option of splitStatusOptions; track option.value) {
+                <option [value]="option.value">{{ option.badge.labelKey ? (option.badge.labelKey | translate) : option.value }}</option>
               }
-            </tbody>
-          </table>
+            </select>
+          </div>
         </div>
-      }
-    </div>
-  }
+
+        <!-- Splits Table -->
+        <div>
+          @if (isLoadingSplits() && revenueSplits().length === 0) {
+            <div class="flex flex-col gap-4 p-6">
+              <app-skeleton className="h-12 w-full" />
+              <app-skeleton className="h-12 w-full" />
+            </div>
+          } @else if (revenueSplits().length === 0) {
+            <div class="flex flex-col items-center gap-3 p-12 text-center text-xs text-[var(--color-text-muted)]">
+              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+                <ng-icon name="phosphorChartPieSlice" class="text-2xl" />
+              </div>
+              <p class="font-bold text-sm text-[var(--color-text)]">{{ 'admin.payouts.splits.empty.title' | translate }}</p>
+              <p>{{ 'admin.payouts.splits.empty.description' | translate }}</p>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[var(--color-surface-muted)]/50 font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+                  <tr>
+                    <th class="py-3.5 px-4">{{ 'admin.payouts.splits.table.date' | translate }}</th>
+                    <th class="py-3.5 px-4">{{ 'admin.payouts.splits.table.instructor' | translate }}</th>
+                    <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.splits.table.gross' | translate }}</th>
+                    <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.splits.table.gatewayFee' | translate }}</th>
+                    <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.splits.table.platformFee' | translate }}</th>
+                    <th class="tone-green py-3.5 px-4 text-right font-bold text-[var(--tone-fg)]">{{ 'admin.payouts.splits.table.instructorShare' | translate }}</th>
+                    <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.splits.table.status' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--color-border)]">
+                  @for (item of revenueSplits(); track item.id) {
+                    <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                      <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">
+                        {{ item.createdAtUtc | date: 'dd/MM/yyyy HH:mm' }}
+                      </td>
+                      <td class="py-3.5 px-4 font-mono font-semibold text-[var(--color-text)]">
+                        {{ item.instructorId }}
+                      </td>
+                      <td class="py-3.5 px-4 text-right font-semibold text-[var(--color-text)]">
+                        {{ item.grossAmount | currencyThb }}
+                      </td>
+                      <td class="tone-red py-3.5 px-4 text-right text-[var(--tone-fg)] font-medium">
+                        -{{ item.paymentFeeAmount | currencyThb }}
+                      </td>
+                      <td class="py-3.5 px-4 text-right text-[var(--color-text-muted)] font-medium">
+                        -{{ item.platformFeeAmount | currencyThb }}
+                      </td>
+                      <td class="tone-green py-3.5 px-4 text-right font-bold text-[var(--tone-fg)]">
+                        {{ item.instructorAmount | currencyThb }}
+                      </td>
+                      <td class="py-3.5 px-4 text-center">
+                        @let splitBadge = splitStatusBadge(item.status);
+                        <span
+                          class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold"
+                          [ngClass]="splitBadge.badgeClass"
+                        >
+                          <ng-icon [name]="splitBadge.icon" aria-hidden="true" />
+                          <span>{{ splitBadge.labelKey ? (splitBadge.labelKey | translate) : item.status }}</span>
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- TAB 3: PENDING REFUNDS -->
+    @if (activeTab() === 'refunds') {
+      <div class="animate-fade-in-up">
+        @if (isLoadingRefunds() && pendingRefunds().length === 0) {
+          <div class="flex flex-col gap-4 p-6">
+            <app-skeleton className="h-12 w-full" />
+            <app-skeleton className="h-12 w-full" />
+          </div>
+        } @else if (pendingRefunds().length === 0) {
+          <div class="flex flex-col items-center gap-2 p-12 text-center text-xs text-[var(--color-text-muted)]">
+            <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)] animate-pop-in" />
+            <p class="font-bold text-[var(--color-text)]">{{ 'admin.payouts.refunds.empty.title' | translate }}</p>
+            <p>{{ 'admin.payouts.refunds.empty.description' | translate }}</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-[var(--color-text)]">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
+                <tr>
+                  <th class="py-3.5 px-4">{{ 'admin.payouts.refunds.table.requestedAt' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.payouts.refunds.table.paymentId' | translate }}</th>
+                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.refunds.table.amount' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.payouts.refunds.table.reason' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.payouts.refunds.table.status' | translate }}</th>
+                  <th class="py-3.5 px-4 text-right">{{ 'admin.payouts.refunds.table.decision' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @for (refund of pendingRefunds(); track refund.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                    <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
+                      {{ refund.requestedAtUtc | date:'d/M/yyyy HH:mm' }}
+                    </td>
+                    <td class="py-3.5 px-4 font-mono text-[11px] text-[var(--color-text-muted)]">
+                      {{ refund.paymentId }}
+                    </td>
+                    <td class="tone-red py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">
+                      {{ refund.amount | currencyThb }}
+                    </td>
+                    <td class="py-3.5 px-4 max-w-xs truncate text-[var(--color-text)] font-medium">
+                      {{ refund.reason }}
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                      <span class="tone-red inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                        {{ 'admin.payouts.refunds.statusPending' | translate }}
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right space-x-2">
+                      <button
+                        type="button"
+                        (click)="openApproveRefundModal(refund)"
+                        class="tone-green btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg bg-[var(--tone-fg)] px-3 py-1.5 text-xs font-bold text-[var(--color-text-inverse)] shadow-sm hover:opacity-90 transition"
+                      >
+                        <span>{{ 'admin.payouts.refunds.approve' | translate }}</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="openRejectRefundModal(refund)"
+                        class="tone-red btn-tactile hit-44 inline-flex items-center gap-1 rounded-lg border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-bold text-[var(--tone-fg)] hover:brightness-95 transition"
+                      >
+                        <span>{{ 'admin.payouts.refunds.reject' | translate }}</span>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+  </section>
 
   <!-- MODAL: CREATE PAYOUT BATCH -->
   @if (showCreateBatchModal()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeCreateBatchModal()"
       [titleText]="'admin.payouts.createModal.title' | translate"
@@ -407,6 +411,7 @@
   <!-- MODAL: APPROVE REFUND -->
   @if (approvingRefund(); as refund) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeApproveRefundModal()"
       [titleText]="'admin.payouts.approveModal.title' | translate"
@@ -458,6 +463,7 @@
   <!-- MODAL: REJECT REFUND -->
   @if (rejectingRefund(); as refund) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeRejectRefundModal()"
       [titleText]="'admin.payouts.rejectModal.title' | translate"

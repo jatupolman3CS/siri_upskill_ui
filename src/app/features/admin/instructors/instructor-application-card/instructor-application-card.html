@@ -1,5 +1,5 @@
 <article
-  class="flex flex-col gap-4 rounded-[var(--radius-lg)] glass-card p-4 shadow-[var(--shadow-sm)] sm:p-5"
+  class="flex h-full flex-col gap-4 rounded-2xl glass-card p-6 shadow-[var(--shadow-sm)]"
   [attr.aria-labelledby]="'application-name-' + application().id"
 >
   <div class="min-w-0">
@@ -35,7 +35,7 @@
     }
   </div>
 
-  <div class="flex flex-wrap justify-end gap-3 border-t border-[var(--color-border)] pt-4">
+  <div class="mt-auto flex flex-wrap justify-end gap-3 border-t border-[var(--color-border)] pt-4">
     <app-button variant="secondary" [disabled]="busy()" (click)="reject.emit(application())">
       <ng-icon leading name="phosphorXCircle" aria-hidden="true" />
       {{ 'admin.instructors.card.reject' | translate }}

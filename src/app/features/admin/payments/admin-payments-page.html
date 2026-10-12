@@ -1,8 +1,8 @@
-<div class="animate-fade-in space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Page Header -->
-  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <div class="flex items-center gap-2">
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-2">
         <h1 class="text-2xl font-black tracking-tight text-[var(--color-text)]">
           {{ 'admin.payments.title' | translate }}
         </h1>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Actions -->
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
       <button
         type="button"
         (click)="loadData()"
@@ -52,8 +52,8 @@
   }
 
   <!-- KPI Summary Cards -->
-  <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-    <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
+  <div class="animate-fade-in-up stagger-1 grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div class="card-hover flex h-full flex-col justify-between rounded-2xl glass-card p-6 shadow-xs">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           {{ 'admin.payments.kpi.opsQueueTitle' | translate }}
@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
+    <div class="card-hover flex h-full flex-col justify-between rounded-2xl glass-card p-6 shadow-xs">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           {{ 'admin.payments.kpi.refundsTitle' | translate }}
@@ -87,7 +87,7 @@
       </div>
     </div>
 
-    <div class="card-hover rounded-2xl glass-card p-5 shadow-xs flex flex-col justify-between h-full">
+    <div class="card-hover flex h-full flex-col justify-between rounded-2xl glass-card p-6 shadow-xs">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
           {{ 'admin.payments.kpi.gatewayTitle' | translate }}
@@ -105,320 +105,324 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs -->
-  <div class="animate-fade-in-up stagger-2 border-b border-[var(--color-border)] flex items-center gap-6">
-    <button
-      type="button"
-      (click)="setTab('ops-queue')"
-      [class.border-[var(--color-primary)]]="activeTab() === 'ops-queue'"
-      [class.text-[var(--color-primary-text)]]="activeTab() === 'ops-queue'"
-      [class.border-transparent]="activeTab() !== 'ops-queue'"
-      [class.text-[var(--color-text-muted)]]="activeTab() !== 'ops-queue'"
-      class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorWarningCircle" class="text-base" />
-      <span>{{ 'admin.payments.tabs.opsQueue' | translate }}</span>
-      <span class="tone-gold rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
-        {{ opsTotalCount() }}
-      </span>
-    </button>
-
-    <button
-      type="button"
-      (click)="setTab('refunds')"
-      [class.border-[var(--color-primary)]]="activeTab() === 'refunds'"
-      [class.text-[var(--color-primary-text)]]="activeTab() === 'refunds'"
-      [class.border-transparent]="activeTab() !== 'refunds'"
-      [class.text-[var(--color-text-muted)]]="activeTab() !== 'refunds'"
-      class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorArrowsDownUp" class="text-base" />
-      <span>{{ 'admin.payments.tabs.refunds' | translate }}</span>
-      <span class="tone-red rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
-        {{ refundsTotalCount() }}
-      </span>
-    </button>
-  </div>
-
-  <!-- Tab 1: Ops Queue Content -->
-  @if (activeTab() === 'ops-queue') {
-    <div class="animate-fade-in-up stagger-3 space-y-4">
-      <!-- Status Filter Buttons -->
-      <div
-        role="group"
-        [attr.aria-label]="'a11y.admin.paymentOpsStatusFilter' | translate"
-        class="flex flex-wrap items-center gap-2"
+  <!-- Queue panel: tabs + tab content -->
+  <section class="animate-fade-in-up stagger-2 overflow-hidden rounded-2xl glass-card shadow-xs">
+    <div class="flex items-center gap-6 border-b border-[var(--color-border)] px-6 pt-2">
+      <button
+        type="button"
+        (click)="setTab('ops-queue')"
+        [class.border-[var(--color-primary)]]="activeTab() === 'ops-queue'"
+        [class.text-[var(--color-primary-text)]]="activeTab() === 'ops-queue'"
+        [class.border-transparent]="activeTab() !== 'ops-queue'"
+        [class.text-[var(--color-text-muted)]]="activeTab() !== 'ops-queue'"
+        class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
       >
-        <button
-          type="button"
-          (click)="setStatusFilter('ALL')"
-          [attr.aria-pressed]="opsStatusFilter() === 'ALL'"
-          [class]="
-            opsStatusFilter() === 'ALL'
-              ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
-              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
-          "
-          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
-        >
-          {{ 'admin.payments.filter.all' | translate }}
-        </button>
-        <button
-          type="button"
-          (click)="setStatusFilter('Open')"
-          [attr.aria-pressed]="opsStatusFilter() === 'Open'"
-          [class]="
-            opsStatusFilter() === 'Open'
-              ? 'tone-gold bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
-              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
-          "
-          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
-        >
-          {{ 'admin.payments.filter.open' | translate }}
-        </button>
-        <button
-          type="button"
-          (click)="setStatusFilter('InProgress')"
-          [attr.aria-pressed]="opsStatusFilter() === 'InProgress'"
-          [class]="
-            opsStatusFilter() === 'InProgress'
-              ? 'tone-blue bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
-              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
-          "
-          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
-        >
-          {{ 'admin.payments.filter.inProgress' | translate }}
-        </button>
-        <button
-          type="button"
-          (click)="setStatusFilter('Resolved')"
-          [attr.aria-pressed]="opsStatusFilter() === 'Resolved'"
-          [class]="
-            opsStatusFilter() === 'Resolved'
-              ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
-              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
-          "
-          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
-        >
-          {{ 'admin.payments.filter.resolved' | translate }}
-        </button>
-        <button
-          type="button"
-          (click)="setStatusFilter('Dismissed')"
-          [attr.aria-pressed]="opsStatusFilter() === 'Dismissed'"
-          [class]="
-            opsStatusFilter() === 'Dismissed'
-              ? 'bg-[var(--color-text-muted)] text-[var(--color-text-inverse)]'
-              : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
-          "
-          class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
-        >
-          {{ 'admin.payments.filter.dismissed' | translate }}
-        </button>
-      </div>
+        <ng-icon name="phosphorWarningCircle" class="text-base" />
+        <span>{{ 'admin.payments.tabs.opsQueue' | translate }}</span>
+        <span class="tone-gold rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
+          {{ opsTotalCount() }}
+        </span>
+      </button>
 
-      <!-- Ops Queue Table -->
-      <div class="rounded-2xl glass-card shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-              <tr>
-                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.order' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.reason' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.buyer' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.amount' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.status' | translate }}</th>
-                <th class="px-5 py-3.5 text-right">{{ 'admin.payments.table.actions' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @if (loading() && opsEntries().length === 0) {
-                <tr>
-                  <td colspan="6" class="px-5 py-16 text-center text-[var(--color-text-muted)]">
-                    <div class="flex flex-col items-center gap-3">
-                      <app-spinner size="md" />
-                      <span>{{ 'admin.payments.ops.loading' | translate }}</span>
-                    </div>
-                  </td>
-                </tr>
-              } @else if (opsEntries().length === 0) {
-                <tr>
-                  <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
-                    <div class="flex flex-col items-center gap-2">
-                      <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)]" />
-                      <p class="font-bold text-[var(--color-text)]">{{ 'admin.payments.ops.empty.title' | translate }}</p>
-                      <p class="text-xs">{{ 'admin.payments.ops.empty.description' | translate }}</p>
-                    </div>
-                  </td>
-                </tr>
-              }
+      <button
+        type="button"
+        (click)="setTab('refunds')"
+        [class.border-[var(--color-primary)]]="activeTab() === 'refunds'"
+        [class.text-[var(--color-primary-text)]]="activeTab() === 'refunds'"
+        [class.border-transparent]="activeTab() !== 'refunds'"
+        [class.text-[var(--color-text-muted)]]="activeTab() !== 'refunds'"
+        class="btn-tactile border-b-2 py-3 px-1 text-sm font-bold transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorArrowsDownUp" class="text-base" />
+        <span>{{ 'admin.payments.tabs.refunds' | translate }}</span>
+        <span class="tone-red rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-xs font-black text-[var(--tone-fg)]">
+          {{ refundsTotalCount() }}
+        </span>
+      </button>
+    </div>
 
-              @for (item of opsEntries(); track item.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
-                  <td class="px-5 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
-                    <div>{{ item.orderNo || ('admin.payments.notAvailable' | translate) }}</div>
-                    <div class="text-[10px] text-[var(--color-text-muted)] font-normal truncate max-w-[150px]">
-                      {{ item.providerPaymentIntentId || item.paymentId }}
-                    </div>
-                  </td>
-                  <td class="px-5 py-4 text-xs font-medium text-[var(--color-text)]">
-                    <div class="tone-gold flex items-center gap-1.5 text-[var(--tone-fg)] font-bold">
-                      <ng-icon name="phosphorWarningCircle" class="shrink-0 text-sm" />
-                      <span>{{ item.reason }}</span>
-                    </div>
-                    @if (item.note) {
-                      <div class="mt-1 text-[11px] text-[var(--color-text-muted)] italic">
-                        {{ 'admin.payments.ops.note' | translate: { note: item.note } }}
+    <!-- Tab 1: Ops Queue Content -->
+    @if (activeTab() === 'ops-queue') {
+      <div class="flex flex-col gap-6 p-6">
+        <!-- Status Filter Buttons -->
+        <div
+          role="group"
+          [attr.aria-label]="'a11y.admin.paymentOpsStatusFilter' | translate"
+          class="flex flex-wrap items-center gap-2"
+        >
+          <button
+            type="button"
+            (click)="setStatusFilter('ALL')"
+            [attr.aria-pressed]="opsStatusFilter() === 'ALL'"
+            [class]="
+              opsStatusFilter() === 'ALL'
+                ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+            "
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          >
+            {{ 'admin.payments.filter.all' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="setStatusFilter('Open')"
+            [attr.aria-pressed]="opsStatusFilter() === 'Open'"
+            [class]="
+              opsStatusFilter() === 'Open'
+                ? 'tone-gold bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+                : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+            "
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          >
+            {{ 'admin.payments.filter.open' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="setStatusFilter('InProgress')"
+            [attr.aria-pressed]="opsStatusFilter() === 'InProgress'"
+            [class]="
+              opsStatusFilter() === 'InProgress'
+                ? 'tone-blue bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+                : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+            "
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          >
+            {{ 'admin.payments.filter.inProgress' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="setStatusFilter('Resolved')"
+            [attr.aria-pressed]="opsStatusFilter() === 'Resolved'"
+            [class]="
+              opsStatusFilter() === 'Resolved'
+                ? 'tone-green bg-[var(--tone-fg)] text-[var(--color-text-inverse)]'
+                : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+            "
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          >
+            {{ 'admin.payments.filter.resolved' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="setStatusFilter('Dismissed')"
+            [attr.aria-pressed]="opsStatusFilter() === 'Dismissed'"
+            [class]="
+              opsStatusFilter() === 'Dismissed'
+                ? 'bg-[var(--color-text-muted)] text-[var(--color-text-inverse)]'
+                : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+            "
+            class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-bold transition"
+          >
+            {{ 'admin.payments.filter.dismissed' | translate }}
+          </button>
+        </div>
+
+        <!-- Ops Queue Table -->
+        <div class="overflow-hidden rounded-xl border border-[var(--color-border)]">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                <tr>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.order' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.reason' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.buyer' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.amount' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.ops.table.status' | translate }}</th>
+                  <th class="px-5 py-3.5 text-right">{{ 'admin.payments.table.actions' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @if (loading() && opsEntries().length === 0) {
+                  <tr>
+                    <td colspan="6" class="px-5 py-16 text-center text-[var(--color-text-muted)]">
+                      <div class="flex flex-col items-center gap-3">
+                        <app-spinner size="md" />
+                        <span>{{ 'admin.payments.ops.loading' | translate }}</span>
                       </div>
-                    }
-                  </td>
-                  <td class="px-5 py-4 text-xs text-[var(--color-text-muted)]">
-                    {{ item.userEmail || ('admin.payments.ops.noEmail' | translate) }}
-                  </td>
-                  <td class="px-5 py-4 font-bold text-xs text-[var(--color-text)]">
-                    {{ item.amount | currencyThb }}
-                  </td>
-                  <td class="px-5 py-4">
-                    @switch (item.status) {
-                      @case ('Open') {
-                        <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                          {{ 'admin.payments.ops.status.open' | translate }}
-                        </span>
-                      }
-                      @case ('InProgress') {
-                        <span class="tone-blue inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                          {{ 'admin.payments.ops.status.inProgress' | translate }}
-                        </span>
-                      }
-                      @case ('Resolved') {
-                        <span class="tone-green inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                          {{ 'admin.payments.ops.status.resolved' | translate }}
-                        </span>
-                      }
-                      @case ('Dismissed') {
-                        <span class="inline-flex items-center rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-xs font-bold text-[var(--color-text-muted)]">
-                          {{ 'admin.payments.ops.status.dismissed' | translate }}
-                        </span>
-                      }
-                    }
-                  </td>
-                  <td class="px-5 py-4 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                      @if (item.status === 'Open') {
-                        <button
-                          type="button"
-                          (click)="assignToSelf(item)"
-                          class="btn-tactile hit-44 rounded-xl glass-card px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
-                        >
-                          {{ 'admin.payments.ops.action.assign' | translate }}
-                        </button>
-                      }
+                    </td>
+                  </tr>
+                } @else if (opsEntries().length === 0) {
+                  <tr>
+                    <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
+                      <div class="flex flex-col items-center gap-2">
+                        <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)]" />
+                        <p class="font-bold text-[var(--color-text)]">{{ 'admin.payments.ops.empty.title' | translate }}</p>
+                        <p class="text-xs">{{ 'admin.payments.ops.empty.description' | translate }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                }
 
-                      @if (item.status === 'Open' || item.status === 'InProgress') {
+                @for (item of opsEntries(); track item.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
+                    <td class="px-5 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
+                      <div>{{ item.orderNo || ('admin.payments.notAvailable' | translate) }}</div>
+                      <div class="text-[10px] text-[var(--color-text-muted)] font-normal truncate max-w-[150px]">
+                        {{ item.providerPaymentIntentId || item.paymentId }}
+                      </div>
+                    </td>
+                    <td class="min-w-[12rem] max-w-sm break-words px-5 py-4 text-xs font-medium text-[var(--color-text)]">
+                      <div class="tone-gold flex items-center gap-1.5 text-[var(--tone-fg)] font-bold">
+                        <ng-icon name="phosphorWarningCircle" class="shrink-0 text-sm" />
+                        <span class="min-w-0">{{ item.reason }}</span>
+                      </div>
+                      @if (item.note) {
+                        <div class="mt-1 text-[11px] text-[var(--color-text-muted)] italic">
+                          {{ 'admin.payments.ops.note' | translate: { note: item.note } }}
+                        </div>
+                      }
+                    </td>
+                    <td class="min-w-[9rem] max-w-[12rem] break-all px-5 py-4 text-xs text-[var(--color-text-muted)]">
+                      {{ item.userEmail || ('admin.payments.ops.noEmail' | translate) }}
+                    </td>
+                    <td class="px-5 py-4 font-bold text-xs text-[var(--color-text)]">
+                      {{ item.amount | currencyThb }}
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      @switch (item.status) {
+                        @case ('Open') {
+                          <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
+                            {{ 'admin.payments.ops.status.open' | translate }}
+                          </span>
+                        }
+                        @case ('InProgress') {
+                          <span class="tone-blue inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
+                            {{ 'admin.payments.ops.status.inProgress' | translate }}
+                          </span>
+                        }
+                        @case ('Resolved') {
+                          <span class="tone-green inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
+                            {{ 'admin.payments.ops.status.resolved' | translate }}
+                          </span>
+                        }
+                        @case ('Dismissed') {
+                          <span class="inline-flex items-center rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-xs font-bold text-[var(--color-text-muted)]">
+                            {{ 'admin.payments.ops.status.dismissed' | translate }}
+                          </span>
+                        }
+                      }
+                    </td>
+                    <td class="min-w-[9rem] px-5 py-4 text-right">
+                      <div class="flex flex-wrap items-center justify-end gap-2 whitespace-nowrap">
+                        @if (item.status === 'Open') {
+                          <button
+                            type="button"
+                            (click)="assignToSelf(item)"
+                            class="btn-tactile hit-44 rounded-xl glass-card px-2.5 py-1 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                          >
+                            {{ 'admin.payments.ops.action.assign' | translate }}
+                          </button>
+                        }
+
+                        @if (item.status === 'Open' || item.status === 'InProgress') {
+                          <button
+                            type="button"
+                            (click)="openResolveModal(item)"
+                            class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
+                          >
+                            {{ 'admin.payments.ops.action.resolve' | translate }}
+                          </button>
+                          <button
+                            type="button"
+                            (click)="openDismissModal(item)"
+                            class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
+                          >
+                            {{ 'admin.payments.ops.action.dismiss' | translate }}
+                          </button>
+                        } @else {
+                          <span class="text-xs text-[var(--color-text-muted)] italic">{{ 'admin.payments.ops.action.done' | translate }}</span>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tab 2: Refunds Content -->
+    @if (activeTab() === 'refunds') {
+      <div class="flex flex-col gap-6 p-6">
+        <div class="overflow-hidden rounded-xl border border-[var(--color-border)]">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                <tr>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.id' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.reason' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.amount' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.requestedAt' | translate }}</th>
+                  <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.status' | translate }}</th>
+                  <th class="px-5 py-3.5 text-right">{{ 'admin.payments.table.actions' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @if (pendingRefunds().length === 0) {
+                  <tr>
+                    <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
+                      <div class="flex flex-col items-center gap-2">
+                        <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)] animate-pop-in" />
+                        <p class="font-bold text-[var(--color-text)]">{{ 'admin.payments.refunds.empty' | translate }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                }
+
+                @for (refund of pendingRefunds(); track refund.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
+                    <td class="px-5 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
+                      {{ refund.id.substring(0, 8) }}...
+                    </td>
+                    <td class="px-5 py-4 text-xs font-medium text-[var(--color-text)]">
+                      {{ refund.reason }}
+                    </td>
+                    <td class="tone-red px-5 py-4 font-bold text-xs text-[var(--tone-fg)]">
+                      {{ refund.amount | currencyThb }}
+                    </td>
+                    <td class="px-5 py-4 text-xs text-[var(--color-text-muted)]">
+                      {{ refund.requestedAtUtc | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td class="px-5 py-4">
+                      <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
+                        {{ refund.status }}
+                      </span>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          (click)="openResolveModal(item)"
+                          (click)="openRefundModal(refund, 'approve')"
                           class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
                         >
-                          {{ 'admin.payments.ops.action.resolve' | translate }}
+                          {{ 'admin.payments.refunds.approve' | translate }}
                         </button>
                         <button
                           type="button"
-                          (click)="openDismissModal(item)"
+                          (click)="openRefundModal(refund, 'reject')"
                           class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
                         >
-                          {{ 'admin.payments.ops.action.dismiss' | translate }}
+                          {{ 'admin.payments.refunds.reject' | translate }}
                         </button>
-                      } @else {
-                        <span class="text-xs text-[var(--color-text-muted)] italic">{{ 'admin.payments.ops.action.done' | translate }}</span>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-  }
+    }
 
-  <!-- Tab 2: Refunds Content -->
-  @if (activeTab() === 'refunds') {
-    <div class="animate-fade-in-up stagger-3 space-y-4">
-      <div class="rounded-2xl glass-card shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-              <tr>
-                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.id' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.reason' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.amount' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.requestedAt' | translate }}</th>
-                <th class="px-5 py-3.5">{{ 'admin.payments.refunds.table.status' | translate }}</th>
-                <th class="px-5 py-3.5 text-right">{{ 'admin.payments.table.actions' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @if (pendingRefunds().length === 0) {
-                <tr>
-                  <td colspan="6" class="px-5 py-12 text-center text-[var(--color-text-muted)]">
-                    <div class="flex flex-col items-center gap-2">
-                      <ng-icon name="phosphorCheckCircle" class="tone-green text-3xl text-[var(--tone-fg)] animate-pop-in" />
-                      <p class="font-bold text-[var(--color-text)]">{{ 'admin.payments.refunds.empty' | translate }}</p>
-                    </div>
-                  </td>
-                </tr>
-              }
-
-              @for (refund of pendingRefunds(); track refund.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/50 transition">
-                  <td class="px-5 py-4 font-mono font-bold text-xs text-[var(--color-text)]">
-                    {{ refund.id.substring(0, 8) }}...
-                  </td>
-                  <td class="px-5 py-4 text-xs font-medium text-[var(--color-text)]">
-                    {{ refund.reason }}
-                  </td>
-                  <td class="tone-red px-5 py-4 font-bold text-xs text-[var(--tone-fg)]">
-                    {{ refund.amount | currencyThb }}
-                  </td>
-                  <td class="px-5 py-4 text-xs text-[var(--color-text-muted)]">
-                    {{ refund.requestedAtUtc | date:'dd/MM/yyyy HH:mm' }}
-                  </td>
-                  <td class="px-5 py-4">
-                    <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
-                      {{ refund.status }}
-                    </span>
-                  </td>
-                  <td class="px-5 py-4 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                      <button
-                        type="button"
-                        (click)="openRefundModal(refund, 'approve')"
-                        class="tone-green btn-tactile hit-44 rounded-xl bg-[var(--tone-fg)] px-3 py-1 text-xs font-bold text-[var(--color-text-inverse)] shadow-xs hover:opacity-90 transition"
-                      >
-                        {{ 'admin.payments.refunds.approve' | translate }}
-                      </button>
-                      <button
-                        type="button"
-                        (click)="openRefundModal(refund, 'reject')"
-                        class="tone-red btn-tactile hit-44 rounded-xl border border-[var(--tone-fg)]/30 px-2.5 py-1 text-xs font-bold text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
-                      >
-                        {{ 'admin.payments.refunds.reject' | translate }}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  }
+  </section>
 
   <!-- Resolve Modal -->
   @if (selectedEntryForResolve()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeResolveModal()"
       [titleText]="'admin.payments.resolveModal.title' | translate"
@@ -518,6 +522,7 @@
   <!-- Dismiss Modal -->
   @if (selectedEntryForDismiss()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeDismissModal()"
       [titleText]="'admin.payments.dismissModal.title' | translate"
@@ -566,6 +571,7 @@
   <!-- Refund Approve/Reject Modal -->
   @if (selectedRefundForAction()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeRefundModal()"
       [titleText]="selectedRefundForAction()?.action === 'approve' ? ('admin.payments.refundModal.approveTitle' | translate) : ('admin.payments.refundModal.rejectTitle' | translate)"

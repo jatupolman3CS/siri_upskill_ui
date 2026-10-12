@@ -1,5 +1,5 @@
-<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
-  <header class="flex flex-wrap items-start justify-between gap-4">
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
       <h1 class="text-2xl font-semibold text-[var(--color-text)]">{{ 'admin.categories.heading' | translate }}</h1>
       <p class="mt-1 text-[var(--color-text-muted)]">{{ 'admin.categories.subheading' | translate }}</p>
@@ -39,32 +39,36 @@
     }
     @case ('success') {
       @if (rows().length === 0) {
-        <app-empty-state
-          icon="none"
-          [heading]="'admin.categories.emptyHeading' | translate"
-          [description]="'admin.categories.emptyDescription' | translate"
-        >
-          <ng-icon emptyStateIcon name="phosphorTreeStructure" aria-hidden="true" class="h-8 w-8" />
-          <app-button emptyStateAction size="lg" (click)="openCreate(null)">
-            <ng-icon leading name="phosphorPlus" aria-hidden="true" />
-            {{ 'admin.categories.emptyAction' | translate }}
-          </app-button>
-        </app-empty-state>
+        <div class="rounded-2xl glass-card">
+          <app-empty-state
+            icon="none"
+            [heading]="'admin.categories.emptyHeading' | translate"
+            [description]="'admin.categories.emptyDescription' | translate"
+          >
+            <ng-icon emptyStateIcon name="phosphorTreeStructure" aria-hidden="true" class="h-8 w-8" />
+            <app-button emptyStateAction size="lg" (click)="openCreate(null)">
+              <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+              {{ 'admin.categories.emptyAction' | translate }}
+            </app-button>
+          </app-empty-state>
+        </div>
       } @else {
-        <ul role="list" class="flex flex-col gap-2" [attr.aria-label]="'admin.categories.listLabel' | translate">
-          @for (row of rows(); track row.node.id) {
-            <li>
-              <app-category-row
-                [row]="row"
-                [busy]="busy()"
-                (edit)="openEdit($event)"
-                (addChild)="openCreate($event.node.id)"
-                (remove)="openDelete($event)"
-                (move)="move($event)"
-              />
-            </li>
-          }
-        </ul>
+        <section class="rounded-2xl glass-card p-6">
+          <ul role="list" class="flex flex-col gap-3" [attr.aria-label]="'admin.categories.listLabel' | translate">
+            @for (row of rows(); track row.node.id) {
+              <li>
+                <app-category-row
+                  [row]="row"
+                  [busy]="busy()"
+                  (edit)="openEdit($event)"
+                  (addChild)="openCreate($event.node.id)"
+                  (remove)="openDelete($event)"
+                  (move)="move($event)"
+                />
+              </li>
+            }
+          </ul>
+        </section>
       }
     }
   }

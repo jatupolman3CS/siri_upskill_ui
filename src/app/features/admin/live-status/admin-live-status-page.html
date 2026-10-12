@@ -1,5 +1,5 @@
-<div class="animate-fade-in mx-auto flex max-w-6xl flex-col gap-6">
-  <header class="flex flex-wrap items-start justify-between gap-4">
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'admin.liveStatus.heading' | translate }}</h1>
       <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.subheading' | translate }}</p>
@@ -19,18 +19,28 @@
   </header>
 
   @if (isLoading()) {
-    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'common.loading' | translate">
+    <div class="flex flex-col gap-8" role="status" [attr.aria-label]="'common.loading' | translate">
       <app-skeleton variant="block" height="7rem" radius="lg" />
-      <app-skeleton variant="block" height="10rem" radius="lg" />
-      <app-skeleton variant="block" height="14rem" radius="lg" />
+      <div class="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div class="flex flex-col gap-6">
+          <app-skeleton variant="block" height="10rem" radius="lg" />
+          <app-skeleton variant="block" height="14rem" radius="lg" />
+        </div>
+        <div class="flex flex-col gap-6">
+          <app-skeleton variant="block" height="12rem" radius="lg" />
+          <app-skeleton variant="block" height="14rem" radius="lg" />
+        </div>
+      </div>
     </div>
   } @else if (hasError()) {
-    <app-empty-state
-      [heading]="'admin.liveStatus.errorHeading' | translate"
-      [description]="'admin.liveStatus.errorDescription' | translate"
-    >
-      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'admin.liveStatus.retry' | translate }}</app-button>
-    </app-empty-state>
+    <div class="rounded-2xl glass-card">
+      <app-empty-state
+        [heading]="'admin.liveStatus.errorHeading' | translate"
+        [description]="'admin.liveStatus.errorDescription' | translate"
+      >
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'admin.liveStatus.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
   } @else if (status(); as current) {
     @if (isStale()) {
       <p
@@ -45,7 +55,11 @@
     }
 
     <app-live-status-verdict [status]="current" />
-    <app-live-status-jobs [status]="current" />
-    <app-live-status-services [status]="current" />
+    <!-- Job server + recurring jobs (wider, tabular) beside the e-mail outbox + Live settings. -->
+    <div class="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] 2xl:items-start">
+      <app-live-status-jobs [status]="current" />
+      <app-live-status-services [status]="current" />
+    </div>
   }
 </div>
+

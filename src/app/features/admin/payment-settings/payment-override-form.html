@@ -2,9 +2,9 @@
   [formGroup]="form"
   (ngSubmit)="submit()"
   novalidate
-  class="flex flex-col gap-5 rounded-[var(--radius-lg)] glass-card p-5"
+  class="grid grid-cols-1 gap-6 rounded-2xl glass-card p-6 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2"
 >
-  <div>
+  <div class="md:col-span-2 xl:col-span-1 2xl:col-span-2">
     <h2 class="text-lg font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.form.heading' | translate }}</h2>
     <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.form.intro' | translate }}</p>
   </div>
@@ -12,7 +12,7 @@
   @if (formError(); as key) {
     <p
       role="alert"
-      class="rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm font-medium text-[var(--color-text)]"
+      class="rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm font-medium text-[var(--color-text)] md:col-span-2 xl:col-span-1 2xl:col-span-2"
     >
       {{ key | translate }}
     </p>
@@ -34,7 +34,7 @@
     [errorMessage]="message('overrideAmount')"
   />
 
-  <div>
+  <div class="md:col-span-2 xl:col-span-1 2xl:col-span-2">
     <label for="payment-override-reason" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
       {{ 'admin.paymentSettings.form.reason' | translate }}
       <span aria-hidden="true" class="text-[var(--color-danger)]">*</span>
@@ -62,7 +62,7 @@
     </div>
   </div>
 
-  <div class="flex justify-end">
+  <div class="flex justify-end md:col-span-2 xl:col-span-1 2xl:col-span-2">
     <app-button type="submit" [loading]="saving()">{{ submitKey() | translate }}</app-button>
   </div>
 </form>

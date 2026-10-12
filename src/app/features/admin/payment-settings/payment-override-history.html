@@ -1,4 +1,4 @@
-<section aria-labelledby="payment-override-history-heading" class="flex flex-col gap-4">
+<section aria-labelledby="payment-override-history-heading" class="flex flex-col gap-6 rounded-2xl glass-card p-6">
   <h2 id="payment-override-history-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
     <ng-icon name="phosphorClockCounterClockwise" aria-hidden="true" class="text-xl" />
     {{ 'admin.paymentSettings.history.heading' | translate }}
@@ -15,7 +15,7 @@
     @case ('error') {
       <div
         role="alert"
-        class="rounded-[var(--radius-lg)] glass-card border-[var(--color-danger)] p-6 text-center shadow-sm"
+        class="rounded-[var(--radius-md)] border border-[var(--color-danger)] p-6 text-center"
       >
         <p class="font-semibold text-[var(--color-text)]">{{ 'admin.paymentSettings.history.errorHeading' | translate }}</p>
         <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.history.errorDescription' | translate }}</p>
@@ -31,7 +31,7 @@
       />
     }
     @case ('ready') {
-      <div class="overflow-x-auto rounded-[var(--radius-lg)] glass-card">
+      <div class="relative overflow-x-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
         <table class="w-full min-w-[42rem] border-collapse text-left text-sm">
           <caption class="sr-only">{{ 'admin.paymentSettings.history.caption' | translate }}</caption>
           <thead>
@@ -74,3 +74,4 @@
     }
   }
 </section>
+

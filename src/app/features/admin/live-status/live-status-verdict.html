@@ -1,7 +1,7 @@
 <div aria-live="polite">
   @if (isReady()) {
     <section
-      class="flex items-start gap-3 rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--color-success)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] p-5"
+      class="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-success)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] p-6"
     >
       <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-3xl text-[var(--color-success)]" />
       <div>
@@ -11,7 +11,7 @@
     </section>
   } @else {
     <section
-      class="rounded-[var(--radius-lg)] border-2 border-[var(--color-warning)] bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] p-5"
+      class="rounded-2xl border-2 border-[var(--color-warning)] bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] p-6"
     >
       <div class="flex items-start gap-3">
         <ng-icon name="phosphorWarning" aria-hidden="true" class="mt-0.5 shrink-0 text-3xl text-[var(--color-warning)]" />

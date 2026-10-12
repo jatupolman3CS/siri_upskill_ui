@@ -1,7 +1,7 @@
-<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Page Header -->
-  <div class="animate-fade-in-down flex items-center justify-between">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'admin.posts.title' | translate }}</h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ 'admin.posts.subtitle' | translate }}</p>
     </div>
@@ -18,9 +18,9 @@
 
   <!-- Add Post Form -->
   @if (showAddForm()) {
-    <div class="animate-fade-in-up rounded-2xl glass-card p-6 space-y-4 shadow-sm">
+    <div class="animate-fade-in-up flex flex-col gap-6 rounded-2xl glass-card p-6 shadow-sm">
       <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'admin.posts.writeNew' | translate }}</h2>
-      <div class="space-y-3">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           <label for="post-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.posts.form.titleLabel' | translate }}</label>
           <input
@@ -55,17 +55,6 @@
         </div>
 
         <div>
-          <label for="post-content-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.posts.form.contentLabel' | translate }}</label>
-          <textarea
-            id="post-content-textarea"
-            [(ngModel)]="newContent"
-            rows="6"
-            [placeholder]="'admin.posts.form.contentPlaceholder' | translate"
-            class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-          ></textarea>
-        </div>
-
-        <div>
           <label for="post-cover-url-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.posts.form.coverUrlLabel' | translate }}</label>
           <input
             id="post-cover-url-input"
@@ -75,9 +64,20 @@
             class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           />
         </div>
+
+        <div class="md:col-span-2">
+          <label for="post-content-textarea" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.posts.form.contentLabel' | translate }}</label>
+          <textarea
+            id="post-content-textarea"
+            [(ngModel)]="newContent"
+            rows="6"
+            [placeholder]="'admin.posts.form.contentPlaceholder' | translate"
+            class="min-h-11 w-full rounded-xl glass-card p-3 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          ></textarea>
+        </div>
       </div>
 
-      <div class="flex justify-end gap-2 pt-2">
+      <div class="flex justify-end gap-2">
         <button
           type="button"
           (click)="showAddForm.set(false)"

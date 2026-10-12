@@ -1,4 +1,4 @@
-<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Toast Message -->
   @if (actionMessage(); as msg) {
     <div
@@ -19,8 +19,8 @@
   }
 
   <!-- Header -->
-  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'admin.menus.title' | translate }}</h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ 'admin.menus.description' | translate }}</p>
     </div>
@@ -140,6 +140,7 @@
 
   <!-- Add / Edit Modal -->
   <app-modal
+    class="contents"
     [open]="showModal()"
     (openChange)="closeModal()"
     [titleText]="(isEditing() ? 'admin.menus.editTitle' : 'admin.menus.addTitle') | translate"

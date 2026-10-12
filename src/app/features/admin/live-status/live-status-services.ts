@@ -48,7 +48,7 @@ const LIVE_PROVIDER: Record<LiveAdminStatus['live']['provider'], Tone> = {
   providers: [
     provideIcons({ phosphorCheckCircle, phosphorEnvelopeSimple, phosphorMinusCircle, phosphorVideoCamera, phosphorWarningCircle }),
   ],
-  host: { class: 'grid gap-6 lg:grid-cols-2' },
+  host: { class: 'grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-1' },
 })
 export class LiveStatusServices {
   readonly status = input.required<LiveAdminStatus>();

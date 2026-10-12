@@ -1,5 +1,5 @@
-<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
-  <header>
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="min-w-0">
     <div class="flex flex-wrap items-center gap-3">
       <h1 class="text-2xl font-semibold text-[var(--color-text)]">{{ 'admin.instructors.heading' | translate }}</h1>
       @if (loadState() === 'success' && totalCount() > 0) {
@@ -10,63 +10,73 @@
         </span>
       }
     </div>
-    <p class="mt-1 text-[var(--color-text-muted)]">{{ 'admin.instructors.subheading' | translate }}</p>
-    <p
-      class="mt-3 flex items-start gap-2 rounded-[var(--radius-md)] glass-card p-3 text-sm text-[var(--color-text-muted)]"
-    >
-      <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-lg" />
-      <span>{{ 'admin.instructors.roleHint' | translate }}</span>
-    </p>
+    <p class="mt-1 max-w-prose text-[var(--color-text-muted)]">{{ 'admin.instructors.subheading' | translate }}</p>
   </header>
 
-  @switch (loadState()) {
-    @case ('loading') {
-      <div class="flex flex-col gap-3" aria-live="polite" [attr.aria-busy]="true">
-        <span class="sr-only">{{ 'common.loading' | translate }}</span>
-        <app-skeleton variant="block" height="9rem" />
-        <app-skeleton variant="block" height="9rem" />
-      </div>
-    }
-    @case ('error') {
-      <section
-        class="rounded-[var(--radius-lg)] glass-card border-[var(--color-danger)] p-6 text-center shadow-sm"
-        role="alert"
-      >
-        <p class="font-semibold text-[var(--color-text)]">{{ 'admin.instructors.errorHeading' | translate }}</p>
-        <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.instructors.errorDescription' | translate }}</p>
-        <app-button variant="secondary" size="sm" class="mt-4" (click)="load(true)">
-          {{ 'admin.instructors.retryButton' | translate }}
-        </app-button>
-      </section>
-    }
-    @case ('success') {
-      @if (applications().length === 0) {
-        <app-empty-state
-          icon="none"
-          [heading]="'admin.instructors.emptyHeading' | translate"
-          [description]="'admin.instructors.emptyDescription' | translate"
-        >
-          <ng-icon emptyStateIcon name="phosphorUserCheck" aria-hidden="true" class="h-8 w-8" />
-        </app-empty-state>
-      } @else {
-        <ul role="list" class="flex flex-col gap-4" [attr.aria-label]="'admin.instructors.listLabel' | translate">
-          @for (application of applications(); track application.id) {
-            <li>
-              <app-instructor-application-card
-                [application]="application"
-                [busy]="busy()"
-                (approve)="ask('approve', $event)"
-                (reject)="ask('reject', $event)"
-              />
-            </li>
+  <!-- Review policy: what approving does. -->
+  <aside class="rounded-2xl glass-card p-6">
+    <p class="flex items-start gap-3 text-sm text-[var(--color-text-muted)]">
+      <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-xl text-[var(--color-primary-text)]" />
+      <span class="max-w-prose">{{ 'admin.instructors.roleHint' | translate }}</span>
+    </p>
+  </aside>
+
+  <!-- Review queue -->
+  <div class="flex min-w-0 flex-col gap-6">
+    <div class="flex min-w-0 flex-col gap-6">
+      @switch (loadState()) {
+        @case ('loading') {
+          <div class="grid grid-cols-1 gap-6 xl:grid-cols-2" aria-live="polite" [attr.aria-busy]="true">
+            <span class="sr-only">{{ 'common.loading' | translate }}</span>
+            <app-skeleton variant="block" height="9rem" />
+            <app-skeleton variant="block" height="9rem" />
+          </div>
+        }
+        @case ('error') {
+          <section
+            class="rounded-2xl glass-card border-[var(--color-danger)] p-6 text-center shadow-sm"
+            role="alert"
+          >
+            <p class="font-semibold text-[var(--color-text)]">{{ 'admin.instructors.errorHeading' | translate }}</p>
+            <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.instructors.errorDescription' | translate }}</p>
+            <app-button variant="secondary" size="sm" class="mt-4" (click)="load(true)">
+              {{ 'admin.instructors.retryButton' | translate }}
+            </app-button>
+          </section>
+        }
+        @case ('success') {
+          @if (applications().length === 0) {
+            <div class="rounded-2xl glass-card">
+              <app-empty-state
+                icon="none"
+                [heading]="'admin.instructors.emptyHeading' | translate"
+                [description]="'admin.instructors.emptyDescription' | translate"
+              >
+                <ng-icon emptyStateIcon name="phosphorUserCheck" aria-hidden="true" class="h-8 w-8" />
+              </app-empty-state>
+            </div>
+          } @else {
+            <ul role="list" class="grid grid-cols-1 gap-6 xl:grid-cols-2" [attr.aria-label]="'admin.instructors.listLabel' | translate">
+              @for (application of applications(); track application.id) {
+                <li class="min-w-0">
+                  <app-instructor-application-card
+                    class="block h-full"
+                    [application]="application"
+                    [busy]="busy()"
+                    (approve)="ask('approve', $event)"
+                    (reject)="ask('reject', $event)"
+                  />
+                </li>
+              }
+            </ul>
+            @if (totalPages() > 1) {
+              <app-pagination [currentPage]="page()" [totalPages]="totalPages()" (currentPageChange)="changePage($event)" class="flex justify-center" />
+            }
           }
-        </ul>
-        @if (totalPages() > 1) {
-          <app-pagination [currentPage]="page()" [totalPages]="totalPages()" (currentPageChange)="changePage($event)" class="flex justify-center" />
         }
       }
-    }
-  }
+    </div>
+  </div>
 </div>
 
 <app-modal

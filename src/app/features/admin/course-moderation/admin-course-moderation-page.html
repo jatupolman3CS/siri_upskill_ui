@@ -1,4 +1,4 @@
-<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Toast Message -->
   @if (actionMessage(); as msg) {
     <div
@@ -19,9 +19,9 @@
   }
 
   <!-- Header -->
-  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2">
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-2">
         <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'admin.moderation.title' | translate }}</h1>
         <span class="tone-gold inline-flex items-center rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)]">
           {{ 'admin.moderation.pendingCount' | translate: { count: totalCount() } }}
@@ -48,7 +48,7 @@
     </div>
   } @else {
     <!-- Course Cards Grid -->
-    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
       @for (course of pendingCourses(); track course.id) {
         <div class="card-hover flex flex-col justify-between overflow-hidden rounded-2xl glass-card shadow-sm">
           <div>
@@ -66,7 +66,7 @@
               </span>
             </div>
 
-            <div class="p-6 space-y-4">
+            <div class="flex flex-col gap-4 p-6">
               <div>
                 <span class="rounded bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-primary-text)]">
                   {{ course.categoryName || ('admin.moderation.defaultCategory' | translate) }}
@@ -136,6 +136,7 @@
   <!-- Reject Modal -->
   @if (rejectingCourse(); as course) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeRejectModal()"
       [titleText]="'admin.moderation.rejectModalTitle' | translate"

@@ -1,5 +1,5 @@
 <section
-  class="rounded-[var(--radius-lg)] glass-card p-5"
+  class="rounded-2xl glass-card p-6"
   aria-labelledby="live-status-jobserver-heading"
 >
   <div class="flex flex-wrap items-center justify-between gap-3">
@@ -28,7 +28,7 @@
 
   @if (jobServer().servers.length > 0) {
     <div
-      class="mt-4 overflow-x-auto"
+      class="relative mt-4 overflow-x-auto"
       role="region"
       tabindex="0"
       [attr.aria-label]="'admin.liveStatus.jobServer.heading' | translate"
@@ -45,9 +45,9 @@
         <tbody>
           @for (server of jobServer().servers; track server.name) {
             <tr class="border-b border-[var(--color-border)] last:border-b-0">
-              <th scope="row" class="break-all py-2 pr-4 font-mono text-xs font-medium text-[var(--color-text)]">{{ server.name }}</th>
-              <td class="py-2 pr-4"><app-live-status-time [instant]="server.startedAtUtc" [nowUtc]="nowUtc()" /></td>
-              <td class="py-2"><app-live-status-time [instant]="server.heartbeatUtc" [nowUtc]="nowUtc()" /></td>
+              <th scope="row" class="max-w-0 break-all py-2 pr-4 font-mono text-xs font-medium text-[var(--color-text)]">{{ server.name }}</th>
+              <td class="whitespace-nowrap py-2 pr-4"><app-live-status-time [instant]="server.startedAtUtc" [nowUtc]="nowUtc()" /></td>
+              <td class="whitespace-nowrap py-2"><app-live-status-time [instant]="server.heartbeatUtc" [nowUtc]="nowUtc()" /></td>
             </tr>
           }
         </tbody>
@@ -59,7 +59,7 @@
 </section>
 
 <section
-  class="rounded-[var(--radius-lg)] glass-card p-5"
+  class="rounded-2xl glass-card p-6"
   aria-labelledby="live-status-recurring-heading"
 >
   <h2 id="live-status-recurring-heading" class="text-lg font-semibold text-[var(--color-text)]">
@@ -69,7 +69,7 @@
 
   @if (jobs().length > 0) {
     <div
-      class="mt-4 overflow-x-auto"
+      class="relative mt-4 overflow-x-auto"
       role="region"
       tabindex="0"
       [attr.aria-label]="'admin.liveStatus.recurring.heading' | translate"
@@ -88,10 +88,10 @@
         <tbody>
           @for (job of jobs(); track job.id) {
             <tr class="border-b border-[var(--color-border)] last:border-b-0">
-              <th scope="row" class="break-all py-2 pr-4 font-mono text-xs font-medium text-[var(--color-text)]">{{ job.id }}</th>
+              <th scope="row" class="max-w-0 break-all py-2 pr-4 font-mono text-xs font-medium text-[var(--color-text)]">{{ job.id }}</th>
               <td class="py-2 pr-4"><code class="whitespace-nowrap text-xs text-[var(--color-text)]">{{ job.cron }}</code></td>
-              <td class="py-2 pr-4"><app-live-status-time [instant]="job.lastExecutionUtc" [nowUtc]="nowUtc()" /></td>
-              <td class="py-2 pr-4"><app-live-status-time [instant]="job.nextExecutionUtc" [nowUtc]="nowUtc()" /></td>
+              <td class="whitespace-nowrap py-2 pr-4"><app-live-status-time [instant]="job.lastExecutionUtc" [nowUtc]="nowUtc()" /></td>
+              <td class="whitespace-nowrap py-2 pr-4"><app-live-status-time [instant]="job.nextExecutionUtc" [nowUtc]="nowUtc()" /></td>
               <td class="py-2">
                 @if (job.lastJobState; as state) {
                   <span class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text)]">
@@ -111,3 +111,4 @@
     <p class="mt-4 text-sm text-[var(--color-text-muted)]">{{ 'admin.liveStatus.recurring.none' | translate }}</p>
   }
 </section>
+

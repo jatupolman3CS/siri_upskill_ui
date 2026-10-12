@@ -1,42 +1,53 @@
-<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <header class="min-w-0">
     <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'admin.paymentSettings.heading' | translate }}</h1>
-    <p class="mt-1 text-sm text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.subheading' | translate }}</p>
+    <p class="mt-1 max-w-prose text-sm text-[var(--color-text-muted)]">{{ 'admin.paymentSettings.subheading' | translate }}</p>
   </header>
 
-  @if (isLoading()) {
-    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'common.loading' | translate">
-      <app-skeleton variant="block" height="9rem" radius="lg" />
-      <app-skeleton variant="block" height="20rem" radius="lg" />
-    </div>
-  } @else if (hasError()) {
-    <app-empty-state
-      [heading]="'admin.paymentSettings.loadErrorHeading' | translate"
-      [description]="'admin.paymentSettings.loadErrorDescription' | translate"
-    >
-      <app-button emptyStateAction variant="secondary" (click)="reloadState()">{{ 'admin.paymentSettings.retry' | translate }}</app-button>
-    </app-empty-state>
-  } @else if (state(); as current) {
-    @if (isStale()) {
+  <!-- Current state + the change form side by side; the audit trail sits full width below. -->
+  <div class="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
+    @if (isLoading()) {
       <div
-        role="alert"
-        class="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] glass-card border-[var(--color-danger)] p-3 text-sm text-[var(--color-text)]"
+        class="grid grid-cols-1 gap-8 xl:col-span-2 xl:grid-cols-[minmax(0,1fr)_22rem]"
+        role="status"
+        [attr.aria-label]="'common.loading' | translate"
       >
-        <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="shrink-0 text-lg text-[var(--color-danger)]" />
-        <span class="min-w-0 flex-1">{{ 'admin.paymentSettings.staleNotice' | translate }}</span>
-        <app-button variant="secondary" size="sm" (click)="reloadState()">{{ 'admin.paymentSettings.retry' | translate }}</app-button>
+        <app-skeleton variant="block" height="9rem" radius="lg" />
+        <app-skeleton class="xl:order-first" variant="block" height="20rem" radius="lg" />
       </div>
-    }
+    } @else if (hasError()) {
+      <div class="rounded-2xl glass-card xl:col-span-2">
+        <app-empty-state
+          [heading]="'admin.paymentSettings.loadErrorHeading' | translate"
+          [description]="'admin.paymentSettings.loadErrorDescription' | translate"
+        >
+          <app-button emptyStateAction variant="secondary" (click)="reloadState()">{{ 'admin.paymentSettings.retry' | translate }}</app-button>
+        </app-empty-state>
+      </div>
+    } @else if (state(); as current) {
+      @if (isStale()) {
+        <div
+          role="alert"
+          class="flex flex-wrap items-center gap-3 rounded-2xl glass-card border-[var(--color-danger)] p-4 text-sm text-[var(--color-text)] xl:col-span-2"
+        >
+          <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="shrink-0 text-lg text-[var(--color-danger)]" />
+          <span class="min-w-0 flex-1">{{ 'admin.paymentSettings.staleNotice' | translate }}</span>
+          <app-button variant="secondary" size="sm" (click)="reloadState()">{{ 'admin.paymentSettings.retry' | translate }}</app-button>
+        </div>
+      }
 
-    <app-payment-override-status [state]="current" />
-    <app-payment-override-form
-      [state]="current"
-      [saving]="saving()"
-      [apiError]="saveApiError()"
-      [errorKey]="saveFailureKey()"
-      (save)="onSave($event)"
-    />
-  }
+      <!-- Status comes first in the DOM (above the form on small screens) but sits in the right column from xl up. -->
+      <app-payment-override-status class="xl:order-last" [state]="current" />
+      <app-payment-override-form
+        class="block"
+        [state]="current"
+        [saving]="saving()"
+        [apiError]="saveApiError()"
+        [errorKey]="saveFailureKey()"
+        (save)="onSave($event)"
+      />
+    }
+  </div>
 
   <app-payment-override-history
     [view]="historyView()"

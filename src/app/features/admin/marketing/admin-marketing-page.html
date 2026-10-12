@@ -1,7 +1,7 @@
-<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Page Header -->
-  <div class="animate-fade-in-down flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">
         {{ 'admin.marketing.title' | translate }}
       </h1>
@@ -64,252 +64,256 @@
     </div>
   }
 
-  <!-- Navigation Tabs -->
-  <div class="animate-fade-in-up stagger-1 flex border-b border-[var(--color-border)] gap-6">
-    <button
-      type="button"
-      (click)="activeTab.set('promos')"
-      [class]="activeTab() === 'promos' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorTag" class="text-base" />
-      <span>{{ 'admin.marketing.tabs.promos' | translate }}</span>
-      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalPromos() }}</span>
-    </button>
+  <!-- Panel: tabs + tab content -->
+  <section class="animate-fade-in-up stagger-1 overflow-hidden rounded-2xl glass-card shadow-sm">
+    <div class="flex gap-6 border-b border-[var(--color-border)] px-6 pt-2">
+      <button
+        type="button"
+        (click)="activeTab.set('promos')"
+        [class]="activeTab() === 'promos' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+        class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorTag" class="text-base" />
+        <span>{{ 'admin.marketing.tabs.promos' | translate }}</span>
+        <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalPromos() }}</span>
+      </button>
 
-    <button
-      type="button"
-      (click)="activeTab.set('flashSales')"
-      [class]="activeTab() === 'flashSales' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorLightning" class="text-base" />
-      <span>{{ 'admin.marketing.tabs.flashSales' | translate }}</span>
-      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalFlashSales() }}</span>
-    </button>
+      <button
+        type="button"
+        (click)="activeTab.set('flashSales')"
+        [class]="activeTab() === 'flashSales' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+        class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorLightning" class="text-base" />
+        <span>{{ 'admin.marketing.tabs.flashSales' | translate }}</span>
+        <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalFlashSales() }}</span>
+      </button>
 
-    <button
-      type="button"
-      (click)="activeTab.set('bundles')"
-      [class]="activeTab() === 'bundles' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
-      class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
-    >
-      <ng-icon name="phosphorFolder" class="text-base" />
-      <span>{{ 'admin.marketing.tabs.bundles' | translate }}</span>
-      <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalBundles() }}</span>
-    </button>
-  </div>
-
-  <!-- TAB 1: PROMO CODES -->
-  @if (activeTab() === 'promos') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
-      @if (isLoadingPromos() && promos().length === 0) {
-        <div class="p-6 space-y-4">
-          <app-skeleton className="h-10 w-full" />
-          <app-skeleton className="h-10 w-full" />
-          <app-skeleton className="h-10 w-full" />
-        </div>
-      } @else if (promos().length === 0) {
-        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
-          <ng-icon name="phosphorTag" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>{{ 'admin.marketing.promos.empty' | translate }}</p>
-          <button
-            type="button"
-            (click)="openPromoModal()"
-            class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
-          >
-            <span>{{ 'admin.marketing.promos.emptyAction' | translate }}</span>
-          </button>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-[var(--color-text)]">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
-              <tr>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colCode' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colDiscount' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colMinOrder' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colUsage' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colPeriod' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @for (item of promos(); track item.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-primary-text)] tracking-wide">
-                    {{ item.code }}
-                  </td>
-                  <td class="py-3.5 px-4 font-semibold">
-                    @if (item.discountType === 'Percentage') {
-                      <span class="tone-red rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
-                        {{ 'admin.marketing.promos.discountPercent' | translate: { value: item.discountValue } }}
-                      </span>
-                    } @else {
-                      <span class="tone-green rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
-                        {{ 'admin.marketing.promos.discountFixed' | translate: { value: (item.discountValue | currencyThb) ?? '' } }}
-                      </span>
-                    }
-                  </td>
-                  <td class="py-3.5 px-4 text-[var(--color-text-muted)]">
-                    {{ item.minOrderAmount > 0 ? (item.minOrderAmount | currencyThb) : ('admin.marketing.promos.noMinimum' | translate) }}
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <span class="font-bold text-[var(--color-text)]">{{ item.redeemedCount }}</span>
-                    <span class="text-[var(--color-text-muted)]"> {{ 'admin.marketing.promos.usageLimit' | translate: { max: item.maxRedemptions } }}</span>
-                  </td>
-                  <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
-                    {{ item.endsAtUtc | date:'d/M/yyyy HH:mm' }}
-                  </td>
-                  <td class="py-3.5 px-4 text-center">
-                    @if (item.isActive) {
-                      <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
-                        {{ 'admin.marketing.status.active' | translate }}
-                      </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
-                        {{ 'admin.marketing.status.inactive' | translate }}
-                      </span>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
+      <button
+        type="button"
+        (click)="activeTab.set('bundles')"
+        [class]="activeTab() === 'bundles' ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary-text)] font-bold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] font-semibold'"
+        class="btn-tactile hit-44 pb-3 text-sm transition flex items-center gap-2"
+      >
+        <ng-icon name="phosphorFolder" class="text-base" />
+        <span>{{ 'admin.marketing.tabs.bundles' | translate }}</span>
+        <span class="rounded-full bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px]">{{ totalBundles() }}</span>
+      </button>
     </div>
-  }
 
-  <!-- TAB 2: FLASH SALES -->
-  @if (activeTab() === 'flashSales') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
-      @if (isLoadingFlashSales() && flashSales().length === 0) {
-        <div class="p-6 space-y-4">
-          <app-skeleton className="h-10 w-full" />
-          <app-skeleton className="h-10 w-full" />
-        </div>
-      } @else if (flashSales().length === 0) {
-        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
-          <ng-icon name="phosphorLightning" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>{{ 'admin.marketing.flashSales.empty' | translate }}</p>
-          <button
-            type="button"
-            (click)="openFlashSaleModal()"
-            class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
-          >
-            <span>{{ 'admin.marketing.flashSales.emptyAction' | translate }}</span>
-          </button>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-[var(--color-text)]">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
-              <tr>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colTitle' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colStart' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colEnd' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.courseCount' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @for (sale of flashSales(); track sale.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="py-3.5 px-4 font-bold text-[var(--color-text)]">{{ sale.title }}</td>
-                  <td class="py-3.5 px-4 text-[var(--color-text-muted)]">{{ sale.startsAtUtc | date:'d/M/yyyy HH:mm' }}</td>
-                  <td class="py-3.5 px-4 text-[var(--color-text-muted)]">{{ sale.endsAtUtc | date:'d/M/yyyy HH:mm' }}</td>
-                  <td class="py-3.5 px-4 text-center font-bold">{{ 'admin.marketing.flashSales.itemCount' | translate: { count: sale.items.length } }}</td>
-                  <td class="py-3.5 px-4 text-center">
-                    @if (sale.isActive) {
-                      <span class="tone-gold inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
-                        {{ 'admin.marketing.status.active' | translate }}
-                      </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
-                        {{ 'admin.marketing.status.inactive' | translate }}
-                      </span>
-                    }
-                  </td>
+    <!-- TAB 1: PROMO CODES -->
+    @if (activeTab() === 'promos') {
+      <div class="animate-fade-in-up">
+        @if (isLoadingPromos() && promos().length === 0) {
+          <div class="flex flex-col gap-4 p-6">
+            <app-skeleton className="h-10 w-full" />
+            <app-skeleton className="h-10 w-full" />
+            <app-skeleton className="h-10 w-full" />
+          </div>
+        } @else if (promos().length === 0) {
+          <div class="flex flex-col items-center gap-3 p-12 text-center text-xs text-[var(--color-text-muted)]">
+            <ng-icon name="phosphorTag" class="text-3xl text-[var(--color-text-muted)]" />
+            <p>{{ 'admin.marketing.promos.empty' | translate }}</p>
+            <button
+              type="button"
+              (click)="openPromoModal()"
+              class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
+            >
+              <span>{{ 'admin.marketing.promos.emptyAction' | translate }}</span>
+            </button>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-[var(--color-text)]">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
+                <tr>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colCode' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colDiscount' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colMinOrder' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colUsage' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.promos.colPeriod' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </div>
-  }
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @for (item of promos(); track item.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                    <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-primary-text)] tracking-wide">
+                      {{ item.code }}
+                    </td>
+                    <td class="py-3.5 px-4 font-semibold">
+                      @if (item.discountType === 'Percentage') {
+                        <span class="tone-red rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
+                          {{ 'admin.marketing.promos.discountPercent' | translate: { value: item.discountValue } }}
+                        </span>
+                      } @else {
+                        <span class="tone-green rounded-md bg-[var(--tone-bg)] px-2 py-0.5 text-[var(--tone-fg)] font-bold">
+                          {{ 'admin.marketing.promos.discountFixed' | translate: { value: (item.discountValue | currencyThb) ?? '' } }}
+                        </span>
+                      }
+                    </td>
+                    <td class="py-3.5 px-4 text-[var(--color-text-muted)]">
+                      {{ item.minOrderAmount > 0 ? (item.minOrderAmount | currencyThb) : ('admin.marketing.promos.noMinimum' | translate) }}
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-bold text-[var(--color-text)]">{{ item.redeemedCount }}</span>
+                      <span class="text-[var(--color-text-muted)]"> {{ 'admin.marketing.promos.usageLimit' | translate: { max: item.maxRedemptions } }}</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-[var(--color-text-muted)] text-[11px]">
+                      {{ item.endsAtUtc | date:'d/M/yyyy HH:mm' }}
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                      @if (item.isActive) {
+                        <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                          <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
+                          {{ 'admin.marketing.status.active' | translate }}
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
+                          {{ 'admin.marketing.status.inactive' | translate }}
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
 
-  <!-- TAB 3: BUNDLES -->
-  @if (activeTab() === 'bundles') {
-    <div class="animate-fade-in-up stagger-2 rounded-2xl glass-card shadow-sm overflow-hidden">
-      @if (isLoadingBundles() && bundles().length === 0) {
-        <div class="p-6 space-y-4">
-          <app-skeleton className="h-10 w-full" />
-          <app-skeleton className="h-10 w-full" />
-        </div>
-      } @else if (bundles().length === 0) {
-        <div class="p-12 text-center text-xs text-[var(--color-text-muted)] space-y-3">
-          <ng-icon name="phosphorFolder" class="text-3xl text-[var(--color-text-muted)]" />
-          <p>{{ 'admin.marketing.bundles.empty' | translate }}</p>
-          <button
-            type="button"
-            (click)="openBundleModal()"
-            class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
-          >
-            <span>{{ 'admin.marketing.bundles.emptyAction' | translate }}</span>
-          </button>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-[var(--color-text)]">
-            <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
-              <tr>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.bundles.colTitle' | translate }}</th>
-                <th class="py-3.5 px-4">{{ 'admin.marketing.bundles.colSlug' | translate }}</th>
-                <th class="py-3.5 px-4 text-right">{{ 'admin.marketing.bundles.colPrice' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.courseCount' | translate }}</th>
-                <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--color-border)]">
-              @for (bundle of bundles(); track bundle.id) {
-                <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
-                  <td class="py-3.5 px-4">
-                    <p class="font-bold text-[var(--color-text)]">{{ bundle.title }}</p>
-                    @if (bundle.description) {
-                      <p class="text-[11px] text-[var(--color-text-muted)] truncate max-w-xs">{{ bundle.description }}</p>
-                    }
-                  </td>
-                  <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">{{ bundle.slug }}</td>
-                  <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">{{ bundle.price | currencyThb }}</td>
-                  <td class="py-3.5 px-4 text-center font-bold">{{ 'admin.marketing.bundles.courseCount' | translate: { count: bundle.items.length } }}</td>
-                  <td class="py-3.5 px-4 text-center">
-                    @if (bundle.isActive) {
-                      <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
-                        <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
-                        {{ 'admin.marketing.status.active' | translate }}
-                      </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
-                        {{ 'admin.marketing.status.inactive' | translate }}
-                      </span>
-                    }
-                  </td>
+    <!-- TAB 2: FLASH SALES -->
+    @if (activeTab() === 'flashSales') {
+      <div class="animate-fade-in-up">
+        @if (isLoadingFlashSales() && flashSales().length === 0) {
+          <div class="flex flex-col gap-4 p-6">
+            <app-skeleton className="h-10 w-full" />
+            <app-skeleton className="h-10 w-full" />
+          </div>
+        } @else if (flashSales().length === 0) {
+          <div class="flex flex-col items-center gap-3 p-12 text-center text-xs text-[var(--color-text-muted)]">
+            <ng-icon name="phosphorLightning" class="text-3xl text-[var(--color-text-muted)]" />
+            <p>{{ 'admin.marketing.flashSales.empty' | translate }}</p>
+            <button
+              type="button"
+              (click)="openFlashSaleModal()"
+              class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
+            >
+              <span>{{ 'admin.marketing.flashSales.emptyAction' | translate }}</span>
+            </button>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-[var(--color-text)]">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
+                <tr>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colTitle' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colStart' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.flashSales.colEnd' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.courseCount' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </div>
-  }
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @for (sale of flashSales(); track sale.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                    <td class="py-3.5 px-4 font-bold text-[var(--color-text)]">{{ sale.title }}</td>
+                    <td class="py-3.5 px-4 text-[var(--color-text-muted)]">{{ sale.startsAtUtc | date:'d/M/yyyy HH:mm' }}</td>
+                    <td class="py-3.5 px-4 text-[var(--color-text-muted)]">{{ sale.endsAtUtc | date:'d/M/yyyy HH:mm' }}</td>
+                    <td class="py-3.5 px-4 text-center font-bold">{{ 'admin.marketing.flashSales.itemCount' | translate: { count: sale.items.length } }}</td>
+                    <td class="py-3.5 px-4 text-center">
+                      @if (sale.isActive) {
+                        <span class="tone-gold inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                          <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
+                          {{ 'admin.marketing.status.active' | translate }}
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
+                          {{ 'admin.marketing.status.inactive' | translate }}
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB 3: BUNDLES -->
+    @if (activeTab() === 'bundles') {
+      <div class="animate-fade-in-up">
+        @if (isLoadingBundles() && bundles().length === 0) {
+          <div class="flex flex-col gap-4 p-6">
+            <app-skeleton className="h-10 w-full" />
+            <app-skeleton className="h-10 w-full" />
+          </div>
+        } @else if (bundles().length === 0) {
+          <div class="flex flex-col items-center gap-3 p-12 text-center text-xs text-[var(--color-text-muted)]">
+            <ng-icon name="phosphorFolder" class="text-3xl text-[var(--color-text-muted)]" />
+            <p>{{ 'admin.marketing.bundles.empty' | translate }}</p>
+            <button
+              type="button"
+              (click)="openBundleModal()"
+              class="btn-tactile hit-44 inline-flex items-center gap-1 text-[var(--color-primary-text)] font-bold hover:underline"
+            >
+              <span>{{ 'admin.marketing.bundles.emptyAction' | translate }}</span>
+            </button>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-[var(--color-text)]">
+              <thead class="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold text-[var(--color-text-muted)] uppercase">
+                <tr>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.bundles.colTitle' | translate }}</th>
+                  <th class="py-3.5 px-4">{{ 'admin.marketing.bundles.colSlug' | translate }}</th>
+                  <th class="py-3.5 px-4 text-right">{{ 'admin.marketing.bundles.colPrice' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.courseCount' | translate }}</th>
+                  <th class="py-3.5 px-4 text-center">{{ 'admin.marketing.col.status' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--color-border)]">
+                @for (bundle of bundles(); track bundle.id) {
+                  <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
+                    <td class="py-3.5 px-4">
+                      <p class="font-bold text-[var(--color-text)]">{{ bundle.title }}</p>
+                      @if (bundle.description) {
+                        <p class="text-[11px] text-[var(--color-text-muted)] truncate max-w-xs">{{ bundle.description }}</p>
+                      }
+                    </td>
+                    <td class="py-3.5 px-4 font-mono text-[var(--color-text-muted)]">{{ bundle.slug }}</td>
+                    <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">{{ bundle.price | currencyThb }}</td>
+                    <td class="py-3.5 px-4 text-center font-bold">{{ 'admin.marketing.bundles.courseCount' | translate: { count: bundle.items.length } }}</td>
+                    <td class="py-3.5 px-4 text-center">
+                      @if (bundle.isActive) {
+                        <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
+                          <span class="h-1.5 w-1.5 rounded-full bg-[var(--tone-fg)]"></span>
+                          {{ 'admin.marketing.status.active' | translate }}
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-text-muted)]">
+                          {{ 'admin.marketing.status.inactive' | translate }}
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+  </section>
 
   <!-- MODAL 1: CREATE PROMO CODE -->
   @if (showPromoModal()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closePromoModal()"
       [titleText]="'admin.marketing.promoModal.title' | translate"
@@ -455,6 +459,7 @@
   <!-- MODAL 2: CREATE FLASH SALE -->
   @if (showFlashSaleModal()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeFlashSaleModal()"
       [titleText]="'admin.marketing.flashSaleModal.title' | translate"
@@ -557,6 +562,7 @@
   <!-- MODAL 3: CREATE BUNDLE -->
   @if (showBundleModal()) {
     <app-modal
+      class="contents"
       [open]="true"
       (openChange)="closeBundleModal()"
       [titleText]="'admin.marketing.bundleModal.title' | translate"

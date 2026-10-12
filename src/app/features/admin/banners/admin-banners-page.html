@@ -1,7 +1,7 @@
-<div class="animate-fade-in max-w-6xl mx-auto space-y-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <!-- Page Header -->
-  <div class="animate-fade-in-down flex items-center justify-between">
-    <div>
+  <div class="animate-fade-in-down flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
       <h1 class="text-2xl font-extrabold text-[var(--color-text)]">{{ 'admin.banners.title' | translate }}</h1>
       <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ 'admin.banners.subtitle' | translate }}</p>
     </div>
@@ -18,9 +18,9 @@
 
   <!-- Add Banner Modal / Form -->
   @if (showAddForm()) {
-    <div class="animate-fade-in-up rounded-2xl glass-card p-6 space-y-4 shadow-sm">
+    <div class="animate-fade-in-up flex flex-col gap-6 rounded-2xl glass-card p-6 shadow-sm">
       <h2 class="text-sm font-bold text-[var(--color-text)]">{{ 'admin.banners.form.heading' | translate }}</h2>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <div>
           <label for="banner-title-input" class="text-xs font-bold text-[var(--color-text)] block mb-1">{{ 'admin.banners.form.titleLabel' | translate }}</label>
           <input
@@ -55,7 +55,7 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 pt-2">
+      <div class="flex justify-end gap-2">
         <button
           type="button"
           (click)="showAddForm.set(false)"
@@ -86,58 +86,61 @@
     </div>
   } @else {
     <!-- Banners List -->
-    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-4">
+    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
       @for (banner of banners(); track banner.id; let idx = $index) {
-        <div class="card-hover flex flex-col sm:flex-row items-center gap-4 rounded-2xl glass-card p-4 shadow-sm">
+        <div class="card-hover flex h-full flex-col overflow-hidden rounded-2xl glass-card shadow-sm">
           <!-- Thumbnail -->
-          <div class="relative h-24 w-44 rounded-xl overflow-hidden bg-[var(--color-surface-muted)] shrink-0">
+          <div class="relative aspect-[3/1] w-full overflow-hidden bg-[var(--color-surface-muted)]">
             @if (banner.imageUrl) {
               <img [ngSrc]="banner.imageUrl" fill [alt]="banner.title" class="object-cover transition-transform duration-500 hover:scale-105" />
             }
           </div>
 
-          <!-- Info -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="rounded bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px] font-mono text-[var(--color-text-muted)]">
-                {{ 'admin.banners.row.order' | translate: { order: banner.sortOrder } }}
-              </span>
-              <span
-                class="rounded px-2 py-0.5 text-[10px] font-bold"
-                [class]="
-                  banner.isActive
-                    ? 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]'
-                    : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
-                "
-              >
-                {{ banner.isActive ? ('admin.banners.row.active' | translate) : ('admin.banners.row.inactive' | translate) }}
-              </span>
+          <div class="flex flex-1 flex-col justify-between gap-4 p-5">
+            <!-- Info -->
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="rounded bg-[var(--color-surface-muted)] px-2 py-0.5 text-[10px] font-mono text-[var(--color-text-muted)]">
+                  {{ 'admin.banners.row.order' | translate: { order: banner.sortOrder } }}
+                </span>
+                <span
+                  class="rounded px-2 py-0.5 text-[10px] font-bold"
+                  [class]="
+                    banner.isActive
+                      ? 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)]'
+                      : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
+                  "
+                >
+                  {{ banner.isActive ? ('admin.banners.row.active' | translate) : ('admin.banners.row.inactive' | translate) }}
+                </span>
+              </div>
+              <h3 class="mt-1 text-sm font-bold text-[var(--color-text)] truncate">{{ banner.title }}</h3>
+              <p class="text-xs text-[var(--color-text-muted)] truncate">{{ 'admin.banners.row.link' | translate: { url: banner.targetUrl || ('admin.banners.row.noLink' | translate) } }}</p>
             </div>
-            <h3 class="mt-1 text-sm font-bold text-[var(--color-text)] truncate">{{ banner.title }}</h3>
-            <p class="text-xs text-[var(--color-text-muted)] truncate">{{ 'admin.banners.row.link' | translate: { url: banner.targetUrl || ('admin.banners.row.noLink' | translate) } }}</p>
-          </div>
 
-          <!-- Controls -->
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              (click)="toggleActive(banner)"
-              class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold hover:bg-[var(--color-surface-muted)] transition"
-            >
-              {{ banner.isActive ? ('admin.banners.row.turnOff' | translate) : ('admin.banners.row.turnOn' | translate) }}
-            </button>
-            <button
-              type="button"
-              (click)="deleteBanner(banner.id)"
-              class="btn-tactile hit-44 rounded-xl p-2 tone-red text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
-              [attr.title]="'a11y.admin.banners.delete' | translate"
-              [attr.aria-label]="'a11y.admin.banners.delete' | translate"
-            >
-              <ng-icon name="phosphorTrash" aria-hidden="true" />
-            </button>
+            <!-- Controls -->
+            <div class="flex items-center justify-between gap-2 border-t border-[var(--color-border)] pt-4">
+              <button
+                type="button"
+                (click)="toggleActive(banner)"
+                class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold hover:bg-[var(--color-surface-muted)] transition"
+              >
+                {{ banner.isActive ? ('admin.banners.row.turnOff' | translate) : ('admin.banners.row.turnOn' | translate) }}
+              </button>
+              <button
+                type="button"
+                (click)="deleteBanner(banner.id)"
+                class="btn-tactile hit-44 rounded-xl p-2 tone-red text-[var(--tone-fg)] hover:bg-[var(--tone-bg)] transition"
+                [attr.title]="'a11y.admin.banners.delete' | translate"
+                [attr.aria-label]="'a11y.admin.banners.delete' | translate"
+              >
+                <ng-icon name="phosphorTrash" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </div>
       }
     </div>
   }
 </div>
+
