@@ -1,14 +1,20 @@
+/*
+ * Quiz taking — colours/surfaces come from tokens.css only (D-24), so light and dark both work
+ * without a prefers-color-scheme block. Status states use the --hue-* pairs (AA in both modes);
+ * "solid" tone fills invert the pair (fg as background, bg as text) so contrast holds in dark too.
+ */
 .quiz-container {
   padding: 1.5rem;
   max-width: 800px;
   margin: 0 auto;
   font-family: inherit;
+  color: var(--color-text);
 }
 
 .loading-box, .empty-box, .error-box {
   text-align: center;
   padding: 3rem 1rem;
-  color: #64748b;
+  color: var(--color-text-muted);
 
   .icon {
     font-size: 2.5rem;
@@ -20,9 +26,9 @@
 .spinner {
   width: 2.5rem;
   height: 2.5rem;
-  border: 3px solid #e2e8f0;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
   animation: spin 0.8s linear infinite;
   margin: 0 auto 1rem;
 }
@@ -31,36 +37,42 @@
   to { transform: rotate(360deg); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
 .quiz-intro {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
 
   .quiz-badge {
     display: inline-block;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--hue-blue-bg);
+    color: var(--hue-blue-fg);
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     padding: 0.25rem 0.6rem;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     margin-bottom: 0.75rem;
   }
 
   h3 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--color-text);
     margin-bottom: 1rem;
   }
 
   .quiz-meta {
     display: flex;
     gap: 1.25rem;
-    color: #475569;
+    color: var(--color-text-muted);
     font-size: 0.95rem;
     margin-bottom: 1.5rem;
   }
@@ -69,12 +81,12 @@
 .history-section {
   margin-top: 1.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-border);
 
   h4 {
     font-size: 1rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--color-text);
     margin-bottom: 0.75rem;
   }
 
@@ -89,21 +101,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.6rem 1rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: 0.9rem;
-    background: #f8fafc;
-    border-left: 4px solid #94a3b8;
+    background: var(--color-surface-muted);
+    border-left: 4px solid var(--color-text-muted);
 
     &.passed {
-      border-left-color: #10b981;
-      background: #ecfdf5;
-      .status { color: #059669; font-weight: 600; }
+      border-left-color: var(--hue-green-fg);
+      background: var(--hue-green-bg);
+      .status { color: var(--hue-green-fg); font-weight: 600; }
     }
 
     &.failed {
-      border-left-color: #ef4444;
-      background: #fef2f2;
-      .status { color: #dc2626; font-weight: 600; }
+      border-left-color: var(--hue-red-fg);
+      background: var(--hue-red-bg);
+      .status { color: var(--hue-red-fg); font-weight: 600; }
     }
   }
 }
@@ -123,14 +135,14 @@
     h3 {
       font-size: 1.35rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--color-text);
     }
 
     .attempt-badge {
-      background: #f1f5f9;
-      color: #475569;
+      background: var(--color-surface-muted);
+      color: var(--color-text-muted);
       padding: 0.35rem 0.75rem;
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       font-weight: 600;
       font-size: 0.85rem;
     }
@@ -143,16 +155,16 @@
   }
 
   .question-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    box-shadow: var(--shadow-sm);
 
     .question-header {
       display: flex;
       justify-content: space-between;
-      color: #64748b;
+      color: var(--color-text-muted);
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
@@ -161,7 +173,7 @@
     .q-prompt {
       font-size: 1.05rem;
       font-weight: 600;
-      color: #1e293b;
+      color: var(--color-text);
       margin-bottom: 1rem;
     }
 
@@ -176,25 +188,31 @@
       align-items: center;
       gap: 0.75rem;
       padding: 0.85rem 1rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
       cursor: pointer;
       transition: all 0.15s ease;
 
       &:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
+        background: var(--color-surface-muted);
+        border-color: color-mix(in srgb, var(--color-text-muted) 50%, var(--color-border));
+      }
+
+      &:focus-within {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
       }
 
       &.selected {
-        background: #eff6ff;
-        border-color: #3b82f6;
-        color: #1e40af;
+        background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+        border-color: var(--color-primary);
+        color: var(--color-primary-text);
         font-weight: 500;
       }
 
       input {
         cursor: pointer;
+        accent-color: var(--color-primary);
       }
     }
   }
@@ -208,11 +226,11 @@
 
 .quiz-result {
   text-align: center;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 3rem 2rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-lg);
 
   .result-icon {
     font-size: 3.5rem;
@@ -222,12 +240,13 @@
   h3 {
     font-size: 1.75rem;
     font-weight: 800;
+    color: var(--color-text);
     margin-bottom: 0.5rem;
   }
 
   .result-message {
     font-size: 1.05rem;
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 1.5rem;
   }
 
@@ -235,7 +254,7 @@
     display: inline-flex;
     flex-direction: column;
     padding: 1rem 2.5rem;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
 
     .score-value {
@@ -245,51 +264,64 @@
 
     .score-label {
       font-size: 0.9rem;
-      color: #64748b;
+      color: var(--color-text);
     }
   }
 
   &.passed {
     .score-banner {
-      background: #ecfdf5;
-      .score-value { color: #059669; }
+      background: var(--hue-green-bg);
+      .score-value { color: var(--hue-green-fg); }
     }
   }
 
   &.failed {
     .score-banner {
-      background: #fef2f2;
-      .score-value { color: #dc2626; }
+      background: var(--hue-red-bg);
+      .score-value { color: var(--hue-red-fg); }
     }
   }
 }
 
 .btn {
   padding: 0.6rem 1.25rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
   border: none;
   transition: background 0.15s ease;
 
-  &-primary {
-    background: #2563eb;
-    color: #ffffff;
-    &:hover { background: #1d4ed8; }
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
   }
 
+  &-primary {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    &:hover { background: var(--color-primary-pressed); }
+  }
+
+  /* Solid green: the hue pair inverted, so it keeps AA contrast in light and dark. */
   &-success {
-    background: #10b981;
-    color: #ffffff;
-    &:hover { background: #059669; }
+    background: var(--hue-green-fg);
+    color: var(--hue-green-bg);
+    &:hover { background: color-mix(in srgb, var(--hue-green-fg) 85%, var(--hue-green-bg)); }
+  }
+
+  &-secondary {
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    &:hover { background: var(--color-border); }
   }
 
   &-outline {
     background: transparent;
-    border: 1.5px solid #cbd5e1;
-    color: #334155;
-    &:hover { background: #f1f5f9; }
+    border: 1.5px solid var(--color-border);
+    color: var(--color-text);
+    &:hover { background: var(--color-surface-muted); }
   }
 
   &-lg {
@@ -300,5 +332,18 @@
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+
+  &-danger {
+    background: var(--hue-red-bg);
+    color: var(--hue-red-fg);
+    border: 1px solid color-mix(in srgb, var(--hue-red-fg) 35%, transparent);
   }
 }

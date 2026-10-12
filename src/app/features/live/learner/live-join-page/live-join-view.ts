@@ -18,7 +18,7 @@ export const JOIN_VIEWS: Readonly<Record<JoinStateKind, StateView>> = {
   },
   notOpen: {
     icon: 'phosphorClock',
-    tone: 'text-[var(--color-primary)]',
+    tone: 'text-[var(--color-primary-text)]',
     heading: 'live.join.notOpen.heading',
     body: 'live.join.notOpen.body',
   },

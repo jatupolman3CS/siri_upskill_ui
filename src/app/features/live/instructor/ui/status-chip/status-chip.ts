@@ -24,22 +24,19 @@ const TONE_STYLES: Record<StatusTone, { readonly surface: string; readonly icon:
   info: {
     surface:
       'border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]',
-    icon: 'text-[var(--color-primary)]',
+    icon: 'text-[var(--color-primary-text)]',
   },
   success: {
-    surface:
-      'border-[color-mix(in_srgb,var(--color-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]',
-    icon: 'text-[var(--color-success)]',
+    surface: 'tone-green border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]',
+    icon: 'text-[var(--tone-fg)]',
   },
   warning: {
-    surface:
-      'border-[color-mix(in_srgb,var(--color-warning)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]',
-    icon: 'text-[var(--color-warning)]',
+    surface: 'tone-gold border-[var(--tone-fg)]/45 bg-[var(--tone-bg)]',
+    icon: 'text-[var(--tone-fg)]',
   },
   danger: {
-    surface:
-      'border-[color-mix(in_srgb,var(--color-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)]',
-    icon: 'text-[var(--color-danger)]',
+    surface: 'tone-red border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]',
+    icon: 'text-[var(--tone-fg)]',
   },
 };
 

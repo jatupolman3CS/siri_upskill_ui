@@ -73,7 +73,7 @@
               [href]="newMeetUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-2 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-primary)] bg-[var(--color-bg)] px-4 text-sm font-medium text-[var(--color-primary)]
+              class="mt-2 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-primary)] bg-[var(--color-bg)] px-4 text-sm font-medium text-[var(--color-primary-text)]
                 transition-colors duration-200 hover:bg-[var(--color-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface-muted)]"
             >
               <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="text-lg" />
@@ -119,6 +119,6 @@
   }
 
   @if (problemText(); as text) {
-    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ text }}</p>
+    <p role="alert" class="tone-red text-sm text-[var(--tone-fg)]">{{ text }}</p>
   }
 </div>

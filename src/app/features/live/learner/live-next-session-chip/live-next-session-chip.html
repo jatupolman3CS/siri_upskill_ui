@@ -1,5 +1,5 @@
 <div
-  class="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5"
+  class="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-md)] glass-card p-2.5"
 >
   <a
     [routerLink]="['/learn', session().courseSlug]"
@@ -10,7 +10,7 @@
       [name]="isLive() ? 'phosphorBroadcast' : 'phosphorCalendarBlank'"
       aria-hidden="true"
       class="mt-0.5 h-5 w-5 shrink-0"
-      [class]="isLive() ? 'text-[var(--color-success)]' : 'text-[var(--color-primary)]'"
+      [class]="isLive() ? 'text-[var(--color-success)]' : 'text-[var(--color-primary-text)]'"
     />
     <span class="min-w-0">
       <span class="block font-semibold">
@@ -34,7 +34,7 @@
   @if (session().canJoin) {
     <a
       [routerLink]="['/live', session().sessionId, 'join']"
-      class="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-3 text-sm font-semibold text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      class="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-3 text-sm font-semibold text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
     >
       <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="h-4 w-4" />
       {{ 'live.tab.joinButton' | translate }}

@@ -19,9 +19,9 @@ import type { DeliveryFormat } from '../../data/live.models';
   template: `
     @if (isLive()) {
       <span
-        class="inline-flex items-center gap-1 rounded-[var(--radius-full)] border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text)] shadow-[var(--shadow-sm)]"
+        class="inline-flex items-center gap-1 rounded-[var(--radius-full)] glass-card px-2.5 py-1 text-xs font-semibold text-[var(--color-text)] shadow-[var(--shadow-sm)]"
       >
-        <ng-icon name="phosphorBroadcast" aria-hidden="true" class="text-sm text-[var(--color-primary)]" />
+        <ng-icon name="phosphorBroadcast" aria-hidden="true" class="text-sm text-[var(--color-primary-text)]" />
         {{ 'live.catalog.badge.' + format() | translate }}
       </span>
     }

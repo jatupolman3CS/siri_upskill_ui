@@ -1,5 +1,5 @@
 <section
-  class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6"
+  class="rounded-[var(--radius-lg)] glass-card p-5 sm:p-6"
   [attr.aria-label]="'live.instructor.room.heading' | translate"
 >
   <div class="flex flex-wrap items-center justify-between gap-3">
@@ -23,7 +23,7 @@
     <div class="mt-4">
       <p class="mb-1.5 text-sm font-medium text-[var(--color-text)]">{{ 'live.instructor.room.linkLabel' | translate }}</p>
       <p
-        class="break-all rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-sm text-[var(--color-text)]"
+        class="break-all rounded-[var(--radius-md)] glass-card px-3.5 py-2.5 text-sm text-[var(--color-text)]"
       >
         {{ url }}
       </p>
@@ -33,7 +33,7 @@
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex h-11 items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
-            transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+            transition-colors duration-200 hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
         >
           <ng-icon name="phosphorArrowSquareOut" aria-hidden="true" />
           {{ 'live.instructor.room.open' | translate }}

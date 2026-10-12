@@ -23,27 +23,25 @@ const STYLES: Readonly<Record<LiveDisplayState, BadgeStyle>> = {
     icon: 'phosphorClock',
     labelKey: 'live.status.upcoming',
     surface: 'border-[var(--color-border)] bg-[var(--color-surface-muted)]',
-    iconTone: 'text-[var(--color-primary)]',
+    iconTone: 'text-[var(--color-primary-text)]',
   },
   Live: {
     icon: 'phosphorBroadcast',
     labelKey: 'live.status.live',
-    surface:
-      'border-[var(--color-success)] bg-[color-mix(in_srgb,var(--color-success)_14%,var(--color-bg))]',
-    iconTone: 'text-[var(--color-success)]',
+    surface: 'tone-green border-[var(--tone-fg)] bg-[var(--tone-bg)]',
+    iconTone: 'text-[var(--tone-fg)]',
   },
   Ended: {
     icon: 'phosphorCheckCircle',
     labelKey: 'live.status.ended',
-    surface: 'border-[var(--color-border)] bg-[var(--color-surface)]',
+    surface: 'border-[var(--color-border)] bg-[var(--color-surface-muted)]',
     iconTone: 'text-[var(--color-text-muted)]',
   },
   Cancelled: {
     icon: 'phosphorProhibit',
     labelKey: 'live.status.cancelled',
-    surface:
-      'border-[var(--color-danger)] bg-[color-mix(in_srgb,var(--color-danger)_12%,var(--color-bg))]',
-    iconTone: 'text-[var(--color-danger)]',
+    surface: 'tone-red border-[var(--tone-fg)] bg-[var(--tone-bg)]',
+    iconTone: 'text-[var(--tone-fg)]',
   },
 };
 

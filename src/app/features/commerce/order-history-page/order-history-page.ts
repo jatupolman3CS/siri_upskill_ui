@@ -303,16 +303,16 @@ export class OrderHistoryPage implements OnInit {
   protected getStatusBadgeClass(status: OrderStatus): string {
     switch (status) {
       case 'Paid':
-        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20';
+        return 'tone-green bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
       case 'AwaitingPayment':
       case 'Pending':
-        return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20';
+        return 'tone-gold bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
       case 'Refunded':
-        return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20';
+        return 'tone-violet bg-[var(--tone-bg)] text-[var(--tone-fg)] border-[var(--tone-fg)]/30';
       case 'Cancelled':
       case 'Failed':
       default:
-        return 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-400 border-zinc-500/20';
+        return 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]';
     }
   }
 

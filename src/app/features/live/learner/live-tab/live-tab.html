@@ -4,7 +4,7 @@
       <p class="sr-only" role="status">{{ 'live.tab.loading' | translate }}</p>
       <div class="space-y-3">
         @for (slot of skeletonSlots; track slot) {
-          <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <div class="rounded-[var(--radius-lg)] glass-card p-5">
             <app-skeleton variant="text" width="55%" height="1.25rem" />
             <div class="mt-3 space-y-2">
               <app-skeleton variant="text" width="75%" />
@@ -19,7 +19,7 @@
     @case ('error') {
       <div
         role="alert"
-        class="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center"
+        class="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] glass-card p-8 text-center"
       >
         <ng-icon name="phosphorWarning" aria-hidden="true" class="h-8 w-8 text-[var(--color-danger)]" />
         <div>
@@ -42,10 +42,10 @@
         @if (refreshFailed()) {
           <div
             role="alert"
-            class="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--color-warning)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+            class="tone-gold glass-card flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-md)] border-[var(--tone-fg)] p-3 text-sm text-[var(--color-text)]"
           >
             <span class="flex items-center gap-2">
-              <ng-icon name="phosphorWarning" aria-hidden="true" class="h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+              <ng-icon name="phosphorWarning" aria-hidden="true" class="h-5 w-5 shrink-0 text-[var(--tone-fg)]" />
               {{ 'live.tab.refreshFailed' | translate }}
             </span>
             <app-button variant="ghost" size="sm" (click)="reload()">{{ 'live.tab.retry' | translate }}</app-button>

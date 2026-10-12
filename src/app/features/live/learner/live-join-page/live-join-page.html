@@ -2,7 +2,7 @@
 
 <div class="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
   <section
-    class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-[var(--shadow-md)] sm:p-8"
+    class="rounded-[var(--radius-lg)] glass-card p-6 text-center shadow-[var(--shadow-md)] sm:p-8"
     aria-labelledby="live-join-heading"
   >
     <div
@@ -58,7 +58,7 @@
           target="_blank"
           rel="noopener noreferrer"
           (click)="cancelAutoRedirect()"
-          class="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+          class="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
         >
           <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="h-5 w-5" />
           {{ 'live.join.redirecting.openRoom' | translate }}
@@ -69,7 +69,7 @@
         @if (s.recordingEpisodeId && s.courseSlug) {
           <a
             [routerLink]="['/learn', s.courseSlug, s.recordingEpisodeId]"
-            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
           >
             {{ 'live.join.ended.watchReplay' | translate }}
           </a>
@@ -86,14 +86,14 @@
         <div class="flex flex-wrap items-center justify-center gap-2">
           <a
             routerLink="/my-courses"
-            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
           >
             {{ 'live.join.goMyCourses' | translate }}
           </a>
           @if (s.kind === 'notFoundOrNoAccess') {
             <a
               routerLink="/courses"
-              class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+              class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
             >
               {{ 'live.join.browseCourses' | translate }}
             </a>
@@ -106,7 +106,7 @@
   @if (isEntering()) {
     <div class="mt-4 space-y-3 text-left">
       <p
-        class="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+        class="flex items-start gap-3 rounded-[var(--radius-md)] glass-card p-3 text-sm text-[var(--color-text)]"
       >
         <ng-icon name="phosphorShieldWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
         <span>{{ 'live.join.forwardWarning' | translate }}</span>

@@ -9,7 +9,7 @@
     <div>
       <label [for]="fieldId" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
         {{ 'live.instructor.cancel.reasonLabel' | translate }}
-        <span aria-hidden="true" class="text-[var(--color-danger)]">*</span>
+        <span aria-hidden="true" class="tone-red text-[var(--tone-fg)]">*</span>
       </label>
       <textarea
         [id]="fieldId"
@@ -24,7 +24,7 @@
         [class]="showRequiredError() ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)]'"
       ></textarea>
       @if (showRequiredError()) {
-        <p role="alert" class="mt-1.5 text-sm text-[var(--color-danger)]">{{ 'live.instructor.cancel.reasonRequired' | translate }}</p>
+        <p role="alert" class="tone-red mt-1.5 text-sm text-[var(--tone-fg)]">{{ 'live.instructor.cancel.reasonRequired' | translate }}</p>
       }
       <p [id]="fieldId + '-hint'" class="mt-1.5 text-sm text-[var(--color-text-muted)]">
         {{ 'live.instructor.cancel.reasonHint' | translate: { count: reason.value.length, max: maxLength } }}
@@ -32,7 +32,7 @@
     </div>
 
     @if (problemText(); as text) {
-      <p role="alert" class="text-sm text-[var(--color-danger)]">{{ text }}</p>
+      <p role="alert" class="tone-red text-sm text-[var(--tone-fg)]">{{ text }}</p>
     }
   </form>
 

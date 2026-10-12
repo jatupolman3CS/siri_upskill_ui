@@ -53,7 +53,7 @@
             <button
               type="button"
               (click)="retryPlayback()"
-              class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-2 focus:ring-white/50"
+              class="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--color-primary-pressed)] focus:outline-none focus:ring-2 focus:ring-white/50"
             >
               <ng-icon name="phosphorArrowsClockwise" class="text-base" />
               <span>ลองใหม่อีกครั้ง</span>
@@ -88,7 +88,7 @@
           <button
             type="button"
             (click)="resumeFromSaved()"
-            class="flex-1 min-h-[44px] rounded-lg bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-hover)] focus:outline-none"
+            class="flex-1 min-h-[44px] rounded-lg bg-[var(--color-primary)] py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-primary-pressed)] focus:outline-none"
           >
             เล่นต่อจากจุดเดิม
           </button>
@@ -108,7 +108,7 @@
   @if (showFreePreviewCta()) {
     <div class="absolute inset-0 z-30 flex items-center justify-center bg-black/85 p-6 backdrop-blur-md">
       <div class="max-w-md rounded-2xl border border-[var(--color-primary)]/40 bg-zinc-900/95 p-6 text-center shadow-2xl text-white">
-        <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary)] shadow-inner">
+        <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[var(--color-primary-text)] shadow-inner">
           <ng-icon name="phosphorShoppingCart" class="text-2xl" />
         </div>
 
@@ -121,7 +121,7 @@
           <button
             type="button"
             (click)="onBuyCourseClick()"
-            class="flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-2 focus:ring-white"
+            class="flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-[var(--color-primary-pressed)] focus:outline-none focus:ring-2 focus:ring-white"
           >
             <span>สมัครเรียนเลย</span>
             <ng-icon name="phosphorArrowRight" class="text-base" />
@@ -249,12 +249,12 @@
                   type="button"
                   (click)="setPlaybackRate(speed)"
                   class="flex min-h-[36px] w-full items-center justify-between px-3 py-1 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
-                  [class.text-[var(--color-primary)]]="playbackRate() === speed"
+                  [class.text-[var(--color-primary-text)]]="playbackRate() === speed"
                   [class.font-bold]="playbackRate() === speed"
                 >
                   <span>{{ speed }}x</span>
                   @if (playbackRate() === speed) {
-                    <span class="text-[var(--color-primary)]">✓</span>
+                    <span class="text-[var(--color-primary-text)]">✓</span>
                   }
                 </button>
               }
@@ -282,12 +282,12 @@
                 type="button"
                 (click)="setQuality('auto')"
                 class="flex min-h-[36px] w-full items-center justify-between px-3 py-1 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
-                [class.text-[var(--color-primary)]]="selectedQuality() === 'auto'"
+                [class.text-[var(--color-primary-text)]]="selectedQuality() === 'auto'"
                 [class.font-bold]="selectedQuality() === 'auto'"
               >
                 <span>อัตโนมัติ (Auto)</span>
                 @if (selectedQuality() === 'auto') {
-                  <span class="text-[var(--color-primary)]">✓</span>
+                  <span class="text-[var(--color-primary-text)]">✓</span>
                 }
               </button>
 
@@ -296,12 +296,12 @@
                   type="button"
                   (click)="setQuality(q.height)"
                   class="flex min-h-[36px] w-full items-center justify-between px-3 py-1 text-xs text-left text-zinc-300 hover:bg-white/10 hover:text-white transition"
-                  [class.text-[var(--color-primary)]]="selectedQuality() === q.height"
+                  [class.text-[var(--color-primary-text)]]="selectedQuality() === q.height"
                   [class.font-bold]="selectedQuality() === q.height"
                 >
                   <span>{{ q.label }}</span>
                   @if (selectedQuality() === q.height) {
-                    <span class="text-[var(--color-primary)]">✓</span>
+                    <span class="text-[var(--color-primary-text)]">✓</span>
                   }
                 </button>
               }
@@ -314,7 +314,7 @@
           type="button"
           (click)="toggleCaptions()"
           class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-white/90 hover:bg-white/20 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          [class.text-[var(--color-primary)]]="isCaptionsEnabled()"
+          [class.text-[var(--color-primary-text)]]="isCaptionsEnabled()"
           [attr.aria-label]="isCaptionsEnabled() ? 'Disable captions (c)' : 'Enable captions (c)'"
         >
           <ng-icon name="phosphorClosedCaptioning" class="text-lg" />

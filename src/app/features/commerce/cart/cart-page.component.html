@@ -10,7 +10,7 @@
   </div>
 
   @if (checkoutError(); as errorMsg) {
-    <div class="animate-fade-in mb-6 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs text-rose-700">
+    <div class="animate-fade-in mb-6 flex items-start gap-3 tone-red rounded-2xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)]">
       <ng-icon name="phosphorWarningCircle" class="text-base shrink-0 mt-0.5" />
       <div>
         <p class="font-bold">ไม่สามารถดำเนินการสั่งซื้อได้</p>
@@ -21,7 +21,7 @@
 
   @if (!cart.hasItems()) {
     <!-- Empty State -->
-    <div class="animate-fade-in-up rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-12 text-center shadow-sm">
+    <div class="animate-fade-in-up rounded-3xl glass-card p-12 text-center shadow-sm">
       <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
         <ng-icon name="phosphorShoppingBag" class="text-4xl" />
       </div>
@@ -32,7 +32,7 @@
       <div class="mt-6">
         <a
           routerLink="/courses"
-          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-white shadow-md transition hover:bg-[var(--color-primary-hover)]"
+          class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)]"
         >
           <span>เลือกดูคอร์สเรียน</span>
           <ng-icon name="phosphorArrowRight" />
@@ -44,10 +44,10 @@
       <!-- Items List -->
       <div class="animate-fade-in-up stagger-1 space-y-4 lg:col-span-8">
         @for (item of cart.items(); track item.courseId) {
-          <div class="card-hover flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">
+          <div class="card-hover flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl glass-card p-4 shadow-sm">
             <div class="flex items-center gap-4 w-full sm:w-auto">
               <!-- Thumbnail -->
-              <div class="h-20 w-32 overflow-hidden rounded-xl bg-zinc-900 shrink-0">
+              <div class="h-20 w-32 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] shrink-0">
                 @if (item.thumbnailUrl) {
                   <img [src]="item.thumbnailUrl" [alt]="item.title" class="h-full w-full object-cover" />
                 } @else {
@@ -59,13 +59,13 @@
 
               <!-- Info -->
               <div class="min-w-0 flex-1 space-y-1">
-                <a [routerLink]="['/courses', item.slug]" class="text-sm font-bold text-[var(--color-text)] line-clamp-2 hover:text-[var(--color-primary)] transition">
+                <a [routerLink]="['/courses', item.slug]" class="text-sm font-bold text-[var(--color-text)] line-clamp-2 hover:text-[var(--color-primary-text)] transition">
                   {{ item.title }}
                 </a>
                 @if (item.instructorName) {
                   <p class="text-xs text-[var(--color-text-muted)]">ผู้สอน: {{ item.instructorName }}</p>
                 }
-                <p class="text-sm font-extrabold text-[var(--color-primary)] sm:hidden">
+                <p class="text-sm font-extrabold text-[var(--color-primary-text)] sm:hidden">
                   {{ item.price | currencyThb }}
                 </p>
               </div>
@@ -73,14 +73,14 @@
 
             <!-- Price & Action -->
             <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t border-[var(--color-border)] sm:border-0 pt-3 sm:pt-0">
-              <span class="hidden sm:inline-block text-base font-black text-[var(--color-primary)]">
+              <span class="hidden sm:inline-block text-base font-black text-[var(--color-primary-text)]">
                 {{ item.price | currencyThb }}
               </span>
 
               <button
                 type="button"
                 (click)="cart.removeItem(item.courseId)"
-                class="btn-tactile flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-rose-500/10 hover:text-rose-600 transition"
+                class="tone-red btn-tactile flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] hover:bg-[var(--tone-bg)] hover:text-[var(--tone-fg)] transition"
                 title="ลบออกจากตะกร้า"
               >
                 <ng-icon name="phosphorTrash" class="text-lg" />
@@ -92,25 +92,25 @@
 
       <!-- Order Summary Card -->
       <div class="animate-fade-in-up stagger-2 lg:col-span-4">
-        <div class="sticky top-24 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-6 shadow-sm">
+        <div class="sticky top-24 rounded-3xl glass-card p-6 space-y-6 shadow-sm">
           <h2 class="text-base font-bold text-[var(--color-text)]">สรุปคำสั่งซื้อ</h2>
 
           <!-- Promo Code Section -->
           <div class="space-y-2">
             <label for="promoInput" class="text-xs font-semibold text-[var(--color-text)]">รหัสส่วนลด</label>
             @if (cart.appliedPromo(); as promo) {
-              <div class="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2.5 text-xs text-emerald-800">
+              <div class="tone-green flex items-center justify-between rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/30 px-3.5 py-2.5 text-xs text-[var(--tone-fg)]">
                 <div class="flex items-center gap-2">
-                  <ng-icon name="phosphorTicket" class="text-base text-emerald-600" />
+                  <ng-icon name="phosphorTicket" class="text-base text-[var(--tone-fg)]" />
                   <div>
                     <span class="font-mono font-bold">{{ promo.code }}</span>
-                    <p class="text-[10px] text-emerald-600">-{{ promo.discountAmount | currencyThb }}</p>
+                    <p class="text-[10px] text-[var(--tone-fg)]">-{{ promo.discountAmount | currencyThb }}</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   (click)="removePromo()"
-                  class="text-[11px] font-bold text-rose-600 hover:underline"
+                  class="tone-red text-[11px] font-bold text-[var(--tone-fg)] hover:underline"
                 >
                   ลบ
                 </button>
@@ -122,13 +122,13 @@
                   type="text"
                   [(ngModel)]="promoCodeInput"
                   placeholder="เช่น SIRI2026"
-                  class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2 text-xs uppercase text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+                  class="w-full rounded-xl glass-card px-3.5 py-2 text-xs uppercase text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
                 />
                 <button
                   type="button"
                   (click)="applyPromo()"
                   [disabled]="!promoCodeInput.trim() || cart.isApplyingPromo()"
-                  class="btn-tactile inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-white transition disabled:opacity-50"
+                  class="btn-tactile inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition disabled:opacity-50"
                 >
                   @if (cart.isApplyingPromo()) {
                     <app-spinner size="xs" color="muted" />
@@ -137,7 +137,7 @@
                 </button>
               </div>
               @if (cart.promoError(); as err) {
-                <p class="text-[11px] text-rose-600 animate-fade-in">{{ err }}</p>
+                <p class="tone-red text-[11px] text-[var(--tone-fg)] animate-fade-in">{{ err }}</p>
               }
             }
           </div>
@@ -150,7 +150,7 @@
             </div>
 
             @if (cart.discount() > 0) {
-              <div class="flex justify-between text-emerald-600 font-semibold animate-fade-in">
+              <div class="tone-green flex justify-between text-[var(--tone-fg)] font-semibold animate-fade-in">
                 <span>ส่วนลด</span>
                 <span>-{{ cart.discount() | currencyThb }}</span>
               </div>
@@ -158,7 +158,7 @@
 
             <div class="flex justify-between border-t border-[var(--color-border)] pt-3 text-sm font-black text-[var(--color-text)]">
               <span>ยอดชำระสุทธิ</span>
-              <span class="text-base text-[var(--color-primary)]">{{ cart.total() | currencyThb }}</span>
+              <span class="text-base text-[var(--color-primary-text)]">{{ cart.total() | currencyThb }}</span>
             </div>
           </div>
 
@@ -167,7 +167,7 @@
             type="button"
             (click)="proceedToCheckout()"
             [disabled]="isCreatingOrder()"
-            class="btn-tactile w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] py-3.5 text-xs font-bold text-white shadow-md transition hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+            class="btn-tactile w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] py-3.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-md transition hover:bg-[var(--color-primary-pressed)] disabled:opacity-50"
           >
             @if (isCreatingOrder()) {
               <app-spinner size="sm" color="white" />
@@ -181,11 +181,11 @@
           <!-- Guarantee badges -->
           <div class="space-y-2 pt-2 border-t border-[var(--color-border)]/60 text-[11px] text-[var(--color-text-muted)]">
             <div class="flex items-center gap-2">
-              <ng-icon name="phosphorShieldCheck" class="text-emerald-600 text-sm" />
+              <ng-icon name="phosphorShieldCheck" class="tone-green text-[var(--tone-fg)] text-sm" />
               <span>รับประกันการชำระเงินปลอดภัยผ่าน Stripe PromptPay</span>
             </div>
             <div class="flex items-center gap-2">
-              <ng-icon name="phosphorCheckCircle" class="text-emerald-600 text-sm" />
+              <ng-icon name="phosphorCheckCircle" class="tone-green text-[var(--tone-fg)] text-sm" />
               <span>รับ e-Tax Invoice และใบเสร็จรับเงินทางอีเมลทันที</span>
             </div>
           </div>

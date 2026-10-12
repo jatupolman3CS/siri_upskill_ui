@@ -1,7 +1,7 @@
 <div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
   <a
     routerLink="/instructor/sessions"
-    class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary)]
+    class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary-text)]
       hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
   >
     <ng-icon name="phosphorArrowLeft" aria-hidden="true" />
@@ -24,7 +24,7 @@
         emptyStateAction
         routerLink="/instructor/sessions"
         class="inline-flex h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-primary-foreground)]
-          hover:bg-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ 'live.instructor.detail.back' | translate }}
       </a>
@@ -59,10 +59,10 @@
 
     @if (isCancelled()) {
       <section
-        class="rounded-[var(--radius-lg)] border border-[color-mix(in_srgb,var(--color-danger)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-5"
+        class="tone-red glass-card rounded-[var(--radius-lg)] border-[var(--tone-fg)]/40 p-5"
       >
         <h2 class="flex items-center gap-2 text-base font-semibold text-[var(--color-text)]">
-          <ng-icon name="phosphorProhibit" aria-hidden="true" class="text-lg text-[var(--color-danger)]" />
+          <ng-icon name="phosphorProhibit" aria-hidden="true" class="text-lg text-[var(--tone-fg)]" />
           {{ 'live.instructor.detail.cancelledHeading' | translate }}
         </h2>
         @if (d.cancelReason) {
@@ -72,15 +72,15 @@
     }
 
     <dl class="grid grid-cols-3 gap-3">
-      <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <div class="rounded-[var(--radius-lg)] glass-card p-4">
         <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.enrolled' | translate }}</dt>
         <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.enrolledCount }}</dd>
       </div>
-      <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <div class="rounded-[var(--radius-lg)] glass-card p-4">
         <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.expected' | translate }}</dt>
         <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.expectedLearners }}</dd>
       </div>
-      <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <div class="rounded-[var(--radius-lg)] glass-card p-4">
         <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.joined' | translate }}</dt>
         <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.joinedLearners }}</dd>
       </div>
@@ -92,7 +92,7 @@
 
     @if (isEnded()) {
       <section
-        class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6"
+        class="rounded-[var(--radius-lg)] glass-card p-5 sm:p-6"
         [attr.aria-label]="'live.instructor.recording.heading' | translate"
       >
         <h2 class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
@@ -112,7 +112,7 @@
           @if (d.recordingEpisodeId; as episodeId) {
             <a
               [routerLink]="['/learn', d.courseSlug, episodeId]"
-              class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary)]
+              class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary-text)]
                 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <ng-icon name="phosphorPlayCircle" aria-hidden="true" />

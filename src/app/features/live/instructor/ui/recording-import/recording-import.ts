@@ -17,7 +17,7 @@ import { RecordingUploader } from '../recording-uploader/recording-uploader';
 /** Icon colour per tone — whole class names so Tailwind sees them. The sentence itself always stays `--color-text`. */
 const ICON_TONE: Record<StatusTone, string> = {
   neutral: 'text-[var(--color-text-muted)]',
-  info: 'text-[var(--color-primary)]',
+  info: 'text-[var(--color-primary-text)]',
   success: 'text-[var(--color-success)]',
   warning: 'text-[var(--color-warning)]',
   danger: 'text-[var(--color-danger)]',

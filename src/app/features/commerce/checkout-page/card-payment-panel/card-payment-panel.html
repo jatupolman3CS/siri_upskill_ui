@@ -1,12 +1,12 @@
 <div class="space-y-4">
-  <h3 class="text-base font-semibold text-[var(--color-text,#0F172A)]">
+  <h3 class="text-base font-semibold text-[var(--color-text)]">
     {{ 'checkout.card.enterDetails' | translate }}
   </h3>
 
   @if (state() === 'loading') {
     <app-skeleton variant="block" height="12rem" />
   } @else if (state() === 'loadFailed') {
-    <div class="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+    <div class="tone-red flex items-start gap-2 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-sm text-[var(--tone-fg)]">
       <ng-icon name="phosphorWarningCircle" class="mt-0.5 flex-none text-lg" />
       <span>{{ 'checkout.card.loadFailed' | translate }}</span>
     </div>
@@ -22,7 +22,7 @@
   <div
     #cardElementContainer
     [hidden]="state() === 'loading' || state() === 'loadFailed'"
-    class="min-h-[12rem] rounded-xl border border-[var(--color-border,#E2E8F0)] p-4"
+    class="min-h-[12rem] rounded-xl border border-[var(--color-border)] p-4"
   ></div>
 
   @if (isReady()) {

@@ -18,14 +18,14 @@ import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
   host: { class: 'block' },
   template: `
     <aside
-      class="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text)]"
+      class="flex items-start gap-3 rounded-[var(--radius-md)] glass-card p-3 text-sm text-[var(--color-text)]"
     >
-      <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-primary)]" />
+      <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-primary-text)]" />
       <p>
         {{ 'live.refundNotice' | translate }}
         <a
           routerLink="/refund-policy"
-          class="font-semibold text-[var(--color-primary)] underline underline-offset-2 hover:text-[var(--color-primary-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          class="font-semibold text-[var(--color-primary-text)] underline underline-offset-2 hover:text-[var(--color-primary-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           {{ 'live.refundPolicyLink' | translate }}
         </a>

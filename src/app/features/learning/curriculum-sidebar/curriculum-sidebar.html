@@ -1,9 +1,9 @@
-<div class="flex h-full flex-col bg-[var(--color-surface)] border-l border-[var(--color-border)] select-none">
+<div class="flex h-full flex-col select-none">
   <!-- Sidebar Header with Progress Bar -->
   <div class="border-b border-[var(--color-border)] p-4">
     <div class="flex items-center justify-between text-sm mb-2">
       <span class="font-bold text-[var(--color-text)]">เนื้อหาหลักสูตร</span>
-      <span class="text-xs font-semibold text-[var(--color-primary)]">
+      <span class="text-xs font-semibold text-[var(--color-primary-text)]">
         {{ progress()?.progressPercent ?? 0 }}% สำเร็จ
       </span>
     </div>
@@ -48,7 +48,7 @@
 
         <!-- Episodes List -->
         @if (isSectionExpanded(section.id, sIdx)) {
-          <div class="divide-y divide-[var(--color-border)]/50 bg-[var(--color-surface)]">
+          <div class="divide-y divide-[var(--color-border)]/50">
             @for (episode of section.episodes; track episode.id; let eIdx = $index) {
               <button
                 type="button"
@@ -63,9 +63,9 @@
                 <!-- Status Icon -->
                 <div class="shrink-0 text-base">
                   @if (isEpisodeCompleted(episode.id)) {
-                    <ng-icon name="phosphorCheckCircle" class="text-emerald-500" />
+                    <ng-icon name="phosphorCheckCircle" class="tone-green text-[var(--tone-fg)]" />
                   } @else if (episode.id === activeEpisodeId()) {
-                    <ng-icon name="phosphorPlayCircle" class="text-[var(--color-primary)]" />
+                    <ng-icon name="phosphorPlayCircle" class="text-[var(--color-primary-text)]" />
                   } @else if (!isEnrolled() && !episode.isFreePreview) {
                     <ng-icon name="phosphorLock" class="text-[var(--color-text-muted)]" />
                   } @else {
@@ -78,14 +78,14 @@
                   <div class="flex items-center gap-1.5">
                     <span
                       class="text-xs font-medium truncate"
-                      [class.text-[var(--color-primary)]]="episode.id === activeEpisodeId()"
+                      [class.text-[var(--color-primary-text)]]="episode.id === activeEpisodeId()"
                       [class.font-bold]="episode.id === activeEpisodeId()"
                       [class.text-[var(--color-text)]]="episode.id !== activeEpisodeId()"
                     >
                       {{ episode.title }}
                     </span>
                     @if (episode.isFreePreview && !isEnrolled()) {
-                      <span class="rounded bg-emerald-500/10 px-1.5 py-0.2 text-[9px] font-bold text-emerald-600">
+                      <span class="tone-green rounded bg-[var(--tone-bg)] px-1.5 py-0.2 text-[9px] font-bold text-[var(--tone-fg)]">
                         ตัวอย่างฟรี
                       </span>
                     }
