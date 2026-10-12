@@ -16,13 +16,13 @@
   </p>
 
   @if (schedule().sessions.length === 0) {
-    <p class="mt-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm text-[var(--color-text-muted)]">
+    <p class="mt-4 rounded-[var(--radius-lg)] glass-card p-4 text-sm text-[var(--color-text-muted)]">
       {{ 'live.catalog.noSessions' | translate }}
     </p>
   } @else {
-    <ul class="mt-4 flex flex-col divide-y divide-[var(--color-border)] overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
+    <ul class="glass-card mt-4 flex flex-col divide-y divide-[var(--color-border)] overflow-hidden rounded-[var(--radius-lg)]">
       @for (session of visibleSessions(); track session.id) {
-        <li class="flex flex-col gap-2 bg-[var(--color-surface)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <li class="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div class="min-w-0">
             <p
               class="break-words font-medium text-[var(--color-text)]"
@@ -52,7 +52,7 @@
         type="button"
         (click)="toggle()"
         [attr.aria-expanded]="expanded()"
-        class="mt-2 min-h-11 cursor-pointer rounded-[var(--radius-md)] px-2 text-sm font-semibold text-[var(--color-primary)] hover:underline
+        class="mt-2 min-h-11 cursor-pointer rounded-[var(--radius-md)] px-2 text-sm font-semibold text-[var(--color-primary-text)] hover:underline
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ (expanded() ? 'live.catalog.showLess' : 'live.catalog.showMore') | translate: { count: hiddenCount() } }}

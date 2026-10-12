@@ -14,7 +14,7 @@
     }
     @case ('error') {
       <section
-        class="animate-pop-in rounded-[var(--radius-lg)] border border-[var(--color-danger)] bg-[var(--color-surface)] p-6 text-center shadow-sm"
+        class="animate-pop-in rounded-[var(--radius-lg)] glass-card border-[var(--color-danger)] p-6 text-center shadow-sm"
         role="alert"
       >
         <p class="font-semibold text-[var(--color-text)]">{{ 'auth.devices.errorHeading' | translate }}</p>
@@ -43,7 +43,7 @@
         <ul class="animate-fade-in-up stagger-2 flex flex-col gap-3">
           @for (session of sessions(); track session.sessionId) {
             <li
-              class="card-hover flex flex-col gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:flex-row sm:items-center sm:justify-between shadow-xs transition"
+              class="card-hover flex flex-col gap-3 rounded-[var(--radius-lg)] glass-card p-4 sm:flex-row sm:items-center sm:justify-between shadow-xs transition"
             >
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">

@@ -1,73 +1,91 @@
-<div class="animate-fade-in flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-  <h1 class="animate-fade-in-down text-4xl font-bold text-[var(--color-text)] sm:text-5xl">
-    {{ 'home.hero.heading' | translate }}
-  </h1>
-  <p class="animate-fade-in-up stagger-1 max-w-xl text-lg text-[var(--color-text-muted)]">
-    {{ 'home.hero.subheading' | translate }}
-  </p>
+<div class="mx-auto max-w-6xl px-4 pt-6 sm:pt-10">
+  <div
+    class="glass-panel animate-fade-in relative flex min-h-[60vh] flex-col items-center justify-center gap-6 overflow-hidden rounded-3xl px-4 py-16 text-center sm:px-10"
+  >
+    <span
+      class="glass-pill animate-fade-in-down inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-[var(--color-primary-text)]"
+    >
+      <span class="relative flex h-2.5 w-2.5" aria-hidden="true">
+        <span
+          class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-primary)] opacity-75 motion-reduce:animate-none"
+        ></span>
+        <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-[var(--color-primary)]"></span>
+      </span>
+      {{ 'home.hero.badge' | translate }}
+    </span>
+    <h1
+      class="animate-fade-in-down max-w-4xl text-4xl font-bold leading-tight tracking-tight text-[var(--color-text)] sm:text-5xl lg:text-6xl"
+    >
+      {{ 'home.hero.headingLead' | translate }}
+      <span class="text-gradient-brand text-shimmer font-black">{{ 'home.hero.headingAccent' | translate }}</span>
+    </h1>
+    <p class="animate-fade-in-up stagger-1 max-w-xl text-lg text-[var(--color-text-muted)]">
+      {{ 'home.hero.subheading' | translate }}
+    </p>
 
-  <!-- Guest CTAs (register/login) only for a confirmed guest; a signed-in visitor gets browse/my-courses
-       instead. Until the session restore has finished (SSR, first paint) this reserves the row's height
-       with nothing in it, so neither set of buttons flashes to the wrong person. -->
-  <div class="animate-fade-in-up stagger-2 mt-2 flex min-h-14 flex-col gap-3 sm:flex-row">
-    @if (auth.sessionResolved()) {
-      @if (auth.isAuthenticated()) {
-        <a
-          routerLink="/courses"
-          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
-        text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
-        transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
-        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {{ 'nav.allCourses' | translate }}
-        </a>
-        <a
-          routerLink="/my-courses"
-          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
-        text-base font-medium text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-surface)]
-        transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
-        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {{ 'nav.myCourses' | translate }}
-        </a>
-      } @else {
-        <a
-          routerLink="/register"
-          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
-        text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
-        transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
-        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {{ 'home.hero.ctaRegister' | translate }}
-        </a>
-        <a
-          routerLink="/login"
-          class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
-        text-base font-medium text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-surface)]
-        transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
-        focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {{ 'home.hero.ctaLogin' | translate }}
-        </a>
+    <!-- Guest CTAs (register/login) only for a confirmed guest; a signed-in visitor gets browse/my-courses
+         instead. Until the session restore has finished (SSR, first paint) this reserves the row's height
+         with nothing in it, so neither set of buttons flashes to the wrong person. -->
+    <div class="animate-fade-in-up stagger-2 mt-2 flex min-h-14 flex-col gap-3 sm:flex-row">
+      @if (auth.sessionResolved()) {
+        @if (auth.isAuthenticated()) {
+          <a
+            routerLink="/courses"
+            class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+          text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
+          transition-colors duration-200 ease-out hover:bg-[var(--color-primary-pressed)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+          focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+          >
+            {{ 'nav.allCourses' | translate }}
+          </a>
+          <a
+            routerLink="/my-courses"
+            class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+          text-base font-medium text-[var(--color-text)] glass-card
+          transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+          focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+          >
+            {{ 'nav.myCourses' | translate }}
+          </a>
+        } @else {
+          <a
+            routerLink="/register"
+            class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+          text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)] shadow-sm
+          transition-colors duration-200 ease-out hover:bg-[var(--color-primary-pressed)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+          focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+          >
+            {{ 'home.hero.ctaRegister' | translate }}
+          </a>
+          <a
+            routerLink="/login"
+            class="btn-tactile inline-flex h-14 select-none items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-6
+          text-base font-medium text-[var(--color-text)] glass-card
+          transition-colors duration-200 ease-out hover:bg-[var(--color-surface-muted)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
+          focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+          >
+            {{ 'home.hero.ctaLogin' | translate }}
+          </a>
+        }
       }
-    }
+    </div>
   </div>
 </div>
 
 <!-- Continue Learning Card (For Authenticated Learners) -->
 @if (recentEnrollmentResource.value(); as enroll) {
   <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-3" aria-label="Continue Learning">
-    <div class="card-hover flex flex-col sm:flex-row items-center justify-between gap-4 rounded-[var(--radius-xl)] border border-[var(--color-primary)]/30 bg-gradient-to-r from-[var(--color-primary)]/10 via-[var(--color-surface)] to-[var(--color-surface)] p-5 shadow-sm">
+    <div class="card-hover glass-card glow-border flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border-[var(--color-primary)]/30 bg-gradient-to-r from-[var(--color-primary)]/10 to-transparent p-5 shadow-sm">
       <div class="flex items-center gap-4 w-full sm:w-auto">
-        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-md">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-md">
           <ng-icon name="phosphorPlayCircle" class="text-2xl" />
         </div>
         <div class="min-w-0 flex-1">
-          <span class="text-xs font-bold text-[var(--color-primary)] uppercase tracking-wider block mb-0.5">
+          <span class="text-xs font-bold text-[var(--color-primary-text)] uppercase tracking-wider block mb-0.5">
             เรียนต่อจากจุดเดิม
           </span>
           <h2 class="text-base font-bold text-[var(--color-text)] truncate">
@@ -89,7 +107,7 @@
 
       <a
         [routerLink]="['/learn', enroll.courseSlug || enroll.courseId]"
-        class="btn-tactile inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+        class="btn-tactile inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
       >
         <span>เข้าสู่บทเรียน</span>
         <ng-icon name="phosphorArrowRight" />
@@ -111,12 +129,12 @@
 
 <!-- Promotional Banners (CMS) -->
 @if (bannersResource.hasValue() && bannersResource.value().length > 0) {
-  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-6" aria-label="Promotional Banners">
+  <section class="reveal mx-auto max-w-6xl px-4 py-6" aria-label="Promotional Banners">
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
       @for (banner of bannersResource.value(); track banner.id) {
         <a
           [routerLink]="banner.targetUrl || '/courses'"
-          class="card-hover group relative overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm block aspect-[21/9]"
+          class="card-hover glow-border group relative block aspect-[21/9] overflow-hidden rounded-3xl glass-card shadow-sm"
         >
           <img
             [src]="banner.imageUrl"
@@ -144,14 +162,14 @@
     </div>
   </section>
 } @else if (categoriesResource.hasValue() && categoriesResource.value().length > 0) {
-  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-12">
+  <section class="reveal mx-auto max-w-6xl px-4 py-12">
     <h2 class="mb-6 text-2xl font-bold text-[var(--color-text)]">{{ 'home.categories.heading' | translate }}</h2>
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
       @for (category of categoriesResource.value(); track category.id) {
         <a
           [routerLink]="['/courses']"
           [queryParams]="{ category: category.slug }"
-          class="card-hover flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center
+          class="card-hover glow-border flex flex-col items-center gap-3 rounded-3xl glass-card p-6 text-center
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
         >
           <span [class]="resolveTone(category.iconKey) + ' flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--tone-bg)] text-[var(--tone-fg)]'">
@@ -177,13 +195,13 @@
     </div>
   </section>
 } @else if (recommendedResource.hasValue() && recommendedResource.value().results.items.length > 0) {
-  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-12">
+  <section class="reveal mx-auto max-w-6xl px-4 py-12">
     <div class="mb-6 flex items-center justify-between gap-4">
       <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ 'home.recommended.heading' | translate }}</h2>
       <a
         [routerLink]="['/courses']"
         [queryParams]="{ sort: 'RatingDesc' }"
-        class="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--color-primary)]
+        class="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--color-primary-text)]
           hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ 'home.viewAll' | translate }}
@@ -214,13 +232,13 @@
     </div>
   </section>
 } @else if (newestResource.hasValue() && newestResource.value().results.items.length > 0) {
-  <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-12">
+  <section class="reveal mx-auto max-w-6xl px-4 py-12">
     <div class="mb-6 flex items-center justify-between gap-4">
       <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ 'home.newest.heading' | translate }}</h2>
       <a
         [routerLink]="['/courses']"
         [queryParams]="{ sort: 'Newest' }"
-        class="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--color-primary)]
+        class="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--color-primary-text)]
           hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
       >
         {{ 'home.viewAll' | translate }}

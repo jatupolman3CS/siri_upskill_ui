@@ -8,7 +8,7 @@
     </p>
   </header>
 
-  <article class="animate-fade-in-up stagger-1 prose prose-neutral dark:prose-invert max-w-none text-xs sm:text-sm text-[var(--color-text)] leading-relaxed space-y-6">
+  <article class="animate-fade-in-up stagger-1 glass-card rounded-3xl p-6 sm:p-8 prose dark:prose-invert max-w-none text-xs sm:text-sm text-[var(--color-text)] leading-relaxed space-y-6">
     <section class="space-y-2">
       <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.privacy.s1.heading' | translate }}</h2>
       <ul class="list-disc pl-5 space-y-1 text-[var(--color-text-muted)]">
@@ -32,12 +32,12 @@
         <li>
           <strong>{{ 'legal.privacy.s3.accessLabel' | translate }}</strong>
           {{ 'legal.privacy.s3.accessText' | translate }}
-          <a routerLink="/account/privacy" class="text-[var(--color-primary)] underline font-semibold">{{ 'legal.privacy.s3.accessLink' | translate }}</a>
+          <a routerLink="/account/privacy" class="text-[var(--color-primary-text)] underline font-semibold">{{ 'legal.privacy.s3.accessLink' | translate }}</a>
         </li>
         <li>
           <strong>{{ 'legal.privacy.s3.erasureLabel' | translate }}</strong>
           {{ 'legal.privacy.s3.erasureText' | translate }}
-          <a routerLink="/account/privacy" class="text-[var(--color-primary)] underline font-semibold">{{ 'legal.privacy.s3.erasureLink' | translate }}</a>
+          <a routerLink="/account/privacy" class="text-[var(--color-primary-text)] underline font-semibold">{{ 'legal.privacy.s3.erasureLink' | translate }}</a>
         </li>
         <li><strong>{{ 'legal.privacy.s3.objectLabel' | translate }}</strong> {{ 'legal.privacy.s3.objectText' | translate }}</li>
       </ul>
@@ -57,7 +57,7 @@
       <h2 class="text-base font-bold text-[var(--color-text)]">{{ 'legal.privacy.s6.heading' | translate }}</h2>
       <p>
         {{ 'legal.privacy.s6.p1' | translate }}
-        <a [href]="'mailto:' + emails.dpo" class="text-[var(--color-primary)] underline">{{ emails.dpo }}</a>
+        <a [href]="'mailto:' + emails.dpo" class="text-[var(--color-primary-text)] underline">{{ emails.dpo }}</a>
       </p>
     </section>
   </article>

@@ -13,7 +13,7 @@
       (focus)="onFocus()"
       (keydown)="onKeyDown($event)"
       [placeholder]="placeholder()"
-      class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 pl-10 pr-10 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 shadow-sm"
+      class="w-full rounded-2xl glass-card py-2.5 pl-10 pr-10 text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 shadow-sm"
       autocomplete="off"
     />
 
@@ -37,7 +37,7 @@
   <!-- Autocomplete Suggestions Dropdown -->
   @if (isOpen() && (suggestions().length > 0 || recentSearches().length > 0)) {
     <div
-      class="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl animate-in fade-in slide-in-from-top-1 duration-150"
+      class="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-2xl glass-panel shadow-xl animate-in fade-in slide-in-from-top-1 duration-150"
     >
       <!-- Suggestions when typing -->
       @if (query().length >= 2 && suggestions().length > 0) {
@@ -54,7 +54,7 @@
               [class.bg-[var(--color-surface-muted)]]="activeIndex() === idx"
             >
               <div class="flex items-center gap-3 min-w-0">
-                <div class="h-9 w-12 rounded-lg bg-zinc-900 overflow-hidden shrink-0">
+                <div class="h-9 w-12 rounded-lg bg-[var(--color-surface-muted)] overflow-hidden shrink-0">
                   @if (course.thumbnailUrl) {
                     <img [src]="course.thumbnailUrl" [alt]="course.title" class="h-full w-full object-cover" />
                   }
@@ -64,7 +64,7 @@
                   <p class="text-[10px] text-[var(--color-text-muted)]">{{ course.instructorDisplayName }}</p>
                 </div>
               </div>
-              <span class="text-xs font-black text-[var(--color-primary)] shrink-0">
+              <span class="text-xs font-black text-[var(--color-primary-text)] shrink-0">
                 {{ course.price | currencyThb }}
               </span>
             </button>
@@ -75,7 +75,7 @@
           <button
             type="button"
             (click)="onSubmit()"
-            class="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-surface-muted)] py-2 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition"
+            class="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-surface-muted)] py-2 text-xs font-bold text-[var(--color-primary-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition"
           >
             <span>ดูผลการค้นหาทั้งหมดสำหรับ "{{ query() }}"</span>
             <ng-icon name="phosphorArrowRight" />
@@ -93,7 +93,7 @@
             <button
               type="button"
               (click)="clearAllRecent($event)"
-              class="text-[10px] font-semibold text-rose-500 hover:underline"
+              class="text-[10px] font-semibold text-[var(--hue-red-fg)] hover:underline"
             >
               ล้างทั้งหมด
             </button>
@@ -116,7 +116,7 @@
               <button
                 type="button"
                 (click)="removeRecent(recent, $event)"
-                class="flex h-5 w-5 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-rose-600 transition"
+                class="flex h-5 w-5 items-center justify-center rounded-full text-[var(--color-text-muted)] hover:text-[var(--hue-red-fg)] transition"
                 title="ลบ"
               >
                 <ng-icon name="phosphorX" class="text-xs" />

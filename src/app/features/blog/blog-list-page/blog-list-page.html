@@ -1,7 +1,7 @@
 <div class="animate-fade-in mx-auto max-w-6xl px-4 py-12 pb-24">
   <!-- Page Header -->
   <div class="animate-fade-in-down mb-12 text-center max-w-2xl mx-auto">
-    <span class="rounded-full bg-[var(--color-primary)]/10 px-3 py-1 text-xs font-bold text-[var(--color-primary)]">
+    <span class="glass-pill rounded-full px-3 py-1 text-xs font-bold text-[var(--color-primary-text)]">
       SIRI UpSkill Knowledge Hub
     </span>
     <h1 class="mt-4 text-3xl font-extrabold text-[var(--color-text)] sm:text-4xl">
@@ -16,7 +16,7 @@
   @if (isLoadingPosts()) {
     <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" aria-busy="true" [attr.aria-label]="'blog.loadingLabel' | translate">
       @for (placeholder of skeletonCards; track placeholder) {
-        <div class="flex flex-col overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <div class="flex flex-col overflow-hidden rounded-3xl glass-card shadow-sm">
           <app-skeleton variant="block" height="12rem" [radius]="'sm'" />
           <div class="flex flex-col gap-3 p-6">
             <app-skeleton variant="text" width="40%" />
@@ -31,7 +31,7 @@
         emptyStateAction
         type="button"
         (click)="retry()"
-        class="btn-tactile inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-white shadow transition hover:bg-[var(--color-primary-hover)]"
+        class="btn-tactile inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
       >
         {{ 'blog.retryButton' | translate }}
       </button>
@@ -39,11 +39,11 @@
   } @else if (posts().length === 0) {
     <app-empty-state [heading]="'blog.emptyHeading' | translate" [description]="'blog.emptyDescription' | translate" />
   } @else {
-    <div class="animate-fade-in-up stagger-1 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div class="reveal grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       @for (post of posts(); track post.id) {
-        <article class="card-hover group flex flex-col overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <article class="card-hover glow-border group flex flex-col overflow-hidden rounded-3xl glass-card shadow-sm">
           <!-- Cover Image -->
-          <a [routerLink]="['/blog', post.slug]" class="relative aspect-[16/10] w-full overflow-hidden bg-zinc-900">
+          <a [routerLink]="['/blog', post.slug]" class="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-surface-muted)]">
             @if (post.coverImageUrl) {
               <img
                 [src]="post.coverImageUrl"
@@ -75,7 +75,7 @@
                 }
               </div>
 
-              <h2 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+              <h2 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary-text)] transition-colors line-clamp-2">
                 <a [routerLink]="['/blog', post.slug]">
                   {{ post.title }}
                 </a>
@@ -94,7 +94,7 @@
 
               <a
                 [routerLink]="['/blog', post.slug]"
-                class="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] group-hover:translate-x-1 transition-transform"
+                class="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] group-hover:translate-x-1 transition-transform"
               >
                 <span>อ่านต่อ</span>
                 <ng-icon name="phosphorArrowRight" />

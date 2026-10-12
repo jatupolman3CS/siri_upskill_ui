@@ -17,7 +17,7 @@
         routerLink="/courses"
         class="inline-flex h-12 select-none items-center justify-center gap-2 rounded-[var(--radius-md)] px-4
           text-base font-medium text-[var(--color-primary-foreground)] bg-[var(--color-primary)]
-          transition-colors duration-200 ease-out hover:bg-[var(--color-primary-hover)]
+          transition-colors duration-200 ease-out hover:bg-[var(--color-primary-pressed)]
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]
           focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >
@@ -81,7 +81,7 @@
             <a
               [routerLink]="['/learn', course.slug]"
               [attr.aria-label]="'catalog.detail.previewCardAriaLabel' | translate: { count: freePreviewCount() }"
-              class="group animate-fade-in-up relative block aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)]
+              class="group glow-border animate-fade-in-up relative block aspect-video w-full overflow-hidden rounded-[var(--radius-lg)] bg-[var(--color-surface-muted)]
                 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2"
             >
               <img [ngSrc]="course.thumbnailUrl" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -89,8 +89,8 @@
                 aria-hidden="true"
                 class="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors duration-200 group-hover:bg-black/25"
               >
-                <span class="flex h-14 w-14 items-center justify-center rounded-[var(--radius-full)] bg-white/90 shadow-[var(--shadow-md)] transition-transform group-hover:scale-105">
-                  <ng-icon name="phosphorPlayFill" class="ml-0.5 text-2xl text-[var(--color-primary)]" />
+                <span class="flex h-14 w-14 items-center justify-center rounded-[var(--radius-full)] glass-card shadow-[var(--shadow-md)] transition-transform group-hover:scale-105">
+                  <ng-icon name="phosphorPlayFill" class="ml-0.5 text-2xl text-[var(--color-primary-text)]" />
                 </span>
               </span>
               <span
@@ -178,13 +178,13 @@
 
           <div class="flex flex-col gap-2">
             @for (section of course.sections; track section.id; let sectionIndex = $index) {
-              <div class="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] transition-all">
+              <div class="glass-card overflow-hidden rounded-[var(--radius-lg)] transition-all">
                 <button
                   type="button"
                   (click)="toggleSection(section.id)"
                   [attr.aria-expanded]="isSectionExpanded(section, sectionIndex)"
                   [attr.aria-controls]="'syllabus-section-' + section.id"
-                  class="flex min-h-11 w-full items-center justify-between gap-2 bg-[var(--color-surface)] px-4 py-3 text-left
+                  class="flex min-h-11 w-full items-center justify-between gap-2 px-4 py-3 text-left
                     hover:bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
                 >
                   <span class="font-medium text-[var(--color-text)]">{{ section.title }}</span>
@@ -215,8 +215,8 @@
                       @if (episode.isFreePreview) {
                         <a
                           [routerLink]="['/learn', course.slug, episode.id]"
-                          class="inline-flex shrink-0 items-center gap-1 rounded-[var(--radius-full)] bg-emerald-500/10
-                            px-2.5 py-1 text-xs font-semibold text-[var(--hue-green-fg)] border border-emerald-500/20 hover:bg-emerald-500/20 transition cursor-pointer"
+                          class="tone-green inline-flex shrink-0 items-center gap-1 rounded-[var(--radius-full)] bg-[var(--tone-bg)]
+                            px-2.5 py-1 text-xs font-semibold text-[var(--tone-fg)] border border-[var(--tone-fg)]/30 hover:border-[var(--tone-fg)] transition cursor-pointer"
                         >
                           <ng-icon name="phosphorPlayCircle" aria-hidden="true" />
                           {{ 'catalog.detail.freePreviewBadge' | translate }}
@@ -234,9 +234,9 @@
         </section>
 
         <!-- Instructor -->
-        <section class="animate-fade-in-up stagger-5">
+        <section class="reveal">
           <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'catalog.detail.instructorHeading' | translate }}</h2>
-          <div class="card-hover flex items-center gap-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <div class="card-hover flex items-center gap-4 rounded-[var(--radius-lg)] glass-card p-5">
             @if (course.instructor.avatarUrl) {
               <img
                 [src]="course.instructor.avatarUrl"
@@ -262,21 +262,21 @@
         </section>
 
         <!-- Real Reviews & Rating Breakdown (P1-08 / P1-22 / P1-26) -->
-        <section class="animate-fade-in-up stagger-6">
+        <section class="reveal">
           <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">{{ 'catalog.detail.reviewsHeading' | translate }}</h2>
 
           <!-- Rating Overview Box -->
-          <div class="card-hover mb-6 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+          <div class="card-hover mb-6 rounded-[var(--radius-lg)] glass-card p-6 shadow-sm">
             <div class="grid grid-cols-1 md:grid-cols-[14rem_1fr] gap-6 items-center">
               <!-- Left Score Summary -->
               <div class="flex flex-col items-center justify-center text-center md:border-r border-[var(--color-border)] md:pr-6">
                 <span class="text-5xl font-black text-[var(--color-text)]">{{ course.ratingAverage }}</span>
                 <div class="flex items-center gap-1 my-2 text-[var(--color-accent)] text-lg">
-                  <ng-icon name="phosphorStar" class="text-amber-500" />
-                  <ng-icon name="phosphorStar" class="text-amber-500" />
-                  <ng-icon name="phosphorStar" class="text-amber-500" />
-                  <ng-icon name="phosphorStar" class="text-amber-500" />
-                  <ng-icon name="phosphorStar" class="text-amber-500" />
+                  <ng-icon name="phosphorStar" class="text-[var(--color-accent)]" />
+                  <ng-icon name="phosphorStar" class="text-[var(--color-accent)]" />
+                  <ng-icon name="phosphorStar" class="text-[var(--color-accent)]" />
+                  <ng-icon name="phosphorStar" class="text-[var(--color-accent)]" />
+                  <ng-icon name="phosphorStar" class="text-[var(--color-accent)]" />
                 </div>
                 <span class="text-xs text-[var(--color-text-muted)]">
                   จาก {{ course.ratingCount }} รีวิวของผู้เรียน
@@ -289,11 +289,11 @@
                   <div class="flex items-center gap-3 text-xs">
                     <span class="w-12 shrink-0 font-medium text-[var(--color-text-muted)] flex items-center gap-1">
                       <span>{{ dist.stars }}</span>
-                      <ng-icon name="phosphorStar" class="text-amber-500 text-[10px]" />
+                      <ng-icon name="phosphorStar" class="text-[var(--color-accent)] text-[10px]" />
                     </span>
                     <div class="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
                       <div
-                        class="h-full rounded-full bg-amber-500 transition-all duration-500 ease-out"
+                        class="h-full rounded-full bg-[var(--color-accent)] transition-all duration-500 ease-out"
                         [style.width.%]="dist.percent"
                       ></div>
                     </div>
@@ -310,10 +310,10 @@
           @if (reviews().length > 0) {
             <div class="space-y-4">
               @for (rev of reviews(); track rev.id) {
-                <div class="card-hover rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+                <div class="card-hover rounded-[var(--radius-lg)] glass-card p-5 shadow-sm">
                   <div class="flex items-start justify-between gap-3 mb-2">
                     <div class="flex items-center gap-3">
-                      <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-primary)]/10 font-bold text-[var(--color-primary)] text-sm">
+                      <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-primary)]/10 font-bold text-[var(--color-primary-text)] text-sm">
                         @if (rev.userName; as reviewerName) {
                           {{ instructorInitial(reviewerName) }}
                         } @else {
@@ -331,7 +331,7 @@
                     </div>
 
                     <!-- Stars for this review -->
-                    <div class="flex items-center gap-0.5 text-amber-500 text-xs">
+                    <div class="flex items-center gap-0.5 text-[var(--color-accent)] text-xs">
                       @for (s of [1, 2, 3, 4, 5]; track s) {
                         <ng-icon
                           name="phosphorStar"
@@ -350,7 +350,7 @@
               }
             </div>
           } @else {
-            <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-sm text-[var(--color-text-muted)]">
+            <div class="rounded-[var(--radius-lg)] glass-card p-8 text-center text-sm text-[var(--color-text-muted)]">
               {{ 'catalog.detail.noReviewsYet' | translate }}
             </div>
           }
@@ -359,16 +359,16 @@
 
       <!-- Buy card + requirements card (desktop sidebar) -->
       <aside class="hidden lg:flex lg:flex-col lg:gap-5">
-        <div class="animate-fade-in-up sticky top-24 flex flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-md)]">
+        <div class="animate-fade-in-up sticky top-24 flex flex-col gap-5 rounded-[var(--radius-lg)] glass-card p-5 shadow-[var(--shadow-md)]">
           <div class="flex items-baseline justify-between gap-2">
             <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-extrabold text-[var(--color-primary)]">{{ course.price | currencyThb }}</span>
+              <span class="text-3xl font-extrabold text-[var(--color-primary-text)]">{{ course.price | currencyThb }}</span>
               @if (course.comparePrice) {
                 <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course.comparePrice | currencyThb }}</span>
               }
             </div>
             @if (discountPercent() > 0) {
-              <span class="rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold text-rose-600 animate-pulse-subtle">
+              <span class="tone-red rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)] animate-pulse-subtle">
                 -{{ discountPercent() }}%
               </span>
             }
@@ -379,7 +379,7 @@
             @if (freePreviewCount() > 0) {
               <a
                 [routerLink]="['/learn', course.slug]"
-                class="btn-tactile inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-emerald-500/30 bg-emerald-500/10 py-2.5 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 transition cursor-pointer"
+                class="tone-green btn-tactile inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] py-2.5 text-xs font-bold text-[var(--tone-fg)] hover:border-[var(--tone-fg)] transition cursor-pointer"
               >
                 <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
                 <span>ทดลองเรียนฟรี ({{ freePreviewCount() }} บทเรียน)</span>
@@ -389,7 +389,7 @@
               <button
                 type="button"
                 (click)="addToCart()"
-                class="btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                class="btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] glass-card py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
               >
                 <ng-icon name="phosphorShoppingCart" class="text-base" />
                 <span>{{ isAddedToCart() ? 'อยู่ในตะกร้าแล้ว (เพิ่มอีก)' : 'เพิ่มลงตะกร้า' }}</span>
@@ -398,14 +398,12 @@
                 type="button"
                 (click)="toggleWishlist()"
                 [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'บันทึกในสิ่งที่อยากได้'"
-                class="btn-tactile flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] transition hover:bg-rose-50"
-                [class.text-rose-500]="isWishlisted()"
-                [class.border-rose-200]="isWishlisted()"
+                class="btn-tactile flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] glass-card transition hover:bg-[var(--color-surface-muted)]"
               >
                 @if (isWishlisted()) {
-                  <ng-icon name="phosphorHeartFill" class="text-lg text-rose-500 animate-pop-in" />
+                  <ng-icon name="phosphorHeartFill" class="text-lg text-[var(--color-primary-text)] animate-pop-in" />
                 } @else {
-                  <ng-icon name="phosphorHeart" class="text-lg" />
+                  <ng-icon name="phosphorHeart" class="text-lg text-[var(--color-text)]" />
                 }
               </button>
             </div>
@@ -446,12 +444,12 @@
         <!-- Requirements card (task P1-26 item 7 — moved out of the main column into the sidebar,
              matching the mockup; the main-column copy above stays for mobile, see its own comment). -->
         @if (course.requirements.length > 0) {
-          <div class="animate-fade-in-up rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+          <div class="animate-fade-in-up rounded-[var(--radius-lg)] glass-card p-5 shadow-sm">
             <h3 class="mb-3 text-base font-semibold text-[var(--color-text)]">{{ 'catalog.detail.requirementsSidebarHeading' | translate }}</h3>
             <ul class="flex flex-col gap-2">
               @for (requirement of course.requirements; track requirement) {
                 <li class="flex items-start gap-2 text-sm text-[var(--color-text-muted)]">
-                  <ng-icon name="phosphorCheck" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-primary)]" />
+                  <ng-icon name="phosphorCheck" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--color-primary-text)]" />
                   <span>{{ requirement }}</span>
                 </li>
               }
@@ -463,18 +461,18 @@
 
     <!-- Sticky buy bar (mobile) -->
     <div
-      class="animate-slide-in-up fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-4 border-t border-[var(--color-border)]
-        bg-[var(--color-surface)] px-4 py-3 shadow-[var(--shadow-lg)] lg:hidden"
+      class="animate-slide-in-up glass-card fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-4 border-x-0 border-b-0
+        px-4 py-3 shadow-[var(--shadow-lg)] lg:hidden"
       style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))"
     >
       <div class="min-w-0">
-        <span class="block text-lg font-bold text-[var(--color-primary)]">{{ course.price | currencyThb }}</span>
+        <span class="block text-lg font-bold text-[var(--color-primary-text)]">{{ course.price | currencyThb }}</span>
       </div>
       <div class="flex items-center gap-2">
         @if (freePreviewCount() > 0) {
           <a
             [routerLink]="['/learn', course.slug]"
-            class="inline-flex items-center justify-center gap-1 rounded-[var(--radius-md)] border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-700"
+            class="tone-green inline-flex items-center justify-center gap-1 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-2 text-xs font-bold text-[var(--tone-fg)]"
           >
             <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
             <span>ทดลองเรียนฟรี</span>
@@ -484,19 +482,18 @@
           type="button"
           (click)="toggleWishlist()"
           [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'บันทึกในสิ่งที่อยากได้'"
-          class="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)]"
-          [class.text-rose-500]="isWishlisted()"
+          class="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card"
         >
           @if (isWishlisted()) {
-            <ng-icon name="phosphorHeartFill" class="text-lg text-rose-500" />
+            <ng-icon name="phosphorHeartFill" class="text-lg text-[var(--color-primary-text)]" />
           } @else {
-            <ng-icon name="phosphorHeart" class="text-lg" />
+            <ng-icon name="phosphorHeart" class="text-lg text-[var(--color-text)]" />
           }
         </button>
         <button
           type="button"
           (click)="addToCart()"
-          class="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]"
+          class="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card text-[var(--color-text)]"
         >
           <ng-icon name="phosphorShoppingCart" class="text-lg" />
         </button>

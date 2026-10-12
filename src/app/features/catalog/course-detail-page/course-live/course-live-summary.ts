@@ -20,7 +20,7 @@ import type { CourseDetailLiveSchedule } from '../../data/course-api.models';
   template: `
     <div class="flex flex-col gap-2.5 text-xs text-[var(--color-text)]">
       <div class="flex items-center gap-2 font-semibold">
-        <ng-icon name="phosphorBroadcast" aria-hidden="true" class="shrink-0 text-sm text-[var(--color-primary)]" />
+        <ng-icon name="phosphorBroadcast" aria-hidden="true" class="shrink-0 text-sm text-[var(--color-primary-text)]" />
         <span>{{ 'live.catalog.format.' + format() | translate }}</span>
       </div>
       @if (schedule().nextStartsAtUtc; as nextStart) {
@@ -33,7 +33,7 @@ import type { CourseDetailLiveSchedule } from '../../data/course-api.models';
       }
       @if (replayCount() > 0) {
         <p class="flex items-center gap-2 text-[var(--color-text-muted)]">
-          <ng-icon name="phosphorFilmStrip" aria-hidden="true" class="shrink-0 text-sm text-[var(--color-primary)]" />
+          <ng-icon name="phosphorFilmStrip" aria-hidden="true" class="shrink-0 text-sm text-[var(--color-primary-text)]" />
           {{ 'live.catalog.replayCount' | translate: { count: replayCount() } }}
         </p>
       }

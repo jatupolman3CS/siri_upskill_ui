@@ -12,7 +12,7 @@
 
   <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
     <!-- Filters sidebar -->
-    <aside class="animate-fade-in-up stagger-2 flex flex-col gap-6">
+    <aside class="animate-fade-in-up stagger-2 glass-card flex flex-col gap-6 self-start rounded-3xl p-5">
       <app-course-format-filter [selected]="format()" [facets]="formatFacets()" (selectedChange)="setFormat($event)" />
 
       <section>
@@ -26,7 +26,7 @@
                 [attr.aria-pressed]="categorySlug() === category.slug"
                 [class]="
                   categorySlug() === category.slug
-                    ? 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary)] bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                    ? 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary-text)] bg-[var(--color-primary)]/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
                     : 'flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
                 "
               >
@@ -58,7 +58,7 @@
                   [attr.aria-pressed]="instructorId() === inst.instructorId"
                   [class]="
                     instructorId() === inst.instructorId
-                      ? 'flex min-h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary)] bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
+                      ? 'flex min-h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold text-[var(--color-primary-text)] bg-[var(--color-primary)]/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
                       : 'flex min-h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
                   "
                 >
@@ -131,11 +131,11 @@
           }
         </app-empty-state>
       } @else {
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="reveal grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
           @for (course of searchResult().results.items; track course.id) {
             <a
               [routerLink]="['/courses', course.slug]"
-              class="card-hover group flex flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
+              class="card-hover glow-border group flex flex-col gap-2 rounded-2xl glass-card p-4
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
@@ -146,7 +146,7 @@
                 }
                 <app-course-format-badge class="absolute left-2 top-2" [format]="course.deliveryFormat" />
               </div>
-              <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">{{ course.title }}</h3>
+              <h3 class="line-clamp-2 text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary-text)] transition-colors">{{ course.title }}</h3>
               <p class="text-sm text-[var(--color-text-muted)]">{{ course.instructorDisplayName }}</p>
               <app-course-next-session [startsAtUtc]="course.nextStartsAtUtc" />
               @if (course.ratingCount > 0) {
@@ -155,7 +155,7 @@
                 </p>
               }
               <div class="mt-auto flex items-baseline gap-2">
-                <span class="text-lg font-bold text-[var(--color-primary)]">{{ course.price | currencyThb }}</span>
+                <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ course.price | currencyThb }}</span>
                 @if (course.comparePrice) {
                   <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course.comparePrice | currencyThb }}</span>
                 }

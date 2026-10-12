@@ -1,6 +1,6 @@
 <a
   [routerLink]="['/courses', course().slug]"
-  class="card-hover group flex h-full flex-col gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4
+  class="card-hover glow-border group flex h-full flex-col gap-2 rounded-2xl glass-card p-4
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
 >
   <div class="relative aspect-video w-full overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
@@ -16,14 +16,12 @@
       type="button"
       (click)="toggleWishlist($event)"
       [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'เพิ่มในสิ่งที่อยากได้'"
-      class="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:scale-110"
-      [class.text-rose-500]="isWishlisted()"
-      [class.text-zinc-500]="!isWishlisted()"
+      class="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full glass-card shadow-sm transition hover:scale-110"
     >
       @if (isWishlisted()) {
-        <ng-icon name="phosphorHeartFill" class="text-base text-rose-500" />
+        <ng-icon name="phosphorHeartFill" class="text-base text-[var(--color-primary-text)]" />
       } @else {
-        <ng-icon name="phosphorHeart" class="text-base" />
+        <ng-icon name="phosphorHeart" class="text-base text-[var(--color-text-muted)]" />
       }
     </button>
   </div>
@@ -38,11 +36,11 @@
   }
   <div class="mt-auto flex items-baseline gap-2">
     @if (salePrice() !== undefined && salePrice()! < course().price) {
-      <span class="text-lg font-bold text-rose-600">{{ salePrice()! | currencyThb }}</span>
+      <span class="text-lg font-bold text-[var(--hue-red-fg)]">{{ salePrice()! | currencyThb }}</span>
       <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().price | currencyThb }}</span>
-      <span class="rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold text-rose-600">ลดพิเศษ</span>
+      <span class="tone-red rounded bg-[var(--tone-bg)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">ลดพิเศษ</span>
     } @else {
-      <span class="text-lg font-bold text-[var(--color-primary)]">{{ course().price | currencyThb }}</span>
+      <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ course().price | currencyThb }}</span>
       @if (course().comparePrice) {
         <span class="text-sm text-[var(--color-text-muted)] line-through">{{ course().comparePrice | currencyThb }}</span>
       }
