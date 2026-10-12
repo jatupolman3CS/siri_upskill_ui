@@ -88,6 +88,7 @@ npm run e2e
 > ฝั่ง UI ทำถึง P1 แล้ว (`P0-31`…`P0-35`, `P1-20`…`P1-24`): design system + UI kit 10 ตัว + หน้า auth 6 หน้า + public layout + mega menu + catalog/filter + course detail + home + SEO service ทั้งหมดต่อ API จริง — build/lint สะอาด, unit test 168/168 ผ่าน
 > - **หน้า FE 6 หน้าที่ Antigravity ทำใน P2–P6 ยังเป็น mock ไม่ต่อ API จริง** — ดู `docs/TASKS.md` § "สถานะจริงของงานที่ยังไม่ปิด"
 > - `P2-20` ยังไม่มี Shaka Player จริง (ใช้ `<video>` ธรรมดาอยู่)
+> - **ธีม D-24 "Cyber-Pink Glassmorphism" ย้ายครบทั้งแอปแล้ว (2026-10-12, ยังไม่ commit)** — tokens + `data-theme` 3 โหมด (cookie `siri_theme`) + `.glass-*` utilities + `ThemeService`/`app-theme-toggle`/`app-ambient-background` + shared kit + layouts + ทุก feature folder · `src/app/theme-guard.spec.ts` บังคับว่าไม่มี raw Tailwind palette/hex/`rgba()` นอก allowlist (`video-player`, ปุ่ม LinkedIn) · กฎอยู่ที่ `docs/DECISIONS.md` D-24 + `.claude/rules/ui-design.md` · template ใหม่ใช้ `tone-*`/token/`.glass-*` เสมอ · ยังไม่ได้ดูด้วยตาในเบราว์เซอร์: หน้า admin/instructor/learn/checkout (ต้อง login + backend)
 > - **สีหลักรีแบรนด์เป็นชมพู `#DB2777` แล้ว** (D-17 ทับมติเดิมของ P0-31 ที่เป็นน้ำเงิน) — `src/app/styles/tokens.css` เป็นแหล่งความจริง ห้ามเขียน hex ดิบใน component
 
 **หนี้ที่รู้แล้ว ยังไม่แก้**

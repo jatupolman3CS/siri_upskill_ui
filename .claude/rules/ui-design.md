@@ -10,11 +10,12 @@
 ## Design system (ตัดสินใจครั้งเดียว ใช้ทั้งระบบ)
 
 - Token อยู่ที่ `src/app/styles/tokens.css` — **ห้ามเขียน hex ดิบใน component** ใช้ CSS variable/Tailwind token เท่านั้น
-- รองรับ light + dark ตั้งแต่ต้น: นิยาม palette เต็มที่ `:root`, override เฉพาะ token ที่ต่างใน dark
-- ธีมหลัก/CTA/active/focus = ชมพู (`--color-primary`) แต่ **icon และส่วนตกแต่งที่ไม่ใช่แบรนด์ใช้สีอื่นได้** (เจ้าของโปรเจ็คอนุมัติ 2026-10-10) — ใช้ชุด `--hue-*` ผ่านคลาส `tone-blue|teal|violet|orange|green|gold` ใน `tokens.css` (`class="tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]"`) ห้ามใช้ Tailwind palette ดิบ (`text-emerald-600`) เพราะไม่ปรับตาม dark mode · ปุ่ม/ลิงก์/สถานะ active ยังเป็นชมพูเสมอ
+- รองรับ light + dark + ตามระบบ (D-24): นิยาม palette เต็มที่ `:root`, override เฉพาะ token ที่ต่างใน `:root[data-theme='dark']` — `ThemeService` + inline script ใน `index.html` เป็นคนตั้ง attribute นี้ ห้ามเขียน `@media (prefers-color-scheme)` ในโค้ด component (ใช้ token หรือ `dark:` ที่ผูกกับ attribute แล้ว)
+- **Glass (D-24)**: `.glass-panel` (blur) เฉพาะ header/sidebar/modal/hero · `.glass-card` (ไม่ blur) ใช้กับการ์ดทั่วไปได้ทุกใบ · `.glass-pill` สำหรับ nav/chip — ทั้งหมดอยู่ใน `styles.css` ห้ามเขียน `rgba()`/`backdrop-filter` ซ้ำในหน้า · ข้อความสีชมพูใช้ `--color-primary-text` ไม่ใช่ `--color-primary` · สีสถานะใช้ `tone-*` ห้าม Tailwind palette ดิบ (`text-emerald-600`) · พื้นหลัง blob มีชิ้นเดียวใน `app.html` ห้ามเพิ่มรายหน้า
+- ธีมหลัก/CTA/active/focus = ชมพู (`--color-primary`) แต่ **icon และส่วนตกแต่งที่ไม่ใช่แบรนด์ใช้สีอื่นได้** (เจ้าของโปรเจ็คอนุมัติ 2026-10-10) — ใช้ชุด `--hue-*` ผ่านคลาส `tone-blue|teal|violet|orange|green|gold|red` ใน `tokens.css` (`class="tone-blue bg-[var(--tone-bg)] text-[var(--tone-fg)]"`) ห้ามใช้ Tailwind palette ดิบ (`text-emerald-600`) เพราะไม่ปรับตาม dark mode · ปุ่ม/ลิงก์/สถานะ active ยังเป็นชมพูเสมอ
 - Spacing scale 4px, radius และ shadow มีแค่ชุดที่กำหนดไว้ ห้ามคิดค่าใหม่รายหน้า
 - Icon ใช้ SVG ชุดเดียวทั้งระบบ (Phosphor/Lucide) — **ห้ามใช้ emoji แทน icon**
-- ฟอนต์ต้องรองรับภาษาไทยครบน้ำหนัก (แนะนำ IBM Plex Sans Thai / Noto Sans Thai / LINE Seed Sans TH) — เช็ครูปสระบน-ล่างไม่ชนกันที่ line-height ที่ใช้จริง
+- ฟอนต์ต้องรองรับภาษาไทยครบน้ำหนัก — ใช้ **Prompt** (D-24, แทน IBM Plex Sans Thai) โหลดผ่าน `<link>` ใน `index.html` — เช็ครูปสระบน-ล่างไม่ชนกันที่ line-height ที่ใช้จริง
 
 ## Accessibility (ไม่ใช่ option)
 
@@ -46,8 +47,8 @@
 
 ## Anti-patterns ที่ห้ามทำ
 
-- ใส่ animation ความยาวเดียวกันทุกอย่าง / animate `width`,`height`,`top`,`left` (ใช้ `transform`,`opacity`)
-- ผสม style หลายภาษาในหน้าเดียว (flat + skeuomorphic + glassmorphism ปนกัน)
+- ใส่ animation ความยาวเดียวกันทุกอย่าง / animate `width`,`height`,`top`,`left` (ใช้ `transform`,`opacity`) — ข้อยกเว้นเดียว: shimmer ของ headline หน้าแรก (`.text-shimmer`, 3 รอบ) ตาม D-24
+- ผสม style หลายภาษาในหน้าเดียว (skeuomorphic/neumorphic/claymorphic ปนกับธีม glass) — glass + gradient ชมพู→ม่วง ตามกฎ D-24 ใช้ได้ ส่วน blur ทุกการ์ด / gradient บนข้อความ body / glow บนตารางข้อมูล ยังห้าม
 - ตัวหนังสือ body เล็กกว่า 14px (ภาษาไทยควร ≥ 16px เพราะมีสระบน-ล่าง)
 - เทาบนเทาแบบ contrast ต่ำ, ใช้สีอย่างเดียวสื่อความหมาย (ต้องมี icon/ข้อความกำกับ)
 - state ที่ไม่มี feedback: กดแล้วเงียบ, โหลดแล้วไม่มี skeleton, error แล้วไม่บอกว่าต้องทำอะไรต่อ

@@ -31,6 +31,13 @@
 
 ### Color Palette
 
+> **Superseded 2026-10-12 (D-24, `docs/DECISIONS.md`):** the whole UI moved to a "Cyber-Pink
+> Glassmorphism" theme — slate surfaces + translucent glass layers, light/dark/system switch
+> (`data-theme` on `<html>`, cookie `siri_theme`), Prompt font. Where this file below says
+> *Flat Design / no glassmorphism / no gradients / IBM Plex Sans Thai*, D-24 wins. Rationale and
+> rules for the glass layers: see "Glass theme (D-24)" under Style Guidelines. `tokens.css` is
+> still the single source of truth for values.
+
 > **Superseded 2026-08-20:** primary hue changed from trust-blue to magenta/pink
 > per a project-owner rebrand directive delivered with the mockup handoff.
 > Table below reflects the *current* palette; the reasoning paragraph after it
@@ -62,10 +69,10 @@
 
 ### Typography
 
-- **Family:** IBM Plex Sans Thai (single family for both heading and body — vary weight, not typeface)
-- **Weights loaded:** 400, 500, 600, 700
+- **Family:** Prompt (single family for both heading and body — vary weight, not typeface). *Replaced IBM Plex Sans Thai on 2026-10-12 (D-24); the "why one family" reasoning below still applies unchanged.*
+- **Weights loaded:** 300, 400, 500, 600, 700
 - **Mood:** clean, modern, professional, readable, full Thai + Latin coverage
-- **Google Fonts:** [IBM Plex Sans Thai](https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap) — loaded via `<link>` in `src/index.html`, not `@import`, for earlier discovery/preconnect
+- **Google Fonts:** [Prompt](https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap) — loaded via `<link>` in `src/index.html`, not `@import`, for earlier discovery/preconnect
 - **Why one family, not a heading/body pair:** this app ships a bilingual TH/EN interface (`core/i18n/`). Pairing a Latin-only display font (Poppins, DM Sans, etc.) with a separate Thai body font means every heading silently reverts to a different, unpaired fallback the moment it renders Thai text — the two scripts would visibly not belong to the same design. IBM Plex Sans Thai avoids that failure mode entirely and is this codebase's own pre-existing top recommendation (`.claude/rules/ui-design.md`).
 - **Verify before shipping any real Thai copy:** line-height at body size (16px) with real Thai text containing tone marks/vowels above and below the baseline — the placeholder token comment this file replaces flagged this as unverified; still true, do it once real Thai content exists.
 
@@ -91,19 +98,29 @@
 | Cards, buttons | `--shadow-md` | Default card elevation |
 | Modals, dropdowns | `--shadow-lg` | Overlays |
 
-Restrained on purpose — see Style Guidelines below. No neumorphic double-shadows, no glassmorphic blur-behind-content; shadows communicate elevation, not decoration.
+Restrained on purpose — see Style Guidelines below. No neumorphic double-shadows; shadows communicate elevation, not decoration. *(D-24 adds the `--glass-shadow` and `--shadow-glow` tokens for glass layers and the primary CTA glow — the only decorative shadows allowed.)*
 
 ---
 
 ## Style Guidelines
 
-**Style:** Flat Design, with Minimalism & Swiss Style-influenced spacing/grid discipline
+**Style (current, D-24):** Cyber-Pink Glassmorphism — translucent glass surfaces over a soft ambient pink/violet background, with the Flat/Minimalism spacing and grid discipline below kept for layout.
 
-**Keywords:** Clean, functional, generous white space, high contrast, limited palette, grid-based, no gradients/glassmorphism/claymorphism/neumorphism
+**Style (original, P0-31 — superseded):** Flat Design, with Minimalism & Swiss Style-influenced spacing/grid discipline. Keywords: Clean, functional, generous white space, high contrast, limited palette, grid-based, no gradients/glassmorphism/claymorphism/neumorphism
 
 **Why this over the alternatives the dataset offered:** the product has two very different surfaces that both need the *same* style to hold up — a consumer storefront + checkout (needs to read as trustworthy and calm, not playful) and instructor/admin dashboards (needs to be data-dense and legible). Flat Design is explicitly tagged "Best For: SaaS, dashboards, corporate" and Minimalism is explicitly tagged "Best For: Enterprise apps, dashboards, SaaS platforms, professional tools" — both fit both surfaces. Claymorphism (chunky/toy-like), Glassmorphism (blur, harder to keep accessible), Vibrant & Block-based (youth/gaming-coded), and Aurora UI (decorative gradients) were all considered and rejected — none fit a payment-and-credential product for working adults.
 
 **Icons:** SVG only (Phosphor or Lucide, per `.claude/rules/ui-design.md`) — never emoji.
+
+### Glass theme (D-24)
+
+- **Layers** (`styles.css`, values from `tokens.css`): `.glass-panel` = translucent + `backdrop-filter` blur — header, sidebar, modal, hero panel only (a handful per screen, it is the expensive one). `.glass-card` = translucent, **no blur** — safe on every card and table row group. `.glass-pill` = nav/chip container. They sit in `@layer components`, so a Tailwind utility on the same element still overrides them.
+- **Fallbacks are mandatory and built in:** no `backdrop-filter` support, or `prefers-reduced-transparency: reduce` → solid `--color-surface`. Never put text on a glass layer whose contrast was not computed in both themes (text on glass-card: 13.3:1 dark, 14:1 light).
+- **Pink text** uses `--color-primary-text`, not `--color-primary` (4.4:1 on the light page background). `--color-primary` is for fills, focus rings and the CTA; `--color-brand-500` (`#ec4899`) is decoration only (white on it is ~3.5:1).
+- **Violet** (`--color-secondary`) is the gradient partner only — never a CTA or a status colour. Status colours are `tone-*` pairs, not raw Tailwind palette classes.
+- **Ambient background:** one `<app-ambient-background>` in `app.html`. Do not add per-page blobs. Motion is transform-only, slow, off under `prefers-reduced-motion`, and static + lighter blur on mobile.
+- **Reveal / glow / shimmer:** `.reveal` is CSS-only (scroll-driven animation, content visible without it), `.glow-border` is a hover/focus ring drawn inside the element, `.text-shimmer` runs 3 passes then stops — the single sanctioned non-transform/opacity animation, on the home hero headline only.
+- **Colour mode:** light / dark / system via `data-theme`; never branch on `prefers-color-scheme` in component CSS — use the tokens or `dark:` (wired to the attribute).
 
 ### Page Pattern (marketing/landing pages)
 
@@ -143,7 +160,7 @@ gsap.from(el, { opacity: 0, y: 12, duration: 0.35, ease: 'power1.out', scrollTri
 - ❌ Instant state changes — always transition (150–300ms)
 - ❌ Invisible focus states
 - ❌ Playful/bouncy easing (`back.out`, elastic) on informational or transactional UI — reserve for nothing in this product; it reads as sloppy on payment/credential flows
-- ❌ Glassmorphism, claymorphism, neumorphism, decorative gradients — inconsistent with the chosen style and harder to keep accessible
+- ❌ Claymorphism, neumorphism — still out. (Glassmorphism and the pink→violet brand gradient are now allowed *within the D-24 rules above*; anything outside them — blur on every card, gradients on body text, glow on data tables — is still out.)
 
 ---
 
