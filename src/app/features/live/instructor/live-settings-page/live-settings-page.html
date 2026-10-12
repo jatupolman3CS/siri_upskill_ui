@@ -1,4 +1,4 @@
-<div class="animate-fade-in mx-auto flex max-w-3xl flex-col gap-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <header>
     <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'live.google.heading' | translate }}</h1>
     @if (viewState() !== 'notConfigured') {
@@ -7,7 +7,7 @@
   </header>
 
   @if (isLoading()) {
-    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'live.google.loading' | translate">
+    <div class="grid gap-8 xl:grid-cols-2" role="status" [attr.aria-label]="'live.google.loading' | translate">
       <app-skeleton variant="block" height="10rem" radius="lg" />
       <app-skeleton variant="block" height="7rem" radius="lg" />
     </div>
@@ -58,6 +58,7 @@
         </section>
       }
 
+      <div class="grid gap-8 xl:grid-cols-2 xl:items-start">
       <section class="rounded-[var(--radius-lg)] glass-card p-5 sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <h2 class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
@@ -133,6 +134,7 @@
         </div>
       </section>
 
+      <div class="flex flex-col gap-8">
       @if (recordingCard(); as card) {
         <section
           class="rounded-[var(--radius-lg)] glass-card p-5 sm:p-6"
@@ -180,6 +182,8 @@
         <p class="mt-2 text-sm text-[var(--color-text)]">{{ 'live.google.permissions.body' | translate }}</p>
         <p class="mt-2 text-sm text-[var(--color-text-muted)]">{{ 'live.google.permissions.revoke' | translate }}</p>
       </section>
+      </div>
+      </div>
     }
   }
 </div>

@@ -1,29 +1,30 @@
-<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
-  <header>
-    <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'live.instructor.sessions.heading' | translate }}</h1>
-    <p class="mt-1 text-[var(--color-text-muted)]">{{ 'live.instructor.sessions.subheading' | translate }}</p>
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'live.instructor.sessions.heading' | translate }}</h1>
+      <p class="mt-1 text-[var(--color-text-muted)]">{{ 'live.instructor.sessions.subheading' | translate }}</p>
+    </div>
+    <div role="group" [attr.aria-label]="'live.instructor.sessions.scopeLabel' | translate" class="flex flex-wrap gap-2">
+      @for (option of scopes; track option) {
+        <button
+          type="button"
+          (click)="setScope(option)"
+          [attr.aria-pressed]="scope() === option"
+          class="min-h-11 cursor-pointer rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          [class]="
+            scope() === option
+              ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+              : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'
+          "
+        >
+          {{ 'live.instructor.sessions.scope.' + option | translate }}
+        </button>
+      }
+    </div>
   </header>
 
-  <div role="group" [attr.aria-label]="'live.instructor.sessions.scopeLabel' | translate" class="flex flex-wrap gap-2">
-    @for (option of scopes; track option) {
-      <button
-        type="button"
-        (click)="setScope(option)"
-        [attr.aria-pressed]="scope() === option"
-        class="min-h-11 cursor-pointer rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
-        [class]="
-          scope() === option
-            ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
-            : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'
-        "
-      >
-        {{ 'live.instructor.sessions.scope.' + option | translate }}
-      </button>
-    }
-  </div>
-
   @if (isLoading()) {
-    <div class="flex flex-col gap-3" role="status" [attr.aria-label]="'common.loading' | translate">
+    <div class="grid gap-6 xl:grid-cols-2" role="status" [attr.aria-label]="'common.loading' | translate">
       @for (row of skeletonRows; track row) {
         <app-skeleton variant="block" height="7rem" radius="lg" />
       }
@@ -54,12 +55,12 @@
       <p class="text-sm text-[var(--color-text-muted)]" aria-live="polite">
         {{ 'live.instructor.sessions.count' | translate: { count: list.totalCount } }}
       </p>
-      <ul class="flex flex-col gap-3">
+      <ul class="grid gap-6 xl:grid-cols-2">
         @for (row of rows(); track row.item.sessionId) {
           <li>
             <a
               [routerLink]="['/instructor/sessions', row.item.sessionId]"
-              class="block rounded-[var(--radius-lg)] glass-card p-4 shadow-[var(--shadow-sm)] transition-colors
+              class="block h-full rounded-[var(--radius-lg)] glass-card p-4 shadow-[var(--shadow-sm)] transition-colors
                 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] sm:p-5"
             >
               <div class="flex flex-wrap items-start justify-between gap-3">

@@ -1,4 +1,4 @@
-<div class="animate-fade-in mx-auto flex max-w-4xl flex-col gap-6">
+<div class="animate-fade-in flex flex-col gap-8">
   <a
     routerLink="/instructor/sessions"
     class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-primary-text)]
@@ -9,7 +9,7 @@
   </a>
 
   @if (isLoading()) {
-    <div class="flex flex-col gap-4" role="status" [attr.aria-label]="'common.loading' | translate">
+    <div class="flex flex-col gap-6" role="status" [attr.aria-label]="'common.loading' | translate">
       <app-skeleton variant="text" width="40%" />
       <app-skeleton variant="block" height="2.5rem" radius="md" />
       <app-skeleton variant="block" height="6rem" radius="lg" />
@@ -71,7 +71,7 @@
       </section>
     }
 
-    <dl class="grid grid-cols-3 gap-3">
+    <dl class="grid grid-cols-1 gap-6 sm:grid-cols-3">
       <div class="rounded-[var(--radius-lg)] glass-card p-4">
         <dt class="text-xs text-[var(--color-text-muted)] sm:text-sm">{{ 'live.instructor.detail.enrolled' | translate }}</dt>
         <dd class="mt-1 text-2xl font-bold text-[var(--color-text)]">{{ d.enrolledCount }}</dd>
@@ -86,6 +86,8 @@
       </div>
     </dl>
 
+    <div class="grid gap-8 xl:grid-cols-2 xl:items-start">
+    <div class="flex flex-col gap-8">
     @if (!isCancelled()) {
       <app-live-session-room-card [detail]="d" [googleConfigured]="googleConfigured()" (meetingChange)="reload()" />
     }
@@ -123,7 +125,9 @@
       </section>
     }
 
+    </div>
     <app-live-session-roster [sessionId]="d.sessionId" />
+    </div>
 
     <app-live-cancel-session-dialog
       [(open)]="cancelOpen"
