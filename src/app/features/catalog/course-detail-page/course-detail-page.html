@@ -215,7 +215,7 @@
                       @if (episode.isFreePreview) {
                         <a
                           [routerLink]="['/learn', course.slug, episode.id]"
-                          class="tone-green inline-flex shrink-0 items-center gap-1 rounded-[var(--radius-full)] bg-[var(--tone-bg)]
+                          class="hit-44 tone-green inline-flex shrink-0 items-center gap-1 rounded-[var(--radius-full)] bg-[var(--tone-bg)]
                             px-2.5 py-1 text-xs font-semibold text-[var(--tone-fg)] border border-[var(--tone-fg)]/30 hover:border-[var(--tone-fg)] transition cursor-pointer"
                         >
                           <ng-icon name="phosphorPlayCircle" aria-hidden="true" />
@@ -239,8 +239,10 @@
           <div class="card-hover flex items-center gap-4 rounded-[var(--radius-lg)] glass-card p-5">
             @if (course.instructor.avatarUrl) {
               <img
-                [src]="course.instructor.avatarUrl"
+                [ngSrc]="course.instructor.avatarUrl"
                 [alt]="course.instructor.displayName"
+                width="56"
+                height="56"
                 class="h-14 w-14 shrink-0 rounded-[var(--radius-full)] object-cover"
               />
             } @else {
@@ -379,7 +381,7 @@
             @if (freePreviewCount() > 0) {
               <a
                 [routerLink]="['/learn', course.slug]"
-                class="tone-green btn-tactile inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] py-2.5 text-xs font-bold text-[var(--tone-fg)] hover:border-[var(--tone-fg)] transition cursor-pointer"
+                class="hit-44 tone-green btn-tactile inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] py-2.5 text-xs font-bold text-[var(--tone-fg)] hover:border-[var(--tone-fg)] transition cursor-pointer"
               >
                 <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
                 <span>ทดลองเรียนฟรี ({{ freePreviewCount() }} บทเรียน)</span>
@@ -389,7 +391,7 @@
               <button
                 type="button"
                 (click)="addToCart()"
-                class="btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] glass-card py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
+                class="hit-44 btn-tactile flex-1 inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] glass-card py-2.5 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] transition"
               >
                 <ng-icon name="phosphorShoppingCart" class="text-base" />
                 <span>{{ isAddedToCart() ? 'อยู่ในตะกร้าแล้ว (เพิ่มอีก)' : 'เพิ่มลงตะกร้า' }}</span>
@@ -398,7 +400,7 @@
                 type="button"
                 (click)="toggleWishlist()"
                 [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'บันทึกในสิ่งที่อยากได้'"
-                class="btn-tactile flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] glass-card transition hover:bg-[var(--color-surface-muted)]"
+                class="hit-44 btn-tactile flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] glass-card transition hover:bg-[var(--color-surface-muted)]"
               >
                 @if (isWishlisted()) {
                   <ng-icon name="phosphorHeartFill" class="text-lg text-[var(--color-primary-text)] animate-pop-in" />
@@ -472,7 +474,7 @@
         @if (freePreviewCount() > 0) {
           <a
             [routerLink]="['/learn', course.slug]"
-            class="tone-green inline-flex items-center justify-center gap-1 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-2 text-xs font-bold text-[var(--tone-fg)]"
+            class="hit-44 tone-green inline-flex items-center justify-center gap-1 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] px-3 py-2 text-xs font-bold text-[var(--tone-fg)]"
           >
             <ng-icon name="phosphorPlayCircle" class="text-base text-[var(--hue-green-fg)]" />
             <span>ทดลองเรียนฟรี</span>
@@ -482,7 +484,7 @@
           type="button"
           (click)="toggleWishlist()"
           [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'บันทึกในสิ่งที่อยากได้'"
-          class="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card"
+          class="hit-44 flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card"
         >
           @if (isWishlisted()) {
             <ng-icon name="phosphorHeartFill" class="text-lg text-[var(--color-primary-text)]" />
@@ -493,7 +495,8 @@
         <button
           type="button"
           (click)="addToCart()"
-          class="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card text-[var(--color-text)]"
+          [attr.aria-label]="'wishlist.addToCart' | translate"
+          class="hit-44 flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] glass-card text-[var(--color-text)]"
         >
           <ng-icon name="phosphorShoppingCart" class="text-lg" />
         </button>

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -28,13 +28,14 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { CourseApiService } from '../data/course-api.service';
 import { CourseSearchResultItem } from '../data/course-api.models';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 const RECENT_SEARCHES_KEY = 'siri_recent_searches_v1';
 const MAX_RECENT = 6;
 
 @Component({
   selector: 'app-search-autocomplete',
-  imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe],
+  imports: [CommonModule, FormsModule, NgIcon, NgOptimizedImage, CurrencyThbPipe, TranslatePipe],
   templateUrl: './search-autocomplete.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

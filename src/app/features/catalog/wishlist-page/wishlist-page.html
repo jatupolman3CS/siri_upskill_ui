@@ -49,10 +49,12 @@
               <!-- Course Thumbnail -->
               <a [routerLink]="['/courses', item.slug]" class="relative block aspect-video overflow-hidden bg-[var(--color-surface-muted)]">
                 @if (item.thumbnailUrl) {
+                  <!-- fill: only the anchor's 16/9 aspect ratio is known, not the thumbnail's own size. -->
                   <img
-                    [src]="item.thumbnailUrl"
+                    [ngSrc]="item.thumbnailUrl"
                     [alt]="item.title"
-                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    fill
+                    class="object-cover transition duration-300 group-hover:scale-105"
                   />
                 } @else {
                   <div class="flex h-full w-full items-center justify-center text-[var(--color-text-muted)] font-bold">
@@ -60,11 +62,12 @@
                   </div>
                 }
 
-                <!-- Remove Button overlay -->
+                <!-- Remove Button overlay. after:-inset-1.5 stretches the 32px hit area to 44px (hit-44 can't be
+                     used on an already-absolute element: its unlayered `position: relative` would override it). -->
                 <button
                   type="button"
                   (click)="removeItem(item); $event.preventDefault(); $event.stopPropagation()"
-                  class="btn-tactile absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full glass-card text-[var(--hue-red-fg)] shadow-sm transition hover:bg-[var(--color-surface-muted)]"
+                  class="btn-tactile absolute top-2.5 right-2.5 flex h-8 w-8 items-center justify-center rounded-full glass-card text-[var(--hue-red-fg)] shadow-sm transition hover:bg-[var(--color-surface-muted)] after:absolute after:-inset-1.5 after:content-['']"
                   [attr.aria-label]="'wishlist.remove' | translate"
                 >
                   <ng-icon name="phosphorTrash" class="text-base" />
@@ -111,7 +114,7 @@
               <button
                 type="button"
                 (click)="addToCart(item)"
-                class="btn-tactile w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
+                class="hit-44 btn-tactile w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
               >
                 <ng-icon name="phosphorShoppingCart" class="text-base" />
                 <span>{{ 'wishlist.addToCart' | translate }}</span>

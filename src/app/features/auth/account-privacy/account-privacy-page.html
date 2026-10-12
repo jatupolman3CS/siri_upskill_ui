@@ -21,7 +21,7 @@
         type="button"
         (click)="exportData()"
         [disabled]="isExporting()"
-        class="btn-tactile shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:opacity-50 transition"
+        class="hit-44 btn-tactile shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:opacity-50 transition"
       >
         @if (isExporting()) {
           <app-spinner size="xs" />
@@ -45,7 +45,7 @@
       <button
         type="button"
         (click)="openDeleteModal()"
-        class="btn-tactile shrink-0 px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:brightness-90 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
+        class="hit-44 btn-tactile shrink-0 px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:brightness-90 focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
       >
         ลบบัญชีผู้ใช้ถาวร
       </button>
@@ -94,7 +94,7 @@
       <button
         type="button"
         (click)="closeDeleteModal()"
-        class="btn-tactile px-3 py-1.5 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]"
+        class="hit-44 btn-tactile px-3 py-1.5 text-xs font-semibold rounded-xl border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]"
       >
         ยกเลิก
       </button>
@@ -102,7 +102,7 @@
         type="button"
         (click)="confirmDelete()"
         [disabled]="isDeleting() || deleteConfirmation.trim().toUpperCase() !== 'DELETE'"
-        class="btn-tactile inline-flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-xl bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:brightness-90 disabled:opacity-50"
+        class="hit-44 btn-tactile inline-flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-xl bg-[var(--color-danger)] text-[var(--color-primary-foreground)] hover:brightness-90 disabled:opacity-50"
       >
         @if (isDeleting()) {
           <app-spinner size="xs" color="white" />

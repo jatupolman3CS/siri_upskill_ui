@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -42,7 +43,7 @@ const EMPTY_SEARCH_RESPONSE: SearchCoursesResponse = {
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, TranslatePipe, NgIcon, Skeleton, FlashSaleBanner, HomeCourseCard],
+  imports: [RouterLink, TranslatePipe, NgIcon, NgOptimizedImage, Skeleton, FlashSaleBanner, HomeCourseCard],
   templateUrl: './home-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

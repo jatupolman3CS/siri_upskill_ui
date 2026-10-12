@@ -12,11 +12,13 @@
 
     <app-course-format-badge class="absolute left-2 top-2" [format]="course().deliveryFormat" />
 
+    <!-- after:-inset-1.5 stretches the 32px button's hit area to 44px. (hit-44 can't be used here: its unlayered
+         `position: relative` would override this button's Tailwind `absolute`.) -->
     <button
       type="button"
       (click)="toggleWishlist($event)"
       [attr.aria-label]="isWishlisted() ? 'นำออกจากสิ่งที่อยากได้' : 'เพิ่มในสิ่งที่อยากได้'"
-      class="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full glass-card shadow-sm transition hover:scale-110"
+      class="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full glass-card shadow-sm transition hover:scale-110 after:absolute after:-inset-1.5 after:content-['']"
     >
       @if (isWishlisted()) {
         <ng-icon name="phosphorHeartFill" class="text-base text-[var(--color-primary-text)]" />

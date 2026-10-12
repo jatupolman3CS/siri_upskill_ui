@@ -14,7 +14,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
   template: `
     <a
       routerLink="/"
-      class="flex w-fit items-center gap-2.5 rounded-[var(--radius-md)] focus-visible:outline-none focus-visible:ring-2
+      class="hit-44 flex w-fit items-center gap-2.5 rounded-[var(--radius-md)] focus-visible:outline-none focus-visible:ring-2
         focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
     >
       <span

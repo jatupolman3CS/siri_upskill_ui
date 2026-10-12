@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -32,7 +32,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
  */
 @Component({
   selector: 'app-blog-detail-page',
-  imports: [CommonModule, RouterLink, NgIcon, TranslatePipe, ReadingMinutesPipe, EmptyState, Skeleton],
+  imports: [CommonModule, RouterLink, NgIcon, NgOptimizedImage, TranslatePipe, ReadingMinutesPipe, EmptyState, Skeleton],
   templateUrl: './blog-detail-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

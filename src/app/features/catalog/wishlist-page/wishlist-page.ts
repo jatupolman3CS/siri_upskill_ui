@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -20,7 +20,7 @@ import { Skeleton } from '../../../shared/skeleton/skeleton';
 
 @Component({
   selector: 'app-wishlist-page',
-  imports: [CommonModule, RouterLink, NgIcon, CurrencyThbPipe, TranslatePipe, Skeleton],
+  imports: [CommonModule, RouterLink, NgIcon, NgOptimizedImage, CurrencyThbPipe, TranslatePipe, Skeleton],
   templateUrl: './wishlist-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

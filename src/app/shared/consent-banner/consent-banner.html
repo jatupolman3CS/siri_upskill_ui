@@ -26,21 +26,21 @@
           <button
             type="button"
             (click)="toggleDetails()"
-            class="px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
+            class="min-h-11 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
             ตั้งค่าคุกกี้
           </button>
           <button
             type="button"
             (click)="rejectNonEssential()"
-            class="px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
+            class="min-h-11 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
             ปฏิเสธทั้งหมด
           </button>
           <button
             type="button"
             (click)="acceptAll()"
-            class="px-4 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
+            class="min-h-11 px-4 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
             ยอมรับทั้งหมด
           </button>
@@ -60,7 +60,7 @@
 
           <div class="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] space-y-1">
             <div class="flex items-center justify-between">
-              <label for="consent-analytics" class="text-xs font-bold text-[var(--color-text)] cursor-pointer">คุกกี้วิเคราะห์ (Analytics)</label>
+              <label for="consent-analytics" class="flex min-h-11 flex-1 items-center text-xs font-bold text-[var(--color-text)] cursor-pointer">คุกกี้วิเคราะห์ (Analytics)</label>
               <input
                 type="checkbox"
                 id="consent-analytics"
@@ -74,7 +74,7 @@
 
           <div class="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] space-y-1">
             <div class="flex items-center justify-between">
-              <label for="consent-marketing" class="text-xs font-bold text-[var(--color-text)] cursor-pointer">คุกกี้การตลาด (Marketing)</label>
+              <label for="consent-marketing" class="flex min-h-11 flex-1 items-center text-xs font-bold text-[var(--color-text)] cursor-pointer">คุกกี้การตลาด (Marketing)</label>
               <input
                 type="checkbox"
                 id="consent-marketing"
@@ -91,7 +91,7 @@
           <button
             type="button"
             (click)="saveCustom()"
-            class="px-4 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] transition"
+            class="min-h-11 px-4 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] transition"
           >
             บันทึกการตั้งค่า
           </button>

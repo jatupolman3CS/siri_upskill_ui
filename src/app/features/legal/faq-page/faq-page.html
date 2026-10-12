@@ -18,7 +18,7 @@
         [class.bg-[var(--color-primary)]]="activeCategory() === tab.id"
         [class.text-[var(--color-primary-foreground)]]="activeCategory() === tab.id"
         [class.border-[var(--color-border)]]="activeCategory() !== tab.id"
-        class="btn-tactile glass-pill px-4 py-1.5 text-xs font-semibold rounded-full border transition"
+        class="btn-tactile glass-pill inline-flex min-h-11 items-center px-4 py-1.5 text-xs font-semibold rounded-full border transition"
       >
         {{ tab.labelKey | translate }}
       </button>
@@ -29,7 +29,7 @@
   <div class="animate-fade-in-up stagger-2 space-y-4 pt-4">
     @for (faq of filteredFaqs(); track faq.id) {
       <details class="card-hover group rounded-2xl glass-card p-5 open:shadow-sm transition">
-        <summary class="flex cursor-pointer items-center justify-between font-bold text-xs sm:text-sm text-[var(--color-text)] list-none focus-visible:outline-none">
+        <summary class="hit-44 flex cursor-pointer items-center justify-between rounded-md font-bold text-xs sm:text-sm text-[var(--color-text)] list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]">
           <span>{{ 'faq.items.' + faq.id + '.q' | translate }}</span>
           <ng-icon
             name="phosphorCaretDown"
@@ -52,7 +52,7 @@
     </p>
     <a
       routerLink="/contact"
-      class="btn-tactile inline-block px-5 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] transition"
+      class="hit-44 btn-tactile inline-block px-5 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:bg-[var(--color-primary-pressed)] transition"
     >
       {{ 'faq.ctaButton' | translate }}
     </a>

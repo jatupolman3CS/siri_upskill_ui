@@ -77,7 +77,7 @@
 </div>
 
 <!-- Continue Learning Card (For Authenticated Learners) -->
-@if (recentEnrollmentResource.value(); as enroll) {
+@if (recentEnrollmentResource.hasValue() && recentEnrollmentResource.value(); as enroll) {
   <section class="animate-fade-in-up mx-auto max-w-6xl px-4 py-3" aria-label="Continue Learning">
     <div class="card-hover glass-card glow-border flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border-[var(--color-primary)]/30 bg-gradient-to-r from-[var(--color-primary)]/10 to-transparent p-5 shadow-sm">
       <div class="flex items-center gap-4 w-full sm:w-auto">
@@ -107,7 +107,7 @@
 
       <a
         [routerLink]="['/learn', enroll.courseSlug || enroll.courseId]"
-        class="btn-tactile inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
+        class="btn-tactile hit-44 inline-flex h-10 w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
       >
         <span>เข้าสู่บทเรียน</span>
         <ng-icon name="phosphorArrowRight" />
@@ -136,11 +136,16 @@
           [routerLink]="banner.targetUrl || '/courses'"
           class="card-hover glow-border group relative block aspect-[21/9] overflow-hidden rounded-3xl glass-card shadow-sm"
         >
-          <img
-            [src]="banner.imageUrl"
-            [alt]="banner.title"
-            class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-          />
+          <!-- fill: the banner's intrinsic size is unknown, only the anchor's 21/9 aspect ratio is. Below the fold
+               (the hero above it fills 60vh), so deliberately no `priority`. -->
+          @if (banner.imageUrl) {
+            <img
+              [ngSrc]="banner.imageUrl"
+              [alt]="banner.title"
+              fill
+              class="object-cover transition duration-300 group-hover:scale-105"
+            />
+          }
           @if (banner.title) {
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6">
               <h3 class="text-base sm:text-lg font-extrabold text-white drop-shadow-sm">{{ banner.title }}</h3>

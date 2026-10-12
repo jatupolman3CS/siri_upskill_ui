@@ -3,7 +3,7 @@
   <div>
     <a
       routerLink="/learning-paths"
-      class="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
+      class="hit-44 inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary-text)] hover:underline"
     >
       <ng-icon name="phosphorArrowLeft" />
       <span>{{ 'learningPaths.backToAll' | translate }}</span>
@@ -29,7 +29,7 @@
       <div>
         <a
           routerLink="/learning-paths"
-          class="btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
+          class="hit-44 btn-tactile inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow hover:bg-[var(--color-primary-pressed)] transition"
         >
           <span>{{ 'learningPaths.exploreOtherPaths' | translate }}</span>
         </a>
@@ -58,7 +58,7 @@
           @if (p.courses.length > 0) {
             <a
               [routerLink]="['/courses', p.courses[0].slug]"
-              class="btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-lg hover:bg-[var(--color-primary-pressed)] transition"
+              class="hit-44 btn-tactile inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-bold text-[var(--color-primary-foreground)] shadow-lg hover:bg-[var(--color-primary-pressed)] transition"
             >
               <ng-icon name="phosphorPlayCircle" class="text-base" />
               <span>{{ 'learningPaths.startFirstCourse' | translate: { title: p.courses[0].title } }}</span>
@@ -94,7 +94,7 @@
               <div class="flex items-center gap-3 self-end sm:self-center">
                 <a
                   [routerLink]="['/courses', course.slug]"
-                  class="btn-tactile inline-flex items-center gap-1.5 rounded-xl glass-card px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition shadow-xs"
+                  class="hit-44 btn-tactile inline-flex items-center gap-1.5 rounded-xl glass-card px-4 py-2 text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-primary)] hover:text-[var(--color-primary-foreground)] transition shadow-xs"
                 >
                   <span>{{ 'learningPaths.viewCourse' | translate }}</span>
                   <ng-icon name="phosphorArrowRight" />

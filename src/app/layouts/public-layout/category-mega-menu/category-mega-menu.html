@@ -45,7 +45,7 @@
               [routerLink]="'/courses'"
               [queryParams]="{ category: category.slug }"
               (click)="close()"
-              class="flex items-center gap-2 rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-text)]
+              class="hit-44 flex items-center gap-2 rounded-[var(--radius-sm)] text-sm font-semibold text-[var(--color-text)]
                 hover:text-[var(--color-primary-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
             >
               <ng-icon [name]="resolveIconName(category.iconKey)" aria-hidden="true" [class]="resolveTone(category.iconKey) + ' text-[var(--tone-fg)]'" />

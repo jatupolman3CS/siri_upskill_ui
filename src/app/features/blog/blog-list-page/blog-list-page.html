@@ -31,7 +31,7 @@
         emptyStateAction
         type="button"
         (click)="retry()"
-        class="btn-tactile inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
+        class="hit-44 btn-tactile inline-flex items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3 text-xs font-bold text-[var(--color-primary-foreground)] shadow transition hover:bg-[var(--color-primary-pressed)]"
       >
         {{ 'blog.retryButton' | translate }}
       </button>
@@ -43,12 +43,19 @@
       @for (post of posts(); track post.id) {
         <article class="card-hover glow-border group flex flex-col overflow-hidden rounded-3xl glass-card shadow-sm">
           <!-- Cover Image -->
-          <a [routerLink]="['/blog', post.slug]" class="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-surface-muted)]">
+          <!-- aria-label: the no-cover fallback below is an icon only, which would leave this link nameless. -->
+          <a
+            [routerLink]="['/blog', post.slug]"
+            [attr.aria-label]="post.title"
+            class="relative aspect-[16/10] w-full overflow-hidden bg-[var(--color-surface-muted)]"
+          >
             @if (post.coverImageUrl) {
+              <!-- fill: only the anchor's 16/10 aspect ratio is known, not the cover's own size. -->
               <img
-                [src]="post.coverImageUrl"
+                [ngSrc]="post.coverImageUrl"
                 [alt]="post.title"
-                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                class="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             } @else {
               <div class="flex h-full w-full items-center justify-center bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
@@ -94,7 +101,7 @@
 
               <a
                 [routerLink]="['/blog', post.slug]"
-                class="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] group-hover:translate-x-1 transition-transform"
+                class="hit-44 inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary-text)] group-hover:translate-x-1 transition-transform"
               >
                 <span>อ่านต่อ</span>
                 <ng-icon name="phosphorArrowRight" />

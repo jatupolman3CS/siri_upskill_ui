@@ -16,7 +16,7 @@
         <ng-icon name="phosphorList" class="text-xl" aria-hidden="true" />
       </button>
 
-      <a routerLink="/" class="truncate text-lg font-extrabold tracking-tight text-[var(--color-primary-text)]">
+      <a routerLink="/" class="truncate py-2 text-lg font-extrabold tracking-tight text-[var(--color-primary-text)]">
         SIRI UpSkill <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] ml-1">Studio</span>
       </a>
       <span class="hidden rounded-full tone-blue bg-[var(--tone-bg)] px-2.5 py-0.5 text-xs font-bold text-[var(--tone-fg)] lg:inline-flex">
@@ -30,7 +30,7 @@
       @if (auth.isAdmin()) {
         <a
           routerLink="/admin"
-          class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--tone-fg)]/30 tone-red bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] transition hover:brightness-95"
+          class="hit-44 inline-flex items-center gap-1.5 rounded-xl border border-[var(--tone-fg)]/30 tone-red bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] transition hover:brightness-95"
         >
           <span>{{ 'instructor.nav.toAdmin' | translate }}</span>
         </a>
@@ -38,7 +38,7 @@
 
       <a
         routerLink="/my-courses"
-        class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--tone-fg)]/30 tone-green bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] transition hover:brightness-95"
+        class="hit-44 inline-flex items-center gap-1.5 rounded-xl border border-[var(--tone-fg)]/30 tone-green bg-[var(--tone-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-fg)] transition hover:brightness-95"
       >
         <ng-icon name="phosphorArrowLeft" />
         <span>{{ 'instructor.nav.toLearner' | translate }}</span>
@@ -46,7 +46,7 @@
 
       <a
         routerLink="/instructor/courses/new"
-        class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)] hover:shadow-[var(--shadow-glow)]"
+        class="hit-44 inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-[var(--color-primary-foreground)] shadow-sm transition hover:bg-[var(--color-primary-pressed)] hover:shadow-[var(--shadow-glow)]"
       >
         <ng-icon name="phosphorPlusCircle" class="text-sm" />
         <span>{{ 'instructor.nav.createCourse' | translate }}</span>
@@ -72,7 +72,7 @@
             routerLinkActive="bg-[var(--color-primary)] text-[var(--color-primary-foreground)]! shadow-sm font-bold"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
-            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
+            class="flex min-h-11 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition"
           >
             <ng-icon [name]="item.icon" class="text-lg" aria-hidden="true" />
             <span>{{ item.labelKey | translate }}</span>
