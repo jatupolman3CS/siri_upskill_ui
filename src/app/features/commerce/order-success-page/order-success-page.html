@@ -55,7 +55,7 @@
 
         <ul class="flex flex-col gap-3">
           @for (course of ord.purchasedCourses; track course.courseId) {
-            <li class="flex flex-col items-stretch justify-between gap-4 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)] p-4 sm:flex-row sm:items-center">
+            <li class="card-hover glow-border flex flex-col items-stretch justify-between gap-4 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)] p-4 sm:flex-row sm:items-center">
               <div class="flex min-w-0 items-center gap-4">
                 <div class="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--color-surface-muted)]">
                   @if (course.thumbnailUrl) {

@@ -55,9 +55,9 @@
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
       <!-- Items panel -->
       <section class="animate-fade-in-up stagger-1 min-w-0 rounded-2xl glass-card p-4 shadow-sm sm:p-6">
-        <ul class="flex flex-col divide-y divide-[var(--color-border)]">
+        <ul class="flex flex-col gap-3">
           @for (item of cart.items(); track item.courseId) {
-            <li class="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
+            <li class="card-hover glow-border flex items-center justify-between gap-4 rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)] p-4">
               <div class="flex min-w-0 flex-1 items-center gap-4">
                 <!-- Thumbnail -->
                 <div class="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--color-surface-muted)] sm:h-20 sm:w-32">

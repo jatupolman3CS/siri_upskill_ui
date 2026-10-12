@@ -41,12 +41,12 @@
         </thead>
         <tbody class="divide-y divide-[var(--color-border)]">
           @for (row of rows(); track row.course.courseId) {
-            <tr>
+            <tr class="group transition-colors hover:bg-[var(--color-surface-muted)]/60">
               <td class="px-5 py-3 sm:px-6">
                 <div class="flex items-center gap-3">
                   <div class="relative h-10 w-16 shrink-0 overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-surface-muted)]">
                     @if (row.course.thumbnailUrl) {
-                      <img [ngSrc]="row.course.thumbnailUrl | mediaUrl" alt="" fill class="object-cover" />
+                      <img [ngSrc]="row.course.thumbnailUrl | mediaUrl" alt="" fill class="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" />
                     }
                   </div>
                   <div class="min-w-0">

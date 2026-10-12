@@ -39,7 +39,7 @@
         @for (item of items(); track item.id) {
           <a
             [routerLink]="item.route"
-            routerLinkActive="bg-[var(--color-primary)] text-[var(--color-primary-foreground)]! shadow-sm font-bold"
+            routerLinkActive="bg-[var(--color-primary)] hover:bg-[var(--color-primary-pressed)]! text-[var(--color-primary-foreground)]! shadow-sm font-bold"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
             (click)="requestClose()"
