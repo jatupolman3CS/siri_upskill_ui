@@ -42,6 +42,43 @@ Intentional exceptions (also the guard's allowlist): `features/learning/video-pl
 - `quiz-taking` / `assignment-submission` `.scss` rewritten with tokens only (they had ~100 hex values and no dark mode).
 - `src/app/theme-guard.spec.ts` (unit) and `e2e/theme-toggle.spec.ts` (Playwright, no backend needed).
 
-## Known follow-ups (out of theme scope)
+## Follow-up bug-fix plan (UI-FIX)
 
-Hardcoded Thai strings in several pages; inputs/tab buttons whose only focus indicator is a 1px border (admin forms, course-builder tabs); icon buttons under 44px or without `aria-label`; plain `<img>` instead of `NgOptimizedImage` (home banner, wishlist, blog, cart, my-courses); undefined `animate-bounce-subtle`; unused i18n key `home.hero.heading`; `home-page.ts` reads a resource `.value()` without `hasValue()`; blog `[innerHTML]` uses `prose` but the typography plugin is not installed; initial-bundle raw size warning (830 kB vs 500 kB budget, gzip 191 kB) not compared against the pre-theme baseline.
+Open bugs found after the theme migration, in the order they should be fixed. Each phase is independent, small enough for one review, and has an acceptance check. Do phases in order unless noted; do NOT commit or push — leave the working tree for the owner to review (report `git diff --stat` per phase).
+
+Ground rules: read `.claude/rules/frontend.md`, `ui-design.md`, `workflow.md` first; class/markup/i18n changes only unless a phase says otherwise; keep the hook classes specs depend on (`.app-modal-*`, `.fixed`, `motion-reduce:*`); no raw palette/hex (`theme-guard.spec.ts`); `npm run build`, `npm run test`, `npm run lint` must stay green after every phase (lint is fully clean now). **Never start `Siri.Api` by hand** (the backend `.env` points at the PRODUCTION database; `scripts/dev.ps1` refuses to start while `.env` holds an `sk_live_` Stripe key — the owner must put a test key or blank there). Use `npx ng serve --port 4210` for the UI, never 4200/4201/4202.
+
+Visual check without a backend: `node e2e/tools/visual-sweep.cjs` (mocked API, light + dark; contrast / overflow / page errors / focus rings — see the file header). It cannot show data-rich states.
+
+### Phase 1 — Admin modals without dialog semantics (accessibility bug)
+Seven admin pages hand-roll `fixed inset-0` overlays with no `role="dialog"`, `aria-modal`, `aria-labelledby`, focus trap or Escape: `contact-messages` (1), `course-moderation` (1), `marketing` (3), `menus` (1), `payments` (3), `payouts` (3), `users` (3). Replace each with the shared `app-modal` (`src/app/shared/modal`: `[(open)]`, `titleText`, `showCloseButton`, `closeOnOverlayClick` — pass `false` for destructive confirmations — and a `[modalFooter]` slot; it already provides role/aria-modal/labelledby, `CdkTrapFocus`, Escape, scroll lock and focus return). Keep the page state signals and handlers; only move the markup. Update the specs that query the old markup (`admin-users-page.spec.ts` queries `.fixed`; the shared modal's overlay keeps `fixed`). Acceptance: every modal has role=dialog + an accessible name, Tab stays inside, Escape closes and focus returns to the opener; specs green.
+
+### Phase 2 — Missing ARIA semantics
+- `role="progressbar"` + `aria-valuenow/min/max` + an accessible name on the progress bars driven by `[style.width.%]`: `home-page.html` (continue learning), `learn-page.html`, `curriculum-sidebar.html`, `my-courses-page.html`, `instructor-analytics-page.html` (completion rate), `course-builder-page.html` (trailer upload). The rating-distribution bars in `course-detail-page.html` are not progress: give the row a text label instead.
+- `aria-expanded` (+ `aria-controls`) on disclosure triggers that lack it: the order-history "expand order" button and the curriculum-sidebar section header; check the 13 files that already use it for consistency.
+- `aria-pressed` on two-state toggle buttons: the admin-menus active/inactive toggle and any filter chip that behaves as a toggle (admin payments ops filter). Order-history status tabs should be a proper `role="tablist"`/`tab`/`aria-selected` if that is what they are — check what the markup already claims.
+Acceptance: no unnamed progress bars, collapsed/expanded state announced, toggle state announced.
+
+### Phase 3 — Controls that do nothing (needs a decision per item)
+- `instructor-earnings-page.html`: the "ใบหักภาษี 50 ทวิ" button has no `(click)`. Check `features/payout/data/payout-api.service.ts` and the backend (`siri_upskill_backend`) for a withholding-tax certificate endpoint; if it exists, wire it through the API service with loading/error states; if it does not, hide the button and tell the owner (do not invent an endpoint).
+- `blog-detail-page.html`: the "แชร์บทความ" button has no `(click)`. Implement with `navigator.share` when available (guard `isPlatformBrowser`), else copy the URL and show a toast; the strings come from i18n.
+Acceptance: no focusable control without behaviour.
+
+### Phase 4 — Nested interactive elements
+`home-course-card.html` puts the wishlist `<button>` inside the card's `<a>` (invalid HTML, double-activation risk). Restructure with the stretched-link pattern: the card is a `div`, the title is the `<a>` with an `after:absolute after:inset-0` overlay, and the wishlist button sits above it (`relative z-10`). Check the same pattern in `wishlist-page`, `courses-page` and the learning-path cards. Keep the card's `glow-border`/hover look and the 44px hit area. Acceptance: no `<button>`/`<a>` nested inside another interactive element; Tab order is title link, then wishlist button.
+
+### Phase 5 — Video player i18n, touch targets, error mapper
+`features/learning/video-player`: 8 hardcoded English `aria-label`s (Play, Pause, seek bar …) → i18n keys (`learn.player.*`, Thai + English); the seek/volume sliders are 6px tall — wrap each in a 44px-high padded container so the pointer target is 44px without changing the visual track; the speed/quality menu items are 36px — raise to 44px from `sm` up and keep the menu scrollable on short mobile screens. `shaka-error-mapper.ts` has 26 hardcoded Thai strings → i18n keys. Acceptance: keyboard shortcuts unchanged, specs green.
+
+### Phase 6 — Emoji icons → Phosphor
+`shared/consent-banner` (🍪), `learning/learn-page` (🎓 ★), `quiz-taking` and `assignment-submission` templates (📝 🎯 📋 ⏱️ 📦 📄 📁 ⟳). Replace with `@ng-icons/phosphor-icons` (`provideIcons` on the component); decorative icons get `aria-hidden="true"`. Acceptance: no emoji left in templates.
+
+### Phase 7 — Hardcoded user-facing text → i18n (largest; split by folder)
+About 712 lines of Thai (and some English) text sit outside i18n, by area: admin 416 (marketing 72, payments 71, payouts 61 …), instructor 87, learning 85, commerce 40, auth 24 (account-privacy), catalog 19, shared 19 (consent-banner), blog 14, home 5, layouts 2. Per folder: add keys to `th.json` (the Thai text, verbatim) and `en.json` (a real English translation) under the feature's existing namespace (`admin.<page>.*`, `instructor.*`, `cart.*` …); replace the literal with `{{ 'key' | translate }}` (params via `translate: { … }`, never string concatenation — Thai word order differs); for attributes use `[attr.aria-label]`, `[attr.title]`, `[placeholder]`. Dictionary edits are a conflict hotspot: only one worker edits `th.json`/`en.json` at a time (or workers write key snippets that one person merges, as was done for `a11y.*`). Finish with a guard: a spec like `theme-guard.spec.ts` that fails when a `.html` template contains Thai characters outside comments (explicit allowlist), plus a th/en key-parity spec for the whole dictionary (today only the legal/FAQ namespaces have one). Acceptance: guard + parity specs green; an English page shows no Thai.
+
+### Phase 8 — Verify with real data (blocked on the owner)
+Needs a working local stack: the owner replaces the Stripe key in `siri_upskill_backend/.env` with a test key (or blanks it), then `scripts/dev.ps1 Start`, and the seed accounts are used for login (see the backend CLAUDE.md). Then walk the learner flows with data — `/learn/:slug` with the video player, cart → checkout (the PromptPay QR tile must stay white in dark mode), order history, certificates — and the admin/instructor tables in both themes. Until that is unblocked, report this phase as not done.
+
+### Also open (smaller)
+- The initial-bundle raw size warning (830 kB vs the 500 kB budget; gzip about 191 kB) has not been compared with the pre-theme baseline — measure commit `2bdf1aa` in an isolated `git archive` copy before deciding whether it is a regression.
+- The blog article body uses `[innerHTML]` with a `prose` class, but the Tailwind typography plugin is not installed, so headings and lists are unstyled — decide between installing `@tailwindcss/typography` (new dependency: ask the owner) and styling the article container by hand.
