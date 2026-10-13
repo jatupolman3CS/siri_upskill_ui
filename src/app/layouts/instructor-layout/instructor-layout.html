@@ -1,4 +1,7 @@
-<div class="flex h-screen flex-col overflow-hidden select-none">
+<!-- `relative` makes this shell the containing block for absolutely positioned descendants (`sr-only` captions, labels,
+     popovers). Without it they escape `overflow-hidden`, the document grows taller than 100vh and, once <main> hits
+     its end, scroll chaining slides the whole shell up and leaves a gap above the taskbar. -->
+<div class="relative flex h-screen flex-col overflow-hidden select-none">
   <!-- Top Navigation Bar -->
   <header class="flex h-16 shrink-0 items-center justify-between gap-3 glass-panel rounded-none border-x-0 border-t-0 px-4 md:px-6">
     <div class="flex min-w-0 items-center gap-2 md:gap-4">

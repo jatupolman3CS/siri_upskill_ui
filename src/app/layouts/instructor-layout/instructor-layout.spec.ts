@@ -56,6 +56,15 @@ describe('InstructorLayout navigation', () => {
     return Array.from(root().querySelectorAll('aside nav a')).map((a) => a.textContent?.trim() ?? '');
   }
 
+  it('contains absolutely positioned descendants so the document never outgrows the 100vh shell', () => {
+    // jsdom has no layout, so the class pair is the only observable: `relative` makes the shell the containing block for
+    // `sr-only` captions etc., and `overflow-hidden` then clips them. Drop either and the page scrolls past the shell.
+    const shell = root().firstElementChild as HTMLElement;
+    expect(shell.className).toContain('h-screen');
+    expect(shell.className).toContain('overflow-hidden');
+    expect(shell.className).toContain('relative');
+  });
+
   it('offers a menu button that is only visible below md and has an accessible name', () => {
     const button = menuButton();
     expect(button).toBeTruthy();
