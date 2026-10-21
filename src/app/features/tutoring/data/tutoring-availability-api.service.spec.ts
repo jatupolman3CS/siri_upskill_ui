@@ -14,6 +14,8 @@ const AVAILABILITY: TutorAvailability = {
   settings: { minNoticeHours: 24, bufferMinutes: 10, maxAdvanceDays: 60, rowVersion: 'AAAAAAAAB9E=' },
   rules: [{ dayOfWeek: 1, startLocal: '09:00', endLocal: '12:00' }],
   maxRules: 50,
+  allowedDurationMinutes: [45, 90],
+  allowedBufferMinutes: [0, 15, 30],
 };
 
 describe('TutoringAvailabilityApiService', () => {

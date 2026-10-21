@@ -20,8 +20,6 @@ import { type FieldIssues, integerIssue, issue, optionalTextIssue, trimToNull } 
  * endpoint exposes it, so it is duplicated here on purpose. A time the server's grid refuses comes back as `violation: grid`.
  */
 export const GRID_MINUTES = 30;
-/** `Tutoring:Slots:AllowedBufferMinutes` default - the only buffers the settings endpoint accepts. */
-export const BUFFER_CHOICES: readonly number[] = [0, 5, 10, 15, 20, 30, 45, 60];
 export const MIN_NOTICE_RANGE = { min: 1, max: 168 } as const;
 export const MAX_ADVANCE_RANGE = { min: 7, max: 180 } as const;
 export const EXCEPTION_NOTE_MAX = 200;
@@ -200,7 +198,11 @@ export const SETTINGS_PROPERTY_TO_FIELD: Readonly<Record<string, SettingsField>>
   MaxAdvanceDays: 'maxAdvanceDays',
 };
 
-export function validateSettings(value: SettingsFormValue): FieldIssues<SettingsField> {
+/**
+ * `allowedBuffers` is the server's own list (`allowedBufferMinutes` of `GET tutor/availability`) - passed in, never defaulted, so the
+ * client cannot offer or accept a rest length the deployment does not.
+ */
+export function validateSettings(value: SettingsFormValue, allowedBuffers: readonly number[]): FieldIssues<SettingsField> {
   const issues: FieldIssues<SettingsField> = {};
   const notice = integerIssue(value.minNoticeHours, MIN_NOTICE_RANGE.min, MIN_NOTICE_RANGE.max);
   if (notice) {
@@ -210,7 +212,7 @@ export function validateSettings(value: SettingsFormValue): FieldIssues<Settings
   if (advance) {
     issues.maxAdvanceDays = advance;
   }
-  if (!BUFFER_CHOICES.includes(Number(value.bufferMinutes))) {
+  if (!allowedBuffers.includes(Number(value.bufferMinutes))) {
     issues.bufferMinutes = issue('tutoring.tutor.validation.notAllowed');
   }
   return issues;

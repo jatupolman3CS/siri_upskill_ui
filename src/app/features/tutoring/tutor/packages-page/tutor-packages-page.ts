@@ -55,9 +55,14 @@ export class TutorPackagesPage {
   private readonly profileResource = rxResource({ stream: () => this.tutorApi.getProfile() });
 
   protected readonly packages = computed<readonly TutorPackage[]>(() => (this.packagesResource.hasValue() ? this.packagesResource.value() : []));
-  protected readonly allowedDurationMinutes = computed<readonly number[] | undefined>(() =>
-    this.profileResource.hasValue() ? this.profileResource.value().allowedDurationMinutes : undefined,
+  /**
+   * The class lengths the server accepts, from the tutor's own profile read; `null` until that read has succeeded. The form is only
+   * shown once this is a list (see the template): no list of lengths is ever guessed while the profile is loading or has failed.
+   */
+  protected readonly allowedDurationMinutes = computed<readonly number[] | null>(() =>
+    this.profileResource.hasValue() ? this.profileResource.value().allowedDurationMinutes : null,
   );
+  protected readonly lengthsFailed = computed(() => !this.profileResource.hasValue() && this.profileResource.status() === 'error');
   protected readonly isLoading = computed(() => this.packagesResource.isLoading() && !this.packagesResource.hasValue());
   protected readonly hasError = computed(() => this.packagesResource.status() === 'error');
 
@@ -92,6 +97,11 @@ export class TutorPackagesPage {
   protected reload(): void {
     this.packagesResource.reload();
     this.offeringsResource.reload();
+    this.profileResource.reload();
+  }
+
+  /** Retries only the read the form is waiting for (the class lengths); the list of packages behind it is untouched. */
+  protected reloadLengths(): void {
     this.profileResource.reload();
   }
 

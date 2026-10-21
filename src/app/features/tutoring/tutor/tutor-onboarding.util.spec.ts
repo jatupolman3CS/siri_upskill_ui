@@ -21,6 +21,7 @@ function profile(status: TutorStatus, blockers: readonly string[] = [], statusRe
     maxAdvanceDays: 60,
     verifiedAtUtc: null,
     readiness: { canSubmitForVerification: blockers.length === 0, blockers },
+    allowedDurationMinutes: [60],
     rowVersion: 'AAA=',
   };
 }

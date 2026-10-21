@@ -29,7 +29,7 @@
       </app-empty-state>
     }
   } @else if (availability(); as current) {
-    <app-availability-settings-form [settings]="current.settings" (saved)="onSettingsSaved($event)" (conflict)="reload()" />
+    <app-availability-settings-form [settings]="current.settings" [allowedBufferMinutes]="current.allowedBufferMinutes" (saved)="onSettingsSaved($event)" (conflict)="reload()" />
     <app-weekly-rules-editor [rules]="current.rules" [maxRules]="current.maxRules" (saved)="onRulesSaved($event)" />
     <app-availability-exceptions (changed)="bumpPreview()" />
     @if (previewReady() && profile(); as tutor) {
@@ -39,6 +39,7 @@
         [offerings]="activeOfferings()"
         [refresh]="previewRefresh()"
         [allowedDurationMinutes]="current.allowedDurationMinutes"
+        [maxAdvanceDays]="current.settings.maxAdvanceDays"
       />
     }
   }

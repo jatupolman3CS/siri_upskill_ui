@@ -1,11 +1,12 @@
 import { CurrencyPipe, registerLocaleData } from '@angular/common';
 import localeTh from '@angular/common/locales/th';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { errorInterceptor } from '../../../core/http/error.interceptor';
 import { PagedPendingRefunds } from './data/admin-refunds-api.models';
 import { AdminPayoutsPage } from './admin-payouts-page';
 import { PagedResponse } from '../../payout/data/payout-api.service';
@@ -77,7 +78,8 @@ describe('AdminPayoutsPage', () => {
       providers: [
         CurrencyPipe,
         provideRouter([{ path: 'admin/payouts', component: AdminPayoutsPage }]),
-        provideHttpClient(withFetch()),
+        // The same client stack as app.config.ts: fetch + the real error interceptor, so a failed call reaches the page as the `ApiError` it gets in production.
+        provideHttpClient(withFetch(), withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
       ],
     });
@@ -209,7 +211,9 @@ describe('AdminPayoutsPage', () => {
     await settle();
 
     text = harness.routeNativeElement?.textContent ?? '';
-    expect(text).toContain('อนุมัติคำขอคืนเงินจำนวน ฿1,890 เรียบร้อยแล้ว');
+    // Formatted with CurrencyThbPipe (symbol + two decimals for th-TH), not with toLocaleString and a hard-coded symbol in the string.
+    expect(text).toContain('อนุมัติคำขอคืนเงินจำนวน ฿1,890.00 เรียบร้อยแล้ว');
+    expect(text).not.toContain('฿฿');
   });
 
   it('creates a new payout batch and updates list', async () => {
@@ -232,6 +236,7 @@ describe('AdminPayoutsPage', () => {
 
     const postReq = httpMock.expectOne('/api/payout/admin/batches');
     expect(postReq.request.method).toBe('POST');
+    expect(postReq.request.body).toEqual({ periodKey: '2026-08', sourceType: 'Course' });
     postReq.flush({
       id: 'batch-2',
       periodKey: '2026-08',
@@ -296,38 +301,239 @@ describe('AdminPayoutsPage', () => {
     expect(text).not.toContain('secret-tutor-2');
   });
 
-  it('handles 409 nothing_to_pay with heldBack extensions by displaying reason notice', async () => {
+  describe('creating a payout round', () => {
+    /**
+     * The ProblemDetails body exactly as `DomainErrorHttpResults.ToProblemHttpResult` writes it: `title` is the domain message, `errorCode` /
+     * `reason` / `traceId` and a feature's own extensions are TOP-LEVEL members (no `detail`, no nested `extensions` object).
+     */
+    function problem(status: number, title: string, members: Record<string, unknown> = {}): Record<string, unknown> {
+      return { type: 'https://tools.ietf.org/html/rfc9110#section-15.5.10', title, status, traceId: '00-abc-def-00', errorCode: 'conflict', ...members };
+    }
+
+    const root = (): HTMLElement => harness.routeNativeElement as HTMLElement;
+    const text = (): string => root().textContent ?? '';
+    const button = (label: string): HTMLButtonElement | undefined =>
+      Array.from(root().querySelectorAll('button')).find((b) => b.textContent?.includes(label));
+    const periodInput = (): HTMLInputElement => root().querySelector<HTMLInputElement>('#payout-period-key-input')!;
+    const roundTypeRadios = (): HTMLInputElement[] => Array.from(root().querySelectorAll<HTMLInputElement>('input[name="payout-round-type"]'));
+
+    async function openDialog(): Promise<void> {
+      await navigate();
+      flushInitialRequests();
+      await settle();
+      button('เปิดรอบจ่ายเงินใหม่')?.click();
+      await settle();
+    }
+
+    async function chooseTutoring(): Promise<void> {
+      roundTypeRadios()[1].click();
+      await settle();
+    }
+
+    async function typePeriodKey(value: string): Promise<void> {
+      const input = periodInput();
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      await settle();
+    }
+
+    async function submit(): Promise<void> {
+      (root().querySelector('form') as HTMLFormElement).dispatchEvent(new Event('submit'));
+      await settle();
+    }
+
+    it('offers a course (monthly) and a tutoring (weekly) round, starting on the course one with this month', async () => {
+      await openDialog();
+
+      expect(roundTypeRadios().map((radio) => radio.value)).toEqual(['Course', 'Tutoring']);
+      expect(roundTypeRadios().map((radio) => radio.checked)).toEqual([true, false]);
+      expect(periodInput().value).toBe('2026-08');
+      expect(root().querySelector('[aria-label="สัปดาห์ล่าสุด"]')).toBeNull();
+    });
+
+    it('switching to a tutoring round suggests the week that just ended and offers the recent weeks as quick picks', async () => {
+      await openDialog();
+      await chooseTutoring();
+
+      // 2026-08-15 (Saturday, Thai time) is in ISO week 33, so the week that just ended is 32.
+      expect(periodInput().value).toBe('2026-W32');
+      expect(periodInput().placeholder).toBe('YYYY-Www เช่น 2026-W41');
+      const picks = Array.from(root().querySelectorAll<HTMLButtonElement>('[aria-label="สัปดาห์ล่าสุด"] button'));
+      expect(picks.map((pick) => pick.textContent?.trim())).toEqual(['2026-W33', '2026-W32', '2026-W31', '2026-W30']);
+
+      picks[0].click();
+      await settle();
+      expect(periodInput().value).toBe('2026-W33');
+      expect(picks[0].getAttribute('aria-pressed')).toBe('true');
+      expect(picks[1].getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('keeps the month and the week apart when the kind is switched back and forth', async () => {
+      await openDialog();
+      await typePeriodKey('2026-07');
+      await chooseTutoring();
+      expect(periodInput().value).toBe('2026-W32');
+      roundTypeRadios()[0].click();
+      await settle();
+      expect(periodInput().value).toBe('2026-07');
+    });
+
+    it('sends { periodKey, sourceType: "Tutoring" } for a weekly round and shows who was held back', async () => {
+      await openDialog();
+      await chooseTutoring();
+      await submit();
+
+      const postReq = httpMock.expectOne('/api/payout/admin/batches');
+      expect(postReq.request.method).toBe('POST');
+      expect(postReq.request.body).toEqual({ periodKey: '2026-W32', sourceType: 'Tutoring' });
+      postReq.flush({
+        id: 'batch-weekly',
+        periodKey: '2026-W32',
+        totalAmount: 7000,
+        status: 'Draft',
+        createdAtUtc: '2026-08-15T00:00:00Z',
+        items: [],
+        sourceType: 'Tutoring',
+        heldBack: { tutorCount: 1, rowCount: 2, amount: 900, instructorIds: ['hidden-instructor'] },
+      });
+      await settle();
+      httpMock.expectOne((r) => r.url === '/api/payout/admin/batches').flush(MOCK_BATCHES);
+      await settle();
+
+      expect(text()).toContain('สร้างรอบการจ่ายเงินงวด 2026-W32 เรียบร้อยแล้ว');
+      expect(text()).toContain('มีรายการถูกข้ามเนื่องจากติวเตอร์ถูกระงับหรือไม่ผ่านเงื่อนไข');
+      expect(text()).toContain('฿900.00');
+      expect(text()).not.toContain('hidden-instructor');
+    });
+
+    it('labels each listed round with its kind', async () => {
+      await navigate();
+      flushInitialRequests('ok', {
+        batches: {
+          items: [
+            { id: 'b-course', periodKey: '2026-07', totalAmount: 10, status: 'Draft', createdAtUtc: '2026-08-01T00:00:00Z', items: [], sourceType: 'Course' },
+            { id: 'b-tutoring', periodKey: '2026-W31', totalAmount: 20, status: 'Draft', createdAtUtc: '2026-08-04T00:00:00Z', items: [], sourceType: 'Tutoring' },
+          ],
+          totalCount: 2,
+          page: 1,
+          pageSize: 50,
+        },
+      });
+      await settle();
+
+      const rows = Array.from(root().querySelectorAll('tbody tr')).map((row) => row.querySelector('td')?.textContent?.replace(/\s+/g, ' ').trim());
+      expect(rows).toEqual(['2026-07 คอร์ส (รายเดือน)', '2026-W31 ติวเตอร์ (รายสัปดาห์)']);
+    });
+
+    it('refuses a malformed key for the chosen kind before sending anything', async () => {
+      await openDialog();
+      await typePeriodKey('2026-13');
+      await submit();
+      expect(text()).toContain('รอบคอร์สใช้รหัสงวดรายเดือนรูปแบบ YYYY-MM');
+      expect(periodInput().getAttribute('aria-invalid')).toBe('true');
+
+      await chooseTutoring();
+      expect(text()).not.toContain('รอบคอร์สใช้รหัสงวดรายเดือนรูปแบบ YYYY-MM');
+      await typePeriodKey('2026-W54');
+      await submit();
+      expect(text()).toContain('รอบติวเตอร์ใช้รหัสสัปดาห์ ISO รูปแบบ YYYY-Www');
+
+      await typePeriodKey('2026-08');
+      await submit();
+      expect(text()).toContain('รอบติวเตอร์ใช้รหัสสัปดาห์ ISO รูปแบบ YYYY-Www');
+      // httpMock.verify() in afterEach proves no POST went out.
+    });
+
+    it('409 nothing_to_pay: reads the held-back numbers from the real ProblemDetails (top-level members, through the real error interceptor)', async () => {
+      await openDialog();
+      await chooseTutoring();
+      await submit();
+
+      httpMock.expectOne('/api/payout/admin/batches').flush(
+        problem(409, 'ไม่มีรายการที่ต้องจ่ายในรอบ 2026-W32', {
+          reason: 'payout.nothing_to_pay',
+          heldBackTutorCount: 3,
+          heldBackRowCount: 5,
+          heldBackAmount: 4500,
+        }),
+        { status: 409, statusText: 'Conflict' },
+      );
+      await settle();
+
+      expect(text()).toContain('ไม่มีรายการที่ต้องจ่ายในรอบนี้ (มีผู้สอน 3 ท่าน รวม 5 รายการ ยอดรวม ฿4,500.00 ถูกข้ามเนื่องจากถูกระงับหรือไม่ผ่านเงื่อนไข)');
+      expect(text()).not.toContain('เกิดข้อผิดพลาดในการสร้างรอบจ่ายเงิน');
+      expect(periodInput()).not.toBeNull();
+    });
+
+    it('409 nothing_to_pay with nothing held back is the plain "nothing is due" message, not the held-back one', async () => {
+      await openDialog();
+      await chooseTutoring();
+      await submit();
+
+      httpMock.expectOne('/api/payout/admin/batches').flush(
+        problem(409, 'ไม่มีรายการที่ต้องจ่ายในรอบ 2026-W32', { reason: 'payout.nothing_to_pay' }),
+        { status: 409, statusText: 'Conflict' },
+      );
+      await settle();
+
+      expect(text()).toContain('ไม่มีรายการที่ต้องจ่ายในงวดนี้');
+      expect(text()).not.toContain('ถูกข้ามเนื่องจากถูกระงับหรือไม่ผ่านเงื่อนไข)');
+    });
+
+    it('explains a round that already exists from its reason, in the page language', async () => {
+      await openDialog();
+      await chooseTutoring();
+      await submit();
+
+      httpMock.expectOne('/api/payout/admin/batches').flush(
+        problem(409, 'รอบจ่ายเงิน 2026-W32 มีอยู่แล้ว', { reason: 'payout.batch_exists' }),
+        { status: 409, statusText: 'Conflict' },
+      );
+      await settle();
+
+      expect(text()).toContain('มีรอบจ่ายเงินของงวดนี้อยู่แล้ว');
+    });
+
+    it('shows the server message of a failure it has no reason for, taken from the ProblemDetails title', async () => {
+      await openDialog();
+      await submit();
+
+      httpMock.expectOne('/api/payout/admin/batches').flush(
+        problem(409, 'ยังไม่ได้ตั้งค่าบัญชีผู้จ่ายเงิน', { errorCode: 'payout.payer_not_configured' }),
+        { status: 409, statusText: 'Conflict' },
+      );
+      await settle();
+
+      expect(text()).toContain('ยังไม่ได้ตั้งค่าบัญชีผู้จ่ายเงิน');
+    });
+
+    it('falls back to the generic line when the server sends no readable body at all', async () => {
+      await openDialog();
+      await submit();
+
+      httpMock.expectOne('/api/payout/admin/batches').flush('Bad gateway', { status: 502, statusText: 'Bad Gateway' });
+      await settle();
+
+      expect(text()).toContain('เกิดข้อผิดพลาดในการสร้างรอบจ่ายเงิน');
+    });
+  });
+
+  it('shows the server message when executing a round fails (ApiError, not a raw HttpErrorResponse)', async () => {
     await navigate();
     flushInitialRequests();
     await settle();
 
-    const createBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
-      (b) => b.textContent?.includes('เปิดรอบจ่ายเงินใหม่')
-    );
-    createBtn?.click();
+    const executeBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find((b) => b.textContent?.includes('ยืนยันจ่ายเงิน'));
+    executeBtn?.click();
     await settle();
 
-    const form = harness.routeNativeElement?.querySelector('form') as HTMLFormElement;
-    form.dispatchEvent(new Event('submit'));
-    await settle();
-
-    const postReq = httpMock.expectOne('/api/payout/admin/batches');
-    postReq.flush(
-      {
-        title: 'Conflict',
-        status: 409,
-        detail: 'payout.nothing_to_pay',
-        extensions: {
-          heldBackTutorCount: 3,
-          heldBackAmount: 4500,
-        },
-      },
-      { status: 409, statusText: 'Conflict' }
+    httpMock.expectOne('/api/payout/admin/batches/batch-1/execute').flush(
+      { type: 'about:blank', title: 'รอบนี้ถูกยืนยันจ่ายไปแล้ว', status: 409, traceId: 't', errorCode: 'conflict' },
+      { status: 409, statusText: 'Conflict' },
     );
     await settle();
 
-    const text = harness.routeNativeElement?.textContent ?? '';
-    expect(text).toContain('ไม่มีรายการที่ต้องจ่ายในรอบนี้ (มีผู้สอน 3 ท่าน ยอดรวม ฿4,500 ถูกข้ามเนื่องจากถูกระงับหรือไม่ผ่านเงื่อนไข)');
+    expect(harness.routeNativeElement?.textContent).toContain('รอบนี้ถูกยืนยันจ่ายไปแล้ว');
   });
 
   it('renders heldBack badge in batches table for batch with heldBack tutors', async () => {

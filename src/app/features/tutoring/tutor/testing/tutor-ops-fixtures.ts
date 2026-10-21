@@ -28,6 +28,8 @@ export function availability(overrides: Partial<TutorAvailability> = {}): TutorA
     settings: { minNoticeHours: 24, bufferMinutes: 10, maxAdvanceDays: 60, rowVersion: 'AAAAAAAAB9E=' },
     rules: [{ dayOfWeek: 1, startLocal: '09:00', endLocal: '12:00' }],
     maxRules: 50,
+    allowedDurationMinutes: [30, 60, 90, 120],
+    allowedBufferMinutes: [0, 5, 10, 15, 20, 30, 45, 60],
     ...overrides,
   };
 }

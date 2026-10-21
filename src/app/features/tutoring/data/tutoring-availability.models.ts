@@ -32,7 +32,13 @@ export interface TutorAvailability {
   readonly rules: readonly AvailabilityRule[];
   /** The most rules the server accepts for one tutor. */
   readonly maxRules: number;
-  readonly allowedDurationMinutes?: readonly number[];
+  /**
+   * The class lengths (minutes) the platform accepts - `Tutoring:Slots:AllowedDurationsMinutes`, ascending, never empty and never `null`.
+   * What the preview's length picker offers; the client holds no list of its own.
+   */
+  readonly allowedDurationMinutes: readonly number[];
+  /** The rest lengths (minutes) after a class a tutor may choose - `Tutoring:Slots:AllowedBufferMinutes`, ascending. A buffer outside it answers `400`. */
+  readonly allowedBufferMinutes: readonly number[];
 }
 
 export interface ReplaceRulesRequest {

@@ -44,9 +44,7 @@
           {{ 'tutoring.learner.packages.checkout.refunded.heading' | translate }}
         </h2>
         <p class="max-w-prose text-base text-[var(--color-text)]">
-          {{ (refundIsConsentWithdrawn()
-              ? 'tutoring.learner.packages.checkout.refunded.consentWithdrawnBody'
-              : (refundIsDuplicate() ? 'tutoring.learner.packages.checkout.refunded.duplicateBody' : 'tutoring.learner.packages.checkout.refunded.lateBody')) | translate }}
+          {{ (refundIsDuplicate() ? 'tutoring.learner.packages.checkout.refunded.duplicateBody' : 'tutoring.learner.packages.checkout.refunded.lateBody') | translate }}
         </p>
         @if (paymentState(); as state) {
           <p class="max-w-prose text-base text-[var(--color-text)]">

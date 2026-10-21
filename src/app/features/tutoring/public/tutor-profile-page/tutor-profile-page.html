@@ -172,7 +172,7 @@
         @if (tutor.educations.length > 0) {
           <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5">
             <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.educationHeading' | translate }}</h2>
-            <ul class="flex flex-col gap-3">
+            <ul class="flex flex-col gap-3"><!-- the @for below tracks $index on purpose: PublicEducation has no id (C# record) and the list is read-only and server-ordered, so an index is a stable identity -->
               @for (education of tutor.educations; track $index) {
                 <li class="flex flex-col text-sm">
                   <span class="font-semibold text-[var(--color-text)]">{{ education.degree }}@if (education.field) {, {{ education.field }}}</span>
@@ -193,7 +193,7 @@
         @if (tutor.certificates.length > 0) {
           <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5">
             <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.certificatesHeading' | translate }}</h2>
-            <ul class="flex flex-col gap-3">
+            <ul class="flex flex-col gap-3"><!-- the @for below tracks $index on purpose: PublicCertificate has no id (C# record) and the list is read-only and server-ordered, so an index is a stable identity -->
               @for (certificate of tutor.certificates; track $index) {
                 <li class="flex items-start gap-2 text-sm">
                   <ng-icon name="phosphorCertificate" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--hue-gold-fg)]" />

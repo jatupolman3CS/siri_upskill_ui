@@ -15,6 +15,8 @@ const PROFILE: LearnerProfile = {
   guardianConsentAtUtc: '2026-10-14T03:00:00Z',
   guardianConsentVersion: '2026-10-v1',
   isActive: true,
+  anonymizedAtUtc: null,
+  guardianConsentWithdrawnAtUtc: null,
 };
 
 const UPSERT: UpsertLearnerProfileRequest = {

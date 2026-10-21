@@ -54,7 +54,8 @@ export class PackageForm {
   /** `null` = create a new package. */
   readonly tutorPackage = input<TutorPackage | null>(null);
   readonly offeringChoices = input.required<readonly OfferingChoice[]>();
-  readonly allowedDurationMinutes = input<readonly number[]>([30, 60, 90, 120]);
+  /** The class lengths (minutes) the server accepts - the tutor profile's `allowedDurationMinutes`. Required: the form never assumes a list. */
+  readonly allowedDurationMinutes = input.required<readonly number[]>();
   readonly saved = output<TutorPackage>();
   readonly cancelled = output<void>();
 
@@ -62,7 +63,7 @@ export class PackageForm {
   protected readonly form = new FormGroup({
     offeringId: new FormControl('', { nonNullable: true }),
     sessionCount: new FormControl('', { nonNullable: true }),
-    durationMinutes: new FormControl('60', { nonNullable: true }),
+    durationMinutes: new FormControl('', { nonNullable: true }),
     discountPercent: new FormControl('', { nonNullable: true }),
     validDays: new FormControl('', { nonNullable: true }),
     isActive: new FormControl(true, { nonNullable: true }),
@@ -92,16 +93,17 @@ export class PackageForm {
     effect(() => {
       const existing = this.tutorPackage();
       const first = this.offeringChoices().at(0)?.offeringId ?? '';
-      untracked(() => this.initialise(existing, first));
+      // The length list only picks the starting length of a NEW package; a later change of the list must not wipe what is being typed.
+      untracked(() => this.initialise(existing, first, this.allowedDurationMinutes()));
     });
   }
 
-  private initialise(existing: TutorPackage | null, firstOffering: Guid): void {
+  private initialise(existing: TutorPackage | null, firstOffering: Guid, allowedDurations: readonly number[]): void {
     const identity = [this.form.controls.offeringId, this.form.controls.sessionCount, this.form.controls.durationMinutes];
     for (const control of identity) {
       control.enable({ emitEvent: false });
     }
-    this.form.reset(existing ? packageToForm(existing) : emptyPackageForm(firstOffering));
+    this.form.reset(existing ? packageToForm(existing) : emptyPackageForm(firstOffering, allowedDurations));
     this.feedback.reset();
     this.serverRejected.set(new Set());
     this.problem.set(null);

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -35,6 +36,8 @@ import { PayoutApiService } from '../../payout/data/payout-api.service';
 import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
 import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
 import { payoutBatchStatusBadge, revenueSplitStatusBadge } from '../../payout/ui/payout-status-badges';
+import { nothingToPayHeldBackOf, payoutReasonKey, serverMessageOr } from './payout-batch-error.util';
+import { PAYOUT_ROUND_TYPES, type PayoutRoundType, defaultPeriodKey, periodKeyIssue, recentIsoWeekKeys } from './payout-period.util';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
@@ -43,6 +46,9 @@ import { Modal } from '../../../shared/modal/modal';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { Spinner } from '../../../shared/spinner/spinner';
 
+/** How many ISO weeks the dialog offers as quick picks for a tutoring round (the current one and the three before it). */
+const RECENT_WEEK_COUNT = 4;
+
 @Component({
   selector: 'app-admin-payouts-page',
   imports: [CommonModule, FormsModule, NgIcon, CurrencyThbPipe, TranslatePipe, Modal, Skeleton, Spinner, PayoutPolicyText],
@@ -50,6 +56,8 @@ import { Spinner } from '../../../shared/spinner/spinner';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     CurrencyPipe,
+    // Money inside a translated sentence (the held-back notice) is formatted by the same pipe the templates use.
+    CurrencyThbPipe,
     // One `GET /api/payout/policy` per page load, shared by the header copy and the create-batch hint.
     PayoutPolicyStore,
     provideIcons({
@@ -77,6 +85,7 @@ export class AdminPayoutsPage implements OnInit {
   private readonly refundsApi = inject(AdminRefundsApiService);
   private readonly seoService = inject(SeoService);
   private readonly translation = inject(TranslationService);
+  private readonly currencyThb = inject(CurrencyThbPipe);
 
   protected readonly activeTab = signal<'batches' | 'splits' | 'refunds'>('batches');
 
@@ -85,7 +94,15 @@ export class AdminPayoutsPage implements OnInit {
   protected readonly totalBatches = signal(0);
   protected readonly isLoadingBatches = signal(false);
   protected readonly showCreateBatchModal = signal(false);
-  protected readonly newPeriodKey = signal('');
+  /** The kind of round the dialog creates: the monthly course run or the weekly tutoring run. */
+  protected readonly roundTypes = PAYOUT_ROUND_TYPES;
+  protected readonly newRoundType = signal<PayoutRoundType>('Course');
+  /** The key being typed for each kind, kept apart so switching kind never carries a month into a week field or back. */
+  private readonly periodKeys = signal<Readonly<Record<PayoutRoundType, string>>>({ Course: '', Tutoring: '' });
+  protected readonly newPeriodKey = computed(() => this.periodKeys()[this.newRoundType()]);
+  /** Quick picks for a tutoring round: the current ISO week and the ones before it. */
+  protected readonly recentWeeks = signal<readonly string[]>([]);
+  protected readonly periodKeyError = signal<string | null>(null);
   protected readonly isSubmittingBatch = signal(false);
   protected readonly heldBackNotice = signal<PayoutHeldBack | null>(null);
 
@@ -124,10 +141,6 @@ export class AdminPayoutsPage implements OnInit {
       path: '/admin/payouts',
       robots: 'noindex',
     });
-
-    const now = new Date();
-    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    this.newPeriodKey.set(currentMonthKey);
 
     this.loadBatches();
     this.loadSplits();
@@ -188,6 +201,12 @@ export class AdminPayoutsPage implements OnInit {
 
   // Create Batch
   protected openCreateBatchModal(): void {
+    // The suggested keys are read from the clock each time the dialog opens, so a page left open overnight never offers yesterday's.
+    const now = Date.now();
+    this.periodKeys.set({ Course: defaultPeriodKey('Course', now), Tutoring: defaultPeriodKey('Tutoring', now) });
+    this.recentWeeks.set(recentIsoWeekKeys(now, RECENT_WEEK_COUNT));
+    this.newRoundType.set('Course');
+    this.periodKeyError.set(null);
     this.showCreateBatchModal.set(true);
   }
 
@@ -195,15 +214,35 @@ export class AdminPayoutsPage implements OnInit {
     this.showCreateBatchModal.set(false);
   }
 
+  protected selectRoundType(type: PayoutRoundType): void {
+    this.newRoundType.set(type);
+    this.periodKeyError.set(null);
+  }
+
+  protected setPeriodKey(value: string): void {
+    const type = this.newRoundType();
+    this.periodKeys.update((keys) => ({ ...keys, [type]: value }));
+    this.periodKeyError.set(null);
+  }
+
+  /** The kind a listed round is: a response without `sourceType` is a course round (the field's default on the server). */
+  protected roundTypeOf(batch: PayoutBatchItem): PayoutRoundType {
+    return batch.sourceType ?? 'Course';
+  }
+
   protected submitCreateBatch(): void {
+    const type = this.newRoundType();
     const periodKey = this.newPeriodKey().trim();
-    if (!periodKey) {
-      this.showMessage('error', this.translation.t('admin.payouts.errors.periodKeyRequired'));
+    const issue = periodKeyIssue(type, periodKey);
+    if (issue !== null) {
+      this.periodKeyError.set(
+        this.translation.t(issue === 'required' ? 'admin.payouts.errors.periodKeyRequired' : `admin.payouts.errors.periodKeyInvalid${type}`),
+      );
       return;
     }
 
     this.isSubmittingBatch.set(true);
-    this.payoutApi.createPayoutBatch({ periodKey }).subscribe({
+    this.payoutApi.createPayoutBatch({ periodKey, sourceType: type }).subscribe({
       next: (batch) => {
         this.isSubmittingBatch.set(false);
         this.closeCreateBatchModal();
@@ -215,25 +254,26 @@ export class AdminPayoutsPage implements OnInit {
         this.showMessage('success', this.translation.t('admin.payouts.messages.batchCreated', { periodKey }));
         this.loadBatches();
       },
-      error: (err) => {
+      error: (error: unknown) => {
         this.isSubmittingBatch.set(false);
-        if (err?.status === 409) {
-          const ext = err?.error?.extensions ?? err?.error;
-          const heldBackCount = ext?.heldBackTutorCount ?? ext?.heldBackCount;
-          const heldBackAmount = ext?.heldBackAmount;
-          if (heldBackCount && heldBackCount > 0) {
-            this.showMessage(
-              'error',
-              this.translation.t('admin.payouts.errors.nothingToPayWithHeldBack', {
-                tutorCount: heldBackCount,
-                amount: typeof heldBackAmount === 'number' ? `฿${heldBackAmount.toLocaleString()}` : (heldBackAmount ?? ''),
-              }),
-            );
-            return;
-          }
+        // "Nothing to pay" because every tutor due was held back is not the same news as "nothing is due": the 409 says how many.
+        const heldBack = nothingToPayHeldBackOf(error);
+        if (heldBack !== null) {
+          this.showMessage(
+            'error',
+            this.translation.t('admin.payouts.errors.nothingToPayWithHeldBack', {
+              tutorCount: heldBack.tutorCount,
+              rowCount: heldBack.rowCount,
+              amount: this.currencyThb.transform(heldBack.amount) ?? '',
+            }),
+          );
+          return;
         }
-        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.createBatch');
-        this.showMessage('error', errorDetail);
+        const reasonKey = payoutReasonKey(error);
+        this.showMessage(
+          'error',
+          reasonKey !== null ? this.translation.t(reasonKey) : serverMessageOr(error, this.translation.t('admin.payouts.errors.createBatch')),
+        );
       },
     });
   }
@@ -256,9 +296,8 @@ export class AdminPayoutsPage implements OnInit {
         this.showMessage('success', this.translation.t('admin.payouts.messages.batchExecuted', { periodKey: batch.periodKey }));
         this.loadBatches();
       },
-      error: (err) => {
-        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.executeBatch');
-        this.showMessage('error', errorDetail);
+      error: (error: unknown) => {
+        this.showMessage('error', serverMessageOr(error, this.translation.t('admin.payouts.errors.executeBatch')));
       },
     });
   }
@@ -301,14 +340,13 @@ export class AdminPayoutsPage implements OnInit {
           this.closeApproveRefundModal();
           this.showMessage(
             'success',
-            this.translation.t('admin.payouts.messages.refundApproved', { amount: refund.amount.toLocaleString() }),
+            this.translation.t('admin.payouts.messages.refundApproved', { amount: this.currencyThb.transform(refund.amount) ?? '' }),
           );
           this.loadRefunds();
         },
-        error: (err) => {
+        error: (error: unknown) => {
           this.isSubmittingApprove.set(false);
-          const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.approveRefund');
-          this.showMessage('error', errorDetail);
+          this.showMessage('error', serverMessageOr(error, this.translation.t('admin.payouts.errors.approveRefund')));
         },
       });
   }
@@ -341,10 +379,9 @@ export class AdminPayoutsPage implements OnInit {
         this.showMessage('success', this.translation.t('admin.payouts.messages.refundRejected'));
         this.loadRefunds();
       },
-      error: (err) => {
+      error: (error: unknown) => {
         this.isSubmittingReject.set(false);
-        const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.rejectRefund');
-        this.showMessage('error', errorDetail);
+        this.showMessage('error', serverMessageOr(error, this.translation.t('admin.payouts.errors.rejectRefund')));
       },
     });
   }

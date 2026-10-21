@@ -61,8 +61,5 @@ export class CheckoutOutcome {
     const state = this.paymentState();
     return state !== null && lateResolutionOf(state) === 'Duplicate';
   });
-  protected readonly refundIsConsentWithdrawn = computed(() => {
-    return !!this.booking().learner.guardianConsentWithdrawnAtUtc;
-  });
   protected readonly refundIsPromptPay = computed(() => this.paymentState()?.method === 'PromptPay');
 }

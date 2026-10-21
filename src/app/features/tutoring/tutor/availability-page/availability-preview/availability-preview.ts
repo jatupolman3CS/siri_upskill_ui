@@ -10,6 +10,7 @@ import { TranslationService } from '../../../../../core/i18n/translation.service
 import { SelectField, type SelectOption } from '../../../../../shared/select/select';
 import { addDaysToDate } from '../../../../live/data/live-instructor.util';
 import { bangkokDateOf, slotWindowRange } from '../../../data/tutor-slots.util';
+import { initialDurationOf } from '../../../data/tutoring-booking.util';
 import { tutoringErrorKey } from '../../../data/tutoring-errors';
 import { curriculumLabelKey, levelLabelKey, localizedName } from '../../../data/tutoring-labels';
 import { TutoringPublicApiService } from '../../../data/tutoring-public-api.service';
@@ -18,7 +19,6 @@ import type { TutorOffering } from '../../../data/tutoring-tutor.models';
 import { SlotPicker } from '../../../ui/slot-picker/slot-picker';
 
 const WINDOW_DAYS = 7;
-const FALLBACK_MAX_ADVANCE_DAYS = 60;
 
 /**
  * "What learners will see" (P13-25): the PUBLIC slot list of the tutor, rendered with the same picker the booking page uses,
@@ -42,15 +42,21 @@ export class AvailabilityPreview {
   readonly slug = input.required<string>();
   /** Active subjects only (a paused one cannot be booked, so it has no public slots). */
   readonly offerings = input.required<readonly TutorOffering[]>();
-  /** Allowed class durations from tutor availability. */
-  readonly allowedDurationMinutes = input<readonly number[] | undefined>(undefined);
+  /** The class lengths (minutes) the server accepts (`allowedDurationMinutes` of the availability read); the picker offers exactly these. */
+  readonly allowedDurationMinutes = input.required<readonly number[]>();
+  /**
+   * How many days ahead learners can book - the tutor's own `maxAdvanceDays` from the availability settings the page already holds
+   * (it follows a settings save). The calendar never pages beyond it; nothing is assumed before a slot answer arrives.
+   */
+  readonly maxAdvanceDays = input.required<number>();
   /** Whether the profile is listed publicly; if not, there is nothing public to preview. */
   readonly listed = input.required<boolean>();
   /** Bumped by the page whenever the availability changed, so the preview refetches. */
   readonly refresh = input(0);
 
   protected readonly offeringControl = new FormControl('', { nonNullable: true });
-  protected readonly durationControl = new FormControl('60', { nonNullable: true });
+  /** Empty until the first allowed length is picked (see the constructor); no length is assumed. */
+  protected readonly durationControl = new FormControl('', { nonNullable: true });
   private readonly offeringId = toSignal(this.offeringControl.valueChanges.pipe(startWith(this.offeringControl.value)), { requireSync: true });
   private readonly duration = toSignal(this.durationControl.valueChanges.pipe(startWith(this.durationControl.value)), { requireSync: true });
 
@@ -68,16 +74,15 @@ export class AvailabilityPreview {
       ].join(' - '),
     })),
   );
-  protected readonly durationOptions = computed<readonly SelectOption[]>(() => {
-    const durations = this.allowedDurationMinutes() ?? [30, 60, 90, 120];
-    return durations.map((minutes) => ({
+  protected readonly durationOptions = computed<readonly SelectOption[]>(() =>
+    this.allowedDurationMinutes().map((minutes) => ({
       value: String(minutes),
       label: this.i18n.t('tutoring.tutor.availability.preview.durationOption', { minutes }),
-    }));
-  });
+    })),
+  );
 
   protected readonly windowStart = computed(() => addDaysToDate(this.today, this.weekIndex() * WINDOW_DAYS) ?? this.today);
-  protected readonly canPreview = computed(() => this.listed() && this.offerings().length > 0 && this.offeringId() !== '');
+  protected readonly canPreview = computed(() => this.listed() && this.offerings().length > 0 && this.offeringId() !== '' && this.duration() !== '');
 
   protected readonly slotsResource = rxResource({
     params: () => {
@@ -99,7 +104,7 @@ export class AvailabilityPreview {
   protected readonly failed = computed(() => this.slotsResource.status() === 'error');
   protected readonly errorMessage = computed(() => this.i18n.t(tutoringErrorKey(this.slotsResource.error() as ApiError | undefined)));
   protected readonly canGoPrevious = computed(() => this.weekIndex() > 0);
-  protected readonly canGoNext = computed(() => (this.weekIndex() + 1) * WINDOW_DAYS <= (this.response()?.maxAdvanceDays ?? FALLBACK_MAX_ADVANCE_DAYS));
+  protected readonly canGoNext = computed(() => (this.weekIndex() + 1) * WINDOW_DAYS <= this.maxAdvanceDays());
 
   constructor() {
     // Keep a valid subject selected: the first active one, and again whenever the list changes under the current choice.
@@ -112,12 +117,13 @@ export class AvailabilityPreview {
       });
     });
 
-    // Keep a valid duration selected: the first allowed one if the current choice is not in the list.
+    // Keep a valid duration selected: when the current choice is not in the server's list, 60 if it is listed, else the shortest listed
+    // length (the same starting rule as the booking screens); nothing at all if the list is empty.
     effect(() => {
-      const durations = this.allowedDurationMinutes() ?? [30, 60, 90, 120];
+      const durations = this.allowedDurationMinutes();
       untracked(() => {
         if (!durations.map(String).includes(this.durationControl.value)) {
-          this.durationControl.setValue(String(durations[0] ?? 60));
+          this.durationControl.setValue(durations.length > 0 ? String(initialDurationOf(durations)) : '');
         }
       });
     });

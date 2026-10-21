@@ -107,7 +107,7 @@ export class LessonPicker implements OnInit {
       ].join(' - '),
     })),
   );
-  /** The lesson lengths the tutor's profile says this deployment accepts (the server's own list; a fallback only when the field is absent). */
+  /** The lesson lengths the tutor's profile says this deployment accepts (the server's own list; the client adds none). */
   protected readonly allowedDurations = computed(() => allowedDurationsOf(this.tutor()));
   protected readonly durationOptions = computed<SelectOption[]>(() =>
     this.allowedDurations().map((minutes) => ({ value: String(minutes), label: this.translation.t('tutoring.booking.durationOption', { minutes }) })),

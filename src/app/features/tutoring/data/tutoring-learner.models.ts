@@ -57,6 +57,10 @@ export interface UpsertLearnerProfileRequest {
   readonly guardianConsentVersion?: string | null;
 }
 
+/**
+ * A learner profile as its owner sees it (the C# `LearnerProfileResponse`). `anonymizedAtUtc` and `guardianConsentWithdrawnAtUtc`
+ * are always present on the wire - `null` means "never" - so they are declared required, exactly as the record sends them.
+ */
 export interface LearnerProfile {
   readonly learnerProfileId: Guid;
   readonly nickname: string;
@@ -65,8 +69,8 @@ export interface LearnerProfile {
   readonly guardianConsentAtUtc: IsoUtc | null;
   readonly guardianConsentVersion: string | null;
   readonly isActive: boolean;
-  readonly anonymizedAtUtc?: IsoUtc | null;
-  readonly guardianConsentWithdrawnAtUtc?: IsoUtc | null;
+  readonly anonymizedAtUtc: IsoUtc | null;
+  readonly guardianConsentWithdrawnAtUtc: IsoUtc | null;
 }
 
 /** Body of `POST /api/tutoring/learner-profiles/{id}/withdraw-consent` (P13-17). */
@@ -109,7 +113,6 @@ export interface BookingLearnerSummary {
   readonly learnerProfileId: Guid;
   readonly nickname: string;
   readonly gradeLevel: LearnerGrade;
-  readonly guardianConsentWithdrawnAtUtc?: IsoUtc | null;
 }
 
 /**

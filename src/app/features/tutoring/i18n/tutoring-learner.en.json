@@ -305,8 +305,7 @@
           "refunded": {
             "heading": "Your payment is being refunded",
             "lateBody": "Your payment arrived after this purchase was closed, so the full amount is being returned to you.",
-            "duplicateBody": "This package had already been paid for, so the extra payment is being returned to you in full.",
-            "consentWithdrawnBody": "Paid but refunded in full because learner profile's guardian consent was withdrawn."
+            "duplicateBody": "This package had already been paid for, so the extra payment is being returned to you in full."
           },
           "actions": {
             "bookLesson": "Book a lesson",
@@ -534,7 +533,6 @@
         "heading": "Your payment is being refunded",
         "lateBody": "Your payment arrived after the time was released and that time is no longer free, so the full amount is being returned to you.",
         "duplicateBody": "This booking had already been paid, so the extra payment is being returned to you in full.",
-        "consentWithdrawnBody": "Paid but refunded in full because learner profile's guardian consent was withdrawn.",
         "amount": "Amount returned: {{amount}}.",
         "promptpayNote": "PromptPay refunds are handled by Stripe and can take several days. Stripe may email you to ask for your bank account details."
       },

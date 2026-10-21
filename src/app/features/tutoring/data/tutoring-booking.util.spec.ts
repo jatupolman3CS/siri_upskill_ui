@@ -1,6 +1,5 @@
 import type { TutorSlot } from './tutoring-public.models';
 import {
-  FALLBACK_SESSION_DURATIONS,
   allowedDurationsOf,
   countdownStage,
   findSlotStartingAt,
@@ -128,11 +127,8 @@ describe('allowedDurationsOf / initialDurationOf', () => {
     expect(allowedDurationsOf({ allowedDurationMinutes: [0, -30, 1.5, 60, Number.NaN, 90] })).toEqual([60, 90]);
   });
 
-  it('falls back to the historical default only when the field is absent, null or empty', () => {
-    expect(allowedDurationsOf({})).toEqual(FALLBACK_SESSION_DURATIONS);
-    expect(allowedDurationsOf({ allowedDurationMinutes: null })).toEqual(FALLBACK_SESSION_DURATIONS);
-    expect(allowedDurationsOf({ allowedDurationMinutes: [] })).toEqual(FALLBACK_SESSION_DURATIONS);
-    expect(FALLBACK_SESSION_DURATIONS).toEqual([30, 60, 90, 120]);
+  it('invents no lengths of its own: an empty list stays empty', () => {
+    expect(allowedDurationsOf({ allowedDurationMinutes: [] })).toEqual([]);
   });
 
   it('starts on the requested length when it is allowed, else on 60 when allowed, else on the shortest allowed', () => {

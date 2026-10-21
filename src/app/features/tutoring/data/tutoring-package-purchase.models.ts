@@ -24,7 +24,6 @@ export interface PackageTutorRef {
 export interface PackageLearnerRef {
   readonly learnerProfileId: Guid;
   readonly nickname: string;
-  readonly guardianConsentWithdrawnAtUtc?: IsoUtc | null;
 }
 
 /** Body of `POST packages/{packageId}/purchase`. No price, tutor or user id: the server derives all of them. */

@@ -140,8 +140,13 @@
                 @for (batch of batches(); track batch.id) {
                   <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
                     <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-text)]">
-                      <div class="flex items-center gap-2">
+                      <div class="flex flex-wrap items-center gap-2">
                         <span>{{ batch.periodKey }}</span>
+                        <span
+                          class="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-2 py-0.5 font-sans text-[10px] font-bold text-[var(--color-text)]"
+                        >
+                          {{ 'admin.payouts.roundTypes.' + roundTypeOf(batch) | translate }}
+                        </span>
                         @if (batch.heldBack && batch.heldBack.tutorCount > 0) {
                           <span
                             class="tone-gold inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]"
@@ -400,20 +405,74 @@
       [closeOnOverlayClick]="false"
     >
       <form id="payout-batch-form" (ngSubmit)="submitCreateBatch()" class="space-y-4 text-xs">
+        <fieldset class="flex flex-col gap-2">
+          <legend class="mb-1 block font-bold text-[var(--color-text)]">{{ 'admin.payouts.createModal.typeLabel' | translate }}</legend>
+          @for (type of roundTypes; track type) {
+            <label
+              class="glass-card flex min-h-11 cursor-pointer items-start gap-3 rounded-xl p-3 has-[:checked]:border-[var(--color-primary)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-focus-ring)]"
+            >
+              <input
+                type="radio"
+                name="payout-round-type"
+                class="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+                [value]="type"
+                [checked]="newRoundType() === type"
+                (change)="selectRoundType(type)"
+              />
+              <span class="min-w-0">
+                <span class="block font-semibold text-[var(--color-text)]">{{ 'admin.payouts.createModal.types.' + type + '.title' | translate }}</span>
+                <span class="block text-[11px] text-[var(--color-text-muted)]">{{ 'admin.payouts.createModal.types.' + type + '.description' | translate }}</span>
+              </span>
+            </label>
+          }
+        </fieldset>
+
         <div>
           <label for="payout-period-key-input" class="block font-bold text-[var(--color-text)] mb-1">{{ 'admin.payouts.createModal.periodKeyLabel' | translate }}</label>
           <input
             id="payout-period-key-input"
             type="text"
             [ngModel]="newPeriodKey()"
-            (ngModelChange)="newPeriodKey.set($event)"
+            (ngModelChange)="setPeriodKey($event)"
             name="pKey"
             required
-            [placeholder]="'admin.payouts.createModal.periodKeyPlaceholder' | translate"
+            autocomplete="off"
+            [attr.aria-invalid]="periodKeyError() !== null"
+            [attr.aria-describedby]="periodKeyError() !== null ? 'payout-period-key-error' : 'payout-period-key-hint'"
+            [placeholder]="'admin.payouts.createModal.periodKeyPlaceholder' + newRoundType() | translate"
             class="min-h-11 w-full rounded-xl glass-card px-3 py-2.5 font-mono text-[var(--color-text)] focus:border-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
           />
-          <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">
-            <app-payout-policy-text messageKey="admin.payouts.createBatchHint" skeletonWidth="100%" />
+          @if (periodKeyError(); as message) {
+            <p id="payout-period-key-error" role="alert" class="tone-red mt-1 text-[11px] font-semibold text-[var(--tone-fg)]">{{ message }}</p>
+          }
+          @if (newRoundType() === 'Tutoring') {
+            <div class="mt-2 flex flex-col gap-1" role="group" [attr.aria-label]="'admin.payouts.createModal.recentWeeks' | translate">
+              <span class="text-[11px] font-semibold text-[var(--color-text-muted)]">{{ 'admin.payouts.createModal.recentWeeks' | translate }}</span>
+              <div class="flex flex-wrap items-center gap-2">
+                @for (week of recentWeeks(); track week) {
+                  <button
+                    type="button"
+                    (click)="setPeriodKey(week)"
+                    [attr.aria-pressed]="newPeriodKey() === week"
+                    [class]="
+                      newPeriodKey() === week
+                        ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                        : 'bg-[var(--glass-bg-strong)] text-[var(--color-text-muted)]'
+                    "
+                    class="btn-tactile hit-44 rounded-xl border border-[var(--color-border)] px-3 py-1.5 font-mono text-[11px] font-bold transition"
+                  >
+                    {{ week }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+          <p id="payout-period-key-hint" class="mt-1 text-[11px] text-[var(--color-text-muted)]">
+            @if (newRoundType() === 'Course') {
+              <app-payout-policy-text messageKey="admin.payouts.createBatchHint" skeletonWidth="100%" />
+            } @else {
+              {{ 'admin.payouts.createBatchHintTutoring' | translate }}
+            }
           </p>
         </div>
       </form>

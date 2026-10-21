@@ -39,6 +39,8 @@ describe('learnerToForm', () => {
     guardianConsentAtUtc: '2026-10-14T03:00:00Z',
     guardianConsentVersion: GUARDIAN_CONSENT_VERSION,
     isActive: true,
+    anonymizedAtUtc: null,
+    guardianConsentWithdrawnAtUtc: null,
   };
 
   it('loads the stored values but asks for the consent again - it is explicit on every save', () => {

@@ -20,6 +20,8 @@ export function learnerProfile(overrides: Partial<LearnerProfile> = {}): Learner
     guardianConsentAtUtc: '2026-10-10T03:00:00Z',
     guardianConsentVersion: '2026-10-v1',
     isActive: true,
+    anonymizedAtUtc: null,
+    guardianConsentWithdrawnAtUtc: null,
     ...overrides,
   };
 }

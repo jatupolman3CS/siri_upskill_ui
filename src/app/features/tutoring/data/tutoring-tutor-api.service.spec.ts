@@ -25,6 +25,7 @@ const PROFILE: TutorProfile = {
   maxAdvanceDays: 60,
   verifiedAtUtc: null,
   readiness: { canSubmitForVerification: false, blockers: ['no_active_offering'] },
+  allowedDurationMinutes: [45, 90],
   rowVersion: 'AAAAAAAAB9E=',
 };
 

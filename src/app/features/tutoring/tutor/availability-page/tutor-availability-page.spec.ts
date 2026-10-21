@@ -108,6 +108,37 @@ describe('TutorAvailabilityPage', () => {
     expect(slots.request.params.has('trial')).toBe(false);
   });
 
+  it('offers exactly the rest lengths and class lengths the server lists - not the platform defaults', async () => {
+    const server = availability({
+      settings: { minNoticeHours: 24, bufferMinutes: 20, maxAdvanceDays: 60, rowVersion: 'AAAAAAAAB9E=' },
+      allowedDurationMinutes: [45, 90],
+      allowedBufferMinutes: [0, 20, 40],
+    });
+    const seen = await open([{ url: AVAILABILITY_URL, method: 'GET', reply: server }, ...baseRoutes()]);
+
+    const values = (selector: string): string[] => [...page().querySelectorAll<HTMLOptionElement>(`${selector} option`)].map((o) => o.value);
+    expect(values('app-availability-settings-form select')).toEqual(['0', '20', '40']);
+    expect(page().querySelector<HTMLSelectElement>('app-availability-settings-form select')!.value).toBe('20');
+    // The preview's subject picker comes first; the class-length picker is the one whose options are lengths.
+    expect(values('app-availability-preview select').filter((value) => /^\d+$/.test(value))).toEqual(['45', '90']);
+
+    const slots = seen.filter((request) => request.request.url === SLOTS_URL);
+    expect(slots.length).toBeGreaterThan(0);
+    expect(slots.every((request) => request.request.params.get('durationMinutes') === '45')).toBe(true);
+  });
+
+  it('hands the preview the booking horizon from the availability settings the page already holds', async () => {
+    const nextWeek = (): HTMLButtonElement => page().querySelector<HTMLButtonElement>('app-availability-preview button[aria-label="Next week"]')!;
+
+    await open([
+      { url: AVAILABILITY_URL, method: 'GET', reply: availability({ settings: { minNoticeHours: 24, bufferMinutes: 10, maxAdvanceDays: 6, rowVersion: 'AAAAAAAAB9E=' } }) },
+      ...baseRoutes(),
+    ]);
+
+    // The slot answer says 60 days; the page's own settings say 6, so there is no second week to page to - and nothing guessed.
+    expect(nextWeek().disabled).toBe(true);
+  });
+
   it('explains that learners see nothing yet when the profile is not listed, and does not call the public endpoint', async () => {
     const seen = await open(baseRoutes([], { isListed: false }));
     expect(seen.some((request) => request.request.url === SLOTS_URL)).toBe(false);

@@ -45,7 +45,11 @@ export interface TutorProfile {
   readonly maxAdvanceDays: number;
   readonly verifiedAtUtc: IsoUtc | null;
   readonly readiness: TutorReadiness;
-  readonly allowedDurationMinutes?: readonly number[];
+  /**
+   * The class lengths (minutes) the platform accepts - `Tutoring:Slots:AllowedDurationsMinutes`, ascending, never empty and never `null`.
+   * What a tutor may choose from when building a package; the same list the public page of a Verified tutor carries.
+   */
+  readonly allowedDurationMinutes: readonly number[];
   /** Base64 concurrency token: send back the value from the last read on every write. */
   readonly rowVersion: string;
 }

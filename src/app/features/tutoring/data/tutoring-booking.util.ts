@@ -34,20 +34,16 @@ export function parseBookingPreselection(params: QueryParamReader): BookingPrese
   };
 }
 
-/** Lesson lengths used ONLY when a profile response carries no `allowedDurationMinutes` (an older server); the server's list is the truth. */
-export const FALLBACK_SESSION_DURATIONS: readonly number[] = [30, 60, 90, 120];
 /** The length a booking screen starts on when the tutor's allowed list contains it. */
 export const PREFERRED_DURATION_MINUTES = 60;
 
 /**
- * The lesson lengths (minutes) a booking screen offers: the profile's `allowedDurationMinutes` - the deployment's own list
- * (`Tutoring:Slots:AllowedDurationsMinutes`) - and only when that field is absent or empty the historical default. Values that are not
- * positive whole numbers are dropped; the list is shown ascending.
+ * The lesson lengths (minutes) a booking screen offers: exactly the profile's `allowedDurationMinutes` - the deployment's own list
+ * (`Tutoring:Slots:AllowedDurationsMinutes`, never `null`, never empty on a real server). There is no client-side default list: values that
+ * are not positive whole numbers are dropped, duplicates collapse, and the list is shown ascending.
  */
-export function allowedDurationsOf(profile: { readonly allowedDurationMinutes?: readonly number[] | null }): readonly number[] {
-  const list = profile.allowedDurationMinutes;
-  const valid = Array.isArray(list) ? [...new Set(list.filter((minutes) => Number.isInteger(minutes) && minutes > 0))].sort((a, b) => a - b) : [];
-  return valid.length > 0 ? valid : FALLBACK_SESSION_DURATIONS;
+export function allowedDurationsOf(profile: { readonly allowedDurationMinutes: readonly number[] }): readonly number[] {
+  return [...new Set(profile.allowedDurationMinutes.filter((minutes) => Number.isInteger(minutes) && minutes > 0))].sort((a, b) => a - b);
 }
 
 /** The length to start on: the requested one when allowed, else 60 when allowed, else the shortest allowed. */

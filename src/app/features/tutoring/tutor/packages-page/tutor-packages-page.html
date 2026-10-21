@@ -27,13 +27,31 @@
       <h2 id="tutor-package-editor" tabindex="-1" class="text-lg font-semibold text-[var(--color-text)] focus-visible:outline-none">
         {{ (state.tutorPackage ? 'tutoring.tutor.packages.editHeading' : 'tutoring.tutor.packages.addHeading') | translate }}
       </h2>
-      <app-tutor-package-form
-        [tutorPackage]="state.tutorPackage"
-        [offeringChoices]="offeringChoices()"
-        [allowedDurationMinutes]="allowedDurationMinutes() ?? [30, 60, 90, 120]"
-        (saved)="onSaved()"
-        (cancelled)="closeEditor()"
-      />
+      @if (allowedDurationMinutes(); as durations) {
+        <app-tutor-package-form
+          [tutorPackage]="state.tutorPackage"
+          [offeringChoices]="offeringChoices()"
+          [allowedDurationMinutes]="durations"
+          (saved)="onSaved()"
+          (cancelled)="closeEditor()"
+        />
+      } @else if (lengthsFailed()) {
+        <app-empty-state
+          [heading]="'tutoring.tutor.packages.lengthsErrorHeading' | translate"
+          [description]="'tutoring.tutor.packages.lengthsErrorDescription' | translate"
+        >
+          <div emptyStateAction class="flex flex-wrap items-center justify-center gap-3">
+            <app-button variant="secondary" (click)="reloadLengths()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+            <app-button variant="ghost" (click)="closeEditor()">{{ 'tutoring.tutor.common.cancel' | translate }}</app-button>
+          </div>
+        </app-empty-state>
+      } @else {
+        <div role="status" [attr.aria-label]="'tutoring.tutor.packages.lengthsLoading' | translate" class="flex flex-col gap-4">
+          <app-skeleton variant="block" height="2.75rem" radius="md" />
+          <app-skeleton variant="block" height="2.75rem" radius="md" />
+          <app-skeleton variant="block" height="2.75rem" radius="md" />
+        </div>
+      }
     </section>
   }
 

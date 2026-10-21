@@ -579,6 +579,11 @@
     "payouts": {
       "subtitle": "Process instructor revenue share (standard split: instructor {{percent}} / platform {{platformPercent}}, with payment fees deducted before the split) and approve refund requests.",
       "createBatchHint": "Includes successfully paid orders that have passed the hold period of {{holdDays}} days, applies {{withholdingPercent}} withholding tax, and uses the {{minAmount}} minimum payout condition.",
+      "createBatchHintTutoring": "A weekly round pays the tutoring earnings that became releasable by the end of that ISO week (Monday to Sunday, Thai time). Tutors who are suspended or not verified are skipped; their money stays in the system and is paid in a later round once they are reinstated.",
+      "roundTypes": {
+        "Course": "Courses (monthly)",
+        "Tutoring": "Tutoring (weekly)"
+      },
       "batchStatus": {
         "draft": "Draft (awaiting payout)",
         "executed": "Paid out",
@@ -602,7 +607,7 @@
         "empty": "There are no payout batches yet.",
         "createFirst": "+ Create the first payout batch",
         "table": {
-          "period": "Monthly period",
+          "period": "Period",
           "totalAmount": "Net total",
           "instructors": "Instructors",
           "createdAt": "Created",
@@ -668,8 +673,21 @@
       },
       "createModal": {
         "title": "Create new payout batch",
+        "typeLabel": "Round type",
+        "types": {
+          "Course": {
+            "title": "Course round (monthly)",
+            "description": "Pays instructors' course revenue for one calendar month."
+          },
+          "Tutoring": {
+            "title": "Tutoring round (weekly)",
+            "description": "Pays tutors' earnings for one ISO week."
+          }
+        },
         "periodKeyLabel": "Period key*",
-        "periodKeyPlaceholder": "YYYY-MM, e.g. 2026-08",
+        "periodKeyPlaceholderCourse": "YYYY-MM, e.g. 2026-08",
+        "periodKeyPlaceholderTutoring": "YYYY-Www, e.g. 2026-W41",
+        "recentWeeks": "Recent weeks",
         "submitting": "Creating batch...",
         "submit": "Create batch"
       },
@@ -702,20 +720,29 @@
         "tooltip": "{{tutorCount}} tutor(s) skipped (amount: {{amount}})"
       },
       "errors": {
-        "periodKeyRequired": "Please enter the period key (e.g. 2026-08).",
+        "periodKeyRequired": "Please enter the period key.",
+        "periodKeyInvalidCourse": "A course round uses a month key in the form YYYY-MM, e.g. 2026-08.",
+        "periodKeyInvalidTutoring": "A tutoring round uses an ISO week key in the form YYYY-Www, e.g. 2026-W41, and the week must exist.",
         "createBatch": "Failed to create the payout batch.",
         "executeBatch": "Failed to process the payout.",
         "exportBatch": "Failed to export the transfer file.",
         "approveRefund": "Failed to approve the refund.",
         "rejectReasonRequired": "Please enter a reason for rejecting the refund request.",
         "rejectRefund": "Failed to reject the refund.",
-        "nothingToPayWithHeldBack": "Nothing to pay in this round ({{tutorCount}} tutor(s) with total {{amount}} were skipped because they are suspended or unverified)"
+        "nothingToPayWithHeldBack": "Nothing to pay in this round ({{tutorCount}} tutor(s), {{rowCount}} row(s), total {{amount}}, were skipped because they are suspended or unverified)",
+        "reasons": {
+          "invalidPeriodKey": "That period key is not valid for this kind of round.",
+          "periodNotStarted": "That week has not started yet, so a round cannot be opened for it.",
+          "batchExists": "A payout round already exists for this period.",
+          "nothingToPay": "There is nothing to pay in this period.",
+          "concurrentUpdate": "Someone else is changing the same records. Please try again."
+        }
       },
       "messages": {
         "batchCreated": "Payout batch for period {{periodKey}} has been created.",
         "batchExecuted": "Payout for period {{periodKey}} was processed successfully.",
         "batchExported": "Exported {{count}} transfer entries for period {{periodKey}}.",
-        "refundApproved": "Approved the refund request of ฿{{amount}}.",
+        "refundApproved": "Approved the refund request of {{amount}}.",
         "refundRejected": "The refund request has been rejected."
       }
     },

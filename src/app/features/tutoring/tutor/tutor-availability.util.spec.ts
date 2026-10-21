@@ -1,6 +1,5 @@
 import type { AvailabilityRule } from '../data/tutoring-availability.models';
 import {
-  BUFFER_CHOICES,
   type DraftWeek,
   type ExceptionFormValue,
   type SettingsFormValue,
@@ -98,20 +97,28 @@ describe('weekly draft', () => {
 });
 
 describe('settings form', () => {
+  // The allowed rest lengths are the server's list (`allowedBufferMinutes`), passed in - deliberately NOT the platform defaults, so a
+  // validator that fell back to a built-in list would fail these cases.
+  const ALLOWED = [0, 10, 25];
   const ok: SettingsFormValue = { minNoticeHours: '24', bufferMinutes: '10', maxAdvanceDays: '60' };
 
   it('accepts a value inside every server bound', () => {
-    expect(validateSettings(ok)).toEqual({});
-    expect(validateSettings({ minNoticeHours: '1', bufferMinutes: '0', maxAdvanceDays: '180' })).toEqual({});
+    expect(validateSettings(ok, ALLOWED)).toEqual({});
+    expect(validateSettings({ minNoticeHours: '1', bufferMinutes: '0', maxAdvanceDays: '180' }, ALLOWED)).toEqual({});
   });
 
   it('points at each field that is out of range or not allowed', () => {
-    const issues = validateSettings({ minNoticeHours: '0', bufferMinutes: '7', maxAdvanceDays: '6' });
+    const issues = validateSettings({ minNoticeHours: '0', bufferMinutes: '7', maxAdvanceDays: '6' }, ALLOWED);
     expect(Object.keys(issues).sort()).toEqual(['bufferMinutes', 'maxAdvanceDays', 'minNoticeHours']);
-    expect(validateSettings({ ...ok, minNoticeHours: '169' }).minNoticeHours?.key).toBe('tutoring.tutor.validation.outOfRange');
-    expect(validateSettings({ ...ok, minNoticeHours: '' }).minNoticeHours?.key).toBe('tutoring.tutor.validation.required');
-    expect(validateSettings({ ...ok, maxAdvanceDays: '10.5' }).maxAdvanceDays?.key).toBe('tutoring.tutor.validation.wholeNumber');
-    expect(BUFFER_CHOICES).toEqual([0, 5, 10, 15, 20, 30, 45, 60]);
+    expect(validateSettings({ ...ok, minNoticeHours: '169' }, ALLOWED).minNoticeHours?.key).toBe('tutoring.tutor.validation.outOfRange');
+    expect(validateSettings({ ...ok, minNoticeHours: '' }, ALLOWED).minNoticeHours?.key).toBe('tutoring.tutor.validation.required');
+    expect(validateSettings({ ...ok, maxAdvanceDays: '10.5' }, ALLOWED).maxAdvanceDays?.key).toBe('tutoring.tutor.validation.wholeNumber');
+  });
+
+  it('allows only the rest lengths the server lists - 5 is a platform default but not in this list', () => {
+    expect(validateSettings({ ...ok, bufferMinutes: '25' }, ALLOWED)).toEqual({});
+    expect(validateSettings({ ...ok, bufferMinutes: '5' }, ALLOWED).bufferMinutes?.key).toBe('tutoring.tutor.validation.notAllowed');
+    expect(validateSettings({ ...ok, bufferMinutes: '10' }, [5, 15]).bufferMinutes?.key).toBe('tutoring.tutor.validation.notAllowed');
   });
 
   it('builds numbers for the request and carries the row version unchanged', () => {

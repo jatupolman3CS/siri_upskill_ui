@@ -24,6 +24,7 @@ export function tutorProfile(overrides: Partial<TutorProfile> = {}): TutorProfil
     maxAdvanceDays: 60,
     verifiedAtUtc: null,
     readiness: { canSubmitForVerification: true, blockers: [] },
+    allowedDurationMinutes: [30, 60, 90, 120],
     rowVersion: 'AAAAAAAAB9E=',
     ...overrides,
   };

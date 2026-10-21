@@ -102,6 +102,101 @@ describe('TutorPackagesPage', () => {
     expect(post.request.body).toEqual({ offeringId: 'off-1', sessionCount: 8, durationMinutes: 60, discountPercent: 10, validDays: 90, isActive: true });
   });
 
+  describe('class lengths come from the server and only the server', () => {
+    const PROFILE_URL = '/api/tutoring/tutor/profile';
+    const form = (): Element | null => page().querySelector('app-tutor-package-form');
+    const lengthValues = (): string[] => [...page().querySelectorAll<HTMLOptionElement>('app-tutor-package-form select')[1].querySelectorAll('option')].map((o) => o.value);
+
+    async function tick(): Promise<void> {
+      for (let pass = 0; pass < 3; pass++) {
+        harness.detectChanges();
+        TestBed.flushEffects();
+        await Promise.resolve();
+      }
+      harness.detectChanges();
+    }
+
+    it('offers exactly the lengths the profile lists - [45, 90] gives 45 and 90, never 30 / 60 / 120 - and starts a new package on 45', async () => {
+      const overrides: readonly Route[] = [{ url: PROFILE_URL, reply: tutorProfile({ allowedDurationMinutes: [45, 90] }) }];
+      await open([], overrides);
+      button('Create a package').click();
+      await settle([], overrides);
+
+      expect(lengthValues()).toEqual(['45', '90']);
+      expect(page().querySelectorAll<HTMLSelectElement>('app-tutor-package-form select')[1].value).toBe('45');
+
+      buttons().find((b) => b.textContent?.trim() === 'Create package' && b.type === 'submit')!.click();
+      const seen = await settle([], [...overrides, { url: PACKAGES_URL, method: 'POST', status: 201, reply: tutorPackage({ durationMinutes: 45 }) }]);
+      expect(seen.find((request) => request.request.method === 'POST')!.request.body).toMatchObject({ durationMinutes: 45 });
+    });
+
+    it('refuses a length the server did not list instead of validating it against a built-in list', async () => {
+      const overrides: readonly Route[] = [{ url: PROFILE_URL, reply: tutorProfile({ allowedDurationMinutes: [45, 90] }) }];
+      await open([], overrides);
+      button('Create a package').click();
+      await settle([], overrides);
+
+      const select = page().querySelectorAll<HTMLSelectElement>('app-tutor-package-form select')[1];
+      select.value = '60';
+      select.dispatchEvent(new Event('change'));
+      await settle([], overrides);
+      expect(lengthValues()).not.toContain('60');
+      buttons().find((b) => b.textContent?.trim() === 'Create package' && b.type === 'submit')!.click();
+      const seen = await settle([], overrides);
+      expect(seen.some((request) => request.request.method === 'POST')).toBe(false);
+    });
+
+    it('shows a skeleton - no form, no lengths - while the profile that carries them is still loading', async () => {
+      harness = await RouterTestingHarness.create();
+      await harness.navigateByUrl('/instructor/tutoring/packages', TutorPackagesPage);
+      await tick();
+      httpMock.expectOne((request) => request.url === PACKAGES_URL).flush(pagedOf([]));
+      httpMock.expectOne((request) => request.url === '/api/tutoring/tutor/offerings').flush(pagedOf([tutorOffering()]));
+      const profile = httpMock.expectOne((request) => request.url === PROFILE_URL);
+      await tick();
+
+      button('Create a package').click();
+      await tick();
+      expect(form()).toBeNull();
+      expect(page().querySelector('[role=status][aria-label="Loading the class lengths"]')).not.toBeNull();
+      expect(page().querySelectorAll('option')).toHaveLength(0);
+
+      profile.flush(tutorProfile({ allowedDurationMinutes: [45, 90] }));
+      await tick();
+      expect(form()).not.toBeNull();
+      expect(lengthValues()).toEqual(['45', '90']);
+      expect(page().querySelector('[role=status][aria-label="Loading the class lengths"]')).toBeNull();
+    });
+
+    it('shows an error with a retry - and still no form or guessed lengths - when the profile cannot be read, then recovers', async () => {
+      const failing: readonly Route[] = [{ url: PROFILE_URL, status: 500, reply: { status: 500 } }];
+      await open([], failing);
+      button('Create a package').click();
+      await settle([], failing);
+
+      expect(text()).toContain('Could not load the class lengths');
+      expect(form()).toBeNull();
+      expect(page().querySelectorAll('option')).toHaveLength(0);
+
+      button('Try again').click();
+      await settle([], [{ url: PROFILE_URL, reply: tutorProfile({ allowedDurationMinutes: [45, 90] }) }]);
+      expect(text()).not.toContain('Could not load the class lengths');
+      expect(lengthValues()).toEqual(['45', '90']);
+    });
+
+    it('lets the tutor close the editor from the error state', async () => {
+      const failing: readonly Route[] = [{ url: PROFILE_URL, status: 500, reply: { status: 500 } }];
+      await open([], failing);
+      button('Create a package').click();
+      await settle([], failing);
+
+      button('Cancel').click();
+      await settle([], failing);
+      expect(text()).not.toContain('Could not load the class lengths');
+      expect(form()).toBeNull();
+    });
+  });
+
   it('locks what identifies a package when editing and resends it unchanged with the new discount', async () => {
     await open();
     buttonStarting('Edit').click();

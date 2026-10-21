@@ -50,8 +50,5 @@ export class PackageCheckoutOutcome {
     const state = this.paymentState();
     return state !== null && lateResolutionOf(state) === 'Duplicate';
   });
-  protected readonly refundIsConsentWithdrawn = computed(() => {
-    return !!this.purchase().learner.guardianConsentWithdrawnAtUtc;
-  });
   protected readonly refundIsPromptPay = computed(() => this.paymentState()?.method === 'PromptPay');
 }

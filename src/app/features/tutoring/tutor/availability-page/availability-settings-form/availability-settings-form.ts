@@ -15,7 +15,6 @@ import { tutoringErrorKey, tutoringReasonOf } from '../../../data/tutoring-error
 import { FieldFeedback, focusFirstInvalid, serverRejectedFields } from '../../../ui/tutor-form.util';
 import { TutorProblem } from '../../../ui/tutor-problem/tutor-problem';
 import {
-  BUFFER_CHOICES,
   MAX_ADVANCE_RANGE,
   MIN_NOTICE_RANGE,
   SETTINGS_PROPERTY_TO_FIELD,
@@ -46,6 +45,8 @@ export class AvailabilitySettingsForm {
   protected readonly i18n = inject(TranslationService);
 
   readonly settings = input.required<AvailabilitySettings>();
+  /** The rest lengths (minutes) the server accepts (`allowedBufferMinutes` of the availability read); the picker offers exactly these. */
+  readonly allowedBufferMinutes = input.required<readonly number[]>();
   readonly saved = output<AvailabilitySettings>();
   /** The profile changed under the tutor (stale row version): the owner should reload everything. */
   readonly conflict = output<void>();
@@ -65,7 +66,7 @@ export class AvailabilitySettingsForm {
     ),
     { requireSync: true },
   );
-  protected readonly issues = computed(() => validateSettings(this.raw()));
+  protected readonly issues = computed(() => validateSettings(this.raw(), this.allowedBufferMinutes()));
   protected readonly feedback = new FieldFeedback<SettingsField>();
   private readonly serverRejected = signal<ReadonlySet<SettingsField>>(new Set());
   protected readonly saving = signal(false);
@@ -73,7 +74,7 @@ export class AvailabilitySettingsForm {
   private readonly formRoot = viewChild<ElementRef<HTMLElement>>('formRoot');
 
   protected readonly bufferOptions = computed<readonly SelectOption[]>(() =>
-    BUFFER_CHOICES.map((minutes) => ({ value: String(minutes), label: this.i18n.t('tutoring.tutor.availability.settings.bufferOption', { count: minutes }) })),
+    this.allowedBufferMinutes().map((minutes) => ({ value: String(minutes), label: this.i18n.t('tutoring.tutor.availability.settings.bufferOption', { count: minutes }) })),
   );
   protected readonly dirty = computed(() => {
     const stored = this.settings();

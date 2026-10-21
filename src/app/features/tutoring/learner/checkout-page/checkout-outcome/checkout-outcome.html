@@ -47,9 +47,7 @@
           {{ 'tutoring.checkout.refunded.heading' | translate }}
         </h2>
         <p class="max-w-prose text-base text-[var(--color-text)]">
-          {{ (refundIsConsentWithdrawn()
-              ? 'tutoring.checkout.refunded.consentWithdrawnBody'
-              : (refundIsDuplicate() ? 'tutoring.checkout.refunded.duplicateBody' : 'tutoring.checkout.refunded.lateBody')) | translate }}
+          {{ (refundIsDuplicate() ? 'tutoring.checkout.refunded.duplicateBody' : 'tutoring.checkout.refunded.lateBody') | translate }}
         </p>
         @if (paymentState(); as state) {
           <p class="max-w-prose text-base text-[var(--color-text)]">

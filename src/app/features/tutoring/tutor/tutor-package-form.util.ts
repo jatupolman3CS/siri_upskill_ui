@@ -1,11 +1,13 @@
+import { PREFERRED_DURATION_MINUTES } from '../data/tutoring-booking.util';
 import type { TutorPackage, UpsertPackageRequest } from '../data/tutoring-packages.models';
 import { type FieldIssues, decimalPlaces, integerIssue, issue, parseNumber } from '../ui/tutor-form.util';
 
 /**
  * Pure form logic of the tutor package screen (P13-25). The ranges are the DEFAULTS of the server options
- * `Tutoring:Packages:*` (P13-12 section 3) and the allowed lesson lengths of `Tutoring:Slots` - no endpoint exposes them, so they
- * are mirrored here purely so a mistake is shown before the round trip. The server re-checks every one of them (and the price
- * floor, the per-tutor limit and duplicates, which depend on data the client does not have) and its answer always wins.
+ * `Tutoring:Packages:*` (P13-12 section 3) - no endpoint exposes them, so they are mirrored here purely so a mistake is shown before
+ * the round trip. The allowed lesson LENGTHS are not mirrored: they are the server's list (`allowedDurationMinutes` of the tutor's
+ * profile read) and the validator takes it as a required argument. The server re-checks every rule (and the price floor, the per-tutor
+ * limit and duplicates, which depend on data the client does not have) and its answer always wins.
  * Nothing here computes a price: the price of a package is whatever the server answers.
  */
 export const PACKAGE_LIMITS = {
@@ -34,11 +36,22 @@ export const PACKAGE_PROPERTY_TO_FIELD: Readonly<Record<string, PackageField>> =
   ValidDays: 'validDays',
 };
 
-export function emptyPackageForm(offeringId = ''): PackageFormValue {
+/**
+ * The lesson length a new package starts on: 60 minutes when the server allows it (the usual case), else the shortest length it allows.
+ * `''` (nothing selected) for an empty list - a length the server did not offer is never preselected.
+ */
+export function defaultPackageDuration(allowedDurations: readonly number[]): string {
+  if (allowedDurations.length === 0) {
+    return '';
+  }
+  return String(allowedDurations.includes(PREFERRED_DURATION_MINUTES) ? PREFERRED_DURATION_MINUTES : Math.min(...allowedDurations));
+}
+
+export function emptyPackageForm(offeringId: string, allowedDurations: readonly number[]): PackageFormValue {
   return {
     offeringId,
     sessionCount: '10',
-    durationMinutes: '60',
+    durationMinutes: defaultPackageDuration(allowedDurations),
     discountPercent: '10',
     validDays: String(PACKAGE_LIMITS.validDays.default),
     isActive: true,
@@ -56,7 +69,7 @@ export function packageToForm(tutorPackage: TutorPackage): PackageFormValue {
   };
 }
 
-export function validatePackage(value: PackageFormValue, allowedDurations: readonly number[] = [30, 60, 90, 120]): FieldIssues<PackageField> {
+export function validatePackage(value: PackageFormValue, allowedDurations: readonly number[]): FieldIssues<PackageField> {
   const issues: FieldIssues<PackageField> = {};
   if (value.offeringId === '') {
     issues.offeringId = issue('tutoring.tutor.validation.required');

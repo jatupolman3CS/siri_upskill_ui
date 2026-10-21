@@ -257,12 +257,6 @@ describe('TutorBookingPanel', () => {
       await settle();
     });
 
-    it('falls back to the historical 30 / 60 / 90 / 120 only when the profile carries no list', async () => {
-      await create({ tutor: { ...profile(), allowedDurationMinutes: undefined } as unknown as TutorPublicProfile });
-      expect(lengths()).toEqual(['30', '60', '90', '120']);
-      slotsReq().flush(slotsBody([]));
-      await settle();
-    });
   });
 
   describe('changing the lesson', () => {
