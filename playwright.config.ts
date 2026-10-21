@@ -1,6 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * Port of the dev server the suite drives. 4200 stays the default; `E2E_PORT=4310 npx playwright test` moves the whole suite
+ * (server command and base URL together) to a free port, so a run never collides with another project's `ng serve`.
+ */
+const PORT = Number(process.env['E2E_PORT'] ?? 4200);
+const BASE_URL = `http://localhost:${PORT}`;
+
+/**
  * P0-36 E2E setup. Smoke-scope only (task estimate: 1.5) — one browser (chromium), not a full
  * cross-browser matrix; see docs/TASKS.md's P0-36 row and each spec file's own header comment for
  * what it does and does not prove yet.
@@ -21,7 +28,7 @@ export default defineConfig({
   retries: process.env['CI'] ? 1 : 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
   },
   projects: [
@@ -31,8 +38,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run start',
-    url: 'http://localhost:4200',
+    command: `npm run start -- --port ${PORT}`,
+    url: BASE_URL,
     reuseExistingServer: !process.env['CI'],
     timeout: 120_000,
   },

@@ -1,32 +1,130 @@
-import { expect, test } from '@playwright/test';
+import { type BrowserContext, type Locator, type Page, expect, test as base } from '@playwright/test';
+
+import {
+  KYC_CASE_ID,
+  KYC_DOCUMENT_ID,
+  LEARNER_PROFILE_ADULT_ID,
+  LEARNER_PROFILE_MINOR_ID,
+  MEET_URL,
+  OFFERING_ID,
+  type MockOptions,
+  type SignedInAs,
+  TUTOR_SLUG,
+  TutoringMockApi,
+  bangkokDayPlus,
+  bangkokInstant,
+} from './tutoring-mock-api';
+import { th } from './tutoring-texts';
 
 /**
- * P13-31 E2E Acceptance Suite: Tutor Marketplace
+ * P13-31 E2E acceptance suite of the Tutor Marketplace.
  *
- * Scope:
- * 1. Protected routes redirect unauthenticated callers to /login with returnUrl preserved
- * 2. Public /tutors page renders search heading, filter controls, and polite state when API is empty/unresponsive
- * 3. Non-existent tutor profile (/tutors/:slug) answers 404 with noindex robots meta
- * 4. Language switcher (TH/EN) updates page texts on /tutors and verifies lazy dictionary is loaded with no raw keys
- * 5. Full mocked acceptance flows:
- *    Flow A: Learner searches -> Profile -> Book trial -> Join class
- *    Flow B: Tutor manages availability -> Settings saved
- *    Flow C: Admin reviews KYC queue -> Approves KYC case
+ * Every test drives the REAL pages in a browser; only the API is faked, by `tutoring-mock-api.ts` - a stateful stand-in whose bodies are
+ * typed against the app's models and checked against the C# records, and whose state changes only when the page really sends a request.
+ * So a test here goes red when the page stops sending the request (or sends a different one), not merely when a heading disappears:
+ *
+ * - Flow A  search -> profile -> pick a slot -> booking page (learner, policy) -> POST bookings -> checkout -> My tutoring -> join.
+ *           Nothing navigates by URL after the first page: every step is a click, and the request that left the browser is asserted.
+ * - Flow B  the tutor saves weekly hours (PUT rules) -> a learner books one of those times -> the class shows up for the tutor and the
+ *           booked time leaves the tutor's preview.
+ * - Flow C  an admin opens a KYC case, judges the document, approves it (POST decision) and sees the status change.
+ * - i18n    the language switch is clicked and specific Thai text becomes specific English text (and back).
+ *
+ * Every test also fails on a `pageerror`, on any `console.error`, and on an API call nobody mocked (see `harness` below).
+ * Mutation self-check: `E2E_MUTATE=bookings|approve|join|rules` turns that mock off; the matching test must go red.
  */
 
-function makeMockJwt(roles: string[], userId = '0192e2b3-0000-7000-8000-000000000001'): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-  const payload = Buffer.from(
-    JSON.stringify({
-      sub: userId,
-      role: roles,
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    }),
-  ).toString('base64url');
-  return `${header}.${payload}.mockSignature`;
+// --- The harness: one mock per test, a signed-in page per person, and the "nothing may be wrong" guard ---------------------
+
+interface Harness {
+  readonly mock: TutoringMockApi;
+  /** A fresh browser context (own cookies and memory) signed in as `who`, answered by this test's shared mock. */
+  pageFor(who: SignedInAs): Promise<Page>;
+  /**
+   * Declare that a failed API response is the EXPECTED outcome of this test (the browser logs every 4xx/5xx as a console error).
+   * Without this call such a response fails the test like any other console error.
+   */
+  allowFailedResource(status: number, urlPart: string): void;
 }
 
-test.describe('Tutor Marketplace - Route Guards', () => {
+const test = base.extend<{ harness: Harness; mockOptions: MockOptions }>({
+  mockOptions: [{}, { option: true }],
+  harness: async ({ browser, mockOptions }, use) => {
+    const mock = new TutoringMockApi(mockOptions);
+    const contexts: BrowserContext[] = [];
+    const problems: string[] = [];
+    // The one failed response every signed-out visitor produces: the shell asks the API to refresh the session and is told 401
+    // (documented in AuthService.initSession). Anything else must be declared by the test with allowFailedResource().
+    const allowed: { readonly status: number; readonly urlPart: string }[] = [{ status: 401, urlPart: '/api/identity/refresh' }];
+
+    const watch = (context: BrowserContext): void => {
+      context.on('weberror', (error) => problems.push(`uncaught page error: ${error.error().message}`));
+      context.on('console', (message) => {
+        if (message.type() !== 'error') {
+          return;
+        }
+        const url = message.location().url;
+        const expected = allowed.some((entry) => message.text().includes(`status of ${entry.status}`) && url.includes(entry.urlPart));
+        if (!expected) {
+          problems.push(`console.error: ${message.text()}${url === '' ? '' : ` (${url})`}`);
+        }
+      });
+    };
+
+    await use({
+      mock,
+      pageFor: async (who) => {
+        const context = await browser.newContext();
+        contexts.push(context);
+        watch(context);
+        // A returning visitor who already answered the cookie question (the most private answer): the banner would otherwise cover
+        // the bottom of every page and sit between the test and the buttons it clicks.
+        await context.addInitScript(() => {
+          // Runs in every document the context opens, including opaque ones (about:blank, error pages) that may not touch storage.
+          if (location.protocol.startsWith('http') && location.hostname === 'localhost') {
+            localStorage.setItem('siri_pdpa_consent', JSON.stringify({ essential: true, analytics: false, marketing: false, timestamp: '2026-10-01T00:00:00.000Z' }));
+          }
+        });
+        await mock.attach(context, who);
+        return context.newPage();
+      },
+      allowFailedResource: (status, urlPart) => allowed.push({ status, urlPart }),
+    });
+
+    await Promise.all(contexts.map((context) => context.close()));
+    expect(problems, 'the browser reported errors').toEqual([]);
+    expect(mock.unmocked, 'the app called API endpoints this test did not mock').toEqual([]);
+  },
+});
+
+// --- Dates the story needs, relative to "now" so the suite is not day-of-week dependent ------------------------------------
+
+/** The tutor's open day: two Bangkok days from now - always inside the first seven-day calendar window and past the 24 h notice. */
+const OPEN_DAY = bangkokDayPlus(Date.now(), 2);
+const startOnOpenDay = (hhmm: string): string => new Date(bangkokInstant(OPEN_DAY.date, hhmm)).toISOString();
+
+// --- Small page helpers (all of them click; none of them navigates by URL) ----------------------------------------------
+
+/** The time button of a slot picker whose visible text is exactly the start `time` (the accessible name also contains the end time). */
+const slotButton = (scope: Locator, time: string): Locator =>
+  scope.getByRole('tabpanel').locator('button[aria-pressed]').filter({ hasText: new RegExp(`^\\s*${time}\\s*$`) });
+
+async function pickTrialSlot(page: Page, time: string): Promise<void> {
+  const panel = page.locator('app-tutor-booking-panel');
+  await panel.getByLabel(th('tutoring.public.profile.booking.trialLabel', { minutes: 30, price: th('tutoring.public.profile.booking.free') })).check();
+  await slotButton(panel, time).click();
+}
+
+async function reserveFreeTrialFor(page: Page, learnerProfileId: string): Promise<void> {
+  await page.getByRole('combobox', { name: th('tutoring.booking.learner') }).selectOption({ value: learnerProfileId });
+  await page.getByRole('button', { name: th('tutoring.booking.reserveFree') }).click();
+}
+
+// ===================================================================================================================================
+// Route protection
+// ===================================================================================================================================
+
+test.describe('Tutor Marketplace - route guards', () => {
   const protectedRoutes = [
     '/my-tutoring',
     '/my-tutoring/bookings/0192e2b3-0000-7000-8000-000000000001',
@@ -47,618 +145,285 @@ test.describe('Tutor Marketplace - Route Guards', () => {
   ];
 
   for (const route of protectedRoutes) {
-    test(`unauthenticated access to ${route} redirects to login`, async ({ page }) => {
+    test(`a signed-out visitor to ${route} is sent to the login page and brought back afterwards`, async ({ harness }) => {
+      const page = await harness.pageFor(null);
       await page.goto(route);
-      await expect(page).toHaveURL(/.*\/login(\?.*)?$/);
+      await expect(page).toHaveURL(/\/login\?/);
+      expect(new URL(page.url()).searchParams.get('returnUrl')).toBe(route);
     });
   }
 });
 
-test.describe('Tutor Marketplace - Public Search & Profile', () => {
-  test('public /tutors renders search heading, filter controls, and handles empty state gracefully', async ({ page }) => {
+// ===================================================================================================================================
+// Public search and profile
+// ===================================================================================================================================
+
+test.describe('Tutor Marketplace - public search and profile', () => {
+  test('search lists the tutor, sends the typed words and the chosen filter to the API, and says so when nothing matches', async ({ harness }) => {
+    const { mock } = harness;
+    const page = await harness.pageFor(null);
     await page.goto('/tutors');
 
-    // Heading should be visible
-    const heading = page.getByRole('heading', { level: 1 });
-    await expect(heading).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(th('tutoring.public.search.heading'));
+    await expect(page.getByRole('link', { name: 'สมชาย รุ่งเรืองกิจ (Seed)' })).toBeVisible();
+    await expect(page.getByText(th('tutoring.public.search.resultCount', { count: 1 }))).toBeVisible();
 
-    // Verify search and filter inputs are present
-    const searchInputs = page.locator('input');
-    await expect(searchInputs.first()).toBeVisible();
+    // The facet counts reach the filter options (this is the code that threw on a mock that did not match the real response).
+    const level = page.getByLabel(th('tutoring.public.search.filters.level'));
+    await expect(level.locator('option[value="UpperSecondary"]')).toContainText('(1)');
+    await level.selectOption({ value: 'UpperSecondary' });
+    await expect.poll(() => mock.sent('GET', '/tutoring/tutors').some((request) => request.query['level'] === 'UpperSecondary')).toBe(true);
 
-    // Page should never display raw server JSON or unhandled error traces
-    const bodyText = await page.innerText('body');
-    expect(bodyText).not.toContain('Cannot GET');
-    expect(bodyText).not.toContain('Internal Server Error');
+    await page.getByRole('searchbox', { name: th('tutoring.public.search.searchLabel') }).fill('ฟิสิกส์');
+    await page.getByRole('search').filter({ has: page.getByRole('searchbox', { name: th('tutoring.public.search.searchLabel') }) }).getByRole('button').click();
+    await expect.poll(() => mock.sent('GET', '/tutoring/tutors').some((request) => request.query['q'] === 'ฟิสิกส์')).toBe(true);
+    await expect(page.getByRole('heading', { name: th('tutoring.public.search.emptyHeading') })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'สมชาย รุ่งเรืองกิจ (Seed)' })).toHaveCount(0);
   });
 
-  test('non-existent tutor profile displays not-found state with noindex robots meta', async ({ page }) => {
+  test('a tutor that does not exist shows the not-found state and is kept out of search engines', async ({ harness }) => {
+    harness.allowFailedResource(404, '/api/tutoring/tutors/non-existent-tutor-slug-99999');
+    const page = await harness.pageFor(null);
     await page.goto('/tutors/non-existent-tutor-slug-99999');
 
-    // Not found heading or message is displayed
-    const heading = page.getByRole('heading', { level: 1 });
-    await expect(heading).toBeVisible();
-
-    // Meta robots contains noindex to protect SEO
-    const robotsMeta = page.locator('meta[name="robots"]');
-    await expect(robotsMeta).toHaveAttribute('content', /noindex/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(th('tutoring.public.profile.notFoundHeading'));
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 });
 
-test.describe('Tutor Marketplace - Language Switching & i18n', () => {
-  test('switching language updates text on /tutors and ensures lazy dictionary is loaded without raw keys', async ({ page }) => {
+// ===================================================================================================================================
+// Language switch
+// ===================================================================================================================================
+
+test.describe('Tutor Marketplace - language switch', () => {
+  test('clicking the language menu turns the Thai search page into English and back, with no raw keys left', async ({ harness }) => {
+    const page = await harness.pageFor(null);
     await page.goto('/tutors');
 
-    const languageMenu = page.locator('app-language-menu');
-    await expect(languageMenu).toBeVisible();
+    const heading = page.getByRole('heading', { level: 1 });
+    const searchBox = (name: string): Locator => page.getByRole('searchbox', { name, exact: true });
+    await expect(heading).toHaveText('ติวเตอร์');
+    await expect(searchBox('ค้นหาติวเตอร์')).toBeVisible();
+    await expect(page.getByText('พบติวเตอร์ 1 ท่าน')).toBeVisible();
+    await expect(page.getByText('เรียงตาม', { exact: true })).toBeVisible();
+    await expect(page).toHaveTitle(/^ค้นหาติวเตอร์ \|/);
 
-    const triggerButton = languageMenu.getByRole('button').first();
-    await triggerButton.click();
+    const menu = page.locator('app-language-menu');
+    await menu.getByRole('button').click();
+    await menu.getByRole('menuitemradio', { name: 'English' }).click();
 
-    // Click English option (or Thai if already English)
-    const enOption = page.locator('app-language-menu [role="menuitemradio"]').filter({ hasText: /English|EN/i });
-    if (await enOption.isVisible()) {
-      await enOption.click();
-      await page.waitForTimeout(300);
+    await expect(heading).toHaveText('Tutors');
+    await expect(searchBox('Search tutors')).toBeVisible();
+    await expect(page.getByText('1 tutors found')).toBeVisible();
+    await expect(page.getByText('Sort by', { exact: true })).toBeVisible();
+    await expect(page).toHaveTitle(/^Find a tutor \|/);
+    await expect(searchBox('ค้นหาติวเตอร์')).toHaveCount(0);
+    await expect(page.getByText('พบติวเตอร์ 1 ท่าน')).toHaveCount(0);
+    expect(await page.innerText('body')).not.toMatch(/\btutoring\.(public|learner|tutor|errors|enums|slots|booking|checkout)\.[A-Za-z0-9.]+/);
 
-      // Verify that heading is in English
-      const heading = page.getByRole('heading', { level: 1 });
-      await expect(heading).toBeVisible();
+    await menu.getByRole('button').click();
+    await menu.getByRole('menuitemradio', { name: 'ไทย' }).click();
+    await expect(heading).toHaveText('ติวเตอร์');
+    await expect(searchBox('ค้นหาติวเตอร์')).toBeVisible();
+    await expect(searchBox('Search tutors')).toHaveCount(0);
+  });
+});
+
+// ===================================================================================================================================
+// Flow A - search -> profile -> book the free trial -> checkout -> My tutoring -> join
+// ===================================================================================================================================
+
+test.describe('Tutor Marketplace - Flow A: a learner books a free trial and joins the class', () => {
+  test.use({ mockOptions: { rules: [{ dayOfWeek: OPEN_DAY.dayOfWeek, startLocal: '09:00', endLocal: '12:00' }] } });
+
+  test('every step is a click, the booking request carries what the learner chose, and the join request opens the room', async ({ harness }) => {
+    const { mock } = harness;
+    const page = await harness.pageFor('Learner');
+
+    // 1. Find the tutor and open the profile.
+    await page.goto('/tutors');
+    await page.getByRole('link', { name: 'สมชาย รุ่งเรืองกิจ (Seed)' }).click();
+    await expect(page).toHaveURL(`/tutors/${TUTOR_SLUG}`);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('สมชาย รุ่งเรืองกิจ');
+    await expect(page.getByText('สถิติและความน่าจะเป็น').first()).toBeVisible();
+
+    // 2. Choose the free trial and a time. The calendar is asked for trial slots, and the chosen time shows in the summary.
+    await pickTrialSlot(page, '09:00');
+    await expect.poll(() => mock.sent('GET', `/tutoring/tutors/${TUTOR_SLUG}/slots`).some((request) => request.query['trial'] === 'true')).toBe(true);
+    const panel = page.locator('app-tutor-booking-panel');
+    await expect(panel).toContainText('09:00-09:30');
+    await expect(panel.getByText(th('tutoring.public.profile.booking.free'), { exact: true }).first()).toBeVisible();
+
+    const continueLink = panel.getByRole('link', { name: th('tutoring.public.profile.booking.continue') });
+    await expect(continueLink).toHaveAttribute('href', new RegExp(`offeringId=${OFFERING_ID}.*trial=true`));
+    await continueLink.click();
+
+    // 3. The booking page: nothing can be reserved until a learner is chosen; the cancellation policy of the server is shown.
+    await expect(page).toHaveURL(new RegExp(`/tutors/${TUTOR_SLUG}/book\\?`));
+    const reserve = page.getByRole('button', { name: th('tutoring.booking.reserveFree') });
+    const summary = page.getByRole('complementary', { name: th('tutoring.booking.summaryHeading') });
+    await expect(summary).toContainText('09:00-09:30');
+    await expect(reserve).toBeDisabled();
+    await expect(page.getByText(th('tutoring.booking.reserveHint'))).toBeVisible();
+    await expect(page.getByText(th('tutoring.booking.policyNote', { hours: 24, fullPercent: 100, latePercent: 50 }))).toBeVisible();
+
+    await page.getByRole('combobox', { name: th('tutoring.booking.learner') }).selectOption({ value: LEARNER_PROFILE_MINOR_ID });
+    await expect(reserve).toBeEnabled();
+    await expect(summary).toContainText('น้องฟ้า');
+    await reserve.click();
+
+    // 4. Checkout: a free trial arrives already confirmed.
+    await expect(page).toHaveURL(/\/tutoring\/checkout\/[0-9a-f-]+$/);
+    await expect(page.getByRole('heading', { name: th('tutoring.checkout.confirmed.heading') })).toBeVisible();
+    await expect(page.getByText(th('tutoring.checkout.confirmed.freeBody'))).toBeVisible();
+
+    // What left the browser is what the C# `CreateBookingRequest` expects, with the learner and the time the person chose.
+    const bookings = mock.sent('POST', '/tutoring/bookings');
+    expect(bookings).toHaveLength(1);
+    expect(bookings[0].body).toEqual({
+      offeringId: OFFERING_ID,
+      startsAtUtc: startOnOpenDay('09:00'),
+      durationMinutes: 30,
+      format: 'OneOnOne',
+      learnerProfileId: LEARNER_PROFILE_MINOR_ID,
+      isTrial: true,
+    });
+    const booking = mock.createdBookings[0];
+    expect(booking.status).toBe('Confirmed');
+    await expect(page).toHaveURL(new RegExp(`/tutoring/checkout/${booking.bookingId}$`));
+
+    // 5. My tutoring lists it. The room is not open yet, so there is a countdown and no join link.
+    await page.getByRole('link', { name: th('tutoring.checkout.actions.myTutoring') }).click();
+    await expect(page).toHaveURL('/my-tutoring');
+    await expect(page.getByRole('heading', { name: 'สถิติและความน่าจะเป็น' })).toBeVisible();
+    await expect(page.getByText(th('tutoring.learner.my.card.joinOpensIn'))).toBeVisible();
+    await expect(page.getByRole('link', { name: new RegExp(th('tutoring.learner.my.card.join')) })).toHaveCount(0);
+
+    // 6. The class is about to start: the page offers the join link, and clicking it asks the server for the room.
+    mock.openJoinWindow();
+    await page.reload();
+    const join = page.getByRole('link', { name: new RegExp(th('tutoring.learner.my.card.join')) });
+    await expect(join).toBeVisible();
+    await join.click();
+
+    await expect(page).toHaveURL(`/tutoring/sessions/${booking.sessionId}/join`);
+    await expect(page.getByRole('heading', { name: th('tutoring.join.ready.heading') })).toBeVisible();
+    expect(mock.sent('POST', `/tutoring/sessions/${booking.sessionId}/join`)).toHaveLength(1);
+    await expect(page.getByRole('link', { name: new RegExp(th('tutoring.join.ready.openRoom')) })).toHaveAttribute('href', MEET_URL);
+    // The page also tries to open the room in a new tab; the test keeps that tab off the internet and sees where it went.
+    await expect.poll(() => mock.external).toContain(MEET_URL);
+  });
+});
+
+// ===================================================================================================================================
+// Flow B - the tutor sets availability, a learner books it, the tutor sees the class
+// ===================================================================================================================================
+
+test.describe('Tutor Marketplace - Flow B: a tutor sets availability and then gets booked', () => {
+  test('saved hours become bookable times; once a learner books one, the class is on the tutor\'s list and the time leaves the preview', async ({ harness }) => {
+    const { mock } = harness;
+    const tutor = await harness.pageFor('Instructor');
+
+    // 1. A tutor with no hours yet: every weekday is closed and learners can see no time.
+    await tutor.goto('/instructor/tutoring/availability');
+    await expect(tutor.getByRole('heading', { level: 1 })).toHaveText(th('tutoring.tutor.availability.heading'));
+    const preview = tutor.locator('app-availability-preview');
+    await expect(preview.getByRole('heading', { name: th('tutoring.slots.emptyHeading') })).toBeVisible();
+
+    // 2. Open the hours of OPEN_DAY (09:00-12:00 is the editor's starting window) and save them.
+    const dayName = th(`tutoring.enums.weekday.${OPEN_DAY.dayOfWeek}`);
+    const dayCard = tutor.locator('app-weekly-rules-editor li').filter({ has: tutor.getByRole('heading', { name: dayName, exact: true }) });
+    await dayCard.getByRole('button', { name: new RegExp(th('tutoring.tutor.availability.rules.add')) }).click();
+    await expect(tutor.locator('app-weekly-rules-editor')).toContainText(th('tutoring.tutor.availability.unsaved'));
+    await tutor.getByRole('button', { name: th('tutoring.tutor.availability.rules.save') }).click();
+
+    const rulesEditor = tutor.locator('app-weekly-rules-editor');
+    await expect(rulesEditor).toContainText(th('tutoring.tutor.availability.allSaved'));
+    const saved = mock.sent('PUT', '/tutoring/tutor/availability/rules');
+    expect(saved).toHaveLength(1);
+    expect(saved[0].body).toEqual({ rules: [{ dayOfWeek: OPEN_DAY.dayOfWeek, startLocal: '09:00', endLocal: '12:00' }] });
+    expect(mock.weeklyRules).toEqual([{ dayOfWeek: OPEN_DAY.dayOfWeek, startLocal: '09:00', endLocal: '12:00' }]);
+
+    // The preview ("what learners will see") now offers times on that day, built by the server from the saved hours.
+    for (const time of ['09:00', '09:30', '10:00', '10:30', '11:00']) {
+      await expect(slotButton(preview, time)).toBeVisible();
     }
 
-    // Verify no unrendered tutoring keys (e.g., 'tutoring.public.' or 'tutoring.errors.') appear on the page
-    const pageContent = await page.innerText('body');
-    expect(pageContent).not.toMatch(/tutoring\.(public|learner|tutor|errors|enums)\.[a-zA-Z0-9]+/);
+    // 3. A learner (another person, another browser) books the free trial at 10:00 on that day.
+    const learner = await harness.pageFor('Learner');
+    await learner.goto(`/tutors/${TUTOR_SLUG}`);
+    await expect(learner.getByRole('heading', { level: 1 })).toContainText('สมชาย รุ่งเรืองกิจ');
+    await pickTrialSlot(learner, '10:00');
+    await learner.locator('app-tutor-booking-panel').getByRole('link', { name: th('tutoring.public.profile.booking.continue') }).click();
+    await reserveFreeTrialFor(learner, LEARNER_PROFILE_ADULT_ID);
+    await expect(learner.getByRole('heading', { name: th('tutoring.checkout.confirmed.heading') })).toBeVisible();
+    expect(mock.sent('POST', '/tutoring/bookings')).toHaveLength(1);
+
+    // 4. The tutor's class list has it: the learner, the trial badge and the time.
+    await tutor.getByRole('link', { name: th('tutoring.tutor.nav.classes') }).first().click();
+    await expect(tutor).toHaveURL('/instructor/tutoring/classes');
+    const classCard = tutor.locator('app-tutor-class-card');
+    await expect(classCard).toHaveCount(1);
+    await expect(classCard).toContainText('พี่กล้า');
+    await expect(classCard).toContainText('10:00');
+    await expect(classCard).toContainText(th('tutoring.tutor.classes.card.trial'));
+
+    // 5. Back on the availability page, the booked time is no longer offered (09:30 and 10:00 would overlap it; 09:00 and 10:30 do not).
+    await tutor.getByRole('link', { name: th('tutoring.tutor.nav.availability') }).first().click();
+    const refreshed = tutor.locator('app-availability-preview');
+    await expect(slotButton(refreshed, '09:00')).toBeVisible();
+    await expect(slotButton(refreshed, '10:30')).toBeVisible();
+    await expect(slotButton(refreshed, '09:30')).toHaveCount(0);
+    await expect(slotButton(refreshed, '10:00')).toHaveCount(0);
   });
 });
 
-test.describe('Tutor Marketplace - Acceptance Flow A: Search -> Profile -> Book Trial -> Join', () => {
-  test('learner browses tutors, inspects profile, initiates booking, and opens session join page', async ({ page }) => {
-    const mockTutorSlug = 'somchai-rungruangkit-seed';
-    const mockSessionId = '0192e2b3-0005-7000-8000-000000000001';
+// ===================================================================================================================================
+// Flow C - an admin approves a KYC case
+// ===================================================================================================================================
 
-    // Mock authentication as Learner
-    await page.route('**/api/identity/refresh', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ accessToken: makeMockJwt(['Learner']), expiresIn: 900 }),
-      });
-    });
+test.describe('Tutor Marketplace - Flow C: an admin approves a KYC case', () => {
+  test('approval needs a verdict on the document; the decision request carries it and the page shows the case as approved', async ({ harness }) => {
+    const { mock } = harness;
+    const page = await harness.pageFor('Admin');
 
-    await page.route('**/api/identity/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: '0192e2b3-0000-7000-8000-000000000001',
-          email: 'learner1.seed@example.test',
-          displayName: 'สมหญิง นักเรียน',
-          role: 'Learner',
-          roles: ['Learner'],
-        }),
-      });
-    });
-
-    // Mock Subjects taxonomy
-    await page.route('**/api/tutoring/subjects*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          items: [
-            { id: '01a137b5-7000-75f6-9a88-851ffe0b4f23', slug: 'math', nameTh: 'คณิตศาสตร์', nameEn: 'Mathematics', parentId: null, sortOrder: 10 },
-            { id: '01a137b5-700c-765e-9fb2-f627ad190a26', slug: 'statistics', nameTh: 'สถิติและความน่าจะเป็น', nameEn: 'Statistics & Probability', parentId: '01a137b5-7000-75f6-9a88-851ffe0b4f23', sortOrder: 15 },
-          ],
-          totalCount: 2,
-          page: 1,
-          pageSize: 200,
-          totalPages: 1,
-        }),
-      });
-    });
-
-    // Mock Tutor Search list
-    await page.route('**/api/tutoring/tutors?*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          results: {
-            items: [
-              {
-                slug: mockTutorSlug,
-                displayName: 'สมชาย รุ่งเรืองกิจ (Seed)',
-                headline: 'ติวเตอร์คณิตศาสตร์และสถิติธุรกิจ ประสบการณ์ 12 ปี',
-                photoUrl: null,
-                ratingAverage: 4.9,
-                ratingCount: 18,
-                minHourlyRate: 650.0,
-                hasTrial: true,
-                trialDurationMinutes: 30,
-                trialPrice: 0.0,
-                hasGroup: true,
-                nextAvailableAtUtc: '2026-10-25T02:00:00Z',
-                subjects: [
-                  {
-                    slug: 'statistics',
-                    nameTh: 'สถิติและความน่าจะเป็น',
-                    nameEn: 'Statistics & Probability',
-                  },
-                ],
-              },
-            ],
-            totalCount: 1,
-            page: 1,
-            pageSize: 12,
-            totalPages: 1,
-          },
-          facets: {
-            levels: [{ key: 'UpperSecondary', count: 1 }],
-            curriculums: [{ key: 'Thai', count: 1 }],
-            genders: [{ key: 'Male', count: 1 }],
-            hasTrialCount: 1,
-            hasGroupCount: 1,
-            minRate: 650.0,
-            maxRate: 700.0,
-            subjectCounts: { statistics: 1 },
-          },
-        }),
-      });
-    });
-
-    // Mock Tutor Detail Profile
-    await page.route(`**/api/tutoring/tutors/${mockTutorSlug}`, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          slug: mockTutorSlug,
-          displayName: 'สมชาย รุ่งเรืองกิจ (Seed)',
-          headline: 'ติวเตอร์คณิตศาสตร์และสถิติธุรกิจ ประสบการณ์ 12 ปี',
-          bio: 'อดีต Marketing Manager บริษัท FMCG ชั้นนำในประเทศไทย และผู้เชี่ยวชาญด้านการคำนวณสถิติและคณิตศาสตร์ธุรกิจ',
-          photoUrl: null,
-          introVideo: null,
-          gender: 'Male',
-          yearsExperience: 12,
-          ratingAverage: 4.9,
-          ratingCount: 18,
-          completedSessionsCount: 42,
-          verified: true,
-          verifiedAtUtc: '2026-10-15T00:00:00Z',
-          minNoticeHours: 24,
-          maxAdvanceDays: 60,
-          nextAvailableAtUtc: '2026-10-25T02:00:00Z',
-          timezone: 'Asia/Bangkok',
-          allowedDurationMinutes: [30, 45, 60],
-          offerings: [
-            {
-              offeringId: '0192e2b3-0002-7000-8000-000000000001',
-              subject: {
-                slug: 'statistics',
-                nameTh: 'สถิติและความน่าจะเป็น',
-                nameEn: 'Statistics & Probability',
-              },
-              level: 'UpperSecondary',
-              curriculum: 'Thai',
-              hourlyRateOneOnOne: 650.0,
-              groupHourlyRatePerSeat: 350.0,
-              groupMaxSeats: 4,
-              trial: {
-                minutes: 30,
-                price: 0.0,
-                isFree: true,
-              },
-            },
-          ],
-          educations: [
-            {
-              institution: 'จุฬาลงกรณ์มหาวิทยาลัย',
-              degree: 'ปริญญาตรี',
-              field: 'สถิติประยุกต์',
-              yearFrom: 2008,
-              yearTo: 2012,
-            },
-          ],
-          certificates: [],
-        }),
-      });
-    });
-
-    // Mock Slots, Reviews, and Video
-    await page.route(`**/api/tutoring/tutors/${mockTutorSlug}/slots*`, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          tutorSlug: mockTutorSlug,
-          offeringId: '0192e2b3-0002-7000-8000-000000000001',
-          format: 'OneOnOne',
-          durationMinutes: 30,
-          isTrial: true,
-          quote: {
-            amount: 0.0,
-            currency: 'THB',
-            durationMinutes: 30,
-            hourlyRate: 650.0,
-            isFree: true,
-          },
-          timezone: 'Asia/Bangkok',
-          serverTimeUtc: '2026-10-21T00:00:00Z',
-          fromUtc: '2026-10-21T00:00:00Z',
-          toUtc: '2026-10-28T00:00:00Z',
-          slots: [
-            {
-              startsAtUtc: '2026-10-25T02:00:00Z',
-              endsAtUtc: '2026-10-25T02:30:00Z',
-              seatsLeft: 1,
-              joinsExistingGroup: false,
-            },
-          ],
-        }),
-      });
-    });
-
-    await page.route(`**/api/tutoring/tutors/${mockTutorSlug}/reviews*`, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0 }),
-      });
-    });
-
-    await page.route(`**/api/tutoring/tutors/${mockTutorSlug}/intro-video`, async (route) => {
-      await route.fulfill({ status: 404 });
-    });
-
-    // Mock Learner Profiles and Booking creation
-    await page.route('**/api/tutoring/learner-profiles*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          items: [
-            {
-              id: '0192e2b3-0003-7000-8000-000000000001',
-              nickname: 'น้องฟ้า',
-              birthDate: '2008-05-15',
-              grade: 'M5',
-              guardianConsentGiven: true,
-              isActive: true,
-            },
-          ],
-          totalCount: 1,
-          page: 1,
-          pageSize: 50,
-          totalPages: 1,
-        }),
-      });
-    });
-
-    await page.route('**/api/tutoring/cancellation-policy', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ freeCancellationHours: 24, lateCancellationFeePercent: 50 }),
-      });
-    });
-
-    await page.route('**/api/tutoring/bookings', async (route) => {
-      await route.fulfill({
-        status: 201,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          bookingId: '0192e2b3-0004-7000-8000-000000000001',
-          bookingNo: 'TB-20261021-0001',
-          sessionId: mockSessionId,
-          status: 'Confirmed',
-          isTrial: true,
-          priceAmount: 0.0,
-          startsAtUtc: '2026-10-25T02:00:00Z',
-          endsAtUtc: '2026-10-25T02:30:00Z',
-          holdExpiresAtUtc: null,
-        }),
-      });
-    });
-
-    // Mock Join Session
-    await page.route(`**/api/tutoring/sessions/${mockSessionId}/join`, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          sessionId: mockSessionId,
-          role: 'Learner',
-          meetUrl: 'https://meet.google.com/abc-defg-hij',
-          startsAtUtc: '2026-10-25T02:00:00Z',
-          endsAtUtc: '2026-10-25T02:30:00Z',
-          serverTimeUtc: '2026-10-25T01:55:00Z',
-        }),
-      });
-    });
-
-    // 1. Browse tutors
-    await page.goto('/tutors');
-    const tutorCard = page.locator('app-tutor-card, a[href*="/tutors/somchai-rungruangkit-seed"]').first();
-    await expect(tutorCard).toBeVisible();
-    await expect(tutorCard).toContainText('สมชาย รุ่งเรืองกิจ');
-
-    // 2. Click to open tutor profile
-    await tutorCard.click();
-    await expect(page).toHaveURL(`/tutors/${mockTutorSlug}`);
-
-    // Verify profile page loaded
-    const tutorHeading = page.getByRole('heading', { level: 1 });
-    await expect(tutorHeading).toBeVisible();
-    await expect(tutorHeading).toContainText('สมชาย รุ่งเรืองกิจ');
-    await expect(page.locator('body')).toContainText('สถิติและความน่าจะเป็น');
-
-    // 3. Initiate booking
-    await page.goto(`/tutors/${mockTutorSlug}/book`);
-    await expect(page).toHaveURL(new RegExp(`/tutors/${mockTutorSlug}/book`));
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-
-    // 4. Open session join page
-    await page.goto(`/tutoring/sessions/${mockSessionId}/join`);
-    await expect(page).toHaveURL(`/tutoring/sessions/${mockSessionId}/join`);
-
-    // Verify join session container is visible
-    const joinContainer = page.locator('app-tutoring-join-page');
-    await expect(joinContainer).toBeVisible();
-  });
-});
-
-test.describe('Tutor Marketplace - Acceptance Flow B: Tutor Sets Availability', () => {
-  test('verified tutor views and manages weekly availability schedule', async ({ page }) => {
-    const mockTutorId = '0192e2b3-0001-7000-8000-000000000001';
-
-    // Mock authentication as Instructor/Tutor
-    await page.route('**/api/identity/refresh', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ accessToken: makeMockJwt(['Instructor'], mockTutorId), expiresIn: 900 }),
-      });
-    });
-
-    await page.route('**/api/identity/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: mockTutorId,
-          email: 'instructor1.seed@example.test',
-          displayName: 'สมชาย รุ่งเรืองกิจ',
-          role: 'Instructor',
-          roles: ['Instructor'],
-        }),
-      });
-    });
-
-    // Mock Instructor Studio status (Approved)
-    await page.route('**/api/catalog/instructors/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: '0192e2b3-0006-7000-8000-000000000001',
-          status: 'Approved',
-          displayName: 'สมชาย รุ่งเรืองกิจ',
-        }),
-      });
-    });
-
-    // Mock Tutor Profile (Verified)
-    await page.route('**/api/tutoring/tutor/profile', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          tutorId: mockTutorId,
-          slug: 'somchai-rungruangkit-seed',
-          status: 'Verified',
-          isListed: true,
-        }),
-      });
-    });
-
-    await page.route('**/api/tutoring/tutor/offerings*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          items: [
-            {
-              offeringId: '0192e2b3-0002-7000-8000-000000000001',
-              subject: {
-                subjectId: '01a137b5-700c-765e-9fb2-f627ad190a26',
-                slug: 'statistics',
-                nameTh: 'สถิติ',
-                nameEn: 'Statistics',
-              },
-              level: 'UpperSecondary',
-              curriculum: 'Thai',
-              hourlyRateOneOnOne: 650.0,
-              groupHourlyRatePerSeat: 350.0,
-              groupMaxSeats: 4,
-              trialEnabled: true,
-              trialMinutes: 30,
-              trialPrice: 0.0,
-              isActive: true,
-            },
-          ],
-        }),
-      });
-    });
-
-    // Mock Availability data (must use "rules", not "weeklyRules")
-    await page.route('**/api/tutoring/tutor/availability', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          timezone: 'Asia/Bangkok',
-          settings: {
-            minNoticeHours: 24,
-            bufferMinutes: 10,
-            maxAdvanceDays: 60,
-            rowVersion: 'AAAAAA==',
-          },
-          rules: [
-            {
-              dayOfWeek: 1,
-              startLocal: '09:00',
-              endLocal: '17:00',
-            },
-          ],
-          maxRules: 20,
-        }),
-      });
-    });
-
-    await page.route('**/api/tutoring/tutor/availability/exceptions*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0 }),
-      });
-    });
-
-    // Navigate to Availability Management
-    await page.goto('/instructor/tutoring/availability');
-    await expect(page).toHaveURL('/instructor/tutoring/availability');
-
-    const heading = page.getByRole('heading', { level: 1 });
-    await expect(heading).toBeVisible();
-
-    // Verify weekly rules editor and settings controls are present
-    const weeklyEditor = page.locator('app-weekly-rules-editor');
-    await expect(weeklyEditor).toBeVisible();
-
-    const settingsForm = page.locator('app-availability-settings-form');
-    await expect(settingsForm).toBeVisible();
-  });
-});
-
-test.describe('Tutor Marketplace - Acceptance Flow C: Admin Approves KYC', () => {
-  test('admin views KYC queue and opens pending case', async ({ page }) => {
-    const mockCaseId = '0192e2b3-0008-7000-8000-000000000001';
-
-    // Mock authentication as Admin
-    await page.route('**/api/identity/refresh', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ accessToken: makeMockJwt(['Admin']), expiresIn: 900 }),
-      });
-    });
-
-    await page.route('**/api/identity/me', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: '0192e2b3-0000-7000-8000-000000000099',
-          email: 'admin.seed@example.test',
-          displayName: 'Admin User',
-          role: 'Admin',
-          roles: ['Admin'],
-        }),
-      });
-    });
-
-    // Mock KYC cases queue
-    await page.route('**/api/tutoring/admin/kyc/cases*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          items: [
-            {
-              caseId: mockCaseId,
-              tutorId: '0192e2b3-0001-7000-8000-000000000001',
-              tutorDisplayName: 'สมชาย รุ่งเรืองกิจ',
-              attemptNo: 1,
-              status: 'Submitted',
-              submittedAtUtc: '2026-10-20T10:00:00Z',
-              documentCount: 2,
-              waitingHours: 14,
-            },
-          ],
-          totalCount: 1,
-          page: 1,
-          pageSize: 20,
-          totalPages: 1,
-        }),
-      });
-    });
-
-    // Mock KYC case detail
-    await page.route(`**/api/tutoring/admin/kyc/cases/${mockCaseId}`, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          caseId: mockCaseId,
-          tutorId: '0192e2b3-0001-7000-8000-000000000001',
-          tutorDisplayName: 'สมชาย รุ่งเรืองกิจ',
-          gender: 'Male',
-          headline: 'ผู้เชี่ยวชาญสถิติธุรกิจ',
-          attemptNo: 1,
-          status: 'Submitted',
-          submittedAtUtc: '2026-10-20T10:00:00Z',
-          decidedAtUtc: null,
-          decidedByUserId: null,
-          decisionNote: null,
-          consentVersion: '1.0',
-          consentAtUtc: '2026-10-20T09:55:00Z',
-          tutorStatus: 'PendingVerification',
-          requiredDocumentTypes: ['NationalIdCard', 'CriminalRecordCheck'],
-          documents: [
-            {
-              documentId: '0192e2b3-0009-7000-8000-000000000001',
-              type: 'NationalIdCard',
-              status: 'Pending',
-              contentType: 'image/jpeg',
-              sizeBytes: 102400,
-              uploadedAtUtc: '2026-10-20T09:58:00Z',
-              expiresAtUtc: null,
-              purgeAfterUtc: null,
-              purged: false,
-              sameFileSeenFromOtherTutors: 0,
-            },
-          ],
-          rowVersion: 'BBBBBB==',
-        }),
-      });
-    });
-
-    // 1. Visit KYC queue
+    // 1. The queue lists the waiting case; open it.
     await page.goto('/admin/tutoring/kyc');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(th('tutoring.admin.kyc.heading'));
+    await page.getByRole('link', { name: /สมชาย รุ่งเรืองกิจ/ }).click();
+    await expect(page).toHaveURL(`/admin/tutoring/kyc/${KYC_CASE_ID}`);
+    const summary = page.locator('app-kyc-case-summary');
+    await expect(summary).toContainText('สมชาย รุ่งเรืองกิจ');
+    await expect(summary).toContainText(th('tutoring.enums.kycCaseStatus.Submitted'));
+
+    // 2. Approving without judging the document is refused by the page itself - nothing is sent.
+    await page.getByRole('radio', { name: new RegExp(`^${th('tutoring.admin.kyc.decision.option.Approve')}`) }).check();
+    await expect(page.getByText(th('tutoring.admin.kyc.decision.issue.undecidedDocuments', { count: 1 }))).toBeVisible();
+    await expect(page.getByRole('button', { name: th('tutoring.admin.kyc.decision.review') })).toBeDisabled();
+    expect(mock.sent('POST', /\/decision$/)).toHaveLength(0);
+
+    // 3. Judge the document, review, confirm.
+    await page.locator('app-kyc-document-table').getByText(th('tutoring.admin.kyc.verdict.Approved'), { exact: true }).click();
+    await page.getByRole('button', { name: th('tutoring.admin.kyc.decision.review') }).click();
+    await page.getByRole('button', { name: th('tutoring.admin.kyc.decision.confirm.Approve') }).click();
+
+    // 4. The request, and what the person then sees.
+    await expect(page.locator('app-kyc-case-summary')).toContainText(th('tutoring.enums.kycCaseStatus.Approved'));
+    await expect(page.locator('app-kyc-decision-panel')).toContainText(th('tutoring.admin.kyc.decision.notDecidable'));
+    const decisions = mock.sent('POST', `/tutoring/admin/kyc/cases/${KYC_CASE_ID}/decision`);
+    expect(decisions).toHaveLength(1);
+    expect(decisions[0].body).toEqual({
+      decision: 'Approve',
+      note: null,
+      documents: [{ documentId: KYC_DOCUMENT_ID, status: 'Approved' }],
+      rowVersion: 'BBBBBBBBB9E=',
+    });
+
+    // 5. Back in the queue the case has left the waiting list and is found under "Approved".
+    await page.getByRole('link', { name: th('tutoring.admin.kyc.backToQueue') }).click();
     await expect(page).toHaveURL('/admin/tutoring/kyc');
-
-    const queueHeading = page.getByRole('heading', { level: 1 });
-    await expect(queueHeading).toBeVisible();
-
-    // Verify queue displays the pending case
-    const caseRow = page.locator(`a[href*="/admin/tutoring/kyc/${mockCaseId}"]`).first();
-    await expect(caseRow).toBeVisible();
-    await expect(caseRow).toContainText('สมชาย รุ่งเรืองกิจ');
-
-    // 2. Open the case
-    await caseRow.click();
-    await expect(page).toHaveURL(`/admin/tutoring/kyc/${mockCaseId}`);
-
-    // Verify case details page
-    const caseSummary = page.locator('app-kyc-case-summary');
-    await expect(caseSummary).toBeVisible();
-    await expect(caseSummary).toContainText('สมชาย รุ่งเรืองกิจ');
-
-    // Verify document table and decision panel are rendered
-    const docTable = page.locator('app-kyc-document-table');
-    await expect(docTable).toBeVisible();
-
-    const decisionPanel = page.locator('app-kyc-decision-panel');
-    await expect(decisionPanel).toBeVisible();
+    await expect(page.getByRole('link', { name: /สมชาย รุ่งเรืองกิจ/ })).toHaveCount(0);
+    await page.getByRole('button', { name: th('tutoring.enums.kycCaseStatus.Approved'), exact: true }).click();
+    await expect(page.getByRole('link', { name: /สมชาย รุ่งเรืองกิจ/ })).toBeVisible();
   });
 });
