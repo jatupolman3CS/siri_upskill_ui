@@ -58,3 +58,10 @@ This document contains the step-by-step procedure for public launch (Go-Live) of
    - Download PDF receipt & e-Tax invoice from order history.
 6. **PDPA Self-Service**:
    - Test `/account/privacy` JSON data export.
+
+---
+
+## 4. Module-Specific Go-Live Runbooks
+- [Live Course / Google Meet Runbook](live-course-go-live.md) (P11)
+- [Tutoring Marketplace Runbook](tutoring-go-live.md) (P13 / P13-42)
+

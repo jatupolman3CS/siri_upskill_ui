@@ -21,6 +21,7 @@ task ระดับปฏิบัติทั้งหมดอยู่ที
 | P10 | Subscription | หลัง launch | LX-12 |
 | P11 | Hybrid Live (Google Meet + Calendar + Catch-up + บัตร) | หลัง launch / แทรกได้ | HL-01..07 |
 | P12 | AI Study (chapters, summary, watch-plan, marketing copy) | หลัง P11 | AI-01..04 |
+| P13 | Tutor Marketplace (ติวเตอร์ 1:1/กลุ่มย่อย + จองเวลา + Google Meet + escrow) | หลัง launch / ต่อจาก P11 | TM-01..18 |
 
 > P3 ใช้ **Stripe** (แก้ไข 2026-08-18 จาก EasySlip) — ต้องสมัครบัญชี Stripe Thailand ล่วงหน้าตั้งแต่ P1 (KYC ใช้เวลา); v1 เปิดเฉพาะ PromptPay QR — บัตรเปิดเพิ่มทีหลังได้จาก dashboard แต่**ผ่อนชำระยังไม่มี** (Stripe ไทยไม่รองรับ)
 > P0 หนักขึ้นเพราะ self-host บน Contabo (ต้องทำ infra, backup, CI/CD เอง)
@@ -136,6 +137,14 @@ task ระดับปฏิบัติทั้งหมดอยู่ที
 
 ---
 
+## P13 — Tutor Marketplace (ต่อจาก P11 · D-25 · ~131 คน-วัน)
+> แบบระบบ `docs/TUTORING.md` · ค่าธุรกิจตอบแล้ว (คอมมิชชัน 20% / ยกเลิก 100%-50% / รายสัปดาห์ / อีเมล+ICS+ในแอป) · Q14 (กฎหมาย-ภาษี-PDPA) ไม่บล็อกโค้ดเพราะเป็น config
+- **Wave 1** ติวเตอร์ + KYC + เวลาว่าง + ค้นหา (ไม่มีเงิน) → **Wave 2** จอง + จ่าย + escrow + ยกเลิก/คืนเงิน + แพ็กเกจ → **Wave 3** ห้อง Meet + เข้าเรียน + เช็กชื่อ + เตือน → **Wave 4** รีวิว + ข้อพิพาท + analytics + PDPA → **Wave 5** Drive folder (ต้องทดสอบจริง)
+- ใช้ซ้ำ: ตัวตนผู้สอน (`INSTRUCTOR_PROFILE`), Google/Meet (Live), Stripe + webhook, Payout (batch/ภาษี/บัญชีธนาคาร), Notification, Media
+- **Exit criteria:** ดู `TASKS.md` §P13 (จองซ้อนพร้อมกัน = สำเร็จหนึ่ง · refund idempotent ผ่าน Stripe จริง · escrow Held→Released/Frozen · KYC ถูก purge + มี access log)
+
+---
+
 ## เส้นทางเร่ง (ถ้าต้องออกตลาดเร็ว)
 ตัดเหลือเฉพาะ Must-Have: **P0 → P1 → P2 → P3** = ~14 สัปดาห์ ขายคอร์สได้จริง
 เลื่อน P4 ออกไปโดยให้ทีมงานภายในเป็นคนอัปโหลดคอร์สให้ instructor ชั่วคราว (admin-assisted onboarding)
@@ -152,4 +161,6 @@ task ระดับปฏิบัติทั้งหมดอยู่ที
 | Instructor ไม่ใช้ builder เอง | IN-01 เสียเปล่า | ทดสอบ usability กับ instructor จริง 3 คนกลาง P4 (P4-30) |
 | **Google service account สร้าง Meet ไม่ได้ถ้าไม่มี Workspace + domain-wide delegation** (P11) | HL-02 ทำไม่ได้ทั้งฟีเจอร์ | Q10 ตัดสินก่อนเริ่ม P11-03 · degraded mode `PROVIDER=Manual` (ผู้สอนวางลิงก์เอง) ออกแบบไว้ในโค้ดเดียวกัน |
 | **เพดานผู้เข้าร่วม Meet/attendee ของ Google** (100/150/500 ตามแผน · attendee ~200/event) | คลาสใหญ่เข้าไม่ได้ / invite ไม่ครบ | เลือกแผน Workspace ตามขนาดคลาส · ICS ผ่าน outbox เป็น baseline ไม่พึ่ง attendee · เตือนผู้สอนเมื่อใกล้เพดาน |
+| **เงินของบุคคลที่สามพักในบัญชีแพลตฟอร์ม + ภาษี/กฎหมายค่าสอนพิเศษ** (P13) | ผิดข้อกำหนดบัญชี Stripe/กฎหมาย/ภาษี | Q14 — ขอที่ปรึกษากฎหมาย+นักบัญชียืนยันก่อน launch · escrow เป็น ledger เหมือน payout คอร์สเดิม (Stripe ไทยไม่รองรับ Connect separate-transfers) |
+| **เอกสาร KYC รั่ว (บัตรประชาชน/ประวัติอาชญากรรม)** (P13) | PDPA + ความเสียหายต่อผู้ใช้ | bucket แยก + เข้ารหัสชั้นแอป + ไม่มี URL ตรง + access log + purge + บังคับ 2FA admin (X-39) |
 | **ค่า AI บานปลาย** (P12) | ต้นทุนต่อคอร์สเกินคาด | `Ai:MonthlyBudgetUsd` hard stop + ledger + opt-in ต่อคอร์ส · chapters ใช้ Bunny ($0.10/นาที) ไม่ใช่ LLM |

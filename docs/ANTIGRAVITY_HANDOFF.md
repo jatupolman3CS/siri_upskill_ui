@@ -621,12 +621,571 @@ Commit message: feat(catalog): live schedule in public course detail and search 
 
 ---
 
+## 7P. Phase P — P13 Tutor Marketplace: งานที่เหลือ แบ่ง Claude / Antigravity (2026-10-19)
+
+> **ที่มา:** เจ้าของโปรเจ็คสั่ง "แบ่งงานที่เหลือให้ Antigravity ช่วยเขียนบางส่วน" หลัง Claude ทำ P13 ไปแล้ว: BE P13-01..11 + 14 + 33 = `BUILT`, FE P13-20..28 = `BUILT` (ทั้งหมดยังไม่เคยรันกับ Stripe/Google/R2/PostgreSQL 17 จริง และ **ยังไม่มีอะไรถูก commit/apply migration**)
+> **หลักการแบ่ง = §2 เดิม:** feature/UI/test ทั่วไปที่ contract FROZEN แล้ว → Antigravity · เงิน/สิทธิ์/KYC/OAuth/ข้อมูลส่วนบุคคล/`Contracts/` ข้ามโมดูล/แตะ Identity-Payout-Commerce → Claude · **contract BE ที่เหลือทุกฉบับ (P13-12/13/15/17) เขียนว่า "ห้ามส่ง Antigravity"** — ข้อ P-9/P-10 ด้านล่างจึงเป็น **ตัวเลือกที่ต้องให้เจ้าของสั่ง override ชัด ๆ เท่านั้น** (เรียงจากเสี่ยงต่ำสุด)
+
+### 7P.0 ตารางแบ่งงาน
+
+| งาน | ผู้ทำ | สถานะ/เหตุผล |
+|-----|-------|--------------|
+| `P13-12` แพ็กเกจ (BE) | **Claude** | โค้ดค้างครึ่งทางใน tree (31 ไฟล์ + migration `AddTutorPackages` + integration test 7 ไฟล์ — เขียนไม่จบเพราะชนลิมิต; build เขียว 0/0 ณ 2026-10-19) · แตะเงิน/เครดิต → AG **ห้ามแตะไฟล์ชื่อ `*Package*`** |
+| `P13-17` PDPA (BE) | **Claude** | แก้ Identity 3 ไฟล์ข้ามโมดูล (`IPersonalDataParticipant`) |
+| `P13-15` WP-A,B (BE: migration index + Payout `ITutoringRevenueSeriesReader`) | **Claude** | แตะ Payout (เงิน) |
+| `P13-30` integration ข้าม task, `P13-32` security review รอบ 2, `integrator-qa` gate → `DONE` | **Claude** | เฉพาะ Claude ตั้ง `DONE` ได้ |
+| `X-35..X-42` ช่องโหว่เดิม (refund approve ไม่เรียก Stripe, webhook ไม่ฟัง refund/dispute, Payout race, 2FA แอดมิน, NuGet audit) | **Claude** (X-42, X-44 = เจ้าของ/infra) | นอกขอบเขต Antigravity |
+| `P13-16` Drive folder | BLOCK | ต้องทดสอบ scope `drive.file` กับ Google จริงก่อน |
+| `P13-34` ครอบคลุม i18n ของ error code (FE) | **Antigravity** | P-1 |
+| `P13-35` หน้าข้อพิพาทฝั่งติวเตอร์ (FE) | **Antigravity** | P-2 · ช่องว่างจริง: API มีแล้วแต่ FE ไม่มีหน้า |
+| `P13-36` UI รีวิว (หน้า public + หน้า admin) (FE) | **Antigravity** | P-3 · สร้างจาก contract P13-13 (BE ยังไม่มี) |
+| `P13-37` UI ความเป็นส่วนตัว/ถอน consent (FE) | **Antigravity** | P-4 · สร้างจาก contract P13-17 §12 |
+| `P13-38` FE cleanup (picker ซ้ำ + hard-code ระยะเวลา) | **Antigravity** | P-5 |
+| `P13-39` เทียบ FE กับ C# จริง (P13-05..11,14) | **Antigravity** | P-6 · งานกลไกที่ตรวจด้วยเทสต์ได้ |
+| `P13-31` E2E Playwright smoke | **Antigravity** | P-7 |
+| `P13-40` ทำให้เทสต์เสถียร (2 เทสต์ที่แดงแบบไม่เกี่ยวฟีเจอร์) | **Antigravity** | P-8 · test-only |
+| `P13-41` เทียบ FE กับ BE ที่ build เพิ่ม (แพ็กเกจ P13-12 · PDPA P13-17 · analytics P13-15) + ปิดช่อง error reason (FE) | **Antigravity** | P-11 · ส่วน D รอ P13-15 = BUILT |
+| `P13-42` คู่มือขึ้นระบบ Tutoring (`docs/runbooks/tutoring-go-live.md`) | **Antigravity** | P-12 · เอกสารล้วน ทำขนานได้ · Claude ตรวจ |
+| `P13-43` ตรวจคุณภาพ FE หน้า Tutoring ทั้งชุด (responsive/a11y/สถานะ/token) | **Antigravity** | P-13 · หลัง P-11 |
+| `P13-44` ข้อมูลตัวอย่าง Tutoring ใน `--seed` (ไม่มี booking/เงิน) | **Antigravity** | P-14 · BE · เริ่มได้แล้ว (D2 ปิด) |
+| `P13-45` เทสต์แกว่งรอบ 2 (NotificationRelayStore + dispute message order) | **Antigravity** | P-15 · test-only · เริ่มได้แล้ว (D2 ปิด) |
+| `P13-46` FE: ผลจากมติ D-25.1 (i18n offering_has_open_credits + ConsentWithdrawn + heldBack ของ batch แอดมิน) | **Antigravity** | P-16 · FE · หลัง P-13 |
+| `P13-47` BE additive field สำหรับ FE (allowedDurationMinutes ของพอร์ทัลติวเตอร์, anonymizedAtUtc/guardianConsentWithdrawnAtUtc ของโปรไฟล์ผู้เรียน, disputeId ของแถวผู้เรียนในคลาส) | **Claude** | ทำก่อน P-17 · Antigravity ห้ามแตะ BE |
+| `P13-48` FE: ใช้ field ใหม่ + ปิด P13-38 + ตัด heuristic ที่ gate ตำหนิ | **Antigravity** | P-17 · เริ่มเมื่อ P13-47 = BUILT |
+| `P13-48/46/31/42/43` แก้งานที่ gate รอบ 2 ตีกลับ (ตัด fallback ความยาว/buffer, sourceType + ApiError ของหน้ารอบจ่าย, E2E ให้แดงได้, แก้ runbook, ตาราง audit) | **Antigravity** | P-18 · ทำหลัง P-17 · ทำตามลำดับ 1→5 |
+| `P13-13` รีวิว (BE) | Claude (แนะนำ) / **ตัวเลือก AG** | P-9 · ไม่แตะเงิน แต่มี PII + single-writer rating |
+| `P13-15` WP-C..E (BE analytics รายงาน) | Claude (แนะนำ) / **ตัวเลือก AG** | P-10 · ต้องรอ Claude ทำ WP-A,B ก่อน |
+| เจ้าของโปรเจ็ค | **OWN** | สั่ง apply migration ทั้งชุด (ลำดับใน `PROGRESS.md`) · R2 bucket KYC + token แยก · เปิด Stripe event `refund.created/updated/failed` · Google OAuth verification · forwarded-headers/ingress (X-44) · บังคับ 2FA แอดมินก่อนเปิด KYC · Q14 กฎหมาย/ภาษี/PDPA · ตั้ง `Payout:EstimatedPaymentFeePercent` ตามเรตจริง · ตัดสิน X-42 (NuGet audit) · **commit baseline ของงาน P13** (ดู 7P.1) |
+
+### 7P.1 กติการ่วมของ Phase P (อ่านก่อนหยิบ P-1..P-15)
+
+1. **Tree ยังเต็มไปด้วยงาน P13 ของ Claude ที่ยังไม่ commit ทั้งสอง repo** (`siri_upskill_backend`, `siri_upskill_ui`) บวกงานของ session อื่น (Meilisearch/Catalog/Cms/Community/Identity) — **ห้าม** `git add -A` / `git add .` / `git stash` / `git reset` / `git checkout -- .` / `git clean`; `git add` เฉพาะ path ของ task ตัวเองเท่านั้น (ถ้า path ชนไฟล์ที่ Claude แก้ค้างอยู่ ให้หยุดแล้วรายงาน) · **ข้อเสนอ:** เจ้าของ commit baseline P13 ก่อนเริ่ม (จัดกลุ่มตาม task ID) จะทำให้ 1 task = 1 commit สะอาด
+2. **ห้ามมี Antigravity สองตัวทำงานใน repo UI พร้อมกัน** — i18n JSON, `app.routes.ts`, `app.routes.server.ts`, nav ถูกแก้ร่วมกันทุกงาน FE ลำดับแนะนำ: **P-1 → P-2 → P-6 → P-5 → P-3 → P-4 → P-7** · P-8 (BE test-only) ขนานได้ · **ห้ามสร้าง/แก้ migration ทุกกรณีจนกว่า Claude แจ้งว่า P13-12 จบ** (ผู้เขียน migration มีได้ทีละคน — snapshot ชนกัน) — P-1..P-8 ไม่ต้องมี migration
+3. **contract = ข้อผูกพัน** (`docs/contracts/P13-*.md`, ทะเบียนกลาง `P13-README.md` โดยเฉพาะ **§5.1 route→policy, §6 กฎ ext key, §9 errata**) · ฝั่ง BE ที่ build แล้ว **โค้ด C# จริงชนะ contract** (อ่าน record/controller จริงที่ `src/Siri.Modules.Tutoring/**`, `src/Siri.Api/Controllers/Tutoring/**`) · ถ้าขัดกันให้หยุดรายงาน ห้ามแก้ไฟล์ contract เอง
+4. **FE ต้องเป็นไปตามนี้ทุกงาน:** standalone/OnPush/signals · `*ApiService` เท่านั้น (ไม่เรียก HttpClient ตรง) · loading/error/empty ครบ · token/`tone-*` เท่านั้น (ห้าม hex, ห้ามคลาสสี Tailwind ดิบ, ห้าม emoji — `theme-guard.spec` เขียว) · ข้อความทุกตัวใน i18n th+en (`i18n-guard.spec` เขียว) โดย **ข้อความ tutoring อยู่ใน lazy dictionary** `src/app/features/tutoring/i18n/tutoring-{shared,public,learner,tutor}.{th,en}.json` + `admin/i18n/admin-tutoring.{th,en}.json` (โหลดผ่าน route resolver + `TranslationService.extend()`; ดู `tutoring-dictionaries.ts`, `tutoring-i18n.spec.ts`) — **ห้ามเติมข้อความ tutoring ลง `core/i18n/th.json|en.json` หลัก** (ยกเว้น nav label 1 บรรทัด) · route ใหม่ที่ต้อง login ต้องเพิ่ม `RenderMode.Client` ใน `app.routes.server.ts` **ใน change เดียวกัน** (`ng build` ล้มถ้า server path ไม่มี Angular route) · ห้ามยก budget ใน `angular.json` (initial transfer ตอนนี้ ~214 kB / งบ 300 kB) · ห้ามเพิ่ม npm dependency
+5. **บทเรียนจากการสร้าง P13 (BE):** ext key ของ ProblemDetails ห้ามชื่อ `status/detail/title/type/instance/traceId/reason/errorCode` (ถูกทิ้งเงียบ) · `Enum.TryParse` ยอมรับตัวเลข/comma list → ใช้ตัวอักษรล้วน + `IsDefined` · CHECK constraint ของ PostgreSQL ผ่านเมื่อค่า NULL → ต้องมี `IS NOT NULL` ชัด · ชื่อคอลัมน์ที่มี "ตัวเลข+ตัวพิมพ์ใหญ่" (เช่น `REMINDER_24H_*`) ต้อง `HasColumnName` เอง · ห้าม project join หลายตารางเข้า positional record (EF แปลงไม่ได้ → 500 ที่ fake มองไม่เห็น) · เทสต์เดิมหลายตัว hard-code จำนวนตาราง/FK/job → แก้แบบเพิ่ม ไม่ลดความเข้ม · integration test ใช้ DB ร่วมกันทั้ง collection + มี job global → ใช้ข้อมูลเฉพาะตัวต่อเทสต์
+6. **ความปลอดภัย/ข้อห้ามคงเดิม:** ห้ามสตาร์ท `Siri.Api`/`Siri.Workers` ด้วยมือ (`.env` ของ backend ชี้ DB production — ใช้ `scripts/dev.ps1` เท่านั้น) · ห้ามอ่าน/แก้ `.env*` · ห้ามพิมพ์เนื้อหา `.dev/settings.json` · ห้ามรัน `dotnet ef database update` · ห้ามใส่ secret · build BE ด้วย `dotnet build SiriUpSkill.sln -c Release -p:NuGetAudit=false` (X-42: restore ล้มเพราะ advisory) · integration test ใช้โหมด external-services (PostgreSQL native `127.0.0.1:5433` + Garnet `:6380`; อ่านใน doc comment ของ `tests/Siri.IntegrationTests/Fixtures/ExternalTestServices.cs`; password มาจาก `.dev/settings.json` **ภายใน subprocess เท่านั้น**; ตรวจ `netstat` ก่อน — ถ้ามี server ฟังอยู่ห้ามปิดของที่ไม่ได้เปิดเอง; PowerShell `pg_ctl … | Out-Null` ค้างตลอดไป ให้ใช้ `Start-Process`/redirect)
+7. **ตั้ง Status ได้แค่ `BUILT`/`PART`** (ห้าม `DONE`) · อัปเดตแถว task ใน `docs/TASKS.md` + บันทึกสั้น ๆ ใน `docs/PROGRESS.md` · รายงานว่าอะไรไม่ได้ verify (ยังไม่เคยต่อ backend/Stripe/Google จริง) อย่างตรงไปตรงมา
+
+### P-1 — `P13-34` ครอบคลุมข้อความ error ของ Tutoring ใน i18n (FE · S)
+
+```
+Task: P13-34 — ทุก error reason ที่ผู้ใช้เจอได้ต้องมีข้อความ th+en (FE)
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-README.md §6 (กฎ ext key) §9 ·
+.claude/rules/frontend.md
+
+ปัญหาจริง (ตรวจ 2026-10-19): C# ฝั่ง P13-33 เพิ่ม reason ใหม่ 3 ตัว — `tutoring.cancel_after_join`,
+`tutoring.too_many_active_trials`, `tutoring.admin_self_action` — แต่ใน lazy dictionary ไม่มี key
+`tutoring.errors.<reason ตัดคำนำหน้า tutoring.>` ของทั้งสามเลย (grep ทั้ง 8 ไฟล์ใน
+src/app/features/tutoring/i18n/ ได้ 0) ผู้ใช้จึงเห็นข้อความ generic แทนที่จะรู้ว่าทำไมยกเลิกไม่ได้ ·
+ต้องสงสัยว่ายังมี reason อื่นที่ตกหล่นเหมือนกัน
+
+สิ่งที่ต้องทำ:
+1. อ่านวิธี map reason → key ที่ features/tutoring/data/tutoring-errors.ts (+ labels) แล้วเพิ่ม key ทั้ง 3 ใน
+   tutoring-shared.th.json / tutoring-shared.en.json (subtree tutoring.errors) ข้อความไทยสุภาพ สั้น บอกทางไปต่อ
+   (เช่น cancel_after_join = "รับลิงก์เข้าห้องแล้วจึงยกเลิกเองไม่ได้ หากมีปัญหาให้เปิดข้อพิพาท")
+2. ไล่ reason code ทั้งหมดที่ผู้ใช้ปลายทางเห็นได้จาก backend (อ่านอย่างเดียว): `*Errors.cs` และ `WithReason(` ใน
+   C:\ProjectSiriUpSkill\siri_upskill_backend\src\Siri.Modules.Tutoring\** + controllers ใต้
+   src\Siri.Api\Controllers\Tutoring\** (ระวัง: string "tutoring.*" ส่วนใหญ่ใน repo เป็น template key ของอีเมล/
+   notification ไม่ใช่ error — แยกให้ออก) → ทำตารางใน PROGRESS.md: reason | มี key แล้ว? | เพิ่มแล้ว
+3. เพิ่ม key ที่ขาดทั้งหมด (th+en) · ถ้าไม่แน่ใจว่า reason นั้นผู้ใช้เห็นหรือไม่ ให้ใส่ข้อความ generic ที่ปลอดภัย
+   และระบุในตาราง
+4. เพิ่ม/ขยาย spec ที่มีอยู่ (tutoring-errors.spec.ts, tutoring-i18n.spec.ts) ให้ล็อก 3 key ใหม่ + parity เดิมเขียว
+
+ข้อห้ามเฉพาะงานนี้: ห้ามแตะ backend · ห้ามเติม key ลง core/i18n/th.json|en.json หลัก · ห้ามเปลี่ยนความหมายของ key เดิม
+Definition of done: §3 ทุกข้อฝั่ง FE (lint + test + build เขียว) · Status P13-34 = BUILT
+```
+
+### P-2 — `P13-35` หน้าข้อพิพาทฝั่งติวเตอร์ (FE · M)
+
+```
+Task: P13-35 — ติวเตอร์เห็น/ตอบ/ถอนข้อพิพาทได้ในพอร์ทัล (FE)
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-README.md §5.1 §9 ·
+docs/contracts/P13-14-disputes.md (§5 routes ฝั่งติวเตอร์, §6, DTO appendix, Changelog) · docs/TUTORING.md §3.9 ·
+.claude/rules/frontend.md + ui-design.md
+
+ปัญหาจริง (ตรวจ 2026-10-19): BE มี API ฝั่งติวเตอร์ครบแล้ว (TutorDisputesController — InstructorOnly):
+GET api/tutoring/tutor/bookings/{bookingId}/dispute · POST เดียวกัน (เปิดข้อพิพาท) · GET tutor/disputes ·
+GET tutor/disputes/{id} · POST tutor/disputes/{id}/messages · POST tutor/disputes/{id}/withdraw —
+แต่ FE ไม่เรียกเลย (grep 'tutor/disputes' ใน features/tutoring ได้ 0) และ tutor.routes.ts ไม่มี route disputes ·
+ผลคือ ผู้เรียนเปิดข้อพิพาทแล้ว (เงินถูก Freeze) แต่ติวเตอร์ไม่มีทางเห็น/ตอบในระบบ
+
+สิ่งที่ต้องทำ:
+- DTO ให้ยึด C# record จริง (src/Siri.Modules.Tutoring/Application/Disputes/*Models*.cs) — ชนะ contract; ของฝั่งผู้เรียน
+  มีแล้วที่ features/tutoring/data/tutoring-dispute.models.ts + tutoring-dispute-api.service.ts (ใช้ซ้ำ type ได้
+  ถ้าตรง) เพิ่มเมธอดฝั่ง tutor (ไฟล์ service ใหม่หรือขยาย — ตามที่ churn น้อยกว่า)
+- route ใหม่ใต้ tutor.routes.ts: `disputes` (รายการ + filter สถานะ + paging ใน URL) และ `disputes/:disputeId`
+  (รายละเอียด + thread + ตอบ + ถอน) · guard = เฉพาะ instructor (ที่ครอบ tutor.routes อยู่แล้ว) **ห้ามใช้
+  verifiedTutorGuard** — ติวเตอร์ที่ถูกระงับ/ไม่ Verified ต้องตอบข้อพิพาทที่ค้างได้ (README §5.1)
+- ใช้ซ้ำ component ฝั่งผู้เรียน (learner/my-tutoring/dispute-thread, dispute-reply-form) โดย extract ไป
+  features/tutoring/ui/ ถ้า churn ≤ ~30 บรรทัด ไม่งั้นทำตาม pattern เดียวกัน · internal note ของแอดมิน = ห้ามแสดง
+  (BE ไม่ส่งให้คู่กรณีอยู่แล้ว — อย่าเพิ่ม UI รองรับ) · หลักฐานเป็นลิงก์ https เท่านั้น (rel="noopener noreferrer")
+- ปุ่ม "เปิดข้อพิพาท" บนหน้า class (tutor/class-page) ตาม P13-14 (เปิดได้เฉพาะช่วง/สถานะที่ server บอก — ใช้ flag จาก
+  DTO ห้ามคำนวณหน้าต่างเวลาเองฝั่ง client) · badge/ลิงก์ "มีข้อพิพาท" บนการ์ดคลาสถ้า DTO มี disputeId
+- เพิ่มลิงก์ใน TutorPortalNav (tutor/ui/tutor-portal-nav) · ข้อความไว้ใน tutoring-tutor.{th,en}.json
+  (tutoring.tutor.disputes.*) + error ใหม่ใน tutoring-shared
+- PII: ติวเตอร์เห็นผู้เรียนเป็นชื่อเล่น/ระดับชั้นเท่านั้น — ห้ามแสดงข้อมูลผู้ปกครอง
+- spec: service, หน้า list/detail, thread (append-only, clientMessageId กันส่งซ้ำ), ถอน (ปุ่มเฉพาะผู้เปิด — ใช้ flag
+  จาก DTO), route spec (ไม่มี verifiedTutorGuard)
+
+ข้อห้ามเฉพาะงานนี้: ห้ามแตะ backend · ห้ามแก้ฝั่งผู้เรียน/แอดมินนอกจาก extract component ที่ระบุ · ห้ามใส่ข้อมูลปลอม
+Definition of done: §3 ฝั่ง FE ทุกข้อ · Status P13-35 = BUILT · รายงานว่ายังไม่เคยทดสอบกับ API จริง
+```
+
+### P-3 — `P13-36` UI รีวิว: แท็บสาธารณะ + หน้า admin (FE · M)
+
+```
+Task: P13-36 — รีวิวติวเตอร์ (แท็บในโปรไฟล์ + หน้า admin) สร้างจาก contract (FE)
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-13-tutor-reviews.md
+(§12 Frontend notes + DTO appendix + Changelog — FROZEN) · docs/contracts/P13-README.md §5.1 §6 ·
+.claude/rules/frontend.md + ui-design.md
+
+สถานะจริง (2026-10-19): BE ของ P13-13 **ยังไม่มีโค้ด** (TODO) → สร้างจาก contract ด้วย HttpTestingController
+เท่านั้น ห้ามใส่ข้อมูลปลอมลง component · ฟอร์มให้ดาวของผู้เรียนมีแล้ว (P13-23: learner/my-tutoring ส่วน review +
+features/tutoring/ui/star-rating-input) ห้ามทำซ้ำ
+
+สิ่งที่ต้องทำ (ตาม contract §12):
+- แท็บรีวิวสาธารณะบน /tutors/:slug (public/tutor-profile-page): summary (ค่าเฉลี่ย, จำนวน, distribution เป็นแถบ CSS
+  มีตัวเลขกำกับ ไม่พึ่งสีอย่างเดียว), ตัวกรองดาว, sort, pagination · ป้ายผู้รีวิวจาก reviewer.kind
+  (Nickname/Guardian/Anonymous) ตามกติกา contract — ห้ามเดาชื่อเอง · หน้านี้ SSR ได้แต่การดึงรีวิวทำฝั่ง browser/
+  ทนต่อ fail ได้ (อย่าให้ล้ม SSR ของโปรไฟล์) · ห้ามใส่ aggregateRating ใน JSON-LD ถ้า ratingCount = 0 (ของเดิมทำไว้แล้ว)
+- หน้า admin /admin/tutoring/reviews (admin/ ใน features/tutoring; route ใน admin-tutoring.routes.ts + nav 1 รายการ):
+  ตาราง + ตัวกรองสถานะ/ดาว/ติวเตอร์/ค้นหา + ปุ่มซ่อน/เลิกซ่อน (modal เหตุผลบังคับ) · แสดงป้าย
+  countsTowardRating=false ("ไม่นับเข้าคะแนน")
+- ข้อความ: tutoring-public.* (แท็บ) · admin-tutoring.* (admin) · enum labels ใน tutoring-shared · error reason ใหม่ของ
+  contract → tutoring.errors.* (th+en)
+- spec ครบ (service, แท็บ, ตัวกรอง, หน้า admin, modal) · a11y: filter เป็นปุ่ม aria-pressed หรือ select ที่มี label
+
+ข้อห้ามเฉพาะงานนี้: ห้ามแตะ backend/contract · ไม่ต้องทำปุ่มรีวิวฝั่งผู้เรียน (มีแล้ว) · ถ้า DTO ใน contract กำกวม
+ให้ทำ type เป็น optional/nullable แล้วรายงาน อย่าเดา
+Definition of done: §3 ฝั่ง FE · Status P13-36 = BUILT · ระบุว่ารอ BE P13-13 ก่อนทดสอบจริง
+```
+
+### P-4 — `P13-37` UI ความเป็นส่วนตัว: ถอน consent ผู้ปกครอง + บล็อกลบบัญชี (FE · S–M)
+
+```
+Task: P13-37 — ถอนความยินยอมของผู้ปกครอง + แสดงเหตุที่ลบบัญชีไม่ได้ (FE)
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-17-pdpa-hooks.md
+(§12 Frontend notes + Changelog) · docs/contracts/P13-README.md §6 · .claude/rules/frontend.md
+
+สถานะจริง: BE ของ P13-17 **ยังไม่มีโค้ด** → สร้างจาก contract (HttpTestingController) ห้ามใส่ข้อมูลปลอม
+
+สิ่งที่ต้องทำ:
+1. /account/learner-profiles (learner/learner-profiles-page): ปุ่ม "ถอนความยินยอมของผู้ปกครอง" เฉพาะโปรไฟล์ isMinor
+   ที่ยัง active → dialog อธิบายผลกระทบ (ใช้จองไม่ได้อีก ฯลฯ ตามข้อความใน contract) + ยืนยันสองขั้น → POST
+   learner-profiles/{id}/withdraw-consent · โปรไฟล์ที่ถูก anonymise แสดง "[removed]" + ป้าย "ลบข้อมูลแล้ว" แก้ไขไม่ได้
+2. หน้าส่งออกข้อมูล/ลบบัญชีของ Identity (ต้องค้นหาหน้าที่มีอยู่จริงใน src/app/features/auth หรือ account —
+   **ถ้าไม่มีหน้านี้ในระบบ ให้หยุดแล้วรายงาน ห้ามสร้างหน้าใหม่เอง**): รองรับ 409 `tutoring.erasure_blocked`
+   แสดง blockers[] ด้วย i18n พร้อมลิงก์ไป /my-tutoring หรือ /instructor/tutoring/... ตามประเภท blocker
+3. ประวัติการจองที่ติวเตอร์ลบบัญชีแล้ว: แสดง "ผู้สอนที่ลบบัญชีแล้ว" (ตาม contract)
+- ข้อความ: tutoring-learner.* (tutoring.learner.privacy.*, tutoring.learner.profile.consentWithdraw.*) + error ใหม่ใน
+  tutoring-shared · ไม่มี route ใหม่ (ใช้หน้าเดิม) จึงไม่ต้องแก้ app.routes.server.ts · spec ครบ
+
+ข้อห้ามเฉพาะงานนี้: ห้ามแตะ backend/Identity ฝั่ง BE · ห้ามเปลี่ยนกลไกลบบัญชีเดิม
+Definition of done: §3 ฝั่ง FE · Status P13-37 = BUILT (หรือ PART + เหตุผลถ้าไม่มีหน้า Identity ให้ผูก)
+```
+
+### P-5 — `P13-38` FE cleanup: picker ซ้ำ + ระยะเวลา hard-code (FE · S)
+
+```
+Task: P13-38 — ลบ logic ซ้ำ/ค่า hard-code ที่ FE รอบก่อนทิ้งไว้
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · .claude/rules/frontend.md
+
+ปัญหาจริง (ตรวจ 2026-10-19):
+1. features/tutoring/learner/booking-page มี logic เลือกโปรไฟล์ผู้เรียนของตัวเอง ซ้ำกับ
+   learner/learner-profile-picker/learner-profile-picker.ts ที่ package-purchase-page ใช้อยู่แล้ว
+2. ระยะเวลาคลาส hard-code 30/60/90/120 ที่ tutor/availability-page/availability-preview/availability-preview.ts
+   (DURATION_CHOICES), tutor/packages-page/package-form/package-form.ts และ tutor/tutor-package-form.util.ts
+   (PACKAGE_DURATIONS) — ฝั่งสาธารณะแก้ให้ใช้ `allowedDurationMinutes` จาก public profile แล้ว
+
+สิ่งที่ต้องทำ:
+- ข้อ 1: เปลี่ยน booking-page ไปใช้ LearnerProfilePicker (พฤติกรรมและ spec เดิมต้องผ่านโดยไม่ลดความเข้ม)
+- ข้อ 2: หา "แหล่งความจริง" ของระยะเวลาที่อนุญาตที่ติวเตอร์เข้าถึงได้ (อ่าน C#: Tutoring:Slots:AllowedDurationsMinutes ใน
+  TutoringSlotsOptions และ DTO ของ GET tutor/profile / tutor/availability/settings / public profile ของตัวเอง) —
+  ถ้ามี field ที่ใช้ได้ ให้เปลี่ยนไปใช้ + fallback เดิมเฉพาะเมื่อ field หาย · **ถ้าไม่มี field ที่ติวเตอร์เห็นเลย ให้
+  หยุดข้อนี้แล้วรายงาน (ต้องให้ Claude เพิ่ม field ฝั่ง BE) ห้ามเดา/ห้ามแก้ backend**
+
+Definition of done: §3 ฝั่ง FE · Status P13-38 = BUILT (หรือ PART ถ้าข้อ 2 ติด BE)
+```
+
+### P-6 — `P13-39` เทียบ DTO ฝั่ง FE กับ C# จริง (FE · M)
+
+```
+Task: P13-39 — FE ถูกสร้างจาก contract ขนานกับ BE ต้องเทียบกับ C# ที่ build แล้วทีละ field
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-README.md §5.1 §6 §9
+
+บริบท: FE หลายก้อน (learner booking/checkout/my-tutoring, tutor classes/wallet/cancel, payment) ถูกสร้างจาก
+'Frontend DTO appendix' ของ contract ก่อน BE เสร็จ ตอนนี้ BE ของ P13-05/06/07/08/10/11/14 build แล้ว
+(controllers ใต้ C:\ProjectSiriUpSkill\siri_upskill_backend\src\Siri.Api\Controllers\Tutoring\** และ
+Payout wallet controller) — เคยเทียบแล้วเฉพาะ public/tutor-portal/dispute บางส่วน ที่เหลือยังไม่เคยเทียบ
+
+สิ่งที่ต้องทำ:
+- ไล่ทุกไฟล์ *.models.ts + *-api.service.ts ใน features/tutoring/{data,learner,tutor}/** เทียบกับ C# record/controller จริง
+  (Application/{Booking,Payments,Refunds,Wallet,Sessions,Reminders,Disputes}/**, Payout Application/Tutoring*) ทีละ endpoint:
+  HTTP verb + path + query/body ฟิลด์ (ชื่อ, ชนิด, nullable, enum member), response DTO, status code ที่ FE จัดการ,
+  ชื่อ ext key ของ error (bookingStatus, refundAmount, retainedAmount, maxRefundable, withdrawReason, violation ฯลฯ),
+  policy ที่ route ต้องใช้ (Authorize/InstructorOnly/TutorOnly)
+- แก้ฝั่ง FE ให้ตรง C# (ห้ามแก้ C#) พร้อมแก้ fixture/spec · ทำตารางสรุปใน PROGRESS.md: ไฟล์ | field | FE เดิม | C# จริง | แก้
+- สิ่งที่ FE ต้องการแต่ BE ไม่มี (เช่น field ที่ UI ใช้ตัดสินใจ) → ห้ามคำนวณเองฝั่ง client แทน server — ลง "ช่องว่าง BE"
+  ในรายงานให้ Claude ตัดสิน
+
+Definition of done: §3 ฝั่ง FE · Status P13-39 = BUILT · แนบตารางความไม่ตรงที่พบ + ที่แก้
+```
+
+> **เพิ่ม 2026-10-19 (P13-12 แพ็กเกจ BUILT แล้ว — รวมอยู่ใน P-6 ด้วย):** เทียบ `features/tutoring/data/tutoring-package*.ts` กับ C# ใน `Siri.Modules.Tutoring/Application/Packages/**` + controllers `TutoringPackages`/`TutorPackages`/`AdminTutoringPackages` ที่ตรวจเจอแล้ว 2 จุด:
+> 1. ~~`TutoringPackagesApiService.listPackages` ส่ง pageSize=100 (BE จำกัด ≤ 50 → 400)~~ — **Claude แก้แล้ว 2026-10-19** (เป็น 50 + spec ผ่าน) ไม่ต้องทำ
+> 2. (ยังค้าง — AG ทำต่อเมื่อว่าง ไม่บล็อกอะไร) `tutoring-package-purchase.models.ts` ล้าหลัง contract รอบ 3: ขาด `offering`, `validDays`, `discountPercent`, `paymentId`, `serverTimeUtc` (BE ส่งเพิ่มแบบ additive ไม่พัง) → เติม field ให้ตรง record C#
+
+### P-7 — `P13-31` E2E Playwright smoke ของ Tutoring (QA · M)
+
+```
+Task: P13-31 — E2E smoke สำหรับ Tutor Marketplace
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · .claude/rules/frontend.md (หัวข้อ Testing) ·
+e2e/p6-admin-management.spec.ts และ e2e/concurrent-session-eviction.spec.ts (pattern: guard + skip ตาม env) ·
+playwright.config.ts · docs/TASKS.md แถว P13-31
+
+ขอบเขต (smoke ที่ไม่ต้องมีข้อมูลจริง):
+1. route ที่ต้อง login ต้อง redirect ไป /login เมื่อยังไม่ล็อกอิน: /my-tutoring, /my-tutoring/bookings/<guid>,
+   /tutors/<slug>/book, /account/learner-profiles, /tutoring/checkout/<guid>, /tutoring/sessions/<guid>/join,
+   /instructor/tutoring/*, /admin/tutoring/{kyc,tutors,disputes,analytics}
+2. หน้า public: /tutors render หัวข้อ + ฟอร์ม filter + สถานะ empty/error อย่างสุภาพเมื่อ API ไม่ตอบ/ว่าง (assert ด้วย
+   role/label ไม่ใช่ CSS class) · /tutors/ไม่มีอยู่จริง → หน้า not-found (HTTP 404 + meta robots noindex)
+3. สลับภาษา th/en แล้วข้อความของ /tutors เปลี่ยน (พิสูจน์ lazy dictionary โหลดถูก ไม่โชว์ key ดิบ เช่น `tutoring.`)
+4. flow ที่ต้องมี backend+seed (ค้นหา → โปรไฟล์ → จอง trial ฟรี → join) ให้เขียนแต่ `test.skip` อัตโนมัติถ้าไม่ตั้ง env
+   (เช่น E2E_TUTORING_SEED=1) และไม่ hardcode credential — สร้าง user/ข้อมูลจริงลง DB ที่ backend ชี้ = อันตราย
+   (CLAUDE.md เตือนไว้ตั้งแต่ P0-36) ห้ามรัน flow เขียนข้อมูลโดยไม่ได้รับอนุญาตจากเจ้าของ
+
+ข้อห้ามเฉพาะงานนี้: ห้ามสตาร์ท backend เอง · ห้ามรันกับ API production · ห้ามเพิ่ม dependency
+Definition of done: `npx playwright test --list` เห็นทุกเทสต์ · รันส่วน 1–3 ผ่านกับ dev server FE (ไม่ต้องมี backend) ·
+Status P13-31 = BUILT
+```
+
+### P-8 — `P13-40` ทำให้เทสต์ BE 2 ตัวเสถียร (BE test-only · S)
+
+```
+Task: P13-40 — เทสต์ที่แดง/แกว่งโดยไม่เกี่ยวฟีเจอร์ (test-only)
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · .claude/rules/backend.md (หัวข้อ Testing)
+
+1. tests/Siri.IntegrationTests/TutorSearchIntegrationTests.cs:935
+   `SearchLog_WhenTheDatabaseWriteFails_TheSearchStillAnswers200_AndTheWriterKeepsRunning` แกว่ง (รันเดี่ยวผ่านบ้างแดงบ้าง):
+   เทสต์เปลี่ยนชื่อตาราง SEARCH_LOGS ที่ใช้ร่วมกัน แล้วรอ writer ด้วย delay คงที่ 4 วินาที (FlushSeconds=2) — ถ้า flush
+   ช้ากว่านั้นหลังเปลี่ยนชื่อกลับ จะมีแถวเขียนเข้ามาและ assert "ต้องเป็น 0" แดง → เปลี่ยนเป็น polling มี timeout +
+   assert ที่ทนจังหวะ หรือแยกให้ไม่ชนข้อมูลร่วม (ห้ามแก้โค้ด production ของ search log)
+2. tests/Siri.IntegrationTests/LiveAdminStatusIntegrationTests.cs:119 `TheAnswer_HasTheContractedShape_…`
+   คาด publicBaseUrl host `siriupskill.siristudiophoto.com` แต่ SiriApiFactory บังคับ `Seo:PublicBaseUrl=https://example.test`
+   (แดงตั้งแต่ก่อนงาน P13 — ยืนยันแล้วว่าไม่เกี่ยวฟีเจอร์) → ปรับ expectation ให้ตรง factory (หรือให้ค่าจาก config ที่เทสต์ตั้งเอง)
+
+ข้อห้ามเฉพาะงานนี้: แก้ได้เฉพาะไฟล์เทสต์ · ห้ามสร้าง migration · ห้ามแตะ SiriApiFactory ถ้าทำให้เทสต์อื่นพัง (เช็คก่อน)
+Definition of done: §3 ฝั่ง BE · รันสองเทสต์นี้ซ้ำ 5 รอบ (เดี่ยวและทั้งคลาส) ผ่านทุกรอบ · Status P13-40 = BUILT
+```
+
+### P-9 — `P13-13` รีวิวติวเตอร์ (BE · M) — ⚠️ ตัวเลือก ต้องให้เจ้าของ override
+
+> contract เขียน "ห้ามส่ง Antigravity" (เหตุผล: ข้อมูลผู้ใช้ — ป้ายผู้รีวิวของผู้เยาว์ ห้ามเผยชื่อเด็ก — และกฎ single-writer ของคะแนน). **ถ้าเจ้าของยืนยันให้ AG ทำ ให้ใช้บล็อกนี้** โดยมีเงื่อนไข: (ก) Claude ปิด `P13-12` ก่อน (ผู้เขียน migration ทีละคน; คำสั่งนี้สร้าง migration `AddTutorReviews`) (ข) Claude review ก่อนตั้ง `DONE` ทุกครั้ง
+
+```
+Task: P13-13 — รีวิวติวเตอร์ (BE)  [เจ้าของอนุมัติ override แล้ว — ห้ามเริ่มถ้า Claude ยังไม่แจ้งว่า P13-12 จบ]
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-README.md (§7 lock chain, §9 errata) ·
+docs/contracts/P13-13-tutor-reviews.md **ทั้งฉบับ** (FROZEN — scope, schema, ReviewerLabelBuilder, กติกานับรีวิว,
+RecomputeAsync, job reconcile, API, test checklist, Work packages A–E) · .claude/rules/{backend,database,security}.md
+
+ทำตาม work packages A→E ของ contract เป๊ะ · module = Tutoring (Repository+Service, UPPERCASE) · อ่านโค้ดจริงของ
+Tutoring (Application/Booking, Sessions, TutoringServiceSupport, ITutorStatsWriter + TutorProfileStatsUpdater) ก่อน
+จุดที่ห้ามพลาด (เคยเป็นช่องโหว่ในงานก่อนหน้า):
+- `RATING_AVERAGE/COUNT` เขียนผ่าน ITutorStatsWriter.SetRatingAsync **ทางเดียว** (มี source-scan test บังคับอยู่แล้ว)
+- ป้ายผู้รีวิวของผู้เรียนที่เป็นผู้เยาว์ห้ามเผยชื่อเล่นเด็ก (kind=Guardian/Anonymous ตาม contract) · public DTO เป็น
+  allow-list + JSON-walk leak test
+- 1 รีวิวต่อ booking (UQ BOOKING_ID), เฉพาะ booking ที่ Completed และผู้รีวิวเป็นเจ้าของ booking (ownership ใน query
+  เดียวกับการดึง) · รีวิวของ booking ที่ถูกคืนเงินเต็มไม่นับเข้าคะแนน
+- ext key ProblemDetails ห้ามใช้ชื่อสงวน · enum parse ตัวอักษรล้วน · paging ผ่าน TutoringPaging · ห้าม positional-record
+  projection บน join (เขียน translation test) · CHECK ต้องมี IS NOT NULL (+ยิง raw SQL พิสูจน์)
+- migration: `dotnet ef migrations add AddTutorReviews …` ด้วย env IntegrationTest + connection string ปลอม ·
+  อ่านทั้งไฟล์ + diff snapshot · ห้าม apply
+- job reconcile รายวัน + rate limit ต่อผู้ใช้ (ไม่ใช้ `default`) + [Authorize]/[AllowAnonymous] ชัดทุก action
+
+Definition of done: §3 ฝั่ง BE · unit + architecture เขียว · integration (external-services mode) ข้อ 1–6 ของ contract §10
+รันจริงผ่าน · mutation spot-check อย่างน้อย 2 จุด (เช่น ถอด ownership; เขียน RATING_* ตรง) แล้วย้อนกลับ ·
+Status P13-13 = BUILT
+```
+
+### P-10 — `P13-15` WP-C..E รายงาน analytics (BE · L) — ⚠️ ตัวเลือก ต้องให้เจ้าของ override
+
+> contract เขียน "ห้ามส่ง Antigravity". **ถ้าเจ้าของยืนยัน:** Claude ทำ WP-A (migration index, รวม 1 index บน `PAYOUT.REVENUE_SPLITS`) และ WP-B (`Payout.Contracts.ITutoringRevenueSeriesReader` + impl) ให้เสร็จก่อน แล้วค่อยส่ง WP-C..E (repository SQL ดิบ + service bucketing/k-anonymity + cache + controller + integration test) ให้ AG — read-only ทั้งหมด ไม่เขียนข้อมูลเงิน/ไม่แตะ Identity — Claude review ก่อนตั้ง `DONE` · ต้องรอ P13-14 (มีแล้ว); P13-13 ไม่จำเป็นตาม contract
+
+```
+Task: P13-15 WP-C..E — Admin analytics ของ Tutoring (BE)  [เจ้าของอนุมัติ override + Claude ปิด WP-A,B แล้วเท่านั้น]
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-README.md (§7, §9) ·
+docs/contracts/P13-15-admin-analytics.md **ทั้งฉบับ** (§4 นิยามรายงานเป๊ะ + SQL, §5 cache/เพดาน, §6 API, §8 privacy
+(k-anonymity), §9 test checklist, §10 work packages) · .claude/rules/{backend,database,security}.md
+
+ทำ WP-C (ITutoringAnalyticsRepository SQL ดิบ quoted identifiers + TutoringAnalyticsService + TutoringAnalyticsCache +
+Options + validators + unit), WP-D (AdminTutoringAnalyticsController — ทุก action AdminOnly, rate limit ต่อผู้ใช้,
+appsettings Api, telemetry), WP-E (integration §9 รันจริงบน PostgreSQL dev) ตาม contract เป๊ะ
+จุดที่ห้ามพลาด: aggregate เท่านั้น ห้ามมี PII ใน response/log · k-anonymity threshold ตาม contract (ค่าต่ำกว่าเกณฑ์ = null
+ไม่ใช่ 0) · cash กับ ledger แยกกัน ห้ามรวมเป็นตัวเลขเดียว · ช่วงวันที่/ขนาดผลลัพธ์มีเพดานฝั่ง server (TutoringDateLimits,
+TutoringPaging) · raw SQL ทุก identifier ใส่ double quote (UPPERCASE) + EXPLAIN พิสูจน์ว่าใช้ index ของ WP-A · ห้ามแก้ Payout
+Definition of done: §3 ฝั่ง BE · Status P13-15 = BUILT (WP-A,B เป็นของ Claude)
+```
+
+### P-11 — `P13-41` เทียบ FE กับ BE ที่ build เพิ่ม: แพ็กเกจ · PDPA · analytics + ปิดช่อง error reason (FE · M)
+
+> **เพิ่ม 2026-10-20.** ทำ **หลัง P-3 จบ** (UI repo ห้ามสองตัวพร้อมกัน) · ส่วน D รอจน `docs/TASKS.md` แถว `P13-15` = `BUILT` (Claude กำลังทำ) — A–C ทำได้ทันที ไม่ต้องรอ · FE ล้วน ไม่มี migration ไม่แตะ C#
+
+```
+Task: P13-41 — FE ถูกสร้างจาก contract ก่อน BE เสร็จ ตอนนี้ BE ของ P13-12 (แพ็กเกจ), P13-17 (PDPA), P13-15 (analytics) build แล้ว
+ต้องเทียบทีละ field/reason แล้วแก้ FE ให้ตรงโค้ดจริง
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §2 §3 §7P.1 · docs/contracts/P13-README.md §5.1 §6 §9 ·
+docs/contracts/P13-12-tutor-packages.md §11/§12 · docs/contracts/P13-17-pdpa-hooks.md (Changelog rev 1 + §12) ·
+docs/contracts/P13-15-admin-analytics.md §11 · แล้วทำตามสไตล์เดิมของ P-6 (docs/PROGRESS.md รายการ P13-39)
+
+บริบท: BE อ่านได้ (READ-ONLY) ที่ C:\ProjectSiriUpSkill\siri_upskill_backend — ห้ามแก้ C# · ถ้า C# กับ contract ขัดกัน โค้ดที่ build แล้วชนะ
+(Claude ปรับ contract ตามแล้วสำหรับ P13-17 rev 1; ถ้าเจออื่นให้รายงาน ไม่ต้องเดา)
+
+ส่วน A — แพ็กเกจ (P13-12)
+- ไฟล์ FE: features/tutoring/data/tutoring-package*.ts + learner/my-tutoring/my-packages-page + หน้า/ฟอร์มแพ็กเกจฝั่งติวเตอร์ + admin ถ้ามี
+- C#: src/Siri.Modules.Tutoring/Application/Packages/** (Models, Mappings) และ controllers src/Siri.Api/Controllers/Tutoring/
+  {TutoringPackages,TutorPackages,AdminTutoringPackages}Controller.cs (14 route)
+- ที่รู้แล้ว: `tutoring-package-purchase.models.ts` ขาด offering, validDays, discountPercent, paymentId, serverTimeUtc (BE ส่งแล้ว) — เติมให้ตรง record C#
+  แล้วให้ UI ใช้จริงเมื่อมีประโยชน์ (เช่น แสดงวันหมดอายุ/ส่วนลดจาก field ของ server — ห้ามคำนวณราคา/ส่วนลดเองฝั่ง client)
+- (listPackages pageSize ≤ 50 Claude แก้แล้ว ไม่ต้องทำ) · เทียบ query/body/status code/ext key ของทุก route ที่ FE เรียก
+- ต้องแสดงเหตุผลที่ผู้ใช้เจอจริงของแพ็กเกจให้ครบ (รวม `tutoring.package_offering_inactive` 400)
+
+ส่วน B — ช่องว่าง error reason (ต่อจาก P-1)
+- ไล่ reason ที่ BE มี (src/Siri.Modules.Tutoring/**/*Errors.cs) เทียบ `features/tutoring/data/tutoring-errors.ts` + ที่ที่ FE map error ของ dispute/refund/admin
+- ตรวจแล้ว 13 reason ยังไม่ปรากฏใน FE เลย (grep ทั้ง src ได้ 0): booking_not_completable · booking_not_disputed · escrow_already_released ·
+  invalid_hold_start · invalid_kind · invalid_paging · invalid_scope · noshow_conflict · package_credit_not_found · refund_not_allowed ·
+  refund_not_retryable · refund_retry_unconfirmed · settlement_failed
+- สำหรับแต่ละตัว: grep หา endpoint ที่คืนมัน → ตัดสินว่า "ผู้ใช้เห็นได้ (ต้อง map + th/en)" หรือ "ภายใน/admin เท่านั้น/ไม่มีทาง
+  ถึงหน้าจอ (ระบุเหตุผล)" · ที่ผู้ใช้เห็นได้ → เพิ่ม key th+en (เสียงเดียวกับ key เดิม; ห้ามใช้ภาษาเทคนิคกับผู้เรียก) + spec
+  ต่อยอดจาก tutoring-errors.spec.ts · ที่ไม่ map → เขียนตารางเหตุผลใน PROGRESS.md (ไม่ใช่เงียบ ๆ)
+- ห้ามแสดง `detail`/ข้อความดิบจาก server แทน i18n
+
+ส่วน C — PDPA (P13-17) ที่ P13-37 สร้างไว้
+- เทียบกับ C# จริง: src/Siri.Modules.Tutoring/Application/Pdpa/** (GuardianConsentService, PdpaErrors) + Identity AnonymizeAccountHandler/DataExportHandler
+  + LearnerProfilesController (`POST .../learner-profiles/{id}/withdraw-consent`, body {confirmation:"WITHDRAW"})
+- ตรวจ: reason 409 (`tutoring.erasure_blocked` + `blockers[]` ที่ ext key ชื่อ `blockers`, `tutoring.consent_withdraw_blocked`,
+  `tutoring.consent_not_applicable`, `tutoring.learner_profile_anonymised`), รูปร่างของ blockers (รหัส/จำนวนที่ BE ส่งจริง), ข้อความ i18n ครบ,
+  โปรไฟล์ที่ anonymise แล้วแก้ไม่ได้ (เฉพาะเจ้าของเห็น 409; คนอื่นยัง 404) — UI ต้องไม่ให้กดแก้ซ้ำ
+- export: `modules` ใน DataExportResponse เป็น additive — หน้า export ต้องไม่พังเมื่อมี/ไม่มี `modules` (มี spec)
+- BE ยังไม่ส่ง `anonymizedAtUtc` ใน LearnerProfileResponse (Claude ตัดสินแล้วว่าไม่ทำใน task นี้) → ห้ามเดา field; ถ้า UI ต้องใช้ ให้รายงาน
+
+ส่วน D — Analytics (P13-15)  ✅ BE `BUILT` แล้ว 2026-10-19 — ทำได้เลย (ชื่อ field ของ `topSubjects[]` คือ `slug` ไม่ใช่ `subjectSlug`)
+- ไฟล์ FE: features/tutoring/admin/** ของ P13-27 (analytics) · C#: src/Siri.Modules.Tutoring/Application/Analytics/** + AdminTutoringAnalyticsController
+- เทียบ DTO ทุก field กับ contract §11 และ record C# จริง: ชื่อ field, ชนิด, nullable (k-anonymity: ค่าต่ำกว่าเกณฑ์ = null ไม่ใช่ 0 — UI ต้องแสดงเป็น "ข้อมูลไม่พอ/ซ่อน" ไม่ใช่ 0),
+  granularity day|week|month, query param (from,to,top,segment,sort,fromMonth,toMonth) และเพดานช่วงวันที่ฝั่ง server
+- reasons ใหม่ (ต้องมี th+en): `tutoring.analytics_busy` (503 + Retry-After → ปุ่มลองใหม่), `tutoring.analytics_range_invalid`, `tutoring.analytics_timeout`
+- cash กับ ledger แยกกัน — UI ต้องไม่รวมเป็นตัวเลขเดียว · ห้ามเพิ่ม chart library (CSS bars/KPI tiles เท่านั้น ตาม contract)
+
+กับดัก: ไม่ใช่ทุก field ที่ BE ส่งจะต้องใช้ใน UI (additive ได้) แต่ field ที่ UI ใช้ตัดสินใจต้องมี source จาก server เสมอ ·
+ถ้า UI ต้องการ field ที่ BE ไม่มี → ห้ามคำนวณเองฝั่ง client แทน รายงานให้ Claude ตัดสิน · อย่าแตะ i18n key เดิมที่หน้าอื่นใช้ (เพิ่มได้ เปลี่ยนชื่อไม่ได้)
+
+Definition of done: §3 ฝั่ง FE (lint/ng test/build เขียว, initial transfer ไม่เกิน budget) · Status P13-41 = BUILT (ถ้าทำ A–C แล้วแต่ D ยังรอ BE ให้ตั้ง `PART` พร้อมระบุ)
+· แนบตารางความไม่ตรงที่พบ + ที่แก้ + reason ที่ตัดสินว่าไม่ map (พร้อมเหตุผล) ใน docs/PROGRESS.md
+```
+
+### P-12 — `P13-42` คู่มือขึ้นระบบ Tutoring (runbook · เอกสารล้วน · S–M)
+
+> **เพิ่ม 2026-10-20.** เขียนที่ repo backend อย่างเดียว (`docs/runbooks/tutoring-go-live.md`) — ไม่แตะโค้ด ไม่แตะ UI repo จึงทำขนานกับงาน FE ได้ · Claude ตรวจความถูกต้องทุกบรรทัดหลังส่ง
+
+```
+Task: P13-42 — เขียน docs/runbooks/tutoring-go-live.md ให้เจ้าของโปรเจ็คใช้ตอน apply migration และเปิดระบบติวเตอร์บน production
+
+อ่านก่อน: CLAUDE.md (บล็อกสถานะ P13) · docs/runbooks/live-course-go-live.md (ใช้เป็นแม่แบบโครงและน้ำเสียง) · docs/runbooks/go-live-checklist.md +
+alerting-rules.md (อย่าซ้ำ — ลิงก์ไป) · docs/TUTORING.md · docs/PROGRESS.md (รายการ P13 ทั้งหมด) · docs/contracts/P13-README.md (§7.3 งานของเจ้าของ, §7.4, §9) ·
+docs/DATABASE.md (ส่วน P13) · docs/SECURITY.md §6.1
+
+หัวข้อที่ต้องมี (ทุกค่า/ชื่อต้องอ้างไฟล์จริงที่ตรวจแล้ว — ห้ามเดา ถ้าไม่แน่ใจให้เขียน "ยังไม่ยืนยัน" พร้อมบอกว่าต้องดูที่ไหน):
+1. สถานะ/สิ่งที่ยังไม่เคยทดสอบกับของจริง: Stripe/PromptPay, Google Calendar/Meet, R2 (KYC), อีเมล — ทุกอย่างผ่านเทสต์กับ seam จำลอง + PostgreSQL 18 เท่านั้น (prod = 17)
+2. ลำดับ apply migration ของ P13 ครบทุกตัว เรียงตามชื่อไฟล์ใน src/Siri.Persistence/Migrations (AddTutoringCore … AddTutorReviews รวม AddLiveAdhocMeetings ที่ P13 ใช้)
+   · ต่อตัว: ทำอะไร, ข้อควรระวัง (เช่น AddTutorBookingCore ใช้ extension btree_gist + exclusion constraint — role ที่ใช้ migrate ต้องสร้าง extension ได้, ตรวจก่อน;
+   Down ของตัวไหนมี guard ปฏิเสธเมื่อมีข้อมูล) · คำสั่ง migration bundle ตาม database.md (ห้าม Database.Migrate() ใน Program.cs) · วิธีตรวจหลัง apply
+3. Config/env: ทุก section ใต้ `Tutoring:` ใน src/Siri.Api/appsettings.json (และ Workers ถ้ามี) — ตาราง ชื่อ env (`Tutoring__Section__Key`) | ค่า default | ต้องตั้งบน prod ไหม | ผลถ้าผิด
+   · ชี้ให้ชัด: Tutoring:Kyc:Enabled=false เป็น default (เปิดได้เมื่อ R2 bucket KYC + token + 2FA แอดมิน X-39 พร้อม), PublicBaseUrl, Payment, DataProtection key, ค่า commission/cancellation/refund/penalty/payout ที่เจ้าของตัดสินแล้ว
+4. บริการภายนอกที่เจ้าของต้องตั้ง: Stripe (webhook endpoint + event ที่ต้องเปิด รวม refund.created/updated/failed), Google OAuth (scopes ที่ใช้จริง; Drive folder ยังไม่ทำ — P13-16 BLOCK), R2 bucket KYC แยกจาก bucket อื่น + token สิทธิ์ต่ำสุด, SMTP/อีเมล — แต่ละข้อ: ตั้งที่ไหน, ทดสอบอย่างไร
+5. Hangfire jobs ของ Tutoring ทั้งหมดใน src/Siri.Workers/RecurringJobIds.cs (16 ตัว) × src/Siri.Workers/RecurringJobsRegistration.cs: id | cron | ทำอะไร | รันที่ Api หรือ Workers | อาการเมื่อพัง + ดูที่ไหน
+6. Metrics/alerts: meter ใน src/Siri.Modules.Tutoring/Application/Sessions/TutoringTelemetry.cs (+ counter อื่นของ Tutoring ที่มี) — รายการ metric ที่ควรตั้ง alert พร้อมเกณฑ์แนะนำ (เป็นข้อเสนอ ระบุว่าเป็นข้อเสนอ) เชื่อมกับ alerting-rules.md
+7. Smoke test หลัง deploy: เช็คลิสต์เดินด้วยมือ (สมัครติวเตอร์ → KYC (ถ้าเปิด) → เปิดเวลา → ผู้เรียนจอง trial → จ่ายด้วย Stripe test mode → ห้อง Meet → จบคลาส → รีวิว → wallet) พร้อมระบุหน้า/endpoint
+8. Rollback: migration ไหนย้อนได้/ไม่ได้ (guard), feature flag ปิดอะไรได้, ผลต่อข้อมูลเงิน
+9. งานค้างของเจ้าของ (Q14 กฎหมาย/ภาษี/PDPA, X-39 2FA แอดมิน, X-42 NuGet audit, X-44 forwarded headers, ภาษีเครดิตแพ็กเกจหมดอายุ ฯลฯ) — ลิงก์ DECISIONS.md/TASKS.md ไม่คัดลอก
+10. ท้ายไฟล์: รายการ "สิ่งที่ผู้เขียนยังตรวจไม่ได้" ให้ Claude ตรวจ
+
+ข้อห้าม: ห้ามใส่ secret/ค่าจริง · ห้ามสั่งให้รัน --seed หรือ migration กับ DB จริงในนามของ agent (เป็นคำสั่งสำหรับเจ้าของ) · ห้ามแก้โค้ด/appsettings (ถ้าเจอค่าที่ดูผิด ให้ใส่ใน "ข้อสังเกต" ท้ายไฟล์)
+Definition of done: ไฟล์ครบ 10 หัวข้อ · ทุก claim มี path อ้างอิง · TASKS P13-42 = BUILT · ลิงก์เข้า docs/runbooks list ที่ README/go-live-checklist ถ้ามีรายการอยู่แล้ว (เพิ่มบรรทัดเดียว)
+```
+
+### P-13 — `P13-43` ตรวจคุณภาพ FE ของหน้า Tutoring ทั้งชุด (FE · M)
+
+> **เพิ่ม 2026-10-20.** ทำ **หลัง P-11 จบ** (UI repo ห้ามสองตัวพร้อมกัน) · หน้า Tutoring ทั้งหมดถูกสร้างจาก contract โดย **ยังไม่เคยเปิดกับ API จริง** จึงเสี่ยงหลุดเรื่อง responsive/a11y/สถานะ
+
+```
+Task: P13-43 — audit + แก้ไข FE ของ features/tutoring/** (public, learner, tutor, admin) ให้ตรง .claude/rules/frontend.md + ui-design.md
+
+อ่านก่อน: CLAUDE.md · .claude/rules/frontend.md · .claude/rules/ui-design.md · docs/ANTIGRAVITY_HANDOFF.md §7P.1 · design tokens (src/app/styles/tokens.css, D-24: ใช้ tone-* / token เท่านั้น)
+
+วิธี: ห้ามสตาร์ท backend (.env ของ backend ชี้ DB production) — ตรวจแบบ FE ล้วน: Playwright + page.route() mock response ตาม DTO จริงของแต่ละหน้า (ดูตัวอย่างใน e2e/tutoring-marketplace.spec.ts และ fixtures ใน spec ของแต่ละหน้า)
+บนเซิร์ฟเวอร์ dev ของ Angular (`npm start`) หรือ build แล้ว serve — แล้วไล่ทุก route ของ Tutoring (อ่านจาก app.routes.ts) ที่ viewport 375×812, 768×1024, 1280×800 ทั้งธีมสว่างและมืด
+
+เช็คลิสต์ต่อหน้า (บันทึกผล pass/fail/แก้แล้วในตารางที่ docs/PROGRESS.md):
+- ไม่มี horizontal scroll ที่ body · ตาราง/กราฟกว้างเลื่อนในกล่องตัวเอง · ปุ่ม/ลิงก์ touch target ≥ 44px
+- keyboard: tab order สมเหตุสมผล, focus ring มองเห็น, modal/drawer trap + คืน focus, ปุ่ม icon มี aria-label, ฟอร์ม label มองเห็น + error ติด field (แสดงเมื่อ touched)
+- contrast ≥ 4.5:1 ทั้ง 2 ธีม (ข้อความ/ปุ่ม/badge สถานะ) · ไม่ใช้สีอย่างเดียวสื่อสถานะ · ห้ามมี hex ดิบ/คลาสสีดิบของ Tailwind palette ใน component (grep ให้ครบ ยกเว้นที่ tokens อนุญาต)
+- สถานะครบ: loading (skeleton), empty (บอกทางไปต่อ), error (บอกว่าทำอะไรต่อ + ปุ่มลองใหม่) ทั้งกรณี 401/403/404/409/429/5xx — error ใช้ i18n key ผ่าน tutoring-errors ไม่แสดง detail ดิบ
+- รูปผ่าน NgOptimizedImage + width/height (กัน CLS) · วันที่/เงิน ผ่าน pipe (th-TH, Asia/Bangkok; เวลา API เป็น UTC) · ข้อความทั้งหมดผ่าน i18n (ไม่มีไทย/อังกฤษ hard-code — grep ใน .html/.ts) และ th/en ครบ
+- ปุ่ม submit กันกดซ้ำ · prefers-reduced-motion · @for มี track เป็น id จริง · ไม่มี subscribe ค้าง
+- งบ bundle: initial ≤ 300KB gzip (ดูผล `npm run build`) · chunk lazy ของ Tutoring แยกถูกต้อง
+
+แก้ทุกอย่างที่เจอใน FE (แก้ทีละหน้า ไม่ refactor ข้ามโครงสร้าง) · สิ่งที่ต้องการ field/endpoint ที่ BE ไม่มี → ห้ามเดา รายงานให้ Claude · ห้ามเปลี่ยนชื่อ i18n key เดิม
+Definition of done: §3 ฝั่ง FE (lint, ng test, build เขียว) · ตารางผลตรวจต่อหน้าใน PROGRESS.md · screenshot สำคัญ (ก่อน/หลัง) เฉพาะจุดที่แก้ · TASKS P13-43 = BUILT
+```
+
+### P-14 — `P13-44` ข้อมูลตัวอย่างสำหรับ dev (BE · seed · M)
+
+> **เพิ่ม 2026-10-20.** ⚠️ งาน BE — **เริ่มได้แล้ว (D2 ปิด · P13-32 เสร็จ 2026-10-20)** · ก่อน build ให้เช็คว่าไม่มี `dotnet`/`testhost` ของ session อื่นค้าง (สอง build พร้อมกันจะชนไฟล์) · ห้าม migration
+
+```
+Task: P13-44 — Tutoring seeder ต่อเข้า `--seed` ที่มีอยู่ เพื่อให้เจ้าของเดโม และให้ E2E (P13-31) มีข้อมูลจริงใน dev DB
+
+อ่านก่อน: CLAUDE.md · .claude/rules/backend.md + database.md (UPPERCASE entity, ห้ามเขียนตารางตรง ใช้ domain method) · ตัวอย่าง pattern: src/Siri.Modules.Identity/Infrastructure/Seeding/IdentitySeeder.cs,
+src/Siri.Modules.Catalog/Infrastructure/Seeding/CatalogSeeder.cs (+ test ของมัน), Program.cs ส่วน `--seed` · src/Siri.Modules.Tutoring/** (TUTOR_PROFILE, TUTOR_OFFERING, availability, KYC state machine) ·
+docs/TUTORING.md · docs/contracts/P13-01..04 (state machine ของโปรไฟล์/KYC/เวลาว่าง/ค้นหา)
+
+ทำ: `TutoringSeedData` (ข้อมูลล้วน) + `TutoringSeeder` ใน src/Siri.Modules.Tutoring/Infrastructure/Seeding/ — ติวเตอร์ตัวอย่าง 4–6 คน ผูกกับ **Instructor ที่ IdentitySeeder/CatalogSeeder สร้างอยู่แล้ว** (ส่ง userId/instructorProfileId ผ่าน composition root แบบเดียวกับที่ Catalog ทำ — Tutoring ห้าม reference Domain ของ Identity/Catalog; ใช้ Contracts เท่านั้น)
+· ทุกคนมี TUTOR_PROFILE ที่ **Verified** ผ่าน domain method จริง (หรือสถานะที่ domain อนุญาตให้ไปถึงโดยไม่ต้องมีไฟล์ KYC จริง — ห้ามสร้างเอกสาร KYC/อัปโหลดอะไรทั้งสิ้น ถ้า domain ไม่เปิดทางต้องหยุดแล้วรายงาน อย่าข้าม invariant ด้วยการเขียนตารางตรง)
+· offerings (วิชาจาก subject seed ที่ migration ใส่ไว้แล้ว — TutoringSubjectSeedSql; ห้ามสร้างวิชาใหม่), ราคา/ระยะเวลาสมจริง, รูปแบบ trial/group อย่างน้อยหนึ่งคน, เวลาว่างรายสัปดาห์
+· **ห้ามสร้าง** booking/session/payment/refund/escrow/split/wallet/dispute/review/KYC document/ข้อมูลผู้ปกครอง-เด็กจริง ใด ๆ ทั้งสิ้น
+· idempotent ต่อแถว (เช็คก่อน insert เหมือน IdentitySeeder) · ใช้ IClock · อีเมล/ชื่อต้องเป็น @example.test + "(Seed)" กำกับตามธรรมเนียมเดิม · ทำงานเฉพาะตอนสั่ง `--seed` (ห้ามผูกกับ startup ปกติ)
+· Program.cs: เรียกต่อจาก CatalogSeeder เท่านั้น (additive)
+
+Test: unit (seed data ครบ/ไม่ซ้ำ/อ้าง subject slug ที่มีจริง/cross-reference ถูก) + integration บน PG จริงที่ run_it ใช้ (external services: PG 127.0.0.1:5433 + Garnet :6380 — วิธีรันดู docs/PROGRESS.md และ P-8) พิสูจน์ว่ารัน 2 ครั้งแล้วจำนวนแถวไม่เพิ่ม + ติวเตอร์ที่ seed ค้นเจอผ่าน search endpoint
+ข้อห้ามเด็ดขาด: **ห้ามรัน `dotnet run -- --seed` เอง** (.env ของ backend ชี้ DB production; ใช้เทสต์เท่านั้น) · ห้าม apply migration · ห้ามแก้ entity/config ของ Tutoring (ถ้าต้องแก้ → รายงาน)
+Definition of done: §3 ฝั่ง BE · TASKS P13-44 = BUILT · บอกวิธีให้เจ้าของรัน seed ใน dev (ผ่าน scripts/dev.ps1 เท่านั้น) ใน PROGRESS.md
+```
+
+### P-15 — `P13-45` เทสต์ที่แกว่งรอบ 2 (BE test-only · S)
+
+> **เพิ่ม 2026-10-20.** ต่อจาก P-8 · ⚠️ เริ่มได้แล้ว (D2 ปิด 2026-10-20; เช็คไม่มี build ซ้อนก่อนเริ่ม) · test-only — **ห้ามแก้โค้ด production** ถ้าต้นเหตุอยู่ที่โค้ด production ให้รายงาน
+
+```
+Task: P13-45 — ทำให้เทสต์ที่ P13-30 พบว่าแกว่งเสถียร (ไม่เกี่ยวฟีเจอร์ P13)
+
+1) NotificationRelayStoreIntegrationTests (3 ตัวแดงใน suite เต็ม, ผ่านเมื่อรันเดี่ยว): ต้นเหตุ — `BeginBatchAsync(1000)` claim แถว in-app จาก outbox ที่ใช้ร่วมกัน และเทสต์ P13 อื่นทิ้งแถวค้างเกิน 1000 ใน DB ร่วม
+   ทำ: ให้เทสต์เหล่านี้ไม่ขึ้นกับแถวของคลาสอื่น (scope ด้วยค่าที่เทสต์เป็นเจ้าของ / ทำความสะอาดก่อน-หลัง / batch size ที่แยกได้) โดยไม่ลดความเข้มของสิ่งที่ทดสอบ
+2) TutoringDisputeOpenIntegrationTests.WhenTheMoneyHasAlreadyGone… (flaky ~1/3): ข้อความ 2 บรรทัดเขียนใน ms เดียวกัน แล้วเรียงด้วย CREATED_AT_UTC ตามด้วย UUIDv7 (ส่วนสุ่มใน ms เดียว) ลำดับจึงสลับ
+   ทำ: ปรับเทสต์ให้กำหนดลำดับได้แน่นอน (ขยับ OffsetClock ระหว่างสองข้อความ) · **ถ้าเห็นว่าผู้ใช้จริงจะเห็นลำดับข้อความสลับด้วย → ห้ามแก้เอง** รายงานให้ Claude (เป็นปัญหา production ไม่ใช่แค่เทสต์)
+อ่านก่อน: docs/PROGRESS.md รายการ 2026-10-20 แรกสุด (P13-30), วิธีรัน integration ใน P-8
+Definition of done: รันแต่ละกลุ่ม 5 รอบติดกันผ่านทั้งแบบเดี่ยวและใน suite Tutoring* + Notification* · ตัวเลขก่อน/หลังใน PROGRESS.md · TASKS P13-45 = BUILT
+```
+
+### P-16 — `P13-46` FE: ผลจากมติเจ้าของ D-25.1 (i18n + หน้า admin batch) (FE · S)
+
+> **เพิ่ม 2026-10-20.** UI repo เท่านั้น · ทำหลัง P-13 (ห้ามสองตัวพร้อมกันใน repo UI) · Claude ตรวจก่อน DONE
+
+```
+Task: P13-46 — ตามหลัง backend 3 เรื่องที่เจ้าของตัดสิน (docs/DECISIONS.md D-25.1) ให้ FE รองรับ
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §7P.1 · docs/DECISIONS.md D-25.1 · docs/PROGRESS.md รายการ 2026-10-20 (B-2 heldBack, B-1/R1/R2) · docs/contracts/P13-07 changelog rev 2, P13-12 changelog rev 2
+
+ทำ:
+1) i18n th+en (ไฟล์ tutoring-shared / admin-tutoring ตามที่ reason ถูก map อยู่แล้ว): `tutoring.errors.offering_has_open_credits` (ข้อความต้องบอกทางไปต่อ เช่น ปิดบริการนี้ไม่ได้เพราะยังมีผู้เรียนถือเครดิตแพ็กเกจค้างอยู่ ให้รอเครดิตหมดหรือถูกใช้ก่อน) + label ของ `RefundReason.ConsentWithdrawn` ในหน้า/ตาราง refund ของแอดมิน (ดูว่า enum RefundReason ฝั่ง FE map ที่ไหน)
+2) หน้าแอดมินสร้างรอบจ่าย (Payout batch): mirror `PayoutBatchResponse.heldBack?: { tutorCount, rowCount, amount, instructorIds }` (optional; มีเฉพาะรอบ Tutoring) แสดงกล่อง "ถูกข้ามเพราะติวเตอร์ถูกระงับ/ไม่ผ่านเงื่อนไข" พร้อมจำนวน/ยอด (ไม่แสดง PII) · และจัดการ 409 `nothing_to_pay` ที่มี extensions `heldBack*` ให้บอกเหตุ (ถ้าหน้านี้มีอยู่แล้วใน repo; ถ้าไม่มี UI สร้างรอบจ่ายเลย → รายงาน ไม่ต้องสร้างหน้าใหม่)
+3) ถ้ามีหน้าแสดงสถานะการจ่ายของผู้เรียนที่แสดงเหตุ refund → เพิ่มข้อความ "จ่ายแล้วแต่ถูกคืนเงินเต็ม เพราะโปรไฟล์ผู้เรียนถอนความยินยอมของผู้ปกครองแล้ว" (ผ่าน i18n)
+
+ข้อห้าม: ห้ามเดาชื่อ field เพิ่ม — เทียบกับ C# DTO จริงใน src/Siri.Modules.Payout/** และ Tutoring/** · ห้ามเปลี่ยนชื่อ i18n key เดิม · ห้ามฝังข้อความไทย/อังกฤษใน .ts/.html
+Definition of done: §3 ฝั่ง FE (lint, ng test ทั้ง repo ไม่ใช่แค่โฟลเดอร์ tutoring, build) · มี spec ของแต่ละข้อ · th/en parity guard เขียว · TASKS P13-46 = BUILT
+```
+
+### P-17 — `P13-48` FE: ใช้ field ใหม่จาก BE (P13-47) + ปิด P13-38 + ตัด heuristic ที่ gate ตำหนิ (FE · M)
+
+> **เพิ่ม 2026-10-21.** ⚠️ **เริ่มได้เมื่อ `docs/TASKS.md` แถว `P13-47` เป็น `BUILT`** (Claude ทำ BE additive ก่อน แล้วแจ้ง) · UI repo เท่านั้น · ทำหลัง P-16 (ห้ามสองตัวพร้อมกันใน repo UI) · เป็นงานปิด `P13-38` (PART) ด้วย
+
+```
+Task: P13-48 — ให้ FE ใช้ field ที่ BE เพิ่มใน P13-47 แทนค่า hard-code/heuristic แล้วปิด P13-38
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §7P.1 · docs/PROGRESS.md รายการ P13-47 (รายการ field ที่ BE เพิ่มจริง — ชื่อ/ชนิด/nullable ต้องเทียบกับ C# record จริง ห้ามเดา) · รายการ P13-38 (BE Gap) และรายการ integrator-qa gate P13 (หัวข้อ "Failure class ที่เจอในงาน AG")
+
+ทำ (ทุกข้อต้องมี spec; ไม่ใช้ค่า fallback แบบ hard-code ใหม่):
+1) ระยะเวลาคลาส (ปิด P13-38 ปัญหา 2):
+   · `availability-preview.ts` ลบ `DURATION_CHOICES` — ใช้ `allowedDurationMinutes` จาก `GET /api/tutoring/tutor/availability`
+   · `package-form.ts` + `tutor-package-form.util.ts` ลบ `PACKAGE_DURATIONS` — ใช้ `allowedDurationMinutes` จาก `GET /api/tutoring/tutor/profile` (validator ใน util ต้องรับรายการจากภายนอก ไม่ import ค่าคงที่)
+   · มี loading/error state ระหว่างรอรายการ (ไม่แสดงตัวเลือกเดา) · ถ้ามี buffer เลือกได้ในหน้าเดียวกัน ให้ทำแบบเดียวกันด้วย `allowedBufferMinutes` (ถ้า BE เพิ่มให้ — ดู PROGRESS P13-47)
+2) `learner-profiles-page.ts` (~บรรทัด 81): เลิกเดาจาก `nickname === '[removed]'` — ใช้ `anonymizedAtUtc` / `guardianConsentWithdrawnAtUtc` จาก `LearnerProfile` (field ใหม่จาก BE) · ปรับ model + spec + ตัวแสดงสถานะ
+3) หน้า class/attendance ของติวเตอร์: `TutorClassLearner.disputeId` / `TutorAttendanceLearner.disputeId` (nullable) → ลิงก์ตรงไปหน้าข้อพิพาทนั้น แทนลิงก์ลงหน้ารายการ (ถ้า BE รายงานว่าทำ field นี้ไม่ได้ ให้ข้ามข้อนี้และเขียนเหตุผลใน PROGRESS)
+4) `tutoring-packages-api.service.ts` (~บรรทัด 24) และ `tutoring-public-api.service.ts` (~บรรทัด 68): ตัด union `Array.isArray(body) ? body : body.items` — อ่าน controller จริง (`GET tutor/packages`, `GET tutors/{slug}/packages`) ว่า BE คืน array หรือ PagedResult อย่างใดอย่างหนึ่ง แล้วกำหนดชนิดให้ตรงอย่างเดียว (แก้ spec/mocks ตาม)
+5) `admin/data/admin-analytics-api.service.ts` (~บรรทัด 36): comment "there is no C# for these routes yet" ล้าสมัย — ตรวจว่า route analytics ทั้งชุดมีใน BE จริง (WP-A..E ของ P13-15) แล้วแก้ comment ให้ตรงความจริง · ถ้ามี route ที่ไม่มีใน BE จริง ให้รายงาน ไม่ต้องแก้ BE
+6) อย่าแก้ `angular.json` (budget) — ถ้าเห็นว่า maximumError ใน working tree ถูกยกเป็น 1.2MB ให้รายงานใน PROGRESS แต่ไม่ต้องคืนค่าเอง (เจ้าของโปรเจ็คตัดสิน)
+
+ข้อห้าม: ห้ามเดาชื่อ field · ห้ามเปลี่ยนชื่อ i18n key เดิม · ห้ามฝังข้อความไทย/อังกฤษใน .ts/.html · ห้ามแตะ backend
+Definition of done: §3 ฝั่ง FE — lint, **`ng test` ทั้ง repo (ไม่ใช่แค่โฟลเดอร์ tutoring ← gate เคยจับได้ว่ารันไม่ครบ)**, build, th/en parity guard เขียว · TASKS: `P13-48` = BUILT และ `P13-38` เปลี่ยนเป็น BUILT (เหตุผลที่ PART หมดแล้ว) พร้อมเขียนหลักฐานใน PROGRESS
+```
+
+### P-18 — แก้งานที่ gate ตีกลับ: `P13-48` · `P13-46` · `P13-31` · `P13-42` · `P13-43` (FE + DOC · M)
+
+> **เพิ่ม 2026-10-21.** integrator-qa gate รอบ 2 ตั้งทั้ง 5 แถว (+ `P13-38`) เป็น `PART` พร้อมรายการข้อบกพร่อง `file:line` — **รายละเอียดครบอยู่ที่ `docs/TASKS.md` บล็อก "สถานะจริง (integrator-qa gate P13 รอบ 2 — 2026-10-21 ...)" และ `docs/PROGRESS.md` entry บนสุด** · UI repo เป็นหลัก (+ `docs/runbooks/tutoring-go-live.md` ใน backend repo สำหรับ P13-42 แล้ว copy ไป UI repo) · ห้ามแตะ backend production code · ทำตามลำดับ 1 → 5 (1 และ 2 แก้ไฟล์ใกล้กัน อย่าทำพร้อมกัน)
+
+```
+Task: P-18 — แก้ข้อบกพร่องที่ gate พิสูจน์แล้ว (ไม่ใช่ความเห็น: ทุกข้อมี file:line และบางข้อมี mutation/spec ชั่วคราวที่แดงจริง)
+
+อ่านก่อน: CLAUDE.md · docs/ANTIGRAVITY_HANDOFF.md §7P.1 · docs/TASKS.md บล็อก gate รอบ 2 (ทั้งบล็อก) · docs/PROGRESS.md entry 2026-10-21 บนสุด · C# จริง: src/Siri.Modules.Tutoring/Application/** และ src/Siri.Modules.Payout/** (เทียบ field/ชนิด/nullable ทีละตัว ห้ามเดา)
+
+1) P13-48 / P13-38 — เลิกเดารายการความยาวคลาส/buffer (BE ส่ง int[] non-null เสมอ):
+   · ลบ fallback `[30, 60, 90, 120]` ทั้ง 5 จุด: availability-preview.ts:72,117 · package-form.ts:57 · tutor-packages-page.html:33 · tutor-package-form.util.ts:59 · (และ FALLBACK_SESSION_DURATIONS ใน tutoring-booking.util.ts:38 ถ้าไม่ได้ใช้เป็นค่าจาก BE) — รายการต้องมาจาก allowedDurationMinutes ของ BE อย่างเดียว; validator รับรายการจากภายนอกแบบ parameter บังคับ (ไม่มี default)
+   · tutor-packages-page.ts:58-60: ใส่ loading/error gate — ยังไม่โหลดโปรไฟล์ = ไม่แสดงฟอร์ม (skeleton) · โหลดพัง = error state + ปุ่มลองใหม่ (ไม่แสดงตัวเลือกเดา)
+   · mirror allowedBufferMinutes: เลิก BUFFER_CHOICES hard-code (tutor-availability.util.ts:24,213 · availability-settings-form.ts:76) ใช้ค่าจาก GET tutor/availability
+   · แก้ model ให้ตรง BE: allowedDurationMinutes / allowedBufferMinutes เป็น `readonly number[]` ไม่ optional (tutoring-availability.models.ts:35 · tutoring-tutor.models.ts:48)
+   · เทสต์: spec ที่พิสูจน์ว่าไม่มีรายการเดา (mock ตอบ [45,90] → ฟอร์มมีแค่ 45,90) + spec loading/error ของ tutor-packages-page
+2) P13-46 — หน้าแอดมินสร้างรอบจ่าย (admin-payouts-page.ts):
+   · ส่ง sourceType ให้ได้: ตัวเลือกประเภทรอบ (รายเดือนคอร์ส / รายสัปดาห์ติวเตอร์) แล้วส่ง `{ periodKey, sourceType }` — อ่าน CreatePayoutBatchCommand + validator ใน src/Siri.Modules.Payout/Application/PayoutBatchModels.cs เพื่อรู้รูปแบบ periodKey ของแต่ละประเภท (อย่าเดา) · ข้อความ/label ผ่าน i18n
+   · ตัวจัดการ 409 nothing_to_pay: production ได้ `ApiError` (ProblemDetails อยู่ที่ `.details`, extension ของ ASP.NET เป็น key ระดับบนสุดของ ProblemDetails ไม่ใช่ `.extensions`) — ใช้ชื่อ key จริงจาก TutoringPayoutBatchService.cs (ห้ามเดา heldBackCount) · ใช้ pipe เงินที่มีอยู่ (CurrencyThb) แทน `฿${…}` hard-code (:229)
+   · แก้ `err?.error?.detail` ที่ไม่ทำงานกับ ApiError ด้วย (admin-payouts-page.ts:235,260,310,346 — มีมาก่อน แต่ไฟล์เดียวกัน)
+   · spec: ใช้ `errorInterceptor` ตัวจริง + body ตาม C# จริง (gate เขียน spec ชั่วคราวที่แดงอยู่ — ทำให้เขียว) ห้าม mock `err.error.extensions` แบบซ้อน
+   · ลบโค้ดที่อ่านฟิลด์ที่ BE ไม่มี: `learner.guardianConsentWithdrawnAtUtc` ใน checkout-outcome.ts:64-66 · package-checkout-outcome.ts:53-55 และ field ที่ FE เพิ่มเอง (tutoring-learner.models.ts:112 · tutoring-package-purchase.models.ts:27) — BookingLearnerSummary/PackageLearnerSummary ใน C# ไม่มี field นี้ และ payment-state ไม่บอกเหตุ; ข้อความ "ถูกคืนเงินเพราะถอนความยินยอม" ให้ตัดออกทั้งหมด (Claude จะตัดสินเรื่องเพิ่ม field ฝั่ง BE แยกต่างหาก) · ตรวจว่าไม่มี i18n key กำพร้าเหลือ (ลบ key ที่ไม่ใช้ทั้ง th/en)
+3) P13-31 — E2E ต้อง "แดงได้":
+   · Flow A: กดจองจริงผ่าน UI (ไม่ page.goto ตรงไป /book, /join) แล้วยืนยันผลที่ผู้ใช้เห็น (ไม่ใช่แค่ host element) · Flow C: กดอนุมัติจริงและเช็คผล (request ที่ส่ง + สถานะที่แสดง) · Flow B: เพิ่มขั้น "ถูกจอง" ตาม acceptance · test สลับภาษา: ต้องคลิกจริงและ assert ข้อความเปลี่ยน (ห้ามครอบ assertion ด้วย `if (await …isVisible())`)
+   · mock ค้นหาต้องตรง DTO จริง (TutorSearchModels.cs:19-60: Curricula/TrialCount/Subjects/Formats/HourlyRate ฯลฯ) — ปัจจุบัน filters ได้ TypeError ใน tutor-search-filters.ts:107-116 แต่ test เขียว: ให้ test fail เมื่อมี pageerror/console error
+   · พิสูจน์ด้วยตัวเอง: ปิด mock ของ POST bookings / join / approve ทีละจุดแล้ว test ที่เกี่ยวต้องแดง — เขียนผล mutation 3 จุดลง PROGRESS
+4) P13-42 — แก้ runbook docs/runbooks/tutoring-go-live.md ให้ตรงโค้ด (gate ตรวจแล้ว: ส่วนที่ถูกให้คงไว้):
+   · ชื่อตาราง/คอลัมน์ 12 จุดที่ผิด (SQL ตรวจหลัง apply จะ error): TUTORS→TUTOR_PROFILES · TUTORING_SUBJECTS→TUTORING.SUBJECTS · KYC_*→TUTOR_KYC_CASES/TUTOR_DOCUMENTS/TUTOR_DOCUMENT_ACCESS_LOGS · TUTOR_SEARCH_LOGS→SEARCH_LOGS · TUTORING_PAYMENT_ATTEMPTS (ไม่มี — ลบ/แทนด้วยตารางจริง) · ADHOC_MEETING_INVITES→…_PARTICIPANTS · PACKAGE_CREDITS→TUTOR_PACKAGE_CREDITS · ANONYMISED_*→ANONYMIZED_AT_UTC · คอลัมน์ reminder/attendance · TUTORS.RELIABILITY_SCORE→TUTOR_PROFILES — ตรวจทุกชื่อกับ *Configuration.cs / ModelSnapshot
+   · §4.1 Stripe events: โค้ดรับ refund.created / refund.updated / refund.failed (StripeProviderEventMapper.cs:24-35) ไม่ใช่ charge.refunded/charge.refund.updated
+   · alert ที่ไม่มี metric จริง: tutoring_refund_process_failures_total (ไม่มี) · tutoring.reviews.reconcile จริงคือ .scanned/.corrected — เทียบกับ Siri.Tutoring meter
+   · smoke test route /become-tutor และ /instructor/tutoring/onboarding ไม่มีจริง — ใช้ route จริงจาก app.routes.ts
+   · §3 config: ต้องครบ "ทุก section" ของ Tutoring (ปัจจุบัน 11 key จาก ~22 section) — ไล่จาก appsettings.json + *Options.cs · scope meetings.space.readonly ไม่ใช่ของ Tutoring (ตรวจแล้วลบหรือย้าย)
+   · แก้ใน backend repo (docs/ authoritative) แล้ว copy ไป UI repo
+5) P13-43 — เติมที่ DoD §7P P-13 ขาด: ตารางผลตรวจต่อหน้า (4+ หน้า × 375/768/1280 × สว่าง/มืด) + screenshot ลง PROGRESS (ไฟล์ใน docs/ หรือแนบพาธ) · วัด contrast ≥ 4.5:1 จริงทั้งสองธีม (ระบุวิธีวัด/ค่าที่วัดได้) · แก้คำอ้างให้ตรง: `track $index` มี 2 จุด (tutor-profile-page.html:176,197 — DTO ไม่มี id ยอมรับได้ ให้เขียนเหตุผลไว้ใน comment) · เลิกอ้าง "ทุกตัวใช้ tone-*" ถ้าไม่จริง
+
+ข้อห้าม: ห้ามแตะ backend production code · ห้ามเดาชื่อ field/key — เทียบ C# จริง · ห้ามเปลี่ยนชื่อ i18n key เดิมที่ยังใช้ · ห้ามแตะ angular.json · ห้ามตั้ง Status เป็น DONE (BUILT ได้ — Claude/integrator-qa เป็นผู้ตั้ง DONE)
+Definition of done: §3 ฝั่ง FE — lint, `ng test` ทั้ง repo (338 ไฟล์ ณ gate รอบ 2 / 3,768 ผ่าน), build, th/en parity guard เขียว, Playwright tutoring เขียว · ต่อข้อ: เขียนหลักฐานใน PROGRESS (คำสั่ง + ตัวเลข + mutation) · TASKS: P13-48, P13-46, P13-31, P13-42, P13-43, P13-38 = BUILT เมื่อข้อของตัวเองครบ
+```
+
+### 7P.2 ลำดับที่แนะนำ
+
+1. เจ้าของ commit baseline P13 (ทั้งสอง repo) → Antigravity เริ่ม **P-8 (BE test-only) ขนาน P-1** ได้ทันที
+2. FE ทีละงาน: P-1 → P-2 → P-6 → P-5 → P-3 → P-4 → P-7 (ห้ามสองตัวพร้อมกันใน repo UI) → **P-11** (A–D ทำได้ทั้งหมดหลัง P-3) → **P-13** (หลัง P-11) · **P-12** ทำขนานได้ตลอด (เอกสาร backend) · **P-14/P-15** (BE) ✅ เริ่มได้แล้ว (D2 ปิด + P13-32 เสร็จ 2026-10-20 — ไม่มี agent ของ Claude build backend อยู่; ถ้า Claude เปิด agent BE ใหม่จะแจ้งก่อน)
+3. ระหว่างนั้น Claude ปิด P13-12 → P13-17 → P13-15 WP-A,B → (ถ้าเจ้าของ override) ส่ง P-9/P-10 → P13-30/32 → integrator-qa gate
+4. เมื่อ BE ครบ: เจ้าของ apply migration ตามลำดับ → ทดสอบ end-to-end ด้วย `scripts/dev.ps1` กับ Stripe test mode + Mailpit → live-verify checklist ของ integrator-qa
+
 ## 8. ประวัติการแก้แผน
 
 | วันที่ | เปลี่ยนอะไร |
 |-------|------------|
+| 2026-09-16 | Antigravity ทำ Phase N (N1: P11-02, N2: P11-07) เสร็จสิ้น (สถานะ `BUILT`) — สร้าง instructor live session API 4 use cases, controller, delivery-format action, read model projection + search live schedule, zero meetUrl security automated check, unit tests ผ่าน 966/966, architecture tests ผ่าน 5/5, build 0 warning/0 error |
 | 2026-09-16 | Antigravity ทำ Phase M (M1: X-30, M2: X-29) เสร็จสิ้น (สถานะ `BUILT`) — ผ่าน 851 backend unit tests, 5 architecture tests, 1 HTTP rate-limit integration test, 12 frontend guard unit tests, ng lint 0 error, .NET และ Angular build 0 error |
 | 2026-09-16 | เพิ่ม §7 Phase N (P11-02/P11-07 — พร้อมส่ง Antigravity หลัง contract `P11-01-catalog-live-sessions.md` FROZEN) — งานคู่ขนานกันได้ทั้งสอง ไม่ชนไฟล์ · P11-01 เองมอบให้ backend-developer (Claude) เพราะแตะ cross-module Contracts ใหม่ |
 | 2026-09-16 | เพิ่ม §7 Phase M (X-29/X-30 — พร้อมส่ง Antigravity ทันที ไม่ติด Q10-Q13) ระหว่างออกแบบ Hybrid Live (D-21) — X-31 ไม่อยู่ใน Phase M เพราะตรวจแล้วต้องเพิ่ม Contracts ข้ามโมดูลใหม่ (Learning to Notification) จึงเป็นงานของ Claude ไม่ใช่ AG (ดู TASKS.md) |
 | 2026-08-28 | เขียน §4 ใหม่ทั้งหมด (Phase H–L) หลัง Claude Code ตรวจโค้ดจริงทีละไฟล์ — คิว Phase A–G เดิมล้าสมัยเกือบหมด · §7 แทนบล็อก A/B/C ด้วย H/I/J · §6 ขยาย mapping เป็น 18 หน้าจอตาม mockup v2026-08-28 · เจ้าของโปรเจ็คสั่งตัดวิดีโอ/player/DRM และ login/auth ออกจากรอบนี้ |
 | 2026-08-27 | คิว Phase A–G (แทนคิว 2026-08-25) |
+- **2026-10-19:** เพิ่ม §7P Phase P — แบ่งงาน P13 ที่เหลือระหว่าง Claude/Antigravity (P-1..P-8 งาน AG ปกติ · P-9,P-10 ตัวเลือกที่ต้องเจ้าของ override เพราะ contract ระบุ 'ห้ามส่ง Antigravity') + task ID ใหม่ P13-34..P13-40 ใน `TASKS.md`
+- **2026-10-20:** เพิ่ม §7P P-11 (`P13-41`) — เทียบ FE กับ BE ที่ build เพิ่ม (แพ็กเกจ/PDPA/analytics) + ปิดช่อง error reason 13 ตัวที่ไม่ปรากฏใน FE
+- **2026-10-20:** เพิ่ม §7P P-12..P-15 (`P13-42..45`) — runbook ขึ้นระบบ Tutoring · ตรวจคุณภาพ FE · seed ข้อมูลตัวอย่าง · เทสต์แกว่งรอบ 2
+- **2026-10-21:** เพิ่ม §7P P-17 (`P13-48`) + แถว `P13-47` (BE ของ Claude) — ปิด P13-38 หลัง BE เปิด field ที่ขาด · ลำดับ FE ที่เหลือของ Antigravity: **P-16 (เริ่มได้เลย) → P-17 (รอ P13-47)**
+- **2026-10-21 (gate รอบ 2):** เพิ่ม §7P P-18 — integrator-qa ตั้ง P13-31/38/42/43/46/48 เป็น PART พร้อม file:line · P13-44/45 ผ่าน (DONE) · ลำดับ FE ที่เหลือของ Antigravity: **P-18 เท่านั้น**

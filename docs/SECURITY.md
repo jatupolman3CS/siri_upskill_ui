@@ -61,6 +61,14 @@ Requirement SE-01/02/03 ถูกระบุเป็น **CRITICAL INFRASTRUCT
 - ตรวจ promo code แบบ atomic (`UPDATE ... WHERE RedeemedCount < MaxRedemptions`) กัน race condition
 - ทุกการเปลี่ยนสถานะเงินต้องเขียน audit trail ที่ลบไม่ได้
 
+## 6.1 Tutor Marketplace (P13 · D-25) — KYC · ผู้เยาว์ · escrow
+- **เอกสาร KYC** (บัตรประชาชน, วุฒิ, ใบรับรองประวัติอาชญากรรม = ข้อมูลอ่อนไหวสูง): bucket R2 แยก ไม่มี public domain · เข้ารหัสไฟล์ AES-256-GCM ชั้นแอป (`ISensitiveDataProtector` overload ไบต์) ก่อนอัปโหลด · magic bytes + allow-list + ≤10MB · **ไม่ออก presigned URL** — admin ดูผ่าน endpoint stream ที่ถอดรหัส + `no-store` + `TUTOR_DOCUMENT_ACCESS_LOGS` ทุกครั้ง · ติวเตอร์ดาวน์โหลดเอกสารตัวเองกลับไม่ได้ · purge ไฟล์ IdCard/CriminalRecord หลังตัดสิน (default 30 วัน, config) เก็บเฉพาะผลตรวจ · ขอ consent PDPA พร้อมเวอร์ชันข้อความ · ห้าม log ชื่อไฟล์/เนื้อหา/เลขบัตร
+- **บังคับ 2FA ของ Admin ก่อนเปิด KYC บน production** (X-39 — ตอนนี้ `TwoFactorEnabled` ยังไม่ถูก enforce)
+- **ผู้เยาว์:** ไม่เก็บวันเกิด/เลขบัตร — เก็บชื่อเล่น + ระดับชั้น + `IS_MINOR` + consent ผู้ปกครอง · ผู้ปกครองเป็นเจ้าของบัญชีและผู้จ่ายเงิน · ติวเตอร์เห็นเฉพาะชื่อเล่น/ระดับชั้น (ไม่เห็นอีเมล/เบอร์ผู้ปกครอง) · ไม่มีแชตตรงนอกแพลตฟอร์มใน v1 · แพลตฟอร์มไม่บันทึกคลาส (ห้ามติวเตอร์บันทึกตาม ToS) · ลิงก์ห้องผ่าน join gate เท่านั้น
+- **IDOR:** booking/session/dispute/wallet/KYC ทุก endpoint เช็คสิทธิ์ใน query เดียวกับการดึงข้อมูล · join gate ตอบ 404 เดียวกันทุกไบต์ทุกกรณีไม่มีสิทธิ์ · ไม่รับ `userId` จาก body/query
+- **เงิน:** ราคาจาก server (rate × นาที) · ยืนยันจ่ายจาก webhook+signature เท่านั้น · refund ทุกครั้งมี idempotency key ตายตัวและเรียก Stripe จริง · ห้าม hard delete payment/refund/booking/split · ทุกการเปลี่ยนสถานะเงินและการตัดสินของ admin เขียน `SECURITY_AUDIT` · escrow ปล่อยได้จากการตั้ง `AVAILABLE_AT_UTC` ผ่าน Payout contract เท่านั้น
+- **Rate limit** แยกเฉพาะ: `tutoring-search` (ต่อ IP), `tutoring-booking`/`tutoring-join`/`tutoring-upload` (ต่อผู้ใช้) — ห้ามใช้ `default` (global ไม่ partition) · **webhook (Stripe/Bunny) ไม่มี limiter หน้าด่าน signature** (X-45, 2026-10-20): ตรวจ signature ก่อน แล้วนับเฉพาะ request ที่ล้มเหลว (ไม่มี/ผิด/หมดอายุ/body เกินเพดาน) ต่อ IP → 429 + `Retry-After` · event ที่ signature ถูกไม่มีวันโดน 429 และ body จำกัด 256 KB (413) — ตั้งค่าที่ `Webhooks:Protection:*`
+
 ## 7. ก่อน launch (checklist)
 - [ ] Pen-test ภายนอก + ปิดช่อง high/critical ครบ
 - [ ] ทดสอบดึงวิดีโอด้วย IDM / extension / `yt-dlp` / devtools network → ต้องล้มเหลวทุกทาง

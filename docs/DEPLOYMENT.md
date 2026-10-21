@@ -61,7 +61,8 @@ angular-ssr      → Node container รัน Angular SSR (หน้า public)
 api              → ASP.NET Core 10 Web API (Hangfire Client + Dashboard + Processing Server + Recurring Jobs เป็นค่า default — ดู "Background jobs" ด้านล่าง)
 workers          → .NET 10 Worker Service (ทางเลือก: Hangfire Processing Server + Recurring Jobs แยก process)
 mssql            → SQL Server (persistent volume + tempdb แยก)
-redis            → cache + session/device registry
+redis            → cache + session/device registry + (D-23) duplicate-guard / send-throttle / unread-count cache ของ notification
+kafka            → (ทางเลือก, opt-in) broker KRaft node เดียว สำหรับ pipeline อีเมล/แจ้งเตือน (D-23) — ดูหัวข้อ "Kafka" ด้านล่าง
 seq              → เก็บ log แบบ query ได้
 backup           → sidecar cron: dump DB → บีบอัด → เข้ารหัส → อัปขึ้น off-site
 uptime-kuma      → เช็ค uptime + แจ้งเตือน
@@ -91,21 +92,113 @@ Subdomain: `siriupskill.com` (SSR) · `api.siriupskill.com` · `admin.siriupskil
 
 ⚠️ **ตั้งค่า `caddy` ให้ forward header บอก scheme จริงไปหา `angular-ssr`** (`X-Forwarded-Proto`/`Forwarded` — Caddy's `reverse_proxy` ทำให้อัตโนมัติอยู่แล้วโดย default ปกติ ไม่ต้องเพิ่ม directive พิเศษ แค่ต้อง**ยืนยัน**ตอน deploy จริง) แล้วตั้ง env `NG_TRUST_PROXY_HEADERS=true` ให้ container `angular-ssr` — ถ้าไม่ทำ Angular SSR (`SeoService`, task P1-24) จะเข้าใจผิดว่า request เป็น `http://` เสมอ (เช็คจาก `socket.encrypted` ตรง ๆ แทน) เพราะ Caddy→Node เป็น plain HTTP ภายใน docker network แม้ฝั่งผู้ใช้เข้าผ่าน `https://` จริง — canonical/OG URL ในหน้า SSR จะผิดเป็น `http://...` เงียบ ๆ ถ้าลืมข้อนี้
 
-## Meilisearch (ค้นหาคอร์ส + ชื่อผู้สอน — D-22)
+## Meilisearch (ค้นหาคอร์ส + ชื่อผู้สอน — D-22 · ขยายไป blog / กระทู้ถามตอบ / ผู้ใช้ฝั่งแอดมิน — 2026-10-14)
 
-ตั้งค่าเป็น env ให้ **ทั้ง API และ Workers** (ทั้งสองโหลด `AddCatalogModule`; Workers เป็นคนรัน job `course-search-reindex`):
+ตั้งค่าเป็น env ให้ **ทั้ง API และ Workers** (ทั้งสองโหลดทุกโมดูลที่ค้นหา; Workers เป็นคนรัน job `course-search-reindex` และ `search-index-maintenance`):
 
 | env | ความหมาย |
 |---|---|
 | `Meilisearch__Url` | base URL ของ Meilisearch เช่น `http://host:7700` (ว่าง = ปิดฟีเจอร์ ใช้ `pg_trgm`) |
 | `Meilisearch__ApiKey` | **secret** — key ที่ต้องมีสิทธิ์ `search`, `documents.add`, `documents.get`, `documents.delete`, `indexes.create`, `indexes.get`, `settings.update`, `tasks.get` (master key ใช้ได้) · ว่างหรือ `CHANGE_ME` = ปิดฟีเจอร์ |
-| `Meilisearch__DocumentsIndexUid` | uid ของ index (default `siriupskill_documents`; ใช้ได้เฉพาะ `A-Z a-z 0-9 - _`) |
+| `Meilisearch__DocumentsIndexUid` | uid ของ index **คอร์ส** (default `siriupskill_documents`; ใช้ได้เฉพาะ `A-Z a-z 0-9 - _`) |
+| `Meilisearch__PostsIndexUid` | uid ของ index **บทความ blog** (default `siriupskill_posts`) |
+| `Meilisearch__DiscussionsIndexUid` | uid ของ index **กระทู้ถามตอบในบทเรียน** (default `siriupskill_discussions`) |
+| `Meilisearch__UsersIndexUid` | uid ของ index **ผู้ใช้** สำหรับค้นหาฝั่งแอดมิน (default `siriupskill_users`) |
+| `Meilisearch__UserSearchEnabled` | `false` = ไม่ส่งชื่อ+อีเมลผู้ใช้เข้า Meilisearch เลย (ค้นหาผู้ใช้ฝั่งแอดมินใช้ PostgreSQL ล้วน) · default `true` · **index เดียวที่มีข้อมูลส่วนบุคคล** |
 | `Meilisearch__Enabled` | `false` = ปิดทันทีทั้งที่ตั้งค่าครบ (default `true`) |
+
+**uid ทั้งสี่ต้องไม่ซ้ำกัน** (ซ้ำ = boot ล้ม — Meilisearch ตั้งค่า searchable/filterable ระดับ index ถ้าสองชนิดแชร์ index จะเขียนทับกันทุกครั้งที่ start) · key ต้องมีสิทธิ์ครอบคลุมทั้งสี่ index (ใช้ master key หรือสร้าง key ที่จำกัด `indexes: ["siriupskill_*"]` ได้)
 
 - ตั้งแล้ว restart → ตอน start API จะสร้าง index + settings และเติมให้เองถ้า index ว่าง (log: `Meilisearch index is ready…` / `initial reindex indexed N`) ไม่ต้องสั่งอะไรเพิ่ม · ถ้าไม่ได้ผลดู log บรรทัด `Meilisearch course search is off (...)` จะบอกเหตุผล (ไม่มี URL / key ยังเป็น `CHANGE_ME` / ถูกปิด)
 - ตรวจสถานะ: `GET /api/catalog/admin/search/status` (Admin) → `enabled`, `reachable`, `indexedCourses` เทียบ `publishedCoursesInDatabase` · สั่งสร้างใหม่ทั้งหมด: `POST /api/catalog/admin/search/reindex`
+- **ชนิดอื่น (blog / กระทู้ / ผู้ใช้):** `GET /api/admin/search/status` (Admin) → รายการต่อ index: `name` (`post`/`discussion`/`user`), `enabled`, `reachable`, `indexedDocuments` เทียบ `documentsInDatabase` · `POST /api/admin/search/reindex` (ทั้งหมด) หรือ `?index=post|discussion|user` (ทีละตัว) — ไม่คืน URL/key · job `search-index-maintenance` ทุกชม. (นาทีที่ 30) ซ่อมสิ่งที่ hook ตกหล่น · ตอน start จะสร้าง index + settings และเติมให้ถ้าว่างเอง
+- **ค้นด้วยอะไร:** `GET /api/cms/posts?q=` (เฉพาะบทความ Published) · `GET /api/community/discussions?episodeId=…&q=` (เฉพาะกระทู้ Visible ของบทเรียนนั้น) · `GET /api/identity/admin/users?query=` (AdminOnly — Meilisearch **เพิ่ม** ผลที่ substring หาไม่เจอ เช่น พิมพ์ผิด ไม่ได้แทนที่) — ทุกตัว PostgreSQL ยังเป็นคนตัดสิน visibility/สิทธิ์/paging; Meilisearch ล่ม/ปิด/ไม่เจอ → ใช้ PostgreSQL ต่อ
 - **ความปลอดภัย:** ถ้า URL เป็น `http://` ไป public IP ตัว bearer key วิ่งแบบไม่เข้ารหัส → ใช้ `https://` (reverse proxy หน้า Meilisearch) หรือ private network, แนะนำสร้าง key แยกที่จำกัด action ตามตารางด้านบนแทน master key และอย่า commit ลงไฟล์ใด ๆ (`.env_prd`/Jenkins credentials เท่านั้น)
 - Meilisearch ล่มไม่ทำให้เว็บล่ม — ค้นหาตกกลับไป PostgreSQL อัตโนมัติ (ดู `ARCHITECTURE.md` § 6)
+- ทดสอบ client กับ server จริงด้วยมือ (ไม่ต้อง boot API): ตั้ง env `SIRI_MEILISEARCH_LIVE_URL` + `SIRI_MEILISEARCH_LIVE_KEY` (+ `SIRI_MEILISEARCH_LIVE_INDEX` ถ้าไม่ใช่ `siriupskill_documents`) แล้ว `dotnet test tests/Siri.UnitTests --filter MeilisearchLiveSmokeTests --logger "console;verbosity=detailed"` — เขียน document ทดสอบด้วย id สุ่มลง index แล้วลบออกหมด ไม่แตะข้อมูลอื่น (ถ้าไม่ตั้ง env เทสต์ถูกข้ามเอง)
+- ทดสอบ blog/กระทู้/ผู้ใช้กับ server จริง: env ชุดเดียวกัน แล้ว `--filter MeilisearchGenericLiveSmokeTests` — ทำงานใน **index ชั่วคราว 3 ตัวที่ชื่อสุ่ม** (`siriupskill_smoke_*`) แล้ว `DELETE` ทิ้งตอนจบ ไม่แตะ index จริง (key ต้องมีสิทธิ์ `indexes.delete` ด้วย) · ครบสาย engine จริง + PostgreSQL จริง: `dotnet test tests/Siri.IntegrationTests --filter MeilisearchLiveEndToEndTests` (ต้องตั้ง external services ตาม `ExternalTestServices` ด้วย; ใช้ index `siriupskill_it_*` ชั่วคราว)
+
+## Cloudflare R2 (เอกสารประกอบการสอน — P4-03c · ไม่ตั้ง = อัปโหลด/ดาวน์โหลดไฟล์แนบตอบ 503)
+
+เก็บไฟล์แนบของ episode และของคาบสอนสด (สไลด์ ใบงาน ฯลฯ) ใน **R2 bucket แบบ private** — ไม่ใช่ AWS S3 (ใช้ API แบบ S3 ที่ R2 รองรับผ่านไลบรารี `AWSSDK.S3` เป็น HTTP client เท่านั้น) วิดีโอยังอยู่ที่ Bunny ตามเดิม ตั้งเป็น env ให้ **API** (Workers ไม่ใช้):
+
+| env | ความหมาย |
+|---|---|
+| `Storage__R2__AccountId` | Cloudflare account id (ใช้ประกอบ endpoint `https://{id}.r2.cloudflarestorage.com`) |
+| `Storage__R2__AccessKeyId` | **secret** — access key ของ R2 API token (สิทธิ์ *Object Read & Write* ผูกกับ bucket นี้ bucket เดียว) |
+| `Storage__R2__SecretAccessKey` | **secret** — secret ของ token เดียวกัน |
+| `Storage__R2__BucketName` | ชื่อ bucket (ต้อง **private**: ไม่เปิด public access, ไม่ผูก custom domain — presigned URL ใช้กับ custom domain ไม่ได้) |
+| `Storage__R2__Endpoint` | ไม่บังคับ — override endpoint (เช่น jurisdiction EU `https://{id}.eu.r2.cloudflarestorage.com`) |
+| `Catalog__Attachments__MaxFileSizeBytes` / `DownloadUrlTtlSeconds` / `MaxAttachmentsPerParent` | เพดานไฟล์ (default 50 MB, สูงสุด 100 MB) / อายุลิงก์ดาวน์โหลด (default 300 วิ) / จำนวนไฟล์ต่อ episode หรือ session (default 30) |
+
+- **reverse proxy ต้องยอม request body ใหญ่พอ** — อัปโหลดวิ่งผ่าน API (multipart) ไม่ได้ตรงไป R2: nginx ตั้ง `client_max_body_size 110m;` ที่ location `/api/` (default ของ nginx คือ **1 MB** → ผู้สอนจะเจอ 413) ; ถ้ามี Caddy อยู่หน้า ตรวจ `request_body { max_size 110MB }`
+- ไม่ต้องตั้ง CORS บน bucket (browser ไม่คุยกับ R2 ด้วย XHR — อัปโหลดผ่าน API, ดาวน์โหลดเป็นการ navigate ไป presigned URL ที่ตอบ `Content-Disposition: attachment`)
+- **ไม่มี virus scan (Q9 — เจ้าของโปรเจ็คตัดสิน 2026-10-10 ให้ข้ามขั้นสแกนไปก่อน):** `appsettings.json` ส่งมาเป็น `Attachments:VirusScan:Mode=Disabled` ไฟล์ที่ผ่านการตรวจชนิด/MIME/magic bytes จะถูกรับโดยไม่สแกน และ log เตือน `Attachment accepted WITHOUT a virus scan` ทุกไฟล์ · `ProductionConfigurationGuard` ไม่บล็อกโหมดนี้แล้ว · อยากกลับไปบังคับสแกน: ตั้ง `Attachments__VirusScan__Mode=Required` (อัปโหลดจะตอบ 503 `attachment.virus_scanner_not_configured` จนกว่าจะลงทะเบียน engine จริง) · ด่านอื่นยังอยู่ครบ: allow-list นามสกุล+MIME, magic bytes, ปฏิเสธ header ของ executable, อัปโหลดได้เฉพาะเจ้าของคอร์ส/แอดมิน, bucket private, เสิร์ฟด้วย `Content-Disposition: attachment` + ลิงก์ signed อายุสั้น
+- ไม่ตั้ง R2 แล้ว host ยัง boot ปกติ (ตอบ 503 `storage.provider_not_configured` เฉพาะ endpoint ไฟล์แนบ) — ไม่อยู่ใน `ProductionConfigurationGuard` โดยตั้งใจ
+- orphan: ลบแถว/episode/section แล้วระบบลบ object ใน R2 ให้ (best-effort — พลาดแล้ว log warning ไว้) ถ้าอยาก sweep เพิ่มใช้ R2 lifecycle/สคริปต์เทียบ prefix `teaching-materials/` กับ `CATALOG.EPISODE_ATTACHMENTS`/`LIVE_SESSION_ATTACHMENTS`
+
+## Kafka (pipeline อีเมล/แจ้งเตือน — D-23 · opt-in, ปิดอยู่เป็น default)
+
+ไม่เปิด = ไม่ต้องทำอะไร: `Notification__Delivery__Transport` default เป็น `Database` (Hangfire job `email-outbox-send` ส่งอีเมลเหมือนเดิมทุกอย่าง) · สถาปัตยกรรมเต็ม: `ARCHITECTURE.md` § 9
+
+> ✅ **pipeline ผ่าน end-to-end กับ Kafka broker จริงแล้ว (2026-10-09):** `NotificationKafkaPipelineIntegrationTests` 11/11 รันกับ broker บน dev cluster ของเจ้าของ (SASL/PLAIN) + PostgreSQL 18 + Redis-protocol server (Garnet) จริงบนเครื่อง dev — relay → Kafka → consumer → SMTP (recording sender), retry, exhausted, duplicate, poison→DLQ, stale-queued, broker ล่ม, in-app → unread-count cache
+> ⚠️ **ที่ยังไม่ได้ทดสอบ:** ชุดคำสั่ง `docker run` ด้านล่าง (เขียนจาก image doc ของ `apache/kafka` — เครื่อง dev ไม่มี Docker) และ path Testcontainers (`apache/kafka:4.2.2`) ที่จะรันใน CI — ลองบน staging ก่อนเปิด production · รันกับ broker อื่นของเรา: ตั้ง env `SIRI_IT_KAFKA_LIVE_BOOTSTRAP` (+ `_PROTOCOL`/`_MECHANISM`/`_USERNAME`/`_PASSWORD`) หรือ `SIRI_IT_KAFKA` (loopback ไม่มี auth) — ดู `KafkaFixture`; test สร้าง/ลบเฉพาะ topic และ group ที่ขึ้นต้น `siriupskill-it-`
+
+**1) Broker (single node, KRaft) — container ใน network `siri-net` เหมือน `siri_postgres`, ไม่ publish port ออกเน็ต**
+
+```bash
+docker run -d --name siri_kafka --restart unless-stopped --network siri-net --memory 1g \
+  -v siri_kafka_data:/var/lib/kafka/data \
+  -e KAFKA_NODE_ID=1 \
+  -e KAFKA_PROCESS_ROLES=broker,controller \
+  -e KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093 \
+  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://siri_kafka:9092 \
+  -e KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+  -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT \
+  -e KAFKA_CONTROLLER_QUORUM_VOTERS=1@siri_kafka:9093 \
+  -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+  -e KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 \
+  -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 \
+  -e KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
+  -e KAFKA_AUTO_CREATE_TOPICS_ENABLE=false \
+  -e KAFKA_HEAP_OPTS="-Xms512m -Xmx512m" \
+  apache/kafka:4.2.2
+```
+- `AUTO_CREATE_TOPICS_ENABLE=false` เพราะแอปสร้าง topic เองตอน start (`KafkaTopicProvisioner`, partition/retention ตาม `Notification:Delivery:*`) · เปลี่ยนเวอร์ชัน image ให้เปลี่ยนที่ `tests/Siri.IntegrationTests/Fixtures/KafkaFixture.cs` ด้วย
+- ต้องการ **~1 GB RAM** (JVM) บน VPS ที่ใช้ร่วมกับ Postgres/Redis/แอป — เช็ค `docker stats` ก่อนตัดสินใจเปิด · ข้อมูล = record เล็ก ๆ เก็บ 7 วัน (ไม่กี่ MB ต่อวัน)
+- **ห้าม publish port 9092/9093 ออกเน็ต** (`-p`) — listener เป็น `PLAINTEXT` ไม่เข้ารหัสไม่ยืนยันตัวตน ปลอดภัยเพราะอยู่ใน `siri-net` เท่านั้น ถ้าจะใช้ cluster ภายนอก/managed ให้ใช้ `Kafka__SecurityProtocol=SaslSsl` (ดูตารางด้านล่าง) — `SaslPlaintext` ส่งรหัสผ่าน SASL แบบไม่เข้ารหัส
+
+**2) ตั้งค่าแอป — ทุก host ที่รัน Hangfire server (API เมื่อ `Hangfire__ServerInApi=true` + Workers ถ้ามี) ต้องตั้ง "เหมือนกัน"**
+
+| env | ความหมาย |
+|---|---|
+| `Notification__Delivery__Transport` | `Database` (default) \| `Kafka` |
+| `Kafka__BootstrapServers` | `siri_kafka:9092` (คั่นหลาย broker ด้วย `,`) |
+| `Kafka__AllowPlaintext` | `true` = ยืนยันว่า broker อยู่ใน private network (production ปฏิเสธ `Plaintext`/`SaslPlaintext` ถ้าไม่ตั้ง) |
+| `Kafka__TopicPrefix` | namespace ของ topic/consumer group — production `siriupskill`, staging `siriupskill-staging` (ห้ามซ้ำกันถ้าใช้ cluster เดียว) |
+| `Kafka__ReplicationFactor` | จำนวนสำเนา = 1 บน single node |
+| `Kafka__SecurityProtocol` / `SaslMechanism` / `SaslUsername` / `SaslPassword` / `SslCaLocation` | สำหรับ broker ที่มี TLS/SASL — `SaslUsername`/`SaslPassword` เป็น **secret** (env/user-secrets เท่านั้น) |
+| `Notification__Delivery__MaxEmailsPerMinute` | งบส่งต่อนาทีร่วมทุก consumer (0 = ไม่จำกัด) — ตั้งให้ต่ำกว่าเพดานของ SMTP provider |
+| `Notification__Delivery__EmailConsumerInstances`, `__Partitions`, `__QueuedStaleAfterMinutes` (15, ขั้นต่ำ 10 — ตั้งให้เกินเวลาที่ burst ใหญ่สุดใช้ระบาย: ผู้รับ ÷ อัตราส่ง), `__RelayPollIntervalMs` (1000), `__RelayBatchSize` (100), `__UnreadCountCacheSeconds` (30) | ปรับจูน (default ใช้ได้เลย) |
+
+ค่าทั้งหมดข้างบนใส่ใน `.env` (Development/QA) หรือ `.env_prd` (Production) ได้เลย — `DotEnvLoader` อ่านเป็น config ชั้นถัดจาก `appsettings*.json` (ชนะ appsettings แต่แพ้ user-secrets และ env var จริง) ไม่ต้องมี key อื่นเพิ่ม · key ที่ **ไม่มีผล** (ไม่มีโค้ดอ่าน): `Kafka__ConsumerGroupId` (consumer group คำนวณจาก `Kafka__TopicPrefix`), `Redis__InstanceName` · อ่านค่า Redis จาก `Redis__ConnectionString` ตัวเดียว (`REDIS_PASSWORD` ใช้กับ container Redis ไม่ใช่แอป)
+
+**3) ลำดับเปิดใช้ (ปลอดภัยทุกขั้น ย้อนได้)**
+1. apply migration `AddNotificationKafkaDelivery` ด้วย migration bundle ก่อน — additive ล้วน (คอลัมน์ nullable 2 ตัว + partial index) แอปเวอร์ชันเก่าที่ยังรันอยู่ไม่กระทบ
+2. deploy แอปเวอร์ชันใหม่โดย `Transport=Database` (พฤติกรรมเดิม; job ส่งอีเมลหันมาใช้ Redis claim ร่วมด้วย) **ให้ครบทุก host ที่รัน Hangfire server ก่อนไปขั้นถัดไป** — binary เวอร์ชันเก่าไม่มี claim ร่วมนี้ ถ้ามี host เก่าเหลืออยู่ตอนพลิกเป็น `Kafka` มันจะส่งอีเมลซ้ำกับ consumer ได้
+3. รัน container `siri_kafka` (ข้อ 1) → `docker exec siri_kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 | head -1` ต้องตอบ
+4. ตั้ง `Notification__Delivery__Transport=Kafka` + `Kafka__*` ที่ทุก host ที่รัน Hangfire server แล้ว restart (ช่วง host ใหม่/เก่าทับกันไม่ส่งซ้ำ — Redis claim ร่วม)
+5. ตรวจ: ส่งอีเมลทดสอบ (ลืมรหัสผ่าน) → ใน log ต้องเห็น `Kafka topics ensured`, `Kafka consumer email-delivery subscribed ...`; แถวใน `NOTIFY.EMAIL_OUTBOX` ไป `Pending → Queued → Sent` ภายในไม่กี่วินาที (ไม่ใช่รอรอบ 1 นาที); Hangfire dashboard ยังเห็น `email-outbox-send` รันแต่ไม่ทำอะไร
+
+**ย้อนกลับ**: ตั้ง `Transport=Database` + restart — job กลับมาส่งเอง และ adopt แถว `Queued` ที่ค้างเกิน `QueuedStaleAfterMinutes` ให้อัตโนมัติ (อยากให้เร็วกว่านั้น: `UPDATE "NOTIFY"."EMAIL_OUTBOX" SET "STATUS"='Pending', "QUEUED_AT_UTC"=NULL WHERE "STATUS"='Queued';`) ไม่มีข้อมูลหาย เพราะ DB เป็น source of truth ตลอด
+
+**ตรวจ/ดูแลประจำ**
+- สถานะ outbox: `SELECT "STATUS", count(*) FROM "NOTIFY"."EMAIL_OUTBOX" GROUP BY 1;` · dead letter (ต้องมีคนดู): `... WHERE "STATUS"='Failed' AND "NEXT_RETRY_AT_UTC" IS NULL` (อ่านสาเหตุที่ `LAST_ERROR`) · หลังแก้สาเหตุแล้วอยากส่งใหม่: `UPDATE "NOTIFY"."EMAIL_OUTBOX" SET "STATUS"='Pending', "ATTEMPTS"=0, "NEXT_RETRY_AT_UTC"=NULL, "LAST_ERROR"=NULL WHERE "ID"='<uuid>';`
+- consumer lag: `docker exec siri_kafka /opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group siriupskill.notification.email` (LAG ควรเป็น 0 หรือลดลง)
+- DLQ (record ที่ประมวลผลไม่ได้): `docker exec siri_kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic siriupskill.notification.email.dlq.v1 --from-beginning --timeout-ms 5000` — แต่ละอันเป็น JSON (`reason`, `sourceTopic`, `offset`, `originalValue`); แถว outbox ที่อยู่เบื้องหลังยังอยู่ใน DB และถูก publish ใหม่เองเมื่อ `Queued` เกิน stale window
+- metric (OTLP): `notification.email.exhausted` > 0 = ต้องไปดู · `notification.relay.failures` ขึ้นต่อเนื่อง = broker เข้าไม่ถึง (อีเมลไม่หาย แค่ล่าช้า) · `notification.email.throttled` = ชนงบ `MaxEmailsPerMinute`
+- Kafka ล่ม **ไม่ทำให้เว็บล่ม**: API แค่เขียนแถว outbox; อีเมลค้าง `Pending` จนกว่า broker กลับมาแล้วถูกส่งตามลำดับ
+- backup: ไม่ต้อง backup Kafka — ไม่ใช่ source of truth (ถ้า volume หาย แถว `Queued` จะถูก publish ใหม่เองภายใน stale window)
 
 ## CI/CD
 
