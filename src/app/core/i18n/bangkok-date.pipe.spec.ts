@@ -35,6 +35,13 @@ describe('BangkokDatePipe', () => {
     expect(pipe.transform('2026-10-08T03:00:00Z', 'dateTime')).toContain('ต.ค.');
   });
 
+  it('offers the bare weekday and day-of-month the slot picker day tabs use, in Bangkok time', () => {
+    translation.setLocale('en');
+    // 18:00Z on Thursday 8 Oct is already Friday 9 Oct in Bangkok.
+    expect(pipe.transform('2026-10-08T18:00:00Z', 'weekday')).toBe('Fri');
+    expect(pipe.transform('2026-10-08T18:00:00Z', 'dayOfMonth')).toBe('9');
+  });
+
   it('returns an empty string for empty or unparseable input rather than throwing or returning null', () => {
     expect(pipe.transform(null)).toBe('');
     expect(pipe.transform(undefined)).toBe('');

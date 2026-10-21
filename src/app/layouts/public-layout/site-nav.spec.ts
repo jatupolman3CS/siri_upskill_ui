@@ -16,6 +16,13 @@ describe('SITE_NAV_LINKS', () => {
 
   it('keeps every other link as before (no query string)', () => {
     expect(SITE_NAV_LINKS.filter((link) => link.id !== 'live').every((link) => link.queryParams === undefined)).toBe(true);
-    expect(SITE_NAV_LINKS.map((link) => link.id)).toEqual(['home', 'courses', 'live', 'blog', 'learning-paths']);
+    expect(SITE_NAV_LINKS.map((link) => link.id)).toEqual(['home', 'courses', 'live', 'tutors', 'blog', 'learning-paths']);
+  });
+
+  it('has a Tutors link to the public tutor search (no query string, highlighted on profile pages too)', () => {
+    const tutors = SITE_NAV_LINKS.find((link) => link.id === 'tutors');
+    expect(tutors?.path).toBe('/tutors');
+    expect(tutors?.labelKey).toBe('nav.tutors');
+    expect(tutors?.exact).toBe(false);
   });
 });

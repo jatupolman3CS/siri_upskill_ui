@@ -4,6 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { instructorStudioGuard } from './core/guards/instructor-studio.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { loadLearnerTutoringDictionary, loadPublicTutoringDictionary } from './features/tutoring/i18n/tutoring-dictionaries';
 
 export const routes: Routes = [
   {
@@ -41,6 +42,105 @@ export const routes: Routes = [
         path: 'learning-paths/:slug',
         loadComponent: () =>
           import('./features/catalog/learning-path-detail-page/learning-path-detail-page').then((m) => m.LearningPathDetailPage),
+      },
+      // Tutor marketplace (P13-20/21) — public search and profile, server-rendered and indexable. The profile's "Book"
+      // action only appears because the router declares `tutors/:slug/book` (see tutor-booking-link.ts).
+      // The marketplace texts (`tutoring.*`) are not in the base dictionaries: each audience's resolver loads its own lazy pair
+      // before the page renders - on the server too for these two public routes (see features/tutoring/i18n/tutoring-dictionaries.ts).
+      {
+        path: 'tutors',
+        resolve: { dictionary: loadPublicTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/public/tutors-page/tutors-page').then((m) => m.TutorsPage),
+      },
+      // Booking (P13-22) — signed-in only and client-rendered (see app.routes.server.ts); the query string is only a
+      // pre-selection, every value is re-validated and re-priced by the server.
+      {
+        path: 'tutors/:slug/book',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/booking-page/booking-page').then((m) => m.BookingPage),
+      },
+      // Buying a package of lessons (P13-22b) — choose who it is for, then pay at /tutoring/checkout/package/:purchaseId.
+      // Signed-in only and client-rendered: it has its own exact entry in app.routes.server.ts, in this same change.
+      {
+        path: 'tutors/:slug/packages/:packageId',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/package-purchase-page/package-purchase-page').then((m) => m.PackagePurchasePage),
+      },
+      {
+        path: 'tutors/:slug',
+        resolve: { dictionary: loadPublicTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/public/tutor-profile-page/tutor-profile-page').then((m) => m.TutorProfilePage),
+      },
+      // Tutoring checkout (P13-22) — pay for a held lesson (PromptPay QR / card) or see how it ended. Covered by the
+      // `tutoring/**` client-render entry in app.routes.server.ts.
+      {
+        path: 'tutoring/checkout/:bookingId',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/checkout-page/tutoring-checkout-page').then((m) => m.TutoringCheckoutPage),
+      },
+      // Paying for a package purchase (P13-22b) — the same page as the booking checkout, told by `data` what it is paying for.
+      {
+        path: 'tutoring/checkout/package/:purchaseId',
+        canActivate: [authGuard],
+        data: { checkoutKind: 'Package' },
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/checkout-page/tutoring-checkout-page').then((m) => m.TutoringCheckoutPage),
+      },
+      // Tutoring join (P13-23) — the hand-off to the Meet room of a class, for the learner and for the tutor. Every link in the
+      // e-mails and calendar invites points here. Covered by the `tutoring/**` client-render entry in app.routes.server.ts.
+      {
+        path: 'tutoring/sessions/:sessionId/join',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/join-page/tutoring-join-page').then((m) => m.TutoringJoinPage),
+      },
+      // "My tutoring" (P13-23) — the learner's lessons, one lesson in full, and one problem report. Signed-in only and
+      // client-rendered (`my-tutoring` and `my-tutoring/**` in app.routes.server.ts).
+      {
+        path: 'my-tutoring',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/my-tutoring/my-tutoring-page/my-tutoring-page').then((m) => m.MyTutoringPage),
+      },
+      // The learner's packages (P13-22b): the list, and one purchase with its credits and the calendar to spend one.
+      {
+        path: 'my-tutoring/packages',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/my-tutoring/my-packages-page/my-packages-page').then((m) => m.MyPackagesPage),
+      },
+      {
+        path: 'my-tutoring/packages/:purchaseId',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/my-tutoring/package-detail-page/package-detail-page').then((m) => m.PackageDetailPage),
+      },
+      {
+        path: 'my-tutoring/bookings/:bookingId',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/my-tutoring/booking-detail-page/booking-detail-page').then((m) => m.BookingDetailPage),
+      },
+      {
+        path: 'my-tutoring/disputes/:disputeId',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/my-tutoring/dispute-page/dispute-page').then((m) => m.DisputePage),
       },
       {
         path: 'wishlist',
@@ -115,8 +215,17 @@ export const routes: Routes = [
       {
         path: 'account/privacy',
         canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
         loadComponent: () =>
           import('./features/auth/account-privacy/account-privacy-page').then((m) => m.AccountPrivacyPage),
+      },
+      // Learner profiles (P13-22) — the nicknames and school grades an account books tutoring lessons for.
+      {
+        path: 'account/learner-profiles',
+        canActivate: [authGuard],
+        resolve: { dictionary: loadLearnerTutoringDictionary },
+        loadComponent: () =>
+          import('./features/tutoring/learner/learner-profiles-page/learner-profiles-page').then((m) => m.LearnerProfilesPage),
       },
       // Instructor application (any signed-in user) — the one instructor page an unapproved user may see: apply,
       // wait for the admin's review, or re-apply after a rejection. The same wizard also lives at
@@ -291,6 +400,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/live/instructor/session-detail-page/session-detail-page').then((m) => m.SessionDetailPage),
       },
+      // Tutor Portal (P13-24) — onboarding hub, profile, offerings, credentials and identity verification. All reachable
+      // before the tutor is verified; screens that need `Verified` (P13-25) will sit behind `verifiedTutorGuard`.
+      {
+        path: 'tutoring',
+        loadChildren: () => import('./features/tutoring/tutor/tutor.routes').then((m) => m.TUTOR_ROUTES),
+      },
     ],
   },
   // Admin CMS & Ops (P6-20 .. P6-23) — CSR + authGuard + roleGuard
@@ -370,6 +485,11 @@ export const routes: Routes = [
         path: 'live-status',
         loadComponent: () =>
           import('./features/admin/live-status/admin-live-status-page').then((m) => m.AdminLiveStatusPage),
+      },
+      // Tutor marketplace administration (P13-26): identity checks, tutors + subjects, disputes. Same authGuard + roleGuard as the rest.
+      {
+        path: 'tutoring',
+        loadChildren: () => import('./features/tutoring/admin/admin-tutoring.routes').then((m) => m.ADMIN_TUTORING_ROUTES),
       },
     ],
   },

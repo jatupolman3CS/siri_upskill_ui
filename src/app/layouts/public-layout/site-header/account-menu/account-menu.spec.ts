@@ -9,7 +9,7 @@ import { buildTestAccessToken } from '../../../../core/auth/testing/test-jwt';
 import { accessTokenStore } from '../../../../core/http/access-token.store';
 import { TranslationService } from '../../../../core/i18n/translation.service';
 import { AccountMenu } from './account-menu';
-import { buildAccountMenuItems } from './account-menu-items';
+import { ACCOUNT_MENU_ICONS, buildAccountMenuItems } from './account-menu-items';
 
 @Component({ selector: 'app-account-menu-test-page', template: '' })
 class TestPage {}
@@ -23,6 +23,8 @@ describe('buildAccountMenuItems', () => {
       'my-live-sessions',
       'orders',
       'wishlist',
+      'my-tutoring',
+      'learner-profiles',
       'devices',
       'privacy',
       'become-instructor',
@@ -38,6 +40,27 @@ describe('buildAccountMenuItems', () => {
 
     const admin = buildAccountMenuItems({ canUseInstructorStudio: true, isAdmin: true });
     expect(admin.at(-1)).toMatchObject({ id: 'admin', route: '/admin' });
+  });
+
+  it('offers "My tutoring" (the lessons booked with tutors) before the learner profiles it books for', () => {
+    const items = buildAccountMenuItems({ canUseInstructorStudio: false, isAdmin: false });
+
+    expect(items.find((item) => item.id === 'my-tutoring')).toMatchObject({
+      labelKey: 'tutoring.learner.my.nav',
+      route: '/my-tutoring',
+      icon: 'phosphorChalkboard',
+    });
+    expect(items.map((item) => item.id).indexOf('my-tutoring')).toBeLessThan(items.map((item) => item.id).indexOf('learner-profiles'));
+    expect(Object.keys(ACCOUNT_MENU_ICONS)).toContain('phosphorChalkboard');
+  });
+
+  it('offers the learner profiles page (the nicknames lessons are booked for) between the wishlist and the devices', () => {
+    const items = buildAccountMenuItems({ canUseInstructorStudio: false, isAdmin: false });
+
+    expect(items.find((item) => item.id === 'learner-profiles')).toMatchObject({
+      labelKey: 'tutoring.learner.nav',
+      route: '/account/learner-profiles',
+    });
   });
 
   it('never points a menu entry at a route that does not exist yet (live sessions reuses My courses)', () => {
@@ -128,6 +151,8 @@ describe('AccountMenu', () => {
       'My live sessions',
       'Order History',
       'Wishlist',
+      'My tutoring',
+      'Learner profiles',
       'Signed-in devices',
       'Privacy & data (PDPA)',
       'Teach with us',

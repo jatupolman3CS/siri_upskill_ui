@@ -30,7 +30,7 @@ import {
   AdminRefundsApiService,
 } from './data/admin-refunds-api.service';
 import { PendingRefundItem } from './data/admin-refunds-api.models';
-import { PayoutBatchItem, REVENUE_SPLIT_STATUSES, RevenueSplitItem, RevenueSplitStatus } from '../../payout/data/payout-api.models';
+import { PayoutBatchItem, PayoutHeldBack, REVENUE_SPLIT_STATUSES, RevenueSplitItem, RevenueSplitStatus } from '../../payout/data/payout-api.models';
 import { PayoutApiService } from '../../payout/data/payout-api.service';
 import { PayoutPolicyStore } from '../../payout/data/payout-policy.store';
 import { PayoutPolicyText } from '../../payout/ui/payout-policy-text/payout-policy-text';
@@ -87,6 +87,7 @@ export class AdminPayoutsPage implements OnInit {
   protected readonly showCreateBatchModal = signal(false);
   protected readonly newPeriodKey = signal('');
   protected readonly isSubmittingBatch = signal(false);
+  protected readonly heldBackNotice = signal<PayoutHeldBack | null>(null);
 
   // Revenue Splits State
   protected readonly revenueSplits = signal<RevenueSplitItem[]>([]);
@@ -203,18 +204,49 @@ export class AdminPayoutsPage implements OnInit {
 
     this.isSubmittingBatch.set(true);
     this.payoutApi.createPayoutBatch({ periodKey }).subscribe({
-      next: () => {
+      next: (batch) => {
         this.isSubmittingBatch.set(false);
         this.closeCreateBatchModal();
+        if (batch?.heldBack && batch.heldBack.tutorCount > 0) {
+          this.heldBackNotice.set(batch.heldBack);
+        } else {
+          this.heldBackNotice.set(null);
+        }
         this.showMessage('success', this.translation.t('admin.payouts.messages.batchCreated', { periodKey }));
         this.loadBatches();
       },
       error: (err) => {
         this.isSubmittingBatch.set(false);
+        if (err?.status === 409) {
+          const ext = err?.error?.extensions ?? err?.error;
+          const heldBackCount = ext?.heldBackTutorCount ?? ext?.heldBackCount;
+          const heldBackAmount = ext?.heldBackAmount;
+          if (heldBackCount && heldBackCount > 0) {
+            this.showMessage(
+              'error',
+              this.translation.t('admin.payouts.errors.nothingToPayWithHeldBack', {
+                tutorCount: heldBackCount,
+                amount: typeof heldBackAmount === 'number' ? `฿${heldBackAmount.toLocaleString()}` : (heldBackAmount ?? ''),
+              }),
+            );
+            return;
+          }
+        }
         const errorDetail = err?.error?.detail || err?.error?.title || this.translation.t('admin.payouts.errors.createBatch');
         this.showMessage('error', errorDetail);
       },
     });
+  }
+
+  protected refundReasonLabel(reason: string | null | undefined): string {
+    if (!reason) return '-';
+    const adminKey = `admin.payouts.refunds.reasons.${reason}`;
+    const adminLabel = this.translation.t(adminKey);
+    if (adminLabel !== adminKey) return adminLabel;
+    const tutoringKey = `tutoring.enums.refundReason.${reason}`;
+    const tutoringLabel = this.translation.t(tutoringKey);
+    if (tutoringLabel !== tutoringKey) return tutoringLabel;
+    return reason;
   }
 
   // Execute Batch

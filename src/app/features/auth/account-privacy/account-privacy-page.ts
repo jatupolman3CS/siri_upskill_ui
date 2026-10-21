@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/http/error.interceptor';
@@ -12,9 +12,31 @@ import { Spinner } from '../../../shared/spinner/spinner';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { AuthApiService } from '../data/auth-api.service';
 
+export interface ErasureBlocker {
+  readonly code: string;
+  readonly label: string;
+  readonly link: string;
+  readonly actionLabel: string;
+}
+
+const BLOCKER_ROUTES: Readonly<Record<string, string>> = {
+  learner_bookings: '/my-tutoring',
+  learner_refunds: '/my-tutoring',
+  learner_packages: '/my-tutoring',
+  learner_disputes: '/my-tutoring',
+  tutor_sessions: '/instructor/tutoring/classes',
+  tutor_bookings: '/instructor/tutoring/classes',
+  tutor_disputes: '/instructor/tutoring/disputes',
+  tutor_packages: '/instructor/tutoring/packages',
+  tutor_payout_balance: '/instructor/tutoring/wallet',
+};
+
+const PRIVACY_PARTS = ['tutoring', 'learner', 'privacy'] as const;
+const privacyKey = (...subkeys: readonly string[]) => [...PRIVACY_PARTS, ...subkeys].join('.');
+
 @Component({
   selector: 'app-account-privacy-page',
-  imports: [FormsModule, Modal, Spinner, TranslatePipe],
+  imports: [FormsModule, Modal, RouterLink, Spinner, TranslatePipe],
   templateUrl: './account-privacy-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -32,6 +54,8 @@ export class AccountPrivacyPage {
   deletePassword = '';
   deleteConfirmation = '';
   readonly deleteError = signal<string | null>(null);
+  readonly erasureBlockers = signal<readonly ErasureBlocker[]>([]);
+  readonly erasureHeading = signal<string | null>(null);
 
   constructor() {
     setPageMeta({
@@ -68,12 +92,16 @@ export class AccountPrivacyPage {
     this.deletePassword = '';
     this.deleteConfirmation = '';
     this.deleteError.set(null);
+    this.erasureBlockers.set([]);
+    this.erasureHeading.set(null);
     this.showDeleteModal.set(true);
   }
 
   closeDeleteModal(): void {
     this.showDeleteModal.set(false);
     this.deleteError.set(null);
+    this.erasureBlockers.set([]);
+    this.erasureHeading.set(null);
   }
 
   confirmDelete(): void {
@@ -84,6 +112,8 @@ export class AccountPrivacyPage {
 
     this.isDeleting.set(true);
     this.deleteError.set(null);
+    this.erasureBlockers.set([]);
+    this.erasureHeading.set(null);
 
     this.authApi.anonymizeAccount({
       password: this.deletePassword,
@@ -98,7 +128,36 @@ export class AccountPrivacyPage {
       },
       error: (err: ApiError) => {
         this.isDeleting.set(false);
-        this.deleteError.set(err.message || this.translation.t('auth.accountPrivacy.deleteModal.error'));
+        const details = (typeof err.details === 'object' && err.details !== null)
+          ? (err.details as Record<string, unknown>)
+          : undefined;
+        const reason = (typeof details?.['reason'] === 'string' ? details['reason'] : undefined) ?? err.code;
+        const rawBlockers = (Array.isArray(details?.['blockers']) ? (details['blockers'] as string[]) : undefined)
+          ?? (Array.isArray((details?.['extensions'] as Record<string, unknown> | undefined)?.['blockers'])
+            ? ((details!['extensions'] as Record<string, unknown>)['blockers'] as string[])
+            : undefined)
+          ?? [];
+
+        if (err.status === 409 && reason === 'tutoring.erasure_blocked') {
+          const blockersList = rawBlockers.length > 0 ? rawBlockers : ['generic'];
+          const viewAction = this.translation.t(privacyKey('viewAction'));
+
+          this.erasureHeading.set(this.translation.t(privacyKey('erasureBlockedHeading')));
+          this.erasureBlockers.set(
+            blockersList.map((code) => {
+              const key = privacyKey('blockers', code);
+              const translated = this.translation.t(key);
+              return {
+                code,
+                label: translated !== key ? translated : this.translation.t(privacyKey('blockers', 'generic')),
+                link: BLOCKER_ROUTES[code] ?? '/my-tutoring',
+                actionLabel: viewAction,
+              };
+            }),
+          );
+        } else {
+          this.deleteError.set(err.message || this.translation.t('auth.accountPrivacy.deleteModal.error'));
+        }
       },
     });
   }

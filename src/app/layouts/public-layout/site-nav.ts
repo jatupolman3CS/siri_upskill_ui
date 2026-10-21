@@ -25,6 +25,7 @@ export const SITE_NAV_LINKS: readonly SiteNavLink[] = [
   { id: 'home', labelKey: 'nav.home', path: '/', exact: true },
   { id: 'courses', labelKey: 'nav.courses', path: '/courses', exact: false },
   { id: 'live', labelKey: 'live.catalog.nav', path: '/courses', queryParams: { format: 'Live' }, exact: false, activeOptions: MATCH_ON_QUERY },
+  { id: 'tutors', labelKey: 'nav.tutors', path: '/tutors', exact: false },
   { id: 'blog', labelKey: 'nav.blog', path: '/blog', exact: false },
   { id: 'learning-paths', labelKey: 'nav.learningPaths', path: '/learning-paths', exact: false },
 ];

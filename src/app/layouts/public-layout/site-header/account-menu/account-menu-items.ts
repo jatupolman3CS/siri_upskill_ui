@@ -1,11 +1,13 @@
 import {
   phosphorChalkboardTeacher,
+  phosphorChalkboard,
   phosphorDevices,
   phosphorGearSix,
   phosphorGraduationCap,
   phosphorHeart,
   phosphorReceipt,
   phosphorShieldCheck,
+  phosphorUsers,
   phosphorVideoCamera,
 } from '@ng-icons/phosphor-icons/regular';
 
@@ -36,6 +38,8 @@ export const ACCOUNT_MENU_ICONS = {
   phosphorShieldCheck,
   phosphorChalkboardTeacher,
   phosphorGearSix,
+  phosphorUsers,
+  phosphorChalkboard,
 };
 
 /**
@@ -50,6 +54,8 @@ export function buildAccountMenuItems(flags: AccountMenuFlags): readonly Account
     { id: 'my-live-sessions', labelKey: 'nav.myLiveSessions', route: '/my-courses', icon: 'phosphorVideoCamera' },
     { id: 'orders', labelKey: 'nav.orders', route: '/account/orders', icon: 'phosphorReceipt' },
     { id: 'wishlist', labelKey: 'nav.wishlist', route: '/wishlist', icon: 'phosphorHeart' },
+    { id: 'my-tutoring', labelKey: 'tutoring.learner.my.nav', route: '/my-tutoring', icon: 'phosphorChalkboard' },
+    { id: 'learner-profiles', labelKey: 'tutoring.learner.nav', route: '/account/learner-profiles', icon: 'phosphorUsers' },
     { id: 'devices', labelKey: 'nav.devices', route: '/account/devices', icon: 'phosphorDevices' },
     { id: 'privacy', labelKey: 'nav.privacyData', route: '/account/privacy', icon: 'phosphorShieldCheck' },
     flags.canUseInstructorStudio

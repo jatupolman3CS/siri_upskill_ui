@@ -5,6 +5,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   phosphorArrowLeft,
   phosphorBookOpen,
+  phosphorChalkboardTeacher,
   phosphorChartBar,
   phosphorCurrencyDollar,
   phosphorGoogleLogo,
@@ -34,6 +35,7 @@ import { INSTRUCTOR_ADMIN_SWITCH_LINK, INSTRUCTOR_NAV_LINKS, INSTRUCTOR_SWITCH_L
     provideIcons({
       phosphorHouse,
       phosphorBookOpen,
+      phosphorChalkboardTeacher,
       phosphorChartBar,
       phosphorCurrencyDollar,
       phosphorGoogleLogo,

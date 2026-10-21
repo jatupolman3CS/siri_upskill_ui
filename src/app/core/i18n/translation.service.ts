@@ -7,6 +7,17 @@ export type Locale = 'th' | 'en';
 
 type TranslationDictionary = typeof th;
 
+/**
+ * A feature's own text, per language, added at run time by {@link TranslationService.extend}. The base dictionaries above are
+ * bundled into the initial download of every visitor; a feature that only a small audience opens (the administrator screens) keeps
+ * its text in a lazy-loaded pair of files instead and registers it when its routes load. Keys are full paths, exactly as in the
+ * base dictionaries (`tutoring.admin.kyc.heading`), and the two languages must have the same keys.
+ */
+export interface DictionaryExtension {
+  readonly th: object;
+  readonly en: object;
+}
+
 const DICTIONARIES: Record<Locale, TranslationDictionary> = { th, en };
 const DEFAULT_LOCALE: Locale = 'th';
 
@@ -37,6 +48,19 @@ export class TranslationService {
   /** Active dictionary, recomputed whenever locale changes. */
   readonly dictionary = computed(() => DICTIONARIES[this._locale()]);
 
+  private readonly extensions = signal<readonly DictionaryExtension[]>([]);
+
+  /**
+   * Adds a lazy-loaded feature's dictionary (see {@link DictionaryExtension}). Idempotent for the same object, so a route
+   * resolver may call it on every visit. The base dictionary always wins for a key both define; a key found in neither still
+   * comes back as itself. Reading a text inside a template or a `computed()` re-evaluates once the extension arrives.
+   */
+  extend(extension: DictionaryExtension): void {
+    if (!this.extensions().includes(extension)) {
+      this.extensions.update((current) => [...current, extension]);
+    }
+  }
+
   // TODO: once there's a settled UX for it, initialize from a saved user
   // preference / Accept-Language and persist changes (cookie, not
   // localStorage, so SSR can read it too). Deliberately not done yet to
@@ -59,9 +83,24 @@ export class TranslationService {
    * assembling the string via string concatenation in the component.
    */
   t(key: string, params?: Readonly<Record<string, string | number>>): string {
-    const value = resolveKey(this.dictionary(), key);
-    const resolved = typeof value === 'string' ? value : key;
+    const resolved = this.lookup(key) ?? key;
     return params ? interpolate(resolved, params) : resolved;
+  }
+
+  /** The text of `key` in the active language: the base dictionary first, then the extensions in the order they arrived. */
+  private lookup(key: string): string | undefined {
+    const base = resolveKey(this.dictionary(), key);
+    if (typeof base === 'string') {
+      return base;
+    }
+    const locale = this._locale();
+    for (const extension of this.extensions()) {
+      const found = resolveKey(extension[locale], key);
+      if (typeof found === 'string') {
+        return found;
+      }
+    }
+    return undefined;
   }
 }
 

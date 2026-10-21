@@ -377,7 +377,7 @@
                       {{ refund.id.substring(0, 8) }}...
                     </td>
                     <td class="px-5 py-4 text-xs font-medium text-[var(--color-text)]">
-                      {{ refund.reason }}
+                      {{ refundReasonLabel(refund.reason) }}
                     </td>
                     <td class="tone-red px-5 py-4 font-bold text-xs text-[var(--tone-fg)]">
                       {{ refund.amount | currencyThb }}
@@ -578,7 +578,7 @@
       [closeOnOverlayClick]="false"
     >
       <p class="text-xs text-[var(--color-text-muted)]">
-        {{ 'admin.payments.refundModal.amountLabel' | translate }} <strong>{{ selectedRefundForAction()?.refund?.amount | currencyThb }}</strong> {{ 'admin.payments.refundModal.reasonInline' | translate: { reason: selectedRefundForAction()?.refund?.reason ?? '' } }}
+        {{ 'admin.payments.refundModal.amountLabel' | translate }} <strong>{{ selectedRefundForAction()?.refund?.amount | currencyThb }}</strong> {{ 'admin.payments.refundModal.reasonInline' | translate: { reason: refundReasonLabel(selectedRefundForAction()?.refund?.reason) } }}
       </p>
 
       <div>

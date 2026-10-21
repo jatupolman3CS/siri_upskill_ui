@@ -116,7 +116,7 @@ describe('AdminPayoutsPage', () => {
   /** `policy: 'pending'` leaves the policy request open so a test can assert the loading state. */
   function flushInitialRequests(
     policy: 'ok' | 'error' | 'pending' = 'ok',
-    overrides: { batches?: PagedResponse<PayoutBatchItem>; splits?: PagedResponse<RevenueSplitItem> } = {},
+    overrides: { batches?: PagedResponse<PayoutBatchItem>; splits?: PagedResponse<RevenueSplitItem>; refunds?: PagedPendingRefunds } = {},
   ): void {
     if (policy === 'ok') {
       flushPolicy();
@@ -141,7 +141,7 @@ describe('AdminPayoutsPage', () => {
 
     const refundsReq = httpMock.expectOne((r) => r.url === '/api/commerce/admin/refunds/pending');
     expect(refundsReq.request.method).toBe('GET');
-    refundsReq.flush(MOCK_REFUNDS);
+    refundsReq.flush(overrides.refunds ?? MOCK_REFUNDS);
   }
 
   it('renders payout batches list from API', async () => {
@@ -249,6 +249,153 @@ describe('AdminPayoutsPage', () => {
 
     const text = harness.routeNativeElement?.textContent ?? '';
     expect(text).toContain('สร้างรอบการจ่ายเงินงวด 2026-08 เรียบร้อยแล้ว');
+  });
+
+  it('shows held-back callout banner on batch creation when tutors were skipped', async () => {
+    await navigate();
+    flushInitialRequests();
+    await settle();
+
+    const createBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
+      (b) => b.textContent?.includes('เปิดรอบจ่ายเงินใหม่')
+    );
+    createBtn?.click();
+    await settle();
+
+    const form = harness.routeNativeElement?.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit'));
+    await settle();
+
+    const postReq = httpMock.expectOne('/api/payout/admin/batches');
+    postReq.flush({
+      id: 'batch-heldback',
+      periodKey: '2026-08',
+      totalAmount: 50000,
+      status: 'Draft',
+      createdAtUtc: new Date().toISOString(),
+      items: [],
+      heldBack: {
+        tutorCount: 2,
+        rowCount: 4,
+        amount: 3200,
+        instructorIds: ['secret-tutor-1', 'secret-tutor-2'],
+      },
+    });
+    await settle();
+
+    const reloadReq = httpMock.expectOne((r) => r.url === '/api/payout/admin/batches');
+    reloadReq.flush(MOCK_BATCHES);
+    await settle();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('มีรายการถูกข้ามเนื่องจากติวเตอร์ถูกระงับหรือไม่ผ่านเงื่อนไข');
+    expect(text).toContain('2');
+    expect(text).toContain('฿3,200');
+    // Ensure ZERO PII: instructor IDs must never appear in the DOM
+    expect(text).not.toContain('secret-tutor-1');
+    expect(text).not.toContain('secret-tutor-2');
+  });
+
+  it('handles 409 nothing_to_pay with heldBack extensions by displaying reason notice', async () => {
+    await navigate();
+    flushInitialRequests();
+    await settle();
+
+    const createBtn = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
+      (b) => b.textContent?.includes('เปิดรอบจ่ายเงินใหม่')
+    );
+    createBtn?.click();
+    await settle();
+
+    const form = harness.routeNativeElement?.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit'));
+    await settle();
+
+    const postReq = httpMock.expectOne('/api/payout/admin/batches');
+    postReq.flush(
+      {
+        title: 'Conflict',
+        status: 409,
+        detail: 'payout.nothing_to_pay',
+        extensions: {
+          heldBackTutorCount: 3,
+          heldBackAmount: 4500,
+        },
+      },
+      { status: 409, statusText: 'Conflict' }
+    );
+    await settle();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('ไม่มีรายการที่ต้องจ่ายในรอบนี้ (มีผู้สอน 3 ท่าน ยอดรวม ฿4,500 ถูกข้ามเนื่องจากถูกระงับหรือไม่ผ่านเงื่อนไข)');
+  });
+
+  it('renders heldBack badge in batches table for batch with heldBack tutors', async () => {
+    const batchesWithHeldBack: PagedResponse<PayoutBatchItem> = {
+      items: [
+        {
+          id: 'batch-with-hb',
+          periodKey: '2026-08',
+          totalAmount: 10000,
+          status: 'Draft',
+          createdAtUtc: '2026-08-20T00:00:00Z',
+          items: [],
+          heldBack: {
+            tutorCount: 2,
+            rowCount: 3,
+            amount: 1500,
+            instructorIds: ['tutor-x'],
+          },
+        },
+      ],
+      totalCount: 1,
+      page: 1,
+      pageSize: 50,
+    };
+
+    await navigate();
+    flushInitialRequests('ok', { batches: batchesWithHeldBack });
+    await settle();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('ข้าม 2 คน');
+    expect(text).not.toContain('tutor-x');
+  });
+
+  it('translates ConsentWithdrawn refund reason in pending refunds table and modal', async () => {
+    const refundsWithConsentWithdrawn: PagedPendingRefunds = {
+      items: [
+        {
+          id: 'ref-consent',
+          paymentId: 'pay-cw',
+          amount: 600,
+          reason: 'ConsentWithdrawn',
+          status: 'Requested',
+          requestedAtUtc: '2026-08-25T10:00:00Z',
+          decidedAtUtc: null,
+          decisionNote: null,
+          completedAtUtc: null,
+        },
+      ],
+      totalCount: 1,
+      page: 1,
+      pageSize: 50,
+      totalPages: 1,
+    };
+
+    await navigate();
+    flushInitialRequests('ok', { refunds: refundsWithConsentWithdrawn });
+    await settle();
+
+    // Switch to refunds tab
+    const refundsTab = Array.from(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
+      (b) => b.textContent?.includes('คำขอคืนเงิน')
+    );
+    refundsTab?.click();
+    await settle();
+
+    const text = harness.routeNativeElement?.textContent ?? '';
+    expect(text).toContain('ผู้ปกครองถอนความยินยอม (PDPA)');
   });
 
   describe('status badges and filter (real backend enum values)', () => {

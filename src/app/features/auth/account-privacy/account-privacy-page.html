@@ -88,6 +88,26 @@
       />
     </div>
 
+    @if (erasureHeading()) {
+      <div class="tone-red p-3 rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/40 text-[var(--tone-fg)] flex flex-col gap-2">
+        <p class="font-semibold text-xs">{{ erasureHeading() }}</p>
+        <ul class="flex flex-col gap-1.5 pl-1">
+          @for (blocker of erasureBlockers(); track blocker.code) {
+            <li class="flex items-center justify-between gap-2 text-xs">
+              <span>{{ blocker.label }}</span>
+              <a
+                [routerLink]="blocker.link"
+                (click)="closeDeleteModal()"
+                class="underline font-semibold shrink-0 hover:opacity-80"
+              >
+                {{ blocker.actionLabel }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
     @if (deleteError()) {
       <p class="text-[var(--hue-red-fg)] text-xs font-semibold">{{ deleteError() }}</p>
     }

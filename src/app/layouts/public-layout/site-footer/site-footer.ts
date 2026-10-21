@@ -29,6 +29,7 @@ export class SiteFooter {
 
   protected readonly links: readonly FooterLink[] = [
     { id: 'courses', labelKey: 'footer.courses', path: '/courses' },
+    { id: 'tutors', labelKey: 'footer.tutors', path: '/tutors' },
     { id: 'blog', labelKey: 'footer.blog', path: '/blog' },
     { id: 'faq', labelKey: 'footer.faq', path: '/faq' },
     { id: 'contact', labelKey: 'footer.contact', path: '/contact' },

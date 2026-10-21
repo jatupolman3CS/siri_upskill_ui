@@ -12,6 +12,7 @@ export const INSTRUCTOR_NAV_LINKS: readonly StudioNavLink[] = [
   { id: 'earnings', route: '/instructor/earnings', icon: 'phosphorCurrencyDollar', labelKey: 'instructor.nav.earnings' },
   { id: 'sessions', route: '/instructor/sessions', icon: 'phosphorVideoCamera', labelKey: 'live.instructor.nav.sessions' },
   { id: 'live-settings', route: '/instructor/live-settings', icon: 'phosphorGoogleLogo', labelKey: 'live.instructor.nav.liveSettings' },
+  { id: 'tutoring', route: '/instructor/tutoring', icon: 'phosphorChalkboardTeacher', labelKey: 'tutoring.tutor.nav.label' },
 ];
 
 /** The header's mode-switch / create links, repeated in the drawer because the header hides them on small screens. */

@@ -174,6 +174,11 @@ export interface ExternalLoginExportDto {
   readonly lastLoginAtUtc: string;
 }
 
+export interface PersonalDataExportSection {
+  readonly module: string;
+  readonly data: unknown;
+}
+
 export interface DataExportResponse {
   readonly exportedAtUtc: string;
   readonly profile: UserExportDto;
@@ -181,6 +186,8 @@ export interface DataExportResponse {
   readonly securityAudits: readonly SecurityAuditExportDto[];
   /** Sign-in providers (e.g. Google) linked to the account; absent from older API builds. */
   readonly externalLogins?: readonly ExternalLoginExportDto[];
+  /** Contributed module sections from IPersonalDataParticipant (P13-17); null or absent if no module has data. */
+  readonly modules?: readonly PersonalDataExportSection[] | null;
 }
 
 export interface AnonymizeAccountRequest {

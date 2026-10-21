@@ -264,4 +264,15 @@ export class AdminPaymentsPage implements OnInit {
       },
     });
   }
+
+  refundReasonLabel(reason: string | null | undefined): string {
+    if (!reason) return '-';
+    const adminKey = `admin.payouts.refunds.reasons.${reason}`;
+    const adminLabel = this.translation.t(adminKey);
+    if (adminLabel !== adminKey) return adminLabel;
+    const tutoringKey = `tutoring.enums.refundReason.${reason}`;
+    const tutoringLabel = this.translation.t(tutoringKey);
+    if (tutoringLabel !== tutoringKey) return tutoringLabel;
+    return reason;
+  }
 }

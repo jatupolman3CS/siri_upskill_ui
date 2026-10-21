@@ -21,6 +21,7 @@ describe('SiteFooter', () => {
     expect(hrefs()).toEqual([
       '/',
       '/courses',
+      '/tutors',
       '/blog',
       '/faq',
       '/contact',

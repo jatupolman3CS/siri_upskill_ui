@@ -3,7 +3,15 @@ import { Pipe, PipeTransform, inject } from '@angular/core';
 
 import { TranslationService } from './translation.service';
 
-export type BangkokDateFormat = 'dateTime' | 'date' | 'time' | 'shortDateTime' | 'weekdayDate' | 'month';
+export type BangkokDateFormat =
+  | 'dateTime'
+  | 'date'
+  | 'time'
+  | 'shortDateTime'
+  | 'weekdayDate'
+  | 'month'
+  | 'weekday'
+  | 'dayOfMonth';
 
 const FORMATS: Record<BangkokDateFormat, string> = {
   dateTime: 'd MMM yyyy HH:mm',
@@ -12,6 +20,9 @@ const FORMATS: Record<BangkokDateFormat, string> = {
   shortDateTime: 'd MMM HH:mm',
   weekdayDate: 'EEE d MMM',
   month: 'MMMM yyyy',
+  // Day-tab labels of the tutoring slot picker: abbreviated weekday and the bare day number.
+  weekday: 'EEE',
+  dayOfMonth: 'd',
 };
 
 /**

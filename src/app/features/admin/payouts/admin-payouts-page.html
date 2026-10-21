@@ -43,6 +43,29 @@
     </div>
   }
 
+  <!-- Held Back Notice (zero PII) -->
+  @if (heldBackNotice(); as heldBack) {
+    <div
+      class="tone-gold rounded-xl p-4 text-xs font-semibold flex items-start justify-between shadow-sm transition animate-pop-in border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] text-[var(--tone-fg)]"
+    >
+      <div class="flex items-start gap-2.5">
+        <ng-icon name="phosphorWarning" class="text-lg shrink-0 mt-0.5" />
+        <div class="space-y-0.5">
+          <p class="font-bold text-xs">{{ 'admin.payouts.heldBack.title' | translate }}</p>
+          <p class="font-normal">{{ 'admin.payouts.heldBack.description' | translate: { tutorCount: heldBack.tutorCount, rowCount: heldBack.rowCount, amount: ((heldBack.amount | currencyThb) ?? '') } }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        (click)="heldBackNotice.set(null)"
+        class="hit-44 text-[var(--tone-fg)] hover:opacity-75"
+        [attr.aria-label]="'shared.toast.dismiss' | translate"
+      >
+        <ng-icon name="phosphorXCircle" class="text-base" aria-hidden="true" />
+      </button>
+    </div>
+  }
+
   <!-- Panel: tabs + tab content -->
   <section class="animate-fade-in-up stagger-1 overflow-hidden rounded-2xl glass-card shadow-sm">
     <div class="flex gap-6 border-b border-[var(--color-border)] px-6 pt-2">
@@ -117,7 +140,18 @@
                 @for (batch of batches(); track batch.id) {
                   <tr class="hover:bg-[var(--color-surface-muted)]/30 transition">
                     <td class="py-3.5 px-4 font-mono font-bold text-[var(--color-text)]">
-                      {{ batch.periodKey }}
+                      <div class="flex items-center gap-2">
+                        <span>{{ batch.periodKey }}</span>
+                        @if (batch.heldBack && batch.heldBack.tutorCount > 0) {
+                          <span
+                            class="tone-gold inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]"
+                            [attr.title]="'admin.payouts.heldBack.tooltip' | translate: { tutorCount: batch.heldBack.tutorCount, amount: ((batch.heldBack.amount | currencyThb) ?? '') }"
+                          >
+                            <ng-icon name="phosphorWarning" class="text-xs" aria-hidden="true" />
+                            <span>{{ 'admin.payouts.heldBack.badge' | translate: { count: batch.heldBack.tutorCount } }}</span>
+                          </span>
+                        }
+                      </div>
                     </td>
                     <td class="tone-green py-3.5 px-4 text-right font-black text-[var(--tone-fg)]">
                       {{ batch.totalAmount | currencyThb }}
@@ -322,7 +356,7 @@
                       {{ refund.amount | currencyThb }}
                     </td>
                     <td class="py-3.5 px-4 max-w-xs truncate text-[var(--color-text)] font-medium">
-                      {{ refund.reason }}
+                      {{ refundReasonLabel(refund.reason) }}
                     </td>
                     <td class="py-3.5 px-4 text-center">
                       <span class="tone-red inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--tone-fg)]">
@@ -419,7 +453,7 @@
     >
       <div class="tone-green rounded-xl bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)] space-y-1">
         <p class="font-bold">{{ 'admin.payouts.approveModal.amount' | translate: { amount: ((refund.amount | currencyThb) ?? '') } }}</p>
-        <p class="text-[11px]">{{ 'admin.payouts.approveModal.reason' | translate: { reason: refund.reason } }}</p>
+        <p class="text-[11px]">{{ 'admin.payouts.approveModal.reason' | translate: { reason: refundReasonLabel(refund.reason) } }}</p>
       </div>
 
       <div>
@@ -471,7 +505,7 @@
     >
       <div class="tone-red rounded-xl bg-[var(--tone-bg)] p-4 text-xs text-[var(--tone-fg)] space-y-1">
         <p class="font-bold">{{ 'admin.payouts.rejectModal.amount' | translate: { amount: ((refund.amount | currencyThb) ?? '') } }}</p>
-        <p class="text-[11px]">{{ 'admin.payouts.rejectModal.reason' | translate: { reason: refund.reason } }}</p>
+        <p class="text-[11px]">{{ 'admin.payouts.rejectModal.reason' | translate: { reason: refundReasonLabel(refund.reason) } }}</p>
       </div>
 
       <div>

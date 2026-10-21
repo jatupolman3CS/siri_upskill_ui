@@ -19,6 +19,11 @@ export const ADMIN_NAV_LINKS: readonly StudioNavLink[] = [
   { id: 'payment-settings', route: '/admin/payment-settings', icon: 'phosphorCurrencyCircleDollar', labelKey: 'admin.nav.paymentSettings' },
   { id: 'contact', route: '/admin/contact-messages', icon: 'phosphorEnvelopeSimple', labelKey: 'admin.nav.contact' },
   { id: 'live-status', route: '/admin/live-status', icon: 'phosphorPulse', labelKey: 'admin.nav.liveStatus' },
+  // Tutor marketplace (P13-26/27): identity checks, tutors + subjects, disputes, analytics. Each sidebar entry covers its sub-pages too.
+  { id: 'tutoring-kyc', route: '/admin/tutoring/kyc', icon: 'phosphorShieldCheck', labelKey: 'admin.nav.tutoringKyc' },
+  { id: 'tutoring-tutors', route: '/admin/tutoring/tutors', icon: 'phosphorChalkboardTeacher', labelKey: 'admin.nav.tutoringTutors' },
+  { id: 'tutoring-disputes', route: '/admin/tutoring/disputes', icon: 'phosphorScales', labelKey: 'admin.nav.tutoringDisputes' },
+  { id: 'tutoring-analytics', route: '/admin/tutoring/analytics', icon: 'phosphorChartBar', labelKey: 'admin.nav.tutoringAnalytics' },
 ];
 
 /** The header's mode-switch links, repeated in the drawer because the header hides them on small screens. */

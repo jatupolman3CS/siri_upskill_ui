@@ -45,6 +45,22 @@ export const serverRoutes: ServerRoute[] = [
   // Live room join (P11): authGuard route whose only job is one server-gated POST that reveals the room link — it must
   // never run during SSR/prefetch (every call is a logged "link revealed" event), so it is client-rendered only.
   { path: 'live/:sessionId/join', renderMode: RenderMode.Client },
+  // Tutor marketplace (P13): /tutors and /tutors/:slug are public and fall through to the catch-all (server-rendered,
+  // indexable). Everything under /tutoring/** (checkout, session join) needs a signed-in learner and is client-only for
+  // the same reason as the routes above - the in-memory access token does not exist during SSR, so an authGuard route
+  // would only ever redirect to /login.
+  // `tutors/:slug/book` and `account/learner-profiles` (P13-22) are signed-in pages and client-rendered like the rest.
+  // `my-tutoring` (P13-23) is the learner's lesson list; `my-tutoring/**` covers one lesson and one problem report. `ng build`
+  // fails with "server route does not match any routes" for an exact path that no Angular route declares (a `**` pattern is
+  // exempt), so each exact entry lands in the same change that declares its route - and stays BEFORE the catch-all below.
+  { path: 'tutors/:slug/book', renderMode: RenderMode.Client },
+  // `tutors/:slug/packages/:packageId` (P13-22b) buys a package: signed-in, client-rendered, an exact entry in the same change as its route.
+  // `my-tutoring/packages**` and `tutoring/checkout/package/**` are covered by the `my-tutoring/**` and `tutoring/**` entries below.
+  { path: 'tutors/:slug/packages/:packageId', renderMode: RenderMode.Client },
+  { path: 'account/learner-profiles', renderMode: RenderMode.Client },
+  { path: 'my-tutoring', renderMode: RenderMode.Client },
+  { path: 'my-tutoring/**', renderMode: RenderMode.Client },
+  { path: 'tutoring/**', renderMode: RenderMode.Client },
   { path: 'learn/**', renderMode: RenderMode.Client },
   { path: 'instructor/**', renderMode: RenderMode.Client },
   { path: 'admin/**', renderMode: RenderMode.Client },

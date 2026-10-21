@@ -69,8 +69,13 @@ function flatten(node: unknown, prefix: string, out: Map<string, string>): Map<s
   return out;
 }
 
-const TH = flatten(th, '', new Map());
-const EN = flatten(en, '', new Map());
+// Lazy dictionaries (TranslationService.extend) count as part of the dictionaries: their keys are checked for parity like any other, and a
+// template that uses one of their keys is a valid use. They are found on disk - any `i18n/<name>.th.json` with its `.en.json` twin, today the
+// administrator pair and the four tutoring ones - so a feature's new lazy pair is covered without editing this spec.
+const LAZY_TH_FILES = ALL_FILES.filter((f) => f.endsWith('.th.json') && f.split(sep).includes('i18n'));
+const readFlat = (file: string, into: Map<string, string>): Map<string, string> => flatten(JSON.parse(readFileSync(file, 'utf8')) as unknown, '', into);
+const TH = LAZY_TH_FILES.reduce((merged, file) => readFlat(file, merged), flatten(th, '', new Map()));
+const EN = LAZY_TH_FILES.reduce((merged, file) => readFlat(file.replace(/\.th\.json$/, '.en.json'), merged), flatten(en, '', new Map()));
 const placeholders = (text: string): string[] => Array.from(text.matchAll(/\{\{\s*(\w+)\s*\}\}/g), (m) => m[1]).sort();
 
 describe('i18n guard: no hardcoded text in code', () => {

@@ -79,6 +79,13 @@ export interface PayoutBatchItemDetail {
   readonly transferRef?: string | null;
 }
 
+export interface PayoutHeldBack {
+  readonly tutorCount: number;
+  readonly rowCount: number;
+  readonly amount: number;
+  readonly instructorIds: readonly string[];
+}
+
 export interface PayoutBatchItem {
   readonly id: string;
   readonly periodKey: string;
@@ -88,10 +95,13 @@ export interface PayoutBatchItem {
   readonly executedAtUtc?: string | null;
   readonly executedByUserId?: string | null;
   readonly items?: readonly PayoutBatchItemDetail[];
+  readonly sourceType?: 'Course' | 'Tutoring';
+  readonly heldBack?: PayoutHeldBack | null;
 }
 
 export interface CreatePayoutBatchRequest {
   readonly periodKey: string;
+  readonly sourceType?: 'Course' | 'Tutoring';
 }
 
 export interface PayoutHistoryItem {

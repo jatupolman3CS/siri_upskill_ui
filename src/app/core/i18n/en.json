@@ -77,10 +77,14 @@
       "paymentSettings": "Stripe charge amount override",
       "contact": "Contact messages",
       "liveStatus": "Live system status",
+      "tutoringKyc": "Tutor identity checks",
+      "tutoringTutors": "Tutors & subjects",
+      "tutoringDisputes": "Tutoring disputes",
       "toInstructor": "Instructor mode",
       "toLearner": "Learner view",
       "toHome": "Go to home page",
-      "roleBadge": "Administrator (Admin)"
+      "roleBadge": "Administrator (Admin)",
+      "tutoringAnalytics": "Tutoring analytics"
     },
     "categories": {
       "pageTitle": "Manage course categories",
@@ -643,7 +647,24 @@
         },
         "statusPending": "Awaiting approval",
         "approve": "Approve refund",
-        "reject": "Reject"
+        "reject": "Reject",
+        "reasons": {
+          "ConsentWithdrawn": "Guardian consent withdrawn (PDPA)",
+          "requested_by_customer": "Requested by customer",
+          "duplicate": "Duplicate order",
+          "fraudulent": "Fraudulent / Unauthorized",
+          "LearnerCancelEarly": "Learner cancelled early (full refund)",
+          "LearnerCancelLate": "Learner cancelled late (partial refund)",
+          "TutorCancel": "Tutor cancelled class",
+          "TutorNoShow": "Tutor did not attend",
+          "NoClassHeld": "No class held",
+          "DisputeResolved": "Dispute resolved with refund",
+          "AdminManual": "Admin manual refund",
+          "LatePayment": "Late payment received after hold expired",
+          "DuplicatePayment": "Duplicate payment",
+          "AmountMismatch": "Payment amount mismatch",
+          "PackageExpired": "Package expired (tutor unavailable)"
+        }
       },
       "createModal": {
         "title": "Create new payout batch",
@@ -674,6 +695,12 @@
         "title": "Manage payout batches and refunds | SIRI UpSkill Admin",
         "description": "Manage payout batches, instructor revenue shares and the refund request queue."
       },
+      "heldBack": {
+        "title": "Some items skipped due to tutor suspended or unverified",
+        "description": "Skipped {{tutorCount}} tutor(s) ({{rowCount}} rows, total {{amount}}). Funds remain untouched for next payout cycle or admin refund.",
+        "badge": "Skipped {{count}}",
+        "tooltip": "{{tutorCount}} tutor(s) skipped (amount: {{amount}})"
+      },
       "errors": {
         "periodKeyRequired": "Please enter the period key (e.g. 2026-08).",
         "createBatch": "Failed to create the payout batch.",
@@ -681,7 +708,8 @@
         "exportBatch": "Failed to export the transfer file.",
         "approveRefund": "Failed to approve the refund.",
         "rejectReasonRequired": "Please enter a reason for rejecting the refund request.",
-        "rejectRefund": "Failed to reject the refund."
+        "rejectRefund": "Failed to reject the refund.",
+        "nothingToPayWithHeldBack": "Nothing to pay in this round ({{tutorCount}} tutor(s) with total {{amount}} were skipped because they are suspended or unverified)"
       },
       "messages": {
         "batchCreated": "Payout batch for period {{periodKey}} has been created.",
@@ -1237,7 +1265,8 @@
     "privacyData": "Privacy & data (PDPA)",
     "adminPanel": "Admin panel",
     "bottomNavLabel": "Bottom navigation",
-    "account": "Account"
+    "account": "Account",
+    "tutors": "Tutors"
   },
   "notifications": {
     "heading": "Notifications",
@@ -1261,9 +1290,11 @@
     "verifyCertificate": "Verify a certificate",
     "terms": "Terms of use",
     "privacy": "Privacy policy",
-    "refundPolicy": "Refund policy"
+    "refundPolicy": "Refund policy",
+    "tutors": "Tutors"
   },
   "home": {
+    "tagline": "Online Courses & Tutoring Platform",
     "pageDescription": "SIRI UpSkill is an online learning platform — learn new skills from real instructors.",
     "hero": {
       "badge": "Online courses and live classes from real instructors",
@@ -3233,6 +3264,19 @@
     "guarantee": {
       "secure": "Secure payment guaranteed via Stripe PromptPay",
       "receipt": "Get your e-Tax invoice and receipt by email right away"
+    }
+  },
+  "tutoring": {
+    "tutor": {
+      "nav": {
+        "label": "Tutoring"
+      }
+    },
+    "learner": {
+      "nav": "Learner profiles",
+      "my": {
+        "nav": "My tutoring"
+      }
     }
   }
 }
