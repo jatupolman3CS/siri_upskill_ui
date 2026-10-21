@@ -41,6 +41,7 @@ describe('LiveSessionCard', () => {
   }
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({ imports: [LiveSessionCard], providers: [provideRouter([])] });
     TestBed.inject(TranslationService).setLocale('en');
   });

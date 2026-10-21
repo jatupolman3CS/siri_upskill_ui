@@ -80,6 +80,7 @@ describe('OrderSuccessPage receipt download', () => {
   }
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [OrderSuccessPage],
       providers: [
@@ -94,8 +95,8 @@ describe('OrderSuccessPage receipt download', () => {
     TestBed.inject(TranslationService).setLocale('th');
     toastError = vi.spyOn(TestBed.inject(ToastService), 'error');
     anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
-    URL.createObjectURL = vi.fn(() => 'blob:receipt');
-    URL.revokeObjectURL = vi.fn();
+    Object.defineProperty(URL, 'createObjectURL', { value: vi.fn(() => 'blob:receipt'), writable: true, configurable: true });
+    Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), writable: true, configurable: true });
 
     fixture = TestBed.createComponent(OrderSuccessPage);
     httpMock = TestBed.inject(HttpTestingController);
@@ -109,10 +110,14 @@ describe('OrderSuccessPage receipt download', () => {
   });
 
   afterEach(() => {
-    httpMock.verify();
-    anchorClick.mockRestore();
-    URL.createObjectURL = originalCreateObjectUrl;
-    URL.revokeObjectURL = originalRevokeObjectUrl;
+    httpMock?.verify();
+    anchorClick?.mockRestore();
+    if (originalCreateObjectUrl) {
+      Object.defineProperty(URL, 'createObjectURL', { value: originalCreateObjectUrl, writable: true, configurable: true });
+    }
+    if (originalRevokeObjectUrl) {
+      Object.defineProperty(URL, 'revokeObjectURL', { value: originalRevokeObjectUrl, writable: true, configurable: true });
+    }
   });
 
   it('downloads the server-rendered receipt PDF of the order', () => {
