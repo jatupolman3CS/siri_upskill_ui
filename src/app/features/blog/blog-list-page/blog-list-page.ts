@@ -15,6 +15,7 @@ import { CmsApiService } from '../../cms/data/cms-api.service';
 import { ReadingMinutesPipe } from '../reading-time.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
+import { buildBreadcrumbListJsonLd } from '../../../core/seo/schema-org.util';
 import { SeoService } from '../../../core/seo/seo.service';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
@@ -60,9 +61,16 @@ export class BlogListPage implements OnInit {
 
   ngOnInit(): void {
     this.seoService.set({
-      title: this.translation.t('blog.metaTitle'),
+      title: `${this.translation.t('blog.metaTitle')} | ${this.translation.t('common.appName')}`,
       description: this.translation.t('blog.metaDescription'),
       path: '/blog',
+      openGraph: { type: 'website' },
+      jsonLd: [
+        buildBreadcrumbListJsonLd([
+          { name: this.translation.t('nav.home') || 'Home', url: this.seoService.absoluteUrl('/') },
+          { name: this.translation.t('blog.metaTitle') || 'Blog', url: this.seoService.absoluteUrl('/blog') },
+        ]),
+      ],
     });
   }
 

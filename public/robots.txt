@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+Allow: /courses
+Allow: /learning-paths
+Allow: /tutors
+Allow: /blog
+Allow: /faq
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+Allow: /refund-policy
+Disallow: /admin
+Disallow: /instructor
+Disallow: /learn
+Disallow: /api/
+Disallow: /account/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-courses
+Disallow: /my-tutoring
+Disallow: /tutoring/
+Disallow: /live/
+Disallow: /reset-password
+Disallow: /confirm-email
+
+Sitemap: https://siriupskill.siristudiophoto.com/sitemap.xml

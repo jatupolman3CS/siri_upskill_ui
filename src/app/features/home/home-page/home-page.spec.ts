@@ -151,15 +151,15 @@ describe('HomePage', () => {
     return settle();
   }
 
-  it('sets canonical/OG for "/" on construction, with no JSON-LD', async () => {
+  it('sets canonical/OG and JSON-LD structured data for "/" on construction', async () => {
     await navigate();
 
     const document = TestBed.inject(DOCUMENT);
     const origin = document.location.origin;
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(`${origin}/`);
     expect(document.querySelector('meta[property="og:url"]')?.getAttribute('content')).toBe(`${origin}/`);
-    expect(document.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe('SIRI UpSkill');
-    expect(document.querySelectorAll('script[type="application/ld+json"]').length).toBe(0);
+    expect(document.querySelector('meta[property="og:title"]')?.getAttribute('content')).toContain('SIRI UpSkill');
+    expect(document.querySelectorAll('script[type="application/ld+json"]').length).toBe(2);
 
     await flushBanners();
     await flushCategories();

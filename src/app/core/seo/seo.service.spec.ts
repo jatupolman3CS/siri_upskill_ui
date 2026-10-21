@@ -63,6 +63,30 @@ describe('SeoService', () => {
     expect(document.querySelector('meta[property="og:image"]')).toBeNull();
   });
 
+  it('sets og:site_name and og:locale', () => {
+    service.set({ title: 'A', description: 'A', path: '/courses/a' });
+    expect(document.querySelector('meta[property="og:site_name"]')?.getAttribute('content')).toBe('SIRI UpSkill');
+    expect(document.querySelector('meta[property="og:locale"]')?.getAttribute('content')).toBe('th_TH');
+  });
+
+  it('sets Twitter card metadata with summary_large_image when image is provided', () => {
+    service.set({
+      title: 'Course Title',
+      description: 'Course Desc',
+      path: '/courses/test',
+      openGraph: { image: 'https://cdn.test/image.png' },
+    });
+
+    expect(document.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toBe('summary_large_image');
+    expect(document.querySelector('meta[name="twitter:title"]')?.getAttribute('content')).toBe('Course Title');
+    expect(document.querySelector('meta[name="twitter:description"]')?.getAttribute('content')).toBe('Course Desc');
+    expect(document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')).toBe('https://cdn.test/image.png');
+
+    service.set({ title: 'No Image', description: 'No Image Desc', path: '/courses/no-image' });
+    expect(document.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toBe('summary');
+    expect(document.querySelector('meta[name="twitter:image"]')).toBeNull();
+  });
+
   it('sets the robots meta tag to noindex when requested, and removes it once no longer requested', () => {
     service.set({ title: 'Not found', description: 'Not found', path: '/courses/missing', robots: 'noindex' });
     expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, nofollow');

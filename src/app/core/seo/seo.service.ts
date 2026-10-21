@@ -87,6 +87,8 @@ export class SeoService {
     const url = this.absoluteUrl(config.path);
     this.upsertLink('link[rel="canonical"]', { rel: 'canonical', href: url });
 
+    this.metaService.updateTag({ property: 'og:site_name', content: 'SIRI UpSkill' });
+    this.metaService.updateTag({ property: 'og:locale', content: 'th_TH' });
     this.metaService.updateTag({ property: 'og:title', content: config.title });
     this.metaService.updateTag({ property: 'og:description', content: config.description });
     this.metaService.updateTag({ property: 'og:type', content: config.openGraph?.type ?? 'website' });
@@ -95,6 +97,15 @@ export class SeoService {
       this.metaService.updateTag({ property: 'og:image', content: config.openGraph.image });
     } else {
       this.metaService.removeTag('property="og:image"');
+    }
+
+    this.metaService.updateTag({ name: 'twitter:card', content: config.openGraph?.image ? 'summary_large_image' : 'summary' });
+    this.metaService.updateTag({ name: 'twitter:title', content: config.title });
+    this.metaService.updateTag({ name: 'twitter:description', content: config.description });
+    if (config.openGraph?.image) {
+      this.metaService.updateTag({ name: 'twitter:image', content: config.openGraph.image });
+    } else {
+      this.metaService.removeTag('name="twitter:image"');
     }
 
     for (const hreflang of HREFLANG_VALUES) {

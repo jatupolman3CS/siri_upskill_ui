@@ -5,7 +5,8 @@ import { phosphorBriefcase, phosphorEnvelopeSimple, phosphorShieldCheck } from '
 
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
-import { setPageMeta } from '../../../core/seo/page-meta';
+import { buildBreadcrumbListJsonLd } from '../../../core/seo/schema-org.util';
+import { SeoService } from '../../../core/seo/seo.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ContactApiService } from '../data/contact-api.service';
@@ -22,6 +23,7 @@ export class ContactPage {
   private readonly toast = inject(ToastService);
   private readonly contactApi = inject(ContactApiService);
   private readonly translation = inject(TranslationService);
+  private readonly seoService = inject(SeoService);
 
   protected readonly emails = LEGAL_CONTACT_EMAILS;
 
@@ -36,9 +38,17 @@ export class ContactPage {
   botField = ''; // Honeypot trap
 
   constructor() {
-    setPageMeta({
-      title: `${this.translation.t('contact.pageTitle')} · ${this.translation.t('common.appName')}`,
+    this.seoService.set({
+      title: `${this.translation.t('contact.pageTitle')} | ${this.translation.t('common.appName')}`,
       description: this.translation.t('contact.pageDescription'),
+      path: '/contact',
+      openGraph: { type: 'website' },
+      jsonLd: [
+        buildBreadcrumbListJsonLd([
+          { name: this.translation.t('nav.home') || 'Home', url: this.seoService.absoluteUrl('/') },
+          { name: this.translation.t('contact.pageTitle') || 'Contact Us', url: this.seoService.absoluteUrl('/contact') },
+        ]),
+      ],
     });
   }
 

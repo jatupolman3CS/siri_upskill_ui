@@ -29,6 +29,7 @@ import { EnrollmentItemResponse } from '../../learning/data/learning-api.models'
 import { LearningApiService } from '../../learning/data/learning-api.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
+import { buildOrganizationJsonLd, buildWebSiteJsonLd } from '../../../core/seo/schema-org.util';
 import { SeoService } from '../../../core/seo/seo.service';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
 import { FlashSaleBanner } from '../../../shared/flash-sale-banner/flash-sale-banner';
@@ -138,10 +139,31 @@ export class HomePage {
   });
 
   constructor() {
+    const appName = this.translation.t('common.appName');
+    const tagline = this.translation.t('home.tagline');
+    const siteUrl = this.seoService.absoluteUrl('/');
+    const searchUrl = this.seoService.absoluteUrl('/courses?q={search_term_string}');
+
     this.seoService.set({
-      title: this.translation.t('common.appName'),
+      title: `${appName} - ${tagline}`,
       description: this.translation.t('home.pageDescription'),
       path: '/',
+      openGraph: {
+        type: 'website',
+      },
+      jsonLd: [
+        buildOrganizationJsonLd({
+          name: appName,
+          url: siteUrl,
+          logo: this.seoService.absoluteUrl('/favicon.ico'),
+          description: this.translation.t('home.pageDescription'),
+        }),
+        buildWebSiteJsonLd({
+          name: appName,
+          url: siteUrl,
+          searchTargetUrl: searchUrl,
+        }),
+      ],
     });
   }
 

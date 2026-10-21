@@ -16,6 +16,7 @@ import { ReadingMinutesPipe } from '../reading-time.pipe';
 import { ApiError } from '../../../core/http/error.interceptor';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
+import { buildArticleJsonLd, buildBreadcrumbListJsonLd } from '../../../core/seo/schema-org.util';
 import { SeoService } from '../../../core/seo/seo.service';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Skeleton } from '../../../shared/skeleton/skeleton';
@@ -109,11 +110,31 @@ export class BlogDetailPage {
         return;
       }
 
+      const description = post.seoDescription ?? post.excerpt ?? '';
+      const articleUrl = this.seoService.absoluteUrl(path);
+
       this.seoService.set({
         title: `${post.seoTitle ?? post.title} | ${appName} Blog`,
-        description: post.seoDescription ?? post.excerpt ?? '',
+        description,
         path,
         openGraph: { image: post.coverImageUrl, type: 'article' },
+        jsonLd: [
+          buildArticleJsonLd({
+            headline: post.title,
+            description,
+            url: articleUrl,
+            image: post.coverImageUrl,
+            datePublished: post.publishedAtUtc ?? post.createdAtUtc,
+            dateModified: post.createdAtUtc,
+            publisherName: appName,
+            publisherUrl: this.seoService.absoluteUrl('/'),
+          }),
+          buildBreadcrumbListJsonLd([
+            { name: this.translation.t('nav.home') || 'Home', url: this.seoService.absoluteUrl('/') },
+            { name: this.translation.t('blog.metaTitle') || 'Blog', url: this.seoService.absoluteUrl('/blog') },
+            { name: post.title, url: articleUrl },
+          ]),
+        ],
       });
     });
   }

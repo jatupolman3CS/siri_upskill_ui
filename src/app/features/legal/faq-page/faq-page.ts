@@ -5,7 +5,8 @@ import { phosphorCaretDown } from '@ng-icons/phosphor-icons/regular';
 
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
-import { setPageMeta } from '../../../core/seo/page-meta';
+import { buildBreadcrumbListJsonLd, buildFaqPageJsonLd } from '../../../core/seo/schema-org.util';
+import { SeoService } from '../../../core/seo/seo.service';
 
 type FaqCategory = 'general' | 'learning' | 'payment' | 'technical' | 'live';
 type FaqFilter = 'all' | Exclude<FaqCategory, 'general'>;
@@ -36,6 +37,7 @@ interface FaqFilterTab {
 })
 export class FaqPage {
   private readonly translation = inject(TranslationService);
+  private readonly seoService = inject(SeoService);
 
   readonly activeCategory = signal<FaqFilter>('all');
 
@@ -68,9 +70,24 @@ export class FaqPage {
   });
 
   constructor() {
-    setPageMeta({
-      title: `${this.translation.t('faq.pageTitle')} · ${this.translation.t('common.appName')}`,
+    const appName = this.translation.t('common.appName');
+    const faqJsonLdItems = this.faqs.map((faq) => ({
+      question: this.translation.t(`faq.items.${faq.id}.q`),
+      answer: this.translation.t(`faq.items.${faq.id}.a`),
+    }));
+
+    this.seoService.set({
+      title: `${this.translation.t('faq.pageTitle')} | ${appName}`,
       description: this.translation.t('faq.pageDescription'),
+      path: '/faq',
+      openGraph: { type: 'website' },
+      jsonLd: [
+        buildFaqPageJsonLd(faqJsonLdItems),
+        buildBreadcrumbListJsonLd([
+          { name: this.translation.t('nav.home') || 'Home', url: this.seoService.absoluteUrl('/') },
+          { name: this.translation.t('faq.pageTitle') || 'FAQ', url: this.seoService.absoluteUrl('/faq') },
+        ]),
+      ],
     });
   }
 

@@ -15,7 +15,8 @@ import { resolveCategoryIconName } from '../category-icon';
 import { CurrencyThbPipe } from '../../../core/i18n/currency-thb.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
-import { setPageMeta } from '../../../core/seo/page-meta';
+import { BreadcrumbListItemInput, buildBreadcrumbListJsonLd, buildItemListJsonLd } from '../../../core/seo/schema-org.util';
+import { SeoService } from '../../../core/seo/seo.service';
 import { Button } from '../../../shared/button/button';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { InputField } from '../../../shared/input/input';
@@ -100,6 +101,7 @@ export class CoursesPage {
   private readonly router = inject(Router);
   private readonly courseApi = inject(CourseApiService);
   private readonly categoryApi = inject(CategoryApiService);
+  private readonly seoService = inject(SeoService);
   protected readonly translation = inject(TranslationService);
 
   protected readonly resolveIconName = resolveCategoryIconName;
@@ -220,9 +222,52 @@ export class CoursesPage {
   protected readonly maxPriceControl = new FormControl('', { nonNullable: true });
 
   constructor() {
-    setPageMeta({
-      title: this.translation.t('catalog.pageTitle'),
-      description: this.translation.t('catalog.pageDescription'),
+    effect(() => {
+      const appName = this.translation.t('common.appName');
+      const category = this.activeCategory();
+      const title = category
+        ? `${this.categoryName(category)} | ${this.translation.t('catalog.pageTitle')} - ${appName}`
+        : `${this.translation.t('catalog.pageTitle')} | ${appName}`;
+      const description = this.translation.t('catalog.pageDescription');
+
+      const breadcrumbs: BreadcrumbListItemInput[] = [
+        { name: this.translation.t('nav.home') || 'Home', url: this.seoService.absoluteUrl('/') },
+        { name: this.translation.t('catalog.pageTitle') || 'Courses', url: this.seoService.absoluteUrl('/courses') },
+      ];
+      if (category) {
+        breadcrumbs.push({
+          name: this.categoryName(category),
+          url: this.seoService.absoluteUrl(`/courses?category=${category.slug}`),
+        });
+      }
+
+      const jsonLd: Record<string, unknown>[] = [buildBreadcrumbListJsonLd(breadcrumbs)];
+
+      if (this.courseSearchResource.hasValue()) {
+        const items = this.courseSearchResource.value().results.items;
+        if (items.length > 0) {
+          jsonLd.push(
+            buildItemListJsonLd(
+              title,
+              items.map((item, idx) => ({
+                name: item.title,
+                url: this.seoService.absoluteUrl(`/courses/${item.slug}`),
+                position: idx + 1,
+                description: item.subtitle,
+                image: item.thumbnailUrl,
+              })),
+            ),
+          );
+        }
+      }
+
+      this.seoService.set({
+        title,
+        description,
+        path: '/courses',
+        openGraph: { type: 'website' },
+        jsonLd,
+      });
     });
 
     // URL -> controls only, never the other way via valueChanges (see this class's own doc comment
