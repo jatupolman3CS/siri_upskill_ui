@@ -1,0 +1,79 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.kyc.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">{{ 'tutoring.kyc.subheading' | translate }}</p>
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.kyc.loading' | translate" class="flex flex-col gap-6">
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+    </div>
+  } @else if (disabled()) {
+    <app-empty-state [heading]="'tutoring.kyc.disabledHeading' | translate" [description]="'tutoring.kyc.disabledDescription' | translate" />
+  } @else if (noProfile()) {
+    <app-empty-state [heading]="'tutoring.kyc.noProfileHeading' | translate" [description]="'tutoring.kyc.noProfileDescription' | translate">
+      <a
+        emptyStateAction
+        routerLink="/instructor/tutoring/profile"
+        class="inline-flex min-h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-[var(--color-primary-foreground)]
+          transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.kyc.noProfileCta' | translate }}
+      </a>
+    </app-empty-state>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.kyc.loadErrorHeading' | translate" [description]="errorText() ?? ''">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (status(); as s) {
+    @if (currentCase(); as current) {
+      @if (current.status === 'NeedsInfo' && current.decisionNote) {
+        <section class="tone-gold glass-card rounded-[var(--radius-lg)] border-[var(--tone-fg)]/45 p-5" aria-labelledby="kyc-note-heading">
+          <h2 id="kyc-note-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.kyc.needsInfoHeading' | translate }}</h2>
+          <p class="mt-1 whitespace-pre-line break-words text-sm text-[var(--color-text)]">{{ current.decisionNote }}</p>
+        </section>
+      }
+      @if (current.status === 'Submitted' || current.status === 'InReview') {
+        <p role="status" class="tone-blue glass-card rounded-[var(--radius-lg)] border-[var(--tone-fg)]/40 p-5 text-[var(--color-text)]">
+          {{ 'tutoring.kyc.inReview' | translate }}
+        </p>
+      }
+      <app-kyc-documents-step [kycCase]="current" [status]="s" (changed)="reload()" />
+    } @else if (s.canStartNewCase) {
+      @if (latestPastNote(); as note) {
+        <section class="tone-red glass-card rounded-[var(--radius-lg)] border-[var(--tone-fg)]/45 p-5" aria-labelledby="kyc-rejected-heading">
+          <h2 id="kyc-rejected-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.kyc.previousHeading' | translate }}</h2>
+          <p class="mt-1 whitespace-pre-line break-words text-sm text-[var(--color-text)]">{{ note }}</p>
+        </section>
+      }
+      <app-kyc-consent-step [consentVersion]="s.consentVersion" (started)="reload()" />
+    } @else {
+      <app-empty-state [heading]="'tutoring.kyc.cannotStartHeading' | translate" [description]="'tutoring.kyc.cannotStartDescription' | translate" />
+    }
+
+    @if (history().length > 0) {
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="kyc-history-heading">
+        <h2 id="kyc-history-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.kyc.historyHeading' | translate }}</h2>
+        <ul class="flex flex-col gap-2">
+          @for (item of history(); track item.caseId) {
+            <li class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm">
+              <p class="font-semibold text-[var(--color-text)]">
+                {{ 'tutoring.kyc.historyItem' | translate: { attempt: item.attemptNo } }} · {{ caseStatusKey(item.status) | translate }}
+              </p>
+              @if (item.decidedAtUtc) {
+                <p class="text-[var(--color-text-muted)]">{{ item.decidedAtUtc | bangkokDate: 'dateTime' }}</p>
+              }
+              @if (item.decisionNote) {
+                <p class="mt-1 whitespace-pre-line break-words text-[var(--color-text)]">{{ item.decisionNote }}</p>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</div>

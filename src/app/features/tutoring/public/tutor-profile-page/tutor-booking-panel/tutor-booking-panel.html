@@ -1,0 +1,149 @@
+<section
+  class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-md)]"
+  [attr.aria-label]="'tutoring.public.profile.booking.heading' | translate"
+>
+  <h2 class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.booking.heading' | translate }}</h2>
+
+  @if (offering(); as selectedOffering) {
+    <app-select
+      [formControl]="offeringControl"
+      [label]="'tutoring.public.profile.booking.offering' | translate"
+      [options]="offeringOptions()"
+    />
+
+    @if (canGroup()) {
+      <div role="group" aria-labelledby="tutor-booking-format-label" class="flex flex-col gap-1.5">
+        <span id="tutor-booking-format-label" class="text-sm font-medium text-[var(--color-text)]">
+          {{ 'tutoring.public.profile.booking.format' | translate }}
+        </span>
+        <div class="grid grid-cols-2 gap-2">
+          @for (option of formats; track option) {
+            <button
+              type="button"
+              (click)="chooseFormat(option)"
+              [attr.aria-pressed]="isFormatActive(option)"
+              class="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] border px-3 text-sm font-medium transition-colors
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              [class]="
+                isFormatActive(option)
+                  ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                  : 'glass-card text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'
+              "
+            >
+              {{ formatKey(option) | translate }}
+            </button>
+          }
+        </div>
+        @if (format() === 'Group' && selectedOffering.groupMaxSeats) {
+          <p class="text-sm text-[var(--color-text-muted)]">
+            {{ 'tutoring.public.profile.booking.groupSeatsInfo' | translate: { count: selectedOffering.groupMaxSeats } }}
+          </p>
+        }
+      </div>
+    }
+
+    @if (trialOffer(); as trialInfo) {
+      <app-checkbox
+        [formControl]="trialControl"
+        [label]="
+          'tutoring.public.profile.booking.trialLabel'
+            | translate
+              : {
+                  minutes: trialInfo.minutes,
+                  price: trialInfo.isFree ? ('tutoring.public.profile.booking.free' | translate) : ((trialInfo.price | currencyThb) ?? ''),
+                }
+        "
+      />
+    }
+
+    @if (!trial()) {
+      <app-select
+        [formControl]="durationControl"
+        [label]="'tutoring.public.profile.booking.duration' | translate"
+        [options]="durationOptions()"
+      />
+    }
+
+    @if (today() === '') {
+      <!-- Server render / before hydration: reserve the picker's footprint so nothing jumps when slots arrive. -->
+      <div class="flex flex-col gap-3" aria-busy="true" [attr.aria-label]="'tutoring.slots.loading' | translate">
+        <app-skeleton variant="block" height="2.75rem" />
+        <app-skeleton variant="block" height="4rem" />
+        <app-skeleton variant="block" height="8rem" />
+      </div>
+    } @else {
+      <app-slot-picker
+        [slots]="slots()"
+        [windowStartDate]="windowStart()"
+        [(selected)]="selectedSlot"
+        [loading]="pickerLoading()"
+        [failed]="pickerFailed()"
+        [errorMessage]="pickerFailed() ? (pickerErrorKey() | translate) : null"
+        [canGoPrevious]="canGoPrevious()"
+        [canGoNext]="canGoNext()"
+        (previousWeek)="previousWeek()"
+        (nextWeek)="nextWeek()"
+        (retry)="retry()"
+      />
+    }
+
+    <dl class="flex flex-col gap-2 border-t border-[var(--color-border)] pt-4 text-sm" aria-live="polite">
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.booking.summaryLesson' | translate }}</dt>
+        <dd class="text-right font-medium text-[var(--color-text)]">
+          {{ 'tutoring.public.profile.booking.minutes' | translate: { minutes: effectiveDuration() } }}
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.booking.summaryPrice' | translate }}</dt>
+        <dd class="text-right">
+          @if (quote(); as currentQuote) {
+            @if (currentQuote.isFree) {
+              <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ 'tutoring.public.profile.booking.free' | translate }}</span>
+            } @else {
+              <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ currentQuote.amount | currencyThb }}</span>
+              @if (format() === 'Group') {
+                <span class="text-[var(--color-text-muted)]"> {{ 'tutoring.public.profile.booking.perSeat' | translate }}</span>
+              }
+            }
+          } @else {
+            <span class="text-[var(--color-text-muted)]">-</span>
+          }
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.booking.summaryTime' | translate }}</dt>
+        <dd class="text-right font-medium text-[var(--color-text)]">
+          @if (selectedSlot(); as chosen) {
+            {{ chosen.startsAtUtc | bangkokDate: 'weekdayDate' }}, {{ chosen.startsAtUtc | bangkokDate: 'time' }}-{{ chosen.endsAtUtc | bangkokDate: 'time' }}
+          } @else {
+            <span class="font-normal text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.booking.noTimeSelected' | translate }}</span>
+          }
+        </dd>
+      </div>
+    </dl>
+
+    @if (bookingRouteReady && bookingQueryParams(); as bookingParams) {
+      <a
+        [routerLink]="['/tutors', tutor().slug, 'book']"
+        [queryParams]="bookingParams"
+        class="inline-flex h-12 w-full select-none items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4
+          text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 ease-out
+          hover:bg-[var(--color-primary-pressed)] hover:shadow-[var(--shadow-glow)] focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >
+        {{ 'tutoring.public.profile.booking.continue' | translate }}
+      </a>
+    } @else {
+      <app-button [fullWidth]="true" [disabled]="true">
+        {{ (bookingRouteReady ? 'tutoring.public.profile.booking.selectTime' : 'tutoring.public.profile.booking.comingSoon') | translate }}
+      </app-button>
+      @if (!bookingRouteReady) {
+        <p class="flex items-start gap-2 text-sm text-[var(--color-text-muted)]">
+          <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--hue-blue-fg)]" />
+          <span>{{ 'tutoring.public.profile.booking.comingSoonNote' | translate }}</span>
+        </p>
+      }
+    }
+  }
+</section>

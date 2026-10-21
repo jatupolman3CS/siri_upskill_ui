@@ -1,0 +1,159 @@
+<app-analytics-report-frame
+  headingKey="tutoring.admin.analytics.revenue.heading"
+  descriptionKey="tutoring.admin.analytics.revenue.description"
+  [status]="state.status()"
+  [errorText]="state.errorText()"
+  [generatedAtUtc]="state.report()?.generatedAtUtc ?? null"
+  (refresh)="state.reload()"
+>
+  @if (state.report(); as report) {
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'tutoring.admin.analytics.period' | translate: { from: (instantOf(report.effectiveFrom) | bangkokDate: 'date'), to: (instantOf(report.effectiveTo) | bangkokDate: 'date') } }}
+    </p>
+
+    @if (report.ledgerMismatch) {
+      <p role="alert" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-base text-[var(--color-text)]">
+        {{ 'tutoring.admin.analytics.revenue.ledgerMismatch' | translate }}
+      </p>
+    }
+
+    @if (notes().length > 0) {
+      <ul class="flex flex-col gap-1 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text-muted)]">
+        @for (code of notes(); track code) {
+          <li>{{ 'tutoring.admin.analytics.revenue.notes.' + code | translate }}</li>
+        }
+      </ul>
+    }
+
+    <!-- Cash that moved -->
+    <section class="flex flex-col gap-4" aria-labelledby="revenue-cash-heading">
+      <div>
+        <h3 id="revenue-cash-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.revenue.cash.heading' | translate }}</h3>
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.cash.description' | translate }}</p>
+      </div>
+      <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.cash.collected' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-text)]">{{ report.totals.grossCollectedAmount | currencyThb }}</dd>
+          <dd class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.cash.paymentCount' | translate: { count: ((report.totals.paymentCount | number: '1.0-0') ?? '') } }}</dd>
+        </div>
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.cash.refunded' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-text)]">{{ report.totals.refundedAmount | currencyThb }}</dd>
+          <dd class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.cash.refundCount' | translate: { count: ((report.totals.refundCount | number: '1.0-0') ?? '') } }}</dd>
+        </div>
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 lg:col-span-2">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.cash.net' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-text)]">{{ report.totals.netCollectedAmount | currencyThb }}</dd>
+        </div>
+      </dl>
+
+      @if (report.buckets.length > 0) {
+        <div class="max-h-96 overflow-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
+          <table class="w-full min-w-[44rem] text-start text-sm text-[var(--color-text)]">
+            <caption class="sr-only">{{ 'tutoring.admin.analytics.revenue.cash.caption' | translate }}</caption>
+            <thead class="sticky top-0 bg-[var(--color-surface-muted)] text-xs font-semibold text-[var(--color-text-muted)]">
+              <tr>
+                <th scope="col" class="px-3 py-2 text-start">{{ 'tutoring.admin.analytics.revenue.col.period' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.payments' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.collected' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.refunds' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.refunded' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.net' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-start"><span class="sr-only">{{ 'tutoring.admin.analytics.revenue.col.netBar' | translate }}</span></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-border)]">
+              @for (bucket of report.buckets; track bucket.bucketStart) {
+                <tr>
+                  <th scope="row" class="whitespace-nowrap px-3 py-2 text-start font-medium">
+                    @if (isWeekly()) {
+                      {{ 'tutoring.admin.analytics.revenue.weekOf' | translate: { date: (instantOf(bucket.bucketStart) | bangkokDate: 'date') } }}
+                    } @else {
+                      {{ instantOf(bucket.bucketStart) | bangkokDate: dateFormat() }}
+                    }
+                  </th>
+                  <td class="px-3 py-2 text-end">{{ bucket.paymentCount | number: '1.0-0' }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end">{{ bucket.grossCollectedAmount | currencyThb }}</td>
+                  <td class="px-3 py-2 text-end">{{ bucket.refundCount | number: '1.0-0' }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end">{{ bucket.refundedAmount | currencyThb }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end font-semibold">{{ bucket.netCollectedAmount | currencyThb }}</td>
+                  <td class="w-32 px-3 py-2"><app-analytics-bar [percent]="percentOf(bucket.netCollectedAmount, cashScale())" [tone]="bucket.netCollectedAmount < 0 ? 'red' : 'primary'" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <!-- Revenue the ledger recognised -->
+    <section class="flex flex-col gap-4" aria-labelledby="revenue-ledger-heading">
+      <div>
+        <h3 id="revenue-ledger-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.revenue.ledger.heading' | translate }}</h3>
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.ledger.description' | translate }}</p>
+      </div>
+      <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.ledger.gross' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-text)]">{{ report.totals.recognisedGrossAmount | currencyThb }}</dd>
+          <dd class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.ledger.entryCount' | translate: { count: ((report.totals.ledgerEntryCount | number: '1.0-0') ?? '') } }}</dd>
+        </div>
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.ledger.fee' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-text)]">{{ report.totals.paymentFeeAmount | currencyThb }}</dd>
+        </div>
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.ledger.platform' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-primary-text)]">{{ report.totals.platformCommissionAmount | currencyThb }}</dd>
+        </div>
+        <div class="flex flex-col rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <dt class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.ledger.tutor' | translate }}</dt>
+          <dd class="text-xl font-bold text-[var(--color-text)]">{{ report.totals.tutorPayableAmount | currencyThb }}</dd>
+        </div>
+      </dl>
+
+      @if (report.buckets.length > 0) {
+        <div class="max-h-96 overflow-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
+          <table class="w-full min-w-[44rem] text-start text-sm text-[var(--color-text)]">
+            <caption class="sr-only">{{ 'tutoring.admin.analytics.revenue.ledger.caption' | translate }}</caption>
+            <thead class="sticky top-0 bg-[var(--color-surface-muted)] text-xs font-semibold text-[var(--color-text-muted)]">
+              <tr>
+                <th scope="col" class="px-3 py-2 text-start">{{ 'tutoring.admin.analytics.revenue.col.period' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.entries' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.gross' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.fee' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.platform' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.revenue.col.tutor' | translate }}</th>
+                <th scope="col" class="px-3 py-2 text-start"><span class="sr-only">{{ 'tutoring.admin.analytics.revenue.col.platformBar' | translate }}</span></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--color-border)]">
+              @for (bucket of report.buckets; track bucket.bucketStart) {
+                <tr>
+                  <th scope="row" class="whitespace-nowrap px-3 py-2 text-start font-medium">
+                    @if (isWeekly()) {
+                      {{ 'tutoring.admin.analytics.revenue.weekOf' | translate: { date: (instantOf(bucket.bucketStart) | bangkokDate: 'date') } }}
+                    } @else {
+                      {{ instantOf(bucket.bucketStart) | bangkokDate: dateFormat() }}
+                    }
+                  </th>
+                  <td class="px-3 py-2 text-end">{{ bucket.ledgerEntryCount | number: '1.0-0' }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end">{{ bucket.recognisedGrossAmount | currencyThb }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end">{{ bucket.paymentFeeAmount | currencyThb }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end font-semibold">{{ bucket.platformCommissionAmount | currencyThb }}</td>
+                  <td class="whitespace-nowrap px-3 py-2 text-end">{{ bucket.tutorPayableAmount | currencyThb }}</td>
+                  <td class="w-32 px-3 py-2"><app-analytics-bar [percent]="percentOf(bucket.platformCommissionAmount, ledgerScale())" tone="green" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    @if (report.buckets.length === 0) {
+      <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.revenue.empty' | translate }}</p>
+    }
+  }
+</app-analytics-report-frame>

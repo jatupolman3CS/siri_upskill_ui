@@ -1,0 +1,920 @@
+{
+  "tutoring": {
+    "admin": {
+      "nav": {
+        "label": "Tutoring sections",
+        "kyc": "Identity checks",
+        "tutors": "Tutors",
+        "subjects": "Subjects",
+        "disputes": "Disputes",
+        "analytics": "Analytics",
+        "reviews": "Reviews"
+      },
+      "common": {
+        "actions": "Actions",
+        "back": "Back",
+        "cancel": "Cancel",
+        "clearFilters": "Clear filters",
+        "close": "Close",
+        "edit": "Edit",
+        "loadErrorDescription": "We could not load this. Please try again.",
+        "loading": "Loading",
+        "no": "No",
+        "retry": "Try again",
+        "save": "Save",
+        "total": "{{count}} in total",
+        "yes": "Yes"
+      },
+      "errors": {
+        "appealNoRefund": "An attendance appeal cannot refund money. Leave the refund out.",
+        "caseAlreadyDecided": "This request has already been decided.",
+        "caseNotDecidable": "This request is not in a state that can be decided.",
+        "claimedByOther": "Another administrator has already taken this case.",
+        "decisionInvalid": "That decision does not fit this case. Check the options again.",
+        "disputeNotDecidable": "This dispute can no longer be decided. Someone may have decided it or it was withdrawn.",
+        "documentLocked": "This document has already been judged and its verdict cannot change.",
+        "documentPurged": "This file was deleted after its retention period and can no longer be opened.",
+        "documentUnreadable": "This file cannot be read right now. Try again or tell the engineering team.",
+        "documentsUndecided": "Every document needs a verdict and every required type needs an approved one before you can approve.",
+        "forbidden": "This account may not do this, or the administrator security check is not met.",
+        "invalidTransition": "The tutor's current state does not allow this. Reload the page.",
+        "logUnavailable": "The access could not be logged, so the document is not shown. Please try again.",
+        "noCompensationRequired": "This case has no compensation to close.",
+        "noRefundableAmount": "There is nothing left to refund.",
+        "noteRequired": "A reason is required when rejecting or asking for more.",
+        "profileStateConflict": "The tutor's state changed, so this request can no longer be decided.",
+        "refundExceedsCap": "The refund is more than can be refunded.",
+        "subjectParentInvalid": "That group is not valid (it must be a top-level group, and a group that has subjects cannot move under another).",
+        "subjectSlugExists": "A subject with this slug already exists.",
+        "validation": "Some of what you entered was refused. Check every field.",
+        "analyticsRangeInvalid": "That period cannot be used for this report. Choose a shorter period that ends today or earlier.",
+        "analyticsRangeDays": "That period is too long: this report allows at most {{max}} days.",
+        "analyticsRangeMonths": "That period is too long: this report allows at most {{max}} months.",
+        "analyticsRangeBuckets": "That period has too many columns: this report allows at most {{max}}. Choose a shorter period or a larger step.",
+        "analyticsBusy": "The server is busy preparing other reports. Please try again in a few seconds.",
+        "analyticsTimeout": "This report took too long to prepare. Try a shorter period.",
+        "analyticsDisabled": "Analytics are switched off on the server."
+      },
+      "kyc": {
+        "pageTitle": "Tutor identity checks",
+        "casePageTitle": "Review identity documents",
+        "pageDescription": "Review the identity documents of tutor applicants.",
+        "heading": "Tutor identity checks",
+        "subheading": "Requests waiting for review, longest wait first. Every time a document is opened it is logged.",
+        "filterLabel": "Filter by request status",
+        "filterWaiting": "Waiting for review",
+        "tableCaption": "Tutor identity-check requests",
+        "col": {
+          "tutor": "Applicant",
+          "status": "Status",
+          "submitted": "Submitted",
+          "documents": "Documents",
+          "waiting": "Waiting"
+        },
+        "attempt": "Attempt {{n}}",
+        "waiting": "{{hours}} h",
+        "open": "Open request",
+        "disabledHeading": "Identity checks are not switched on",
+        "disabledDescription": "This feature is switched off on the server, so the queue and documents are not available. Ask the engineering team to turn it on.",
+        "loadErrorHeading": "Could not load this",
+        "emptyWaitingHeading": "Nothing waiting for review",
+        "emptyWaitingDescription": "New requests show up here when a tutor submits documents.",
+        "emptyHeading": "No requests in this status",
+        "emptyDescription": "Try another status.",
+        "backToQueue": "Back to the queue",
+        "caseHeading": "Identity-check request",
+        "notFoundHeading": "Request not found",
+        "notFoundDescription": "The link may be wrong, or the request does not exist.",
+        "staleReloaded": "The latest version is loaded. Check it again before deciding.",
+        "summary": {
+          "tutor": "Tutor status",
+          "tutorLink": "View tutor",
+          "attempt": "Attempt",
+          "submitted": "Submitted",
+          "consent": "PDPA consent",
+          "consentValue": "Version {{version}} on {{date}}",
+          "required": "Required documents",
+          "decidedAt": "Decided on {{date}}"
+        },
+        "docs": {
+          "heading": "Documents",
+          "help": "Open one at a time. Every opening is logged and there is no download.",
+          "caption": "Documents of this request",
+          "type": "Type",
+          "status": "Status",
+          "uploaded": "Uploaded",
+          "retention": "File retention",
+          "verdict": "Verdict",
+          "verdictFor": "Verdict for {{type}}",
+          "expires": "Expires {{date}}",
+          "purged": "File deleted",
+          "purgeOn": "File deleted by {{date}}",
+          "purgeNotScheduled": "Deletion not scheduled yet",
+          "sameFile": "The same file is among {{count}} other tutor document(s)",
+          "open": "Open",
+          "log": "Access log"
+        },
+        "verdict": {
+          "undecided": "Undecided",
+          "Approved": "Approve",
+          "Rejected": "Reject"
+        },
+        "viewer": {
+          "heading": "Document: {{type}}",
+          "close": "Close document",
+          "logged": "This access is logged. The file is shown on this page only, is not stored on this device, and is gone once you close it.",
+          "loading": "Loading the document",
+          "retry": "Open again (logged again)",
+          "imageAlt": "Identity document image",
+          "pdfTitle": "Identity document (PDF)",
+          "unsupported": "This kind of file cannot be shown here."
+        },
+        "log": {
+          "title": "Access log: {{type}}",
+          "empty": "Nobody has opened this document yet.",
+          "by": "By administrator {{id}}",
+          "bySystem": "By the system",
+          "action": {
+            "View": "Viewed",
+            "Download": "Downloaded",
+            "Purge": "File deleted"
+          }
+        },
+        "decision": {
+          "heading": "Decision",
+          "notDecidable": "This request cannot be decided now (it is decided, or not submitted yet).",
+          "startHelp": "Press when you start, so other administrators see it is being reviewed (optional).",
+          "start": "Start review",
+          "profileMoved": "The tutor is no longer waiting for verification, so the system may refuse a decision.",
+          "choose": "Choose a decision",
+          "option": {
+            "Approve": "Approve",
+            "NeedsInfo": "Ask for more",
+            "Reject": "Reject"
+          },
+          "effect": {
+            "Approve": "The tutor becomes verified.",
+            "NeedsInfo": "The tutor can add or replace documents on this same request and send it again.",
+            "Reject": "Closes this request. The tutor may start a new one, up to the allowed number of attempts."
+          },
+          "note": "Reason / message to the applicant",
+          "noteHelp": "Required when rejecting or asking for more.",
+          "noteHelpOptional": "Optional when approving.",
+          "applicantSees": "The applicant will see this text.",
+          "issue": {
+            "noteRequired": "Please give a reason.",
+            "noteTooLong": "The reason must be at most {{max}} characters.",
+            "undecidedDocuments": "Give a verdict to the {{count}} pending document(s) before approving."
+          },
+          "review": "Review before confirming",
+          "confirmTitle": "Confirm the decision",
+          "confirm": {
+            "Approve": "Approve",
+            "NeedsInfo": "Ask for more",
+            "Reject": "Reject"
+          },
+          "summary": {
+            "Approve": "Approve {{name}} as a verified tutor.",
+            "NeedsInfo": "Ask {{name}} for more, with the message below.",
+            "Reject": "Reject {{name}} for the reason below."
+          },
+          "purgeNotice": {
+            "Approve": "All files will be deleted after the retention period (ID card and criminal record sooner); only the outcome is kept.",
+            "Reject": "All files will be deleted after the retention period (ID card and criminal record sooner); only the outcome is kept.",
+            "NeedsInfo": "Files are kept, because the tutor continues on the same request."
+          },
+          "done": {
+            "Approve": "Approved",
+            "NeedsInfo": "Request for more sent",
+            "Reject": "Rejected"
+          }
+        }
+      },
+      "tutors": {
+        "pageTitle": "Tutors",
+        "detailPageTitle": "Tutor details",
+        "pageDescription": "View and moderate the tutors on the platform.",
+        "heading": "Tutors",
+        "subheading": "Search, check status, suspend, reinstate and set a commission per tutor. Subjects are managed under \"Subjects\".",
+        "statusFilter": "Status",
+        "statusAny": "Any status",
+        "searchLabel": "Search by display name",
+        "searchPlaceholder": "Type a tutor's name",
+        "search": "Search",
+        "tableCaption": "Tutors",
+        "col": {
+          "tutor": "Tutor",
+          "status": "Status",
+          "listed": "Listed",
+          "rating": "Rating",
+          "completed": "Classes taught",
+          "reliability": "Reliability score",
+          "commission": "Commission",
+          "changed": "Status changed"
+        },
+        "ratingValue": "{{avg}} ({{count}})",
+        "noRating": "No reviews",
+        "commissionDefault": "Default",
+        "emptyHeading": "No tutors yet",
+        "emptyDescription": "Tutors appear here once they sign up.",
+        "emptyFilteredHeading": "No tutors match",
+        "emptyFilteredDescription": "Try another status or search.",
+        "loadErrorHeading": "Could not load tutors",
+        "backToList": "Back to tutors",
+        "detailHeading": "Tutor",
+        "notFoundHeading": "Tutor not found",
+        "notFoundDescription": "The link may be wrong.",
+        "overview": "Overview",
+        "statusReason": "Reason the tutor sees",
+        "headline": "Headline",
+        "experience": "Experience",
+        "years": "{{count}} years",
+        "listed": "Listing",
+        "listedYes": "Listed",
+        "listedNo": "Not listed",
+        "listedNote": "Only the tutor turns this on or off; a suspension turns it off.",
+        "verifiedAt": "Verified on",
+        "statusChanged": "Status changed",
+        "nextAvailable": "Next available",
+        "performance": "Performance",
+        "reliabilityNote": "Worked out by the system from late cancellations and no-shows.",
+        "disputesLink": "View this tutor's disputes",
+        "actions": "Actions",
+        "commission": "Commission",
+        "commissionIsDefault": "Using the platform default",
+        "commissionIsOverride": "Set for this tutor",
+        "noStatusAction": "Suspending or reinstating does not apply in this state.",
+        "moderation": {
+          "suspend": {
+            "open": "Suspend tutor",
+            "title": "Suspend this tutor",
+            "effect": "{{name}} is hidden from search and loses access to teaching tools at once. Classes still to come are cancelled by the system and the learners refunded. The tutor will read your reason.",
+            "confirm": "Suspend",
+            "reason": "Reason",
+            "reasonHelp": "The tutor will see this; it is also kept in the audit trail.",
+            "done": "Tutor suspended"
+          },
+          "reinstate": {
+            "open": "Reinstate",
+            "title": "Reinstate this tutor",
+            "effect": "{{name}} becomes a verified tutor again, but stays out of search until the tutor reopens themselves.",
+            "confirm": "Reinstate",
+            "reason": "Reason (optional)",
+            "reasonHelp": "Kept in the audit trail.",
+            "done": "Tutor reinstated"
+          },
+          "commission": {
+            "open": "Change commission",
+            "title": "Set this tutor's commission",
+            "effect": "Sets the commission rate used for {{name}}. The change is recorded with your reason.",
+            "confirm": "Save commission",
+            "reason": "Reason",
+            "reasonHelp": "Kept in the audit trail with the old and new rate.",
+            "done": "Commission saved",
+            "current": "Current rate",
+            "source": "Source",
+            "sourceDefault": "Platform default",
+            "sourceOverride": "Set for this tutor",
+            "useDefault": "Use the platform default (clear this tutor's rate)",
+            "percent": "Commission (%)",
+            "percentHelp": "From {{min}} to {{max}}, at most two decimals."
+          }
+        },
+        "offerings": {
+          "heading": "Offerings",
+          "empty": "No offerings yet.",
+          "subject": "Subject",
+          "level": "Level / curriculum",
+          "rate": "One-to-one, per hour",
+          "group": "Group",
+          "groupSeats": "up to {{seats}} seats",
+          "active": "Active"
+        },
+        "education": {
+          "heading": "Education",
+          "empty": "Nothing entered.",
+          "present": "present"
+        },
+        "certificates": {
+          "heading": "Certificates",
+          "empty": "Nothing entered."
+        }
+      },
+      "subjects": {
+        "pageTitle": "Subjects",
+        "pageDescription": "Manage the subject groups and subjects tutors can teach.",
+        "heading": "Subjects",
+        "subheading": "Groups and their subjects. They cannot be deleted and the slug cannot change, but they can be switched off.",
+        "create": "Add subject",
+        "tableCaption": "All subjects",
+        "col": {
+          "name": "Name",
+          "state": "State"
+        },
+        "slug": "Slug",
+        "sortOrder": "Sort order",
+        "group": "Group",
+        "active": "Active",
+        "inactive": "Inactive",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "activateTitle": "Activate subject",
+        "deactivateTitle": "Deactivate subject",
+        "activateEffect": "{{name}} can be chosen for new offerings again.",
+        "deactivateEffect": "{{name}} can no longer be chosen, but offerings that already use it are left alone.",
+        "createTitle": "Add a subject",
+        "editTitle": "Edit subject",
+        "created": "Subject added",
+        "updated": "Subject saved",
+        "nameTh": "Thai name",
+        "nameEn": "English name",
+        "parent": "Group",
+        "noParent": "None (a top-level group)",
+        "parentHelp": "Pick the group a subject belongs to. Two levels at most.",
+        "parentLocked": "A group that has subjects cannot move under another group.",
+        "slugHelp": "Lower-case a-z, digits and hyphens. It cannot be changed later.",
+        "activeLabel": "Active (can be chosen for new offerings)",
+        "validation": {
+          "slug": "Use lower-case a-z and digits joined by hyphens, at most {{max}} characters."
+        },
+        "emptyHeading": "No subjects yet",
+        "emptyDescription": "Add the first subject so tutors can offer it.",
+        "loadErrorHeading": "Could not load subjects"
+      },
+      "disputes": {
+        "pageTitle": "Tutoring disputes",
+        "detailPageTitle": "Dispute details",
+        "pageDescription": "Settle disputes between learners and tutors.",
+        "heading": "Disputes",
+        "subheading": "Cases raised by learners and tutors, most urgent first. The money of a disputed class is held until it is decided.",
+        "summary": {
+          "heading": "Queue summary",
+          "open": "Open",
+          "underReview": "Under review",
+          "overdue": "Overdue",
+          "highPriority": "High priority",
+          "needsFollowUp": "Compensation to close",
+          "awaitingAdminReply": "Waiting for us",
+          "frozenAmountTotal": "Money on hold",
+          "oldest": "Oldest open case",
+          "failed": "The summary could not be loaded; the list below still works."
+        },
+        "any": "Any",
+        "statusActive": "Still open (default)",
+        "statusAll": "All statuses",
+        "filter": {
+          "status": "Status",
+          "category": "Category",
+          "flow": "Type",
+          "priority": "Priority",
+          "sort": "Sort by",
+          "search": "Dispute or booking number",
+          "searchPlaceholder": "Type the exact number",
+          "overdue": "Overdue",
+          "mine": "Assigned to me",
+          "followUp": "Compensation to close",
+          "oneTutor": "Showing one tutor only (press to clear)"
+        },
+        "status": {
+          "Open": "Open",
+          "UnderReview": "Under review",
+          "Resolved": "Decided",
+          "Rejected": "Rejected",
+          "Withdrawn": "Withdrawn"
+        },
+        "priority": {
+          "High": "High",
+          "Normal": "Normal"
+        },
+        "sort": {
+          "sla": "Urgency (default)",
+          "newest": "Newest first",
+          "oldest": "Oldest first",
+          "activity": "Latest activity"
+        },
+        "tableCaption": "Disputes",
+        "col": {
+          "case": "Case",
+          "status": "Status",
+          "parties": "Parties",
+          "amount": "Amount at stake",
+          "opened": "Opened",
+          "assigned": "Assigned"
+        },
+        "bookingNo": "Booking {{no}}",
+        "learner": "Learner",
+        "minor": "minor",
+        "age": "Open for {{hours}} h",
+        "slaDue": "Reply due {{date}}",
+        "unassigned": "Not assigned",
+        "assignedYou": "Assigned to you",
+        "assignedOther": "Assigned to another administrator",
+        "overdue": "Overdue",
+        "repeatComplaint": "Repeat complaint",
+        "awaitingReply": "Waiting for us",
+        "followUp": "Compensation to close",
+        "tooLate": "Money already paid out",
+        "emptyHeading": "No disputes",
+        "emptyDescription": "Disputes show up here when they are raised.",
+        "emptyFilteredHeading": "No disputes match",
+        "emptyFilteredDescription": "Clear the filters or change the status.",
+        "loadErrorHeading": "Could not load disputes",
+        "backToQueue": "Back to the queue",
+        "detailHeading": "Dispute",
+        "notFoundHeading": "Dispute not found",
+        "notFoundDescription": "The link may be wrong.",
+        "statusHeading": "Dispute status",
+        "summaryLine": "Booking {{booking}} · opened {{opened}} · reply due {{sla}}",
+        "claim": "Take this case",
+        "takeOver": "Take over",
+        "takeOverTitle": "Take over from another administrator",
+        "takeOverEffect": "You replace the administrator who currently holds this case.",
+        "staleReloaded": "The latest version is loaded. Please check it again.",
+        "case": {
+          "heading": "What was reported",
+          "hints": "Notes from the system",
+          "openedBy": "Raised by / category",
+          "bookingStatus": "Booking status when raised",
+          "session": "Class",
+          "learner": "Learner",
+          "description": "What the reporter wrote",
+          "links": "Evidence links",
+          "newTab": "(opens in a new tab)"
+        },
+        "hint": {
+          "minor_learner": "The learner is a minor. Take extra care.",
+          "behavior_complaint": "A behaviour complaint, handled as high priority.",
+          "repeat_complaint": "This tutor has been complained about repeatedly in the last 90 days.",
+          "tutor_suspended": "The tutor is already suspended.",
+          "learner_repeat_rejected": "This learner has had several cases without a remedy.",
+          "appeal_penalty_exists": "The tutor was penalised for the no-show in this class."
+        },
+        "role": {
+          "Learner": "Learner",
+          "Tutor": "Tutor",
+          "Admin": "Administrator",
+          "System": "System"
+        },
+        "context": {
+          "heading": "Evidence",
+          "attendance": "Attendance",
+          "tutorJoined": "Tutor joined",
+          "tutorConfirmed": "Tutor started the class",
+          "tutorAttested": "Tutor confirmed presence",
+          "learnerJoined": "Learner joined",
+          "learnerConfirmed": "Learner confirmed completion",
+          "never": "No record",
+          "decision": "Attendance result: {{outcome}} by {{by}} on {{date}}",
+          "evidence": "Tutor evidence: {{tutor}} · learner evidence: {{learner}}",
+          "joinLogs": "Room joins",
+          "money": "Money",
+          "price": "Class price",
+          "refunded": "Already refunded",
+          "payment": "Payment",
+          "package": "Booking",
+          "packageNote": "Booked with a package credit",
+          "refundList": "Refunds",
+          "tutor": "Tutor record",
+          "tutorLink": "View tutor",
+          "tutorDisputes": "This tutor's other disputes",
+          "disputes90d": "Disputes (90 days)",
+          "disputes90dValue": "{{total}} · {{upheld}} upheld",
+          "penalties": "Penalties",
+          "voided": "voided"
+        },
+        "thread": {
+          "heading": "Conversation",
+          "empty": "No messages yet.",
+          "internal": "Internal note, administrators only"
+        },
+        "message": {
+          "heading": "Write a message",
+          "visibility": "Who sees it",
+          "option": {
+            "Internal": "Internal note",
+            "Parties": "Message to both parties"
+          },
+          "effect": {
+            "Internal": "Only administrators see it. Nobody is notified.",
+            "Parties": "The learner and the tutor both read it and are e-mailed."
+          },
+          "closed": "This dispute is closed. You cannot write to the parties; internal notes are still possible.",
+          "body": "Message",
+          "sendInternal": "Save internal note",
+          "sendParties": "Send to both parties",
+          "sent": {
+            "Internal": "Note saved",
+            "Parties": "Message sent"
+          }
+        },
+        "outcome": {
+          "heading": "Outcome",
+          "alreadyDecided": "This decision was already recorded; nothing was repeated.",
+          "resolution": "Decision",
+          "decidedAt": "Decided on",
+          "attendance": "Attendance",
+          "overturned": "No-show overturned.",
+          "penaltyVoided": "Penalty voided.",
+          "note": "Note to the parties",
+          "noteSeenBy": "The learner and the tutor see this in the app.",
+          "suspension": {
+            "Done": "The tutor was suspended.",
+            "SkippedNotVerified": "Not suspended: the tutor is not in the verified state.",
+            "Failed": "Suspending the tutor failed. The decision stands; suspend from the tutor page."
+          },
+          "undecided": "Not decided yet.",
+          "decide": "Decide this dispute",
+          "closed": "This dispute is closed.",
+          "followUp": "The tutor must be compensated outside the system. Close this once it is done.",
+          "settle": "Compensation done",
+          "followUpDone": "Compensation closed."
+        },
+        "compensation": {
+          "title": "Close the compensation follow-up",
+          "effect": "The system does not pay compensation itself. Confirm only after the tutor has been compensated outside the system.",
+          "note": "How it was compensated",
+          "noteHelp": "Kept in the audit trail; the parties do not see it.",
+          "confirm": "Confirm done",
+          "done": "Compensation closed"
+        },
+        "decide": {
+          "title": "Decide the dispute",
+          "confirmTitle": "Confirm the decision",
+          "flowHelp": {
+            "Escrow": "The money for this class is held. Choose whether to refund the learner or release it to the tutor.",
+            "AttendanceAppeal": "The tutor is appealing the attendance result. No money is refunded."
+          },
+          "outcome": "Decision",
+          "option": {
+            "Escrow": {
+              "FullRefund": "Refund the learner in full",
+              "PartialRefund": "Refund part of it",
+              "NoRefund": "No refund (considered)",
+              "Reject": "Reject the dispute (not valid, or abuse)"
+            },
+            "AttendanceAppeal": {
+              "Resolve": "Accept the appeal",
+              "Reject": "Reject the appeal"
+            }
+          },
+          "figures": "Class price / already refunded",
+          "figuresNote": "The refund must be above 0 and no more than what is left (the price minus what was already refunded). The system checks it and tells you the maximum.",
+          "amount": "Refund amount (THB)",
+          "overturned": "Overturn the no-show (void the tutor's penalty)",
+          "compensation": "The tutor needs compensation outside the system (add to the follow-up list)",
+          "note": "Explain the decision",
+          "noteHelp": "A short reason both parties can understand.",
+          "bothSeeNote": "Both the learner and the tutor will read this.",
+          "suspend": "Also suspend this tutor",
+          "suspendReason": "Reason for the suspension",
+          "suspendReasonHelp": "The tutor will see this.",
+          "willHappen": "What will happen",
+          "review": "Review",
+          "confirm": "Confirm decision",
+          "confirmIntro": "You are deciding dispute {{no}}. Once recorded it cannot be changed.",
+          "confirmAmount": "Refund: {{amount}}",
+          "maxRefundable": "The most the system allows: {{amount}}",
+          "done": "Decision recorded",
+          "alreadyDone": "This decision was already recorded",
+          "issue": {
+            "outcome": "Please choose a decision",
+            "amountPositive": "The refund must be above 0"
+          },
+          "effect": {
+            "FullRefund": "The learner is refunded the whole remaining amount of this class through Stripe (it can take days to arrive). The tutor receives nothing for this class.",
+            "PartialRefund": "The learner is refunded the amount you enter through Stripe. What remains on hold is released to the tutor right away.",
+            "NoRefund": "The learner is not refunded. The money on hold is released to the tutor right away.",
+            "RejectEscrow": "The dispute is closed as not valid. No refund; the held money is released to the tutor, and the case counts as rejected.",
+            "packageCredit": "This class was booked with a package credit; that credit is marked as refunded.",
+            "tooLate": "This class's money was already paid to the tutor. The refund is taken from the tutor's next earnings, which may leave a negative balance.",
+            "ResolveAppeal": "Appeal accepted: no money moves, and the appeal is recorded as accepted.",
+            "RejectAppeal": "The appeal is rejected. The attendance result and the tutor's penalty stay as they are. No money moves.",
+            "overturn": "The reliability penalty for this no-show is voided. The booking status does not change and the learner is not asked to give the money back.",
+            "compensation": "The case goes on the compensation follow-up list. The system pays nothing; you compensate the tutor yourself and then close it.",
+            "suspend": "The tutor is suspended after the decision is recorded (if they are verified at that point).",
+            "bothSee": "The learner and the tutor read your note and are told the result."
+          }
+        }
+      },
+      "analytics": {
+        "pageTitle": "Tutoring analytics",
+        "pageDescription": "Revenue, search demand, retention, the booking funnel, top tutors and identity-check waiting times.",
+        "heading": "Tutoring analytics",
+        "subheading": "How the tutor marketplace is doing. Figures come from the server and may be a few minutes old; the time they were prepared is shown on every report.",
+        "reportsHeading": "Reports",
+        "tabsLabel": "Choose a report",
+        "tab": {
+          "revenue": "Revenue",
+          "search": "Search demand",
+          "retention": "Retention",
+          "funnel": "Booking funnel",
+          "tutors": "Top tutors",
+          "kyc": "Identity checks"
+        },
+        "generatedAt": "Prepared {{when}}",
+        "refresh": "Refresh",
+        "errorHeading": "We could not load this report",
+        "period": "Period shown: {{from}} to {{to}}",
+        "hours": "{{hours}} h",
+        "topOption": "Top {{count}}",
+        "granularity": {
+          "Day": "Day",
+          "Week": "Week",
+          "Month": "Month"
+        },
+        "segment": {
+          "All": "All bookings",
+          "Trial": "Trial lessons",
+          "Paid": "Paid lessons"
+        },
+        "sort": {
+          "Completed": "Lessons completed",
+          "Booked": "Booked value",
+          "Rating": "Rating"
+        },
+        "rate": {
+          "counts": "{{numerator}} of {{denominator}}",
+          "notEnoughData": "Not enough data"
+        },
+        "range": {
+          "incomplete": "Enter a start and an end date.",
+          "order": "The start must not be after the end.",
+          "future": "The period cannot end after today.",
+          "tooLong": {
+            "days": "That period is too long: this report allows at most {{max}} days.",
+            "weeks": "That period is too long: this report allows at most {{max}} weeks.",
+            "months": "That period is too long: this report allows at most {{max}} months."
+          }
+        },
+        "controls": {
+          "from": "From",
+          "to": "To",
+          "fromMonth": "From month",
+          "toMonth": "To month",
+          "granularity": "Group by",
+          "segment": "Bookings",
+          "sort": "Rank by",
+          "top": "Show",
+          "show": "Show report",
+          "presets": "Quick periods",
+          "lastDays": "Last {{days}} days",
+          "kycNote": "This report shows the identity checks waiting right now; it has no period to choose."
+        },
+        "overview": {
+          "heading": "At a glance",
+          "last30": "Last 30 days",
+          "cashNet": "Cash collected, after refunds",
+          "commission": "Platform commission recognised",
+          "completed": "Lessons completed",
+          "holdConversion": "Held slots that were paid",
+          "holdConversionHint": "Of held bookings whose time to pay is over",
+          "completionRate": "Paid lessons completed",
+          "completionRateHint": "Of paid lessons that have been decided",
+          "retention60": "Learners who rebook within 60 days",
+          "retentionCohort": "Learners whose first lesson was in {{month}}",
+          "kycWaiting": "Identity checks waiting for us",
+          "kycOldest": "Oldest has waited {{hours}} h",
+          "disputesOpen": "Open disputes",
+          "disputesHint": "{{overdue}} overdue, {{high}} high priority",
+          "topSearched": "Most searched subject: {{name}} ({{count}} searches).",
+          "openDisputes": "Open the dispute queue"
+        },
+        "revenue": {
+          "heading": "Revenue",
+          "description": "Cash that moved and revenue the ledger recognised are two different measurements. They are shown apart and are not added together.",
+          "weekOf": "Week of {{date}}",
+          "empty": "There is no revenue activity in this period.",
+          "ledgerMismatch": "The ledger totals do not match the payout totals for this period. Do not rely on these figures until the difference is explained.",
+          "notes": {
+            "package_timing": "Package money is collected when the package is bought, but the ledger recognises it when each lesson is booked, so the two do not match in the same period.",
+            "ledger_excludes_fully_refunded_before_batch": "A lesson that was fully refunded before it reached a payout batch is not in the ledger at all.",
+            "fee_may_be_estimate": "Recent payment fees can be estimates until the payment provider confirms them.",
+            "cash_vs_ledger_not_comparable_per_bucket": "Do not compare the two tables row by row: they use different dates."
+          },
+          "cash": {
+            "heading": "Cash in and out",
+            "description": "Payments that succeeded and refunds that completed, by the day the money moved.",
+            "caption": "Cash collected and refunded for each period",
+            "collected": "Collected",
+            "refunded": "Refunded",
+            "net": "Collected minus refunded",
+            "paymentCount": "{{count}} payments",
+            "refundCount": "{{count}} refunds"
+          },
+          "ledger": {
+            "heading": "Revenue recognised in the ledger",
+            "description": "What the platform ledger recorded after refunds, split into the platform commission and what is payable to tutors.",
+            "caption": "Revenue recognised in the ledger for each period",
+            "gross": "Recognised",
+            "fee": "Payment fees",
+            "platform": "Platform commission",
+            "tutor": "Payable to tutors",
+            "entryCount": "{{count}} ledger entries"
+          },
+          "col": {
+            "period": "Period",
+            "payments": "Payments",
+            "collected": "Collected",
+            "refunds": "Refunds",
+            "refunded": "Refunded",
+            "net": "Net",
+            "netBar": "Net, as a bar",
+            "entries": "Entries",
+            "gross": "Recognised",
+            "fee": "Fees",
+            "platform": "Platform",
+            "tutor": "Tutors",
+            "platformBar": "Platform commission, as a bar"
+          }
+        },
+        "search": {
+          "heading": "What people search for",
+          "description": "The subjects searched most, and how often a search found no tutor at all.",
+          "total": "Searches",
+          "zeroResult": "Searches with no tutor found",
+          "zeroResultHint": "Demand nobody can serve yet",
+          "hidden": "Searches not listed",
+          "hiddenHint": "Subjects with fewer than {{min}} searches are not listed, to protect privacy",
+          "allHidden": "Not enough data to list a subject: every subject was searched fewer than {{min}} times in this period.",
+          "empty": "Nobody searched in this period.",
+          "startMoved": "Search records are only kept for a limited time, so the period starts later than you asked.",
+          "group": "Subject group",
+          "subjectsCaption": "Subjects searched, most searched first",
+          "col": {
+            "subject": "Subject",
+            "searches": "Searches",
+            "searchesBar": "Searches, as a bar",
+            "zero": "No tutor found",
+            "zeroRate": "Share with no tutor"
+          },
+          "queriesHeading": "Most common search texts"
+        },
+        "retention": {
+          "heading": "Do learners come back?",
+          "description": "Learners are grouped by the month of their first completed lesson. For each group: how many booked another lesson within 30 and within 60 days.",
+          "range": "First lessons from {{from}} to {{to}}.",
+          "minCohort": "A rate is only shown for a group of at least {{min}} learners.",
+          "empty": "No learner completed a first lesson in these months.",
+          "caption": "Learners who booked again, by the month of their first lesson",
+          "col": {
+            "cohort": "First lesson in",
+            "size": "Learners",
+            "d30": "Booked again within 30 days",
+            "d60": "Booked again within 60 days",
+            "paid30": "Paid booking within 30 days",
+            "paid60": "Paid booking within 60 days"
+          },
+          "overall": "All months",
+          "footnote": "A group is only counted once enough time has passed (30 or 60 days since the first lesson). A learner is the paying account, not each child."
+        },
+        "funnel": {
+          "heading": "Booking funnel",
+          "description": "Where the bookings made in the period ended up, by their state today.",
+          "empty": "No bookings were made in this period.",
+          "barNote": "Each bar is that count as a share of the bookings made in the period.",
+          "ratesHeading": "Rates",
+          "ratesNote": "Each rate shows what it is out of. A rate with nothing to divide by reads \"not enough data\".",
+          "group": {
+            "beforePayment": "Before payment",
+            "afterPayment": "After payment",
+            "outcome": "How the lessons ended",
+            "problems": "Problems"
+          },
+          "counts": {
+            "created": "Bookings made",
+            "stillPending": "Still waiting for payment",
+            "expired": "Expired without payment",
+            "abandonedByLearner": "Cancelled by the learner before paying",
+            "everConfirmed": "Paid or confirmed",
+            "stillConfirmed": "Confirmed, lesson still to come",
+            "settled": "Decided",
+            "completed": "Completed",
+            "noShowLearner": "Learner did not attend",
+            "noShowTutor": "Tutor did not attend",
+            "noShowBoth": "Nobody attended",
+            "cancelledByLearnerAfterConfirm": "Cancelled by the learner after paying",
+            "cancelledByTutorAfterConfirm": "Cancelled by the tutor after paying",
+            "inDispute": "In dispute now",
+            "withDispute": "Ever disputed"
+          },
+          "rates": {
+            "holdConversionRate": "Held slots that were paid",
+            "completionRate": "Decided lessons that were completed",
+            "noShowLearnerRate": "Learner did not attend",
+            "noShowTutorRate": "Tutor did not attend",
+            "noShowBothRate": "Nobody attended",
+            "cancelAfterConfirmLearnerRate": "Cancelled by the learner after paying",
+            "cancelAfterConfirmTutorRate": "Cancelled by the tutor after paying",
+            "disputeRate": "Disputed"
+          }
+        },
+        "tutors": {
+          "heading": "Top tutors",
+          "description": "The busiest tutors in the period, with the signals used to judge them.",
+          "empty": "No tutor completed a lesson in this period.",
+          "ratingNote": "Ranking by rating lists only tutors with enough reviews.",
+          "bookedNote": "Booked value is the price of the completed lessons before commission and refunds. It is not what the tutor earned.",
+          "caption": "Top tutors for the period",
+          "ratingValue": "{{rating}} ({{count}} reviews)",
+          "col": {
+            "rank": "#",
+            "tutor": "Tutor",
+            "completed": "Lessons completed",
+            "classes": "Classes held",
+            "booked": "Booked value",
+            "rating": "Rating",
+            "reliability": "Reliability",
+            "penalty": "Penalty points",
+            "disputes": "Disputes against"
+          }
+        },
+        "kyc": {
+          "heading": "Identity check queue",
+          "description": "How many tutor identity checks are waiting and for how long. Counts only: no applicant or document is shown here.",
+          "empty": "No identity check is waiting for an administrator.",
+          "awaitingAdmin": "Waiting for an administrator",
+          "awaitingTutor": "Waiting for the tutor",
+          "awaitingTutorHint": "More information was requested",
+          "oldest": "Longest wait",
+          "oldestSince": "Submitted {{when}}",
+          "decisionTime": "Typical time to decide (median)",
+          "decisionP90": "9 in 10 decided within {{hours}} h",
+          "noDecisions": "No decisions in the last 30 days",
+          "bandsHeading": "How long the checks have waited",
+          "band": {
+            "lt24h": "Under 24 hours",
+            "h24to48": "24 to 48 hours",
+            "h48to72": "48 to 72 hours",
+            "gt72h": "Over 72 hours"
+          },
+          "statusHeading": "By status",
+          "status": {
+            "submitted": "Submitted",
+            "inReview": "Being reviewed",
+            "needsInfo": "Needs more information"
+          },
+          "decidedHeading": "Decided in the last 30 days",
+          "decided": {
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "needsInfo": "Sent back for more information"
+          },
+          "openQueue": "Open the identity-check queue"
+        }
+      },
+      "reviews": {
+        "pageTitle": "Manage tutor reviews",
+        "pageDescription": "Moderate, hide, or restore tutor reviews.",
+        "heading": "Tutor reviews",
+        "subheading": "Review learner feedback, hide inappropriate content, or restore hidden reviews.",
+        "statusFilter": "Review status",
+        "statusAll": "All statuses",
+        "statusPublished": "Published",
+        "statusHidden": "Hidden",
+        "ratingFilter": "Rating",
+        "ratingAll": "All ratings",
+        "ratingStars": "{{stars}} stars",
+        "searchLabel": "Search",
+        "searchPlaceholder": "Search by tutor or learner name",
+        "search": "Search",
+        "emptyHeading": "No reviews yet",
+        "emptyDescription": "Reviews submitted by learners will appear here.",
+        "emptyFilteredHeading": "No reviews match the filters",
+        "emptyFilteredDescription": "Try changing the status, rating, or search term.",
+        "loadErrorHeading": "Could not load reviews",
+        "tableCaption": "Tutor reviews list",
+        "col": {
+          "date": "Date",
+          "tutor": "Tutor",
+          "reviewer": "Reviewer",
+          "rating": "Rating",
+          "comment": "Comment",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "noComment": "No written comment",
+        "booking": "Booking {{bookingId}}",
+        "countsTowardRatingFalse": "Excluded from rating",
+        "countsTowardRatingRefunded": "Excluded from rating (refunded)",
+        "btnHide": "Hide review",
+        "btnUnhide": "Unhide review",
+        "hideDialog": {
+          "title": "Hide review",
+          "description": "Provide a reason for hiding this review. Hidden reviews are not displayed on the tutor's public profile.",
+          "reasonLabel": "Reason for hiding",
+          "reasonPlaceholder": "e.g. Inappropriate language, contains personal contact info",
+          "reasonRequired": "A reason is required",
+          "confirm": "Hide review",
+          "cancel": "Cancel"
+        },
+        "unhideDialog": {
+          "title": "Unhide review",
+          "description": "Do you want to unhide this review and restore it to the public profile?",
+          "noteLabel": "Note (optional)",
+          "confirm": "Unhide review",
+          "cancel": "Cancel"
+        }
+      }
+    }
+  }
+}

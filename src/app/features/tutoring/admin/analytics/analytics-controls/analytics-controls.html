@@ -1,0 +1,43 @@
+@if (tab() === 'kyc') {
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.controls.kycNote' | translate }}</p>
+} @else {
+  <form class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-4 sm:p-5" [formGroup]="form" (submit)="$event.preventDefault(); submit()" novalidate>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      @if (usesDates()) {
+        <app-input formControlName="from" type="date" [label]="'tutoring.admin.analytics.controls.from' | translate" [errorMessage]="issueText() ?? undefined" />
+        <app-input formControlName="to" type="date" [label]="'tutoring.admin.analytics.controls.to' | translate" />
+      }
+      @if (usesMonths()) {
+        <app-select formControlName="fromMonth" [label]="'tutoring.admin.analytics.controls.fromMonth' | translate" [options]="monthChoices()" [errorMessage]="issueText() ?? undefined" />
+        <app-select formControlName="toMonth" [label]="'tutoring.admin.analytics.controls.toMonth' | translate" [options]="monthChoices()" />
+      }
+      @if (tab() === 'revenue') {
+        <app-select formControlName="granularity" (change)="submit()" [label]="'tutoring.admin.analytics.controls.granularity' | translate" [options]="granularityOptions()" />
+      }
+      @if (tab() === 'funnel') {
+        <app-select formControlName="segment" (change)="submit()" [label]="'tutoring.admin.analytics.controls.segment' | translate" [options]="segmentOptions()" />
+      }
+      @if (tab() === 'tutors') {
+        <app-select formControlName="sort" (change)="submit()" [label]="'tutoring.admin.analytics.controls.sort' | translate" [options]="sortOptions()" />
+      }
+      @if (usesTop()) {
+        <app-select formControlName="top" (change)="submit()" [label]="'tutoring.admin.analytics.controls.top' | translate" [options]="topOptions()" />
+      }
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <app-button type="submit">{{ 'tutoring.admin.analytics.controls.show' | translate }}</app-button>
+      @if (usesDates()) {
+        <div role="group" [attr.aria-label]="'tutoring.admin.analytics.controls.presets' | translate" class="flex flex-wrap gap-2">
+          @for (days of presets; track days) {
+            <app-button variant="secondary" size="sm" (click)="usePreset(days)">{{ 'tutoring.admin.analytics.controls.lastDays' | translate: { days: days } }}</app-button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (issueText(); as text) {
+      <p role="alert" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-base text-[var(--color-text)]">{{ text }}</p>
+    }
+  </form>
+}

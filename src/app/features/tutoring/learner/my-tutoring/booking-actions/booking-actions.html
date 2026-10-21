@@ -1,0 +1,56 @@
+@if (!isEmpty()) {
+  <div class="flex flex-wrap items-center gap-3">
+    @if (booking().status === 'PendingPayment') {
+      <a
+        [routerLink]="['/tutoring/checkout', booking().bookingId]"
+        class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium text-[var(--color-primary-foreground)]
+          transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.learner.my.card.pay' | translate }}
+      </a>
+    }
+
+    @switch (cue().kind) {
+      @case ('join') {
+        <a
+          [routerLink]="joinLink()"
+          class="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium text-[var(--color-primary-foreground)]
+            transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          <ng-icon name="phosphorVideoCamera" aria-hidden="true" />
+          {{ 'tutoring.learner.my.card.join' | translate }}
+        </a>
+      }
+      @case ('opens') {
+        @if (booking().joinOpensAtUtc; as opensAt) {
+          <p class="text-base text-[var(--color-text)]">
+            {{ 'tutoring.learner.my.card.joinOpensIn' | translate }}
+            <app-live-countdown class="font-semibold" [targetUtc]="opensAt" [offsetMs]="offsetMs()" (reached)="changed.emit()" />
+          </p>
+        }
+      }
+    }
+
+    @if (canConfirm()) {
+      <app-button variant="secondary" (click)="confirmOpen.set(true)">
+        <ng-icon leading name="phosphorCheckCircle" aria-hidden="true" />
+        {{ 'tutoring.learner.my.confirm.open' | translate }}
+      </app-button>
+    }
+
+    @if (canCancel()) {
+      <app-button variant="ghost" (click)="cancelOpen.set(true)">
+        <ng-icon leading name="phosphorXCircle" aria-hidden="true" />
+        {{ (booking().status === 'PendingPayment' ? 'tutoring.learner.my.cancel.openPending' : 'tutoring.learner.my.cancel.open') | translate }}
+      </app-button>
+    }
+  </div>
+}
+
+<app-cancel-booking-dialog [(open)]="cancelOpen" [bookingId]="booking().bookingId" [packageBooking]="booking().packagePurchaseId !== null" (cancelled)="changed.emit()" />
+<app-confirm-completed-dialog
+  [(open)]="confirmOpen"
+  [bookingId]="booking().bookingId"
+  [disputeWindowEndsAtUtc]="booking().disputeWindowEndsAtUtc ?? null"
+  (confirmed)="changed.emit()"
+/>

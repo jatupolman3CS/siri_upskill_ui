@@ -1,0 +1,174 @@
+<section class="flex flex-col gap-4" [attr.aria-label]="'tutoring.slots.regionLabel' | translate">
+  <!-- Week navigation. The range label is a polite live region so paging to another week is announced. -->
+  <div class="flex items-center justify-between gap-2">
+    <button
+      type="button"
+      (click)="previousWeek.emit()"
+      [disabled]="!canGoPrevious()"
+      [attr.aria-label]="'tutoring.slots.previousWeek' | translate"
+      class="glass-card flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg text-[var(--color-text)]
+        transition-colors hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-40
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      <ng-icon name="phosphorCaretLeft" aria-hidden="true" />
+    </button>
+
+    <p class="min-w-0 flex-1 text-center text-sm font-semibold text-[var(--color-text)]" aria-live="polite">
+      {{
+        'tutoring.slots.weekRange'
+          | translate: { from: (firstDayNoonUtc() | bangkokDate: 'date'), to: (lastDayNoonUtc() | bangkokDate: 'date') }
+      }}
+    </p>
+
+    <button
+      type="button"
+      (click)="nextWeek.emit()"
+      [disabled]="!canGoNext()"
+      [attr.aria-label]="'tutoring.slots.nextWeek' | translate"
+      class="glass-card flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg text-[var(--color-text)]
+        transition-colors hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-40
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      <ng-icon name="phosphorCaretRight" aria-hidden="true" />
+    </button>
+  </div>
+
+  <p class="text-center text-sm text-[var(--color-text-muted)]">{{ 'tutoring.slots.timezoneNote' | translate }}</p>
+
+  <!-- Visually hidden announcer: always in the DOM so assistive tech notices its content changing. -->
+  <p class="sr-only" role="status">
+    @if (selected(); as chosen) {
+      {{
+        'tutoring.slots.selectedAnnouncement'
+          | translate
+            : {
+                day: (chosen.startsAtUtc | bangkokDate: 'weekdayDate'),
+                start: (chosen.startsAtUtc | bangkokDate: 'time'),
+                end: (chosen.endsAtUtc | bangkokDate: 'time'),
+              }
+      }}
+    }
+  </p>
+
+  @if (selectionLost()) {
+    <p role="alert" class="tone-orange rounded-[var(--radius-md)] bg-[var(--tone-bg)] px-3 py-2 text-sm font-medium text-[var(--tone-fg)]">
+      {{ 'tutoring.slots.selectionLost' | translate }}
+    </p>
+  }
+
+  @if (loading()) {
+    <div class="flex flex-col gap-3" aria-busy="true" [attr.aria-label]="'tutoring.slots.loading' | translate">
+      <div class="grid grid-cols-7 gap-1">
+        @for (placeholder of placeholderDays; track placeholder) {
+          <app-skeleton variant="block" height="4rem" />
+        }
+      </div>
+      <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+        @for (placeholder of placeholderSlots; track placeholder) {
+          <app-skeleton variant="block" height="2.75rem" />
+        }
+      </div>
+    </div>
+  } @else if (failed()) {
+    <app-empty-state
+      [heading]="'tutoring.slots.errorHeading' | translate"
+      [description]="errorMessage() ?? ('tutoring.errors.generic' | translate)"
+    >
+      <app-button emptyStateAction (click)="retry.emit()">{{ 'tutoring.slots.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (totalSlots() === 0) {
+    <app-empty-state [heading]="'tutoring.slots.emptyHeading' | translate" [description]="'tutoring.slots.emptyDescription' | translate">
+      @if (canGoNext()) {
+        <app-button emptyStateAction (click)="nextWeek.emit()">{{ 'tutoring.slots.emptyNextWeek' | translate }}</app-button>
+      }
+    </app-empty-state>
+  } @else {
+    <div role="tablist" [attr.aria-label]="'tutoring.slots.dayTabsLabel' | translate" class="-mx-1 flex snap-x gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-7 sm:overflow-visible sm:px-0 sm:pb-0">
+      @for (day of days(); track day.date) {
+        <button
+          #dayTab
+          type="button"
+          role="tab"
+          [id]="tabId(day.date)"
+          [attr.aria-selected]="day.date === activeDate()"
+          [attr.aria-controls]="panelId"
+          [attr.tabindex]="day.date === activeDate() ? 0 : -1"
+          [attr.aria-label]="'tutoring.slots.dayTabLabel' | translate: { day: (day.noonUtc | bangkokDate: 'weekdayDate'), count: day.slots.length }"
+          (click)="selectDay(day.date)"
+          (keydown)="onTabKeydown($event)"
+          class="flex min-h-16 min-w-14 shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-[var(--radius-md)] border px-1 py-2 sm:min-w-0 sm:shrink
+            text-center transition-colors focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg)]"
+          [class]="
+            day.date === activeDate()
+              ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+              : 'glass-card text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'
+          "
+        >
+          <span class="text-sm font-medium" aria-hidden="true">{{ day.noonUtc | bangkokDate: 'weekday' }}</span>
+          <span class="text-lg font-bold leading-none" aria-hidden="true">{{ day.noonUtc | bangkokDate: 'dayOfMonth' }}</span>
+          <span class="text-sm" aria-hidden="true">{{ day.slots.length > 0 ? day.slots.length : '-' }}</span>
+        </button>
+      }
+    </div>
+
+    <div
+      role="tabpanel"
+      [id]="panelId"
+      [attr.aria-labelledby]="tabId(activeDate())"
+      [attr.tabindex]="activeDay()?.slots?.length ? null : 0"
+      class="flex flex-col gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      @if (activeDay(); as day) {
+        <h3 class="text-sm font-semibold text-[var(--color-text)]">{{ day.noonUtc | bangkokDate: 'weekdayDate' }}</h3>
+
+        @if (day.slots.length === 0) {
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.slots.dayEmpty' | translate }}</p>
+        } @else {
+          <ul class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            @for (slot of day.slots; track slot.startsAtUtc) {
+              <li>
+                <button
+                  type="button"
+                  [attr.aria-pressed]="isSelected(slot)"
+                  [attr.aria-label]="
+                    slotLabelKey(slot)
+                      | translate
+                        : {
+                            day: (slot.startsAtUtc | bangkokDate: 'weekdayDate'),
+                            start: (slot.startsAtUtc | bangkokDate: 'time'),
+                            end: (slot.endsAtUtc | bangkokDate: 'time'),
+                            count: slot.seatsLeft,
+                          }
+                  "
+                  (click)="toggleSlot(slot)"
+                  class="flex min-h-11 w-full flex-col items-center justify-center gap-0.5 rounded-[var(--radius-md)] border px-2 py-2
+                    text-base font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2
+                    focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg)]"
+                  [class]="
+                    isSelected(slot)
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                      : 'glass-card text-[var(--color-text)] hover:border-[var(--color-primary)] hover:bg-[var(--color-surface-muted)]'
+                  "
+                >
+                  <span class="inline-flex items-center gap-1">
+                    @if (isSelected(slot)) {
+                      <ng-icon name="phosphorCheck" aria-hidden="true" />
+                    }
+                    {{ slot.startsAtUtc | bangkokDate: 'time' }}
+                  </span>
+                  @if (isGroupSlot(slot)) {
+                    <span class="inline-flex items-center gap-1 text-sm font-medium" aria-hidden="true">
+                      <ng-icon name="phosphorUsers" />
+                      {{ (slot.joinsExistingGroup ? 'tutoring.slots.seatsLeft' : 'tutoring.slots.groupSeats') | translate: { count: slot.seatsLeft } }}
+                    </span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </div>
+  }
+</section>

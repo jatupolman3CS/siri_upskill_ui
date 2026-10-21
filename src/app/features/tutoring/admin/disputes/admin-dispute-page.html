@@ -1,0 +1,92 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <a
+        routerLink="/admin/tutoring/disputes"
+        class="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >{{ 'tutoring.admin.disputes.backToQueue' | translate }}</a>
+      <h1 class="break-all text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ detail()?.disputeNo ?? ('tutoring.admin.disputes.detailHeading' | translate) }}</h1>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  @if (staleNotice(); as notice) {
+    <p role="alert" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3 text-sm font-semibold text-[var(--color-text)]">
+      {{ notice }} {{ 'tutoring.admin.disputes.staleReloaded' | translate }}
+    </p>
+  }
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="8rem" radius="lg" />
+      <app-skeleton variant="block" height="14rem" radius="lg" />
+    </div>
+  } @else if (isMissing()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.disputes.notFoundHeading' | translate" [description]="'tutoring.admin.disputes.notFoundDescription' | translate" />
+    </div>
+  } @else if (hasError()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.disputes.loadErrorHeading' | translate" [description]="errorKey() | translate">
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else if (detail(); as current) {
+    <section class="glass-card flex flex-col gap-4 rounded-2xl p-5" aria-labelledby="dispute-status-heading">
+      <h2 id="dispute-status-heading" class="sr-only">{{ 'tutoring.admin.disputes.statusHeading' | translate }}</h2>
+      <div class="flex flex-wrap items-center gap-2">
+        <app-admin-chip [view]="statusView(current.status)" />
+        @if (priorityView(current.priority); as priority) {
+          <app-admin-chip [view]="priority" />
+        }
+        @if (current.isOverdue) {
+          <app-admin-chip [view]="overdueView" />
+        }
+        <span class="text-sm text-[var(--color-text)]">{{ 'tutoring.enums.disputeFlow.' + current.flow | translate }}</span>
+      </div>
+      <p class="break-words text-sm text-[var(--color-text)]">
+        {{ 'tutoring.admin.disputes.summaryLine' | translate: { booking: current.bookingNo, opened: (current.openedAtUtc | bangkokDate: 'dateTime'), sla: (current.slaDueAtUtc | bangkokDate: 'dateTime') } }}
+      </p>
+      <p class="text-sm text-[var(--color-text-muted)]">
+        {{ (current.assignedToUserId === null ? 'tutoring.admin.disputes.unassigned' : (current.assignedToUserId === myId() ? 'tutoring.admin.disputes.assignedYou' : 'tutoring.admin.disputes.assignedOther')) | translate }}
+      </p>
+
+      @if (current.status === 'Open') {
+        <div class="flex flex-col items-start gap-2">
+          <app-button variant="secondary" [loading]="claimBusy()" [disabled]="claimBusy()" (click)="claim(false)">{{ 'tutoring.admin.disputes.claim' | translate }}</app-button>
+        </div>
+      } @else if (heldByOther()) {
+        <div class="flex flex-col items-start gap-2">
+          <app-button variant="secondary" [disabled]="claimBusy()" (click)="takeOverOpen.set(true)">{{ 'tutoring.admin.disputes.takeOver' | translate }}</app-button>
+        </div>
+      }
+      @if (claimProblem(); as problem) {
+        <p role="alert" class="text-sm text-[var(--color-danger)]">{{ problem }}</p>
+      }
+    </section>
+
+    <div class="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,1fr)_24rem] 2xl:items-start">
+      <div class="flex min-w-0 flex-col gap-6">
+        <app-dispute-case-panel [detail]="current" />
+        <app-dispute-context-panel [detail]="current" />
+        <app-dispute-thread [messages]="current.messages" />
+        <app-dispute-message-form [disputeId]="current.disputeId" [canMessageParties]="active()" (posted)="appendMessage($event)" />
+      </div>
+      <app-dispute-decision-card [detail]="current" (decide)="decideOpen.set(true)" (settle)="settleOpen.set(true)" />
+    </div>
+
+    <app-dispute-decision-dialog [(open)]="decideOpen" [detail]="current" (decided)="apply($event)" (stale)="reloadStale($event)" />
+    <app-dispute-compensation-dialog [(open)]="settleOpen" [disputeId]="current.disputeId" (settled)="apply($event)" />
+
+    <app-admin-confirm-dialog
+      [(open)]="takeOverOpen"
+      [titleText]="'tutoring.admin.disputes.takeOverTitle' | translate"
+      [confirmLabel]="'tutoring.admin.disputes.takeOver' | translate"
+      [busy]="claimBusy()"
+      [problem]="claimProblem()"
+      (confirmed)="claim(true)"
+    >
+      <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.admin.disputes.takeOverEffect' | translate }}</p>
+    </app-admin-confirm-dialog>
+  }
+</div>

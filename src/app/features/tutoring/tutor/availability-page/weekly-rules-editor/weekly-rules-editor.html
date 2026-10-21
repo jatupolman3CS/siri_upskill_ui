@@ -1,0 +1,90 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-rules-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-rules-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.availability.rules.heading' | translate }}</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.rules.intro' | translate }}</p>
+  </header>
+
+  <ul class="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+    @for (day of days; track day) {
+      <li class="flex flex-col gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-base font-semibold text-[var(--color-text)]">{{ dayLabelKey(day) | translate }}</h3>
+          <app-button size="sm" variant="secondary" [disabled]="saving()" (click)="addWindow(day)">
+            <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+            {{ 'tutoring.tutor.availability.rules.add' | translate }}
+            <span class="sr-only">{{ dayLabelKey(day) | translate }}</span>
+          </app-button>
+        </div>
+
+        @if (windows(day).length === 0) {
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.rules.closedDay' | translate }}</p>
+        } @else {
+          <ul class="flex flex-col gap-3">
+            @for (window of windows(day); track window.key; let position = $index) {
+              <li class="flex flex-col gap-1.5">
+                <div
+                  class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-2"
+                  role="group"
+                  [attr.aria-label]="'tutoring.tutor.availability.rules.windowLabel' | translate: { day: (dayLabelKey(day) | translate), number: position + 1 }"
+                >
+                  <app-tutor-time-select
+                    [label]="'tutoring.tutor.availability.rules.from' | translate"
+                    [choices]="choices()"
+                    [value]="window.start"
+                    [invalid]="issueKey(window) !== null"
+                    [disabled]="saving()"
+                    (valueChange)="setTime(day, window.key, 'start', $event)"
+                  />
+                  <app-tutor-time-select
+                    [label]="'tutoring.tutor.availability.rules.to' | translate"
+                    [choices]="choices()"
+                    [value]="window.end"
+                    [invalid]="issueKey(window) !== null"
+                    [disabled]="saving()"
+                    (valueChange)="setTime(day, window.key, 'end', $event)"
+                  />
+                  <button
+                    type="button"
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-[var(--radius-full)] text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-danger)]
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:opacity-60"
+                    [disabled]="saving()"
+                    [attr.aria-label]="'tutoring.tutor.availability.rules.remove' | translate: { day: (dayLabelKey(day) | translate), number: position + 1 }"
+                    (click)="removeWindow(day, window.key)"
+                  >
+                    <ng-icon name="phosphorTrash" aria-hidden="true" class="text-lg" />
+                  </button>
+                </div>
+                @if (issueKey(window); as key) {
+                  <p role="alert" class="text-sm text-[var(--color-danger)]">{{ key | translate }}</p>
+                } @else if (crosses(window)) {
+                  <p class="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
+                    <ng-icon name="phosphorMoonStars" aria-hidden="true" class="shrink-0 text-sm" />
+                    {{ 'tutoring.tutor.availability.rules.endsNextDay' | translate }}
+                  </p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (overLimit()) {
+    <p role="alert" class="text-sm text-[var(--color-danger)]">{{ 'tutoring.tutor.availability.rules.tooMany' | translate: { max: maxRules() } }}</p>
+  }
+  <app-tutor-problem [message]="problem()" />
+
+  <div class="flex flex-wrap items-center gap-3">
+    <app-button [loading]="saving()" [disabled]="!canSave()" (click)="save()">{{ 'tutoring.tutor.availability.rules.save' | translate }}</app-button>
+    <app-button variant="ghost" [disabled]="!dirty() || saving()" (click)="discard()">{{ 'tutoring.tutor.availability.discard' | translate }}</app-button>
+    <p role="status" aria-live="polite" class="text-sm text-[var(--color-text-muted)]">
+      @if (dirty()) {
+        {{ 'tutoring.tutor.availability.unsaved' | translate }}
+      } @else {
+        {{ 'tutoring.tutor.availability.allSaved' | translate }}
+      }
+      <span aria-hidden="true"> · </span>{{ 'tutoring.tutor.availability.rules.count' | translate: { count: count(), max: maxRules() } }}
+    </p>
+  </div>
+</section>

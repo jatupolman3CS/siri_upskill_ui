@@ -1,0 +1,23 @@
+<ol class="flex flex-col gap-3" [attr.aria-label]="'tutoring.dispute.thread.label' | translate">
+  @for (message of messages(); track message.messageId) {
+    @if (message.kind === 'System') {
+      <li class="text-center text-sm text-[var(--color-text-muted)]">
+        {{ systemKey(message.body) | translate }}
+        <span aria-hidden="true">·</span>
+        <time [attr.datetime]="message.createdAtUtc">{{ message.createdAtUtc | bangkokDate: 'shortDateTime' }}</time>
+      </li>
+    } @else {
+      <li
+        class="flex max-w-[92%] flex-col gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] p-3 sm:max-w-[80%]"
+        [class]="message.isMine ? 'ms-auto bg-[var(--color-surface-muted)]' : 'glass-card'"
+      >
+        <p class="flex flex-wrap items-baseline gap-x-2 text-sm">
+          <span class="font-semibold text-[var(--color-text)]">{{ authorKey(message) | translate }}</span>
+          <time class="text-[var(--color-text-muted)]" [attr.datetime]="message.createdAtUtc">{{ message.createdAtUtc | bangkokDate: 'shortDateTime' }}</time>
+        </p>
+        <p class="whitespace-pre-line break-words text-base text-[var(--color-text)]">{{ message.body }}</p>
+        <app-evidence-link-list [links]="message.evidenceLinks" />
+      </li>
+    }
+  }
+</ol>

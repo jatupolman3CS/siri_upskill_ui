@@ -1,0 +1,128 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <a
+        routerLink="/admin/tutoring/tutors"
+        class="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >{{ 'tutoring.admin.tutors.backToList' | translate }}</a>
+      <h1 class="break-words text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ tutor()?.displayName ?? ('tutoring.admin.tutors.detailHeading' | translate) }}</h1>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="10rem" radius="lg" />
+      <app-skeleton variant="block" height="8rem" radius="lg" />
+    </div>
+  } @else if (isMissing()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.tutors.notFoundHeading' | translate" [description]="'tutoring.admin.tutors.notFoundDescription' | translate" />
+    </div>
+  } @else if (hasError()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.tutors.loadErrorHeading' | translate" [description]="errorKey() | translate">
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else if (tutor(); as current) {
+    <section class="glass-card flex flex-col gap-5 rounded-2xl p-5" aria-labelledby="tutor-overview-heading">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <h2 id="tutor-overview-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.tutors.overview' | translate }}</h2>
+        <app-admin-chip [view]="statusView(current.status)" />
+      </div>
+
+      @if (current.statusReason) {
+        <p class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+          <span class="font-semibold">{{ 'tutoring.admin.tutors.statusReason' | translate }}</span>
+          <span class="mt-1 block whitespace-pre-line break-words">{{ current.statusReason }}</span>
+        </p>
+      }
+
+      <dl class="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.headline' | translate }}</dt>
+          <dd class="mt-1 break-words text-[var(--color-text)]">{{ current.headline ?? '-' }}</dd>
+        </div>
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.experience' | translate }}</dt>
+          <dd class="mt-1 text-[var(--color-text)]">{{ 'tutoring.admin.tutors.years' | translate: { count: current.yearsExperience } }}</dd>
+        </div>
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.listed' | translate }}</dt>
+          <dd class="mt-1 text-[var(--color-text)]">
+            {{ (current.isListed ? 'tutoring.admin.tutors.listedYes' : 'tutoring.admin.tutors.listedNo') | translate }}
+            <span class="block text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.listedNote' | translate }}</span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.verifiedAt' | translate }}</dt>
+          <dd class="mt-1 text-[var(--color-text)]">{{ current.verifiedAtUtc ? (current.verifiedAtUtc | bangkokDate: 'dateTime') : '-' }}</dd>
+        </div>
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.statusChanged' | translate }}</dt>
+          <dd class="mt-1 text-[var(--color-text)]">{{ current.statusChangedAtUtc | bangkokDate: 'dateTime' }}</dd>
+        </div>
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.nextAvailable' | translate }}</dt>
+          <dd class="mt-1 text-[var(--color-text)]">{{ current.nextAvailableAtUtc ? (current.nextAvailableAtUtc | bangkokDate: 'dateTime') : '-' }}</dd>
+        </div>
+      </dl>
+      <p class="whitespace-pre-line break-words text-sm text-[var(--color-text)]">{{ current.bio }}</p>
+    </section>
+
+    <div class="grid grid-cols-1 gap-8 xl:grid-cols-2">
+      <section class="glass-card flex flex-col gap-4 rounded-2xl p-5" aria-labelledby="tutor-performance-heading">
+        <h2 id="tutor-performance-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.tutors.performance' | translate }}</h2>
+        <dl class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.col.rating' | translate }}</dt>
+            <dd class="mt-1 text-xl font-semibold text-[var(--color-text)]">
+              {{ current.ratingCount > 0 ? ('tutoring.admin.tutors.ratingValue' | translate: { avg: current.ratingAverage.toFixed(1), count: current.ratingCount }) : ('tutoring.admin.tutors.noRating' | translate) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.col.completed' | translate }}</dt>
+            <dd class="mt-1 text-xl font-semibold text-[var(--color-text)]">{{ current.completedSessionsCount }}</dd>
+          </div>
+          <div class="col-span-2">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.col.reliability' | translate }}</dt>
+            <dd class="mt-1 text-xl font-semibold text-[var(--color-text)]">{{ current.reliabilityScore }}</dd>
+            <dd class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.reliabilityNote' | translate }}</dd>
+          </div>
+        </dl>
+        <a
+          [routerLink]="['/admin/tutoring/disputes']"
+          [queryParams]="{ tutorId: current.tutorId, status: 'all' }"
+          class="inline-flex min-h-11 items-center font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >{{ 'tutoring.admin.tutors.disputesLink' | translate }}</a>
+      </section>
+
+      <section class="glass-card flex flex-col gap-4 rounded-2xl p-5" aria-labelledby="tutor-actions-heading">
+        <h2 id="tutor-actions-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.tutors.actions' | translate }}</h2>
+        <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+          <p class="font-semibold">{{ 'tutoring.admin.tutors.commission' | translate }}: {{ current.effectiveCommissionPercent }}%</p>
+          <p class="text-xs text-[var(--color-text-muted)]">
+            {{ (current.commissionPercentOverride === null ? 'tutoring.admin.tutors.commissionIsDefault' : 'tutoring.admin.tutors.commissionIsOverride') | translate }}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <app-button variant="secondary" (click)="openDialog('commission')">{{ 'tutoring.admin.tutors.moderation.commission.open' | translate }}</app-button>
+          @if (current.status === 'Verified') {
+            <app-button variant="danger" (click)="openDialog('suspend')">{{ 'tutoring.admin.tutors.moderation.suspend.open' | translate }}</app-button>
+          }
+          @if (current.status === 'Suspended') {
+            <app-button (click)="openDialog('reinstate')">{{ 'tutoring.admin.tutors.moderation.reinstate.open' | translate }}</app-button>
+          }
+        </div>
+        @if (current.status !== 'Verified' && current.status !== 'Suspended') {
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.noStatusAction' | translate }}</p>
+        }
+      </section>
+    </div>
+
+    <app-tutor-record-lists [offerings]="current.offerings" [educations]="current.educations" [certificates]="current.certificates" />
+
+    <app-tutor-moderation-dialog [(open)]="dialogOpen" [mode]="dialogMode()" [tutor]="current" (done)="apply($event)" />
+  }
+</div>

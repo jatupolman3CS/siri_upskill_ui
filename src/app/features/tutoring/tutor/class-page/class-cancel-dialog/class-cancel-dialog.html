@@ -1,0 +1,110 @@
+<app-modal [(open)]="open" [titleText]="'tutoring.tutor.classes.cancel.title' | translate" [closeOnOverlayClick]="false">
+  @if (result(); as done) {
+    <div class="flex flex-col gap-3" role="status">
+      <p class="text-sm font-semibold text-[var(--color-text)]">{{ (done.alreadyCancelled ? 'tutoring.tutor.classes.cancel.alreadyCancelled' : 'tutoring.tutor.classes.cancel.receiptHeading') | translate }}</p>
+      @if (done.bookings.length > 0) {
+        <ul class="flex flex-col gap-2">
+          @for (booking of done.bookings; track booking.bookingId) {
+            <li class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+              <p class="font-semibold">{{ 'tutoring.tutor.classes.cancel.booking' | translate: { no: booking.bookingNo } }}</p>
+              <p>
+                {{ settlementKey(booking.settlement) | translate }}
+                @if (booking.settlement === 'Money') {
+                  : {{ booking.refundAmount | currencyThb }}
+                }
+                @if (booking.refundStatus; as status) {
+                  <span class="text-[var(--color-text-muted)]"> · {{ refundStatusKey(status) | translate }}</span>
+                }
+              </p>
+            </li>
+          }
+        </ul>
+      }
+      @if (done.penaltyKind; as kind) {
+        <p class="text-sm text-[var(--color-text)]">
+          {{ 'tutoring.tutor.classes.cancel.penaltyApplied' | translate: { kind: (penaltyKey(kind) | translate), points: done.penaltyPoints, score: done.reliabilityScore } }}
+        </p>
+      } @else {
+        <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.tutor.classes.cancel.noPenalty' | translate: { score: done.reliabilityScore } }}</p>
+      }
+      @if (done.suspended) {
+        <p role="alert" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm font-semibold text-[var(--color-text)]">
+          {{ 'tutoring.tutor.classes.cancel.nowSuspended' | translate }}
+        </p>
+      }
+    </div>
+  } @else if (quoteLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.classes.cancel.loadingQuote' | translate">
+      <app-skeleton variant="block" height="8rem" radius="lg" />
+    </div>
+  } @else if (quoteFailed()) {
+    <div class="flex flex-col items-start gap-3">
+      <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.tutor.classes.cancel.quoteError' | translate }}</p>
+      <app-button size="sm" variant="secondary" (click)="retryQuote()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </div>
+  } @else if (quote(); as current) {
+    <div class="flex flex-col gap-4">
+      <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.tutor.classes.cancel.intro' | translate: { time: (current.startsAtUtc | bangkokDate: 'shortDateTime') } }}</p>
+
+      @if (refusalKey(); as key) {
+        <p role="alert" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">{{ key | translate }}</p>
+      } @else {
+        <dl class="grid gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4 text-sm">
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.cancel.affected' | translate }}</dt>
+            <dd class="font-semibold text-[var(--color-text)]">{{ current.affectedBookings }}</dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.cancel.refundTotal' | translate }}</dt>
+            <dd class="font-semibold text-[var(--color-text)]">{{ current.totalRefundAmount | currencyThb }}</dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.cancel.penalty' | translate }}</dt>
+            <dd class="text-end font-semibold text-[var(--color-text)]">
+              @if (current.penaltyKind; as kind) {
+                {{ 'tutoring.tutor.classes.cancel.penaltyValue' | translate: { kind: (penaltyKey(kind) | translate), points: current.penaltyPoints } }}
+              } @else {
+                {{ 'tutoring.tutor.classes.cancel.noPenaltyShort' | translate }}
+              }
+            </dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.cancel.score' | translate }}</dt>
+            <dd class="font-semibold text-[var(--color-text)]">
+              {{ 'tutoring.tutor.classes.cancel.scoreValue' | translate: { current: current.currentReliabilityScore, projected: current.projectedReliabilityScore } }}
+            </dd>
+          </div>
+        </dl>
+        @if (current.willTriggerSuspension) {
+          <p role="alert" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm font-semibold text-[var(--color-text)]">
+            {{ 'tutoring.tutor.classes.cancel.willSuspend' | translate }}
+          </p>
+        }
+
+        <form (submit)="$event.preventDefault(); submit()" novalidate>
+          <app-tutor-textarea
+            [formControl]="reason"
+            [label]="'tutoring.tutor.classes.cancel.reason' | translate"
+            [helperText]="'tutoring.tutor.classes.cancel.reasonHelp' | translate: { min: limits.min }"
+            [errorMessage]="reasonError()"
+            [maxLength]="limits.max"
+            [rows]="3"
+            [required]="true"
+          />
+        </form>
+        <app-tutor-problem [message]="problem()" />
+      }
+    </div>
+  }
+
+  <div modalFooter class="flex gap-3">
+    @if (result()) {
+      <app-button (click)="open.set(false)">{{ 'tutoring.tutor.common.close' | translate }}</app-button>
+    } @else {
+      <app-button variant="secondary" [disabled]="busy()" (click)="open.set(false)">{{ 'tutoring.tutor.classes.cancel.keep' | translate }}</app-button>
+      @if (quote()?.canCancel) {
+        <app-button variant="danger" [loading]="busy()" [disabled]="busy()" (click)="submit()">{{ 'tutoring.tutor.classes.cancel.confirm' | translate }}</app-button>
+      }
+    }
+  </div>
+</app-modal>

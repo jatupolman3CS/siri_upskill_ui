@@ -1,0 +1,57 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.admin.analytics.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.subheading' | translate }}</p>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  <app-analytics-overview />
+
+  <section class="flex flex-col gap-4" aria-labelledby="analytics-reports-heading">
+    <h2 id="analytics-reports-heading" class="sr-only">{{ 'tutoring.admin.analytics.reportsHeading' | translate }}</h2>
+
+    <div role="group" [attr.aria-label]="'tutoring.admin.analytics.tabsLabel' | translate" class="flex flex-wrap gap-2">
+      @for (option of tabs; track option) {
+        <button
+          type="button"
+          [attr.aria-pressed]="tab() === option"
+          (click)="chooseTab(option)"
+          class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          [class]="tab() === option ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+        >
+          {{ 'tutoring.admin.analytics.tab.' + option | translate }}
+        </button>
+      }
+    </div>
+
+    <app-analytics-controls [tab]="tab()" [filters]="filters()" [today]="today" (apply)="apply($event)" />
+
+    @if (issueText(); as text) {
+      <p role="alert" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-4 text-base text-[var(--color-text)]">{{ text }}</p>
+    } @else {
+      @switch (tab()) {
+        @case ('revenue') {
+          <app-revenue-report [from]="filters().from" [to]="filters().to" [granularity]="filters().granularity" />
+        }
+        @case ('search') {
+          <app-search-demand-report [from]="filters().from" [to]="filters().to" [top]="filters().top" />
+        }
+        @case ('retention') {
+          <app-retention-report [fromMonth]="filters().fromMonth" [toMonth]="filters().toMonth" />
+        }
+        @case ('funnel') {
+          <app-funnel-report [from]="filters().from" [to]="filters().to" [segment]="filters().segment" />
+        }
+        @case ('tutors') {
+          <app-top-tutors-report [from]="filters().from" [to]="filters().to" [sort]="filters().sort" [top]="filters().top" />
+        }
+        @case ('kyc') {
+          <app-kyc-aging-report />
+        }
+      }
+    }
+  </section>
+</div>

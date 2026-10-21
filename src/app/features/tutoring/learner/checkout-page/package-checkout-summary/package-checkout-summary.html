@@ -1,0 +1,37 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="package-summary-heading">
+  <h2 id="package-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.checkout.summary.heading' | translate }}</h2>
+
+  <dl class="flex flex-col gap-3 text-sm">
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.status' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">{{ statusKey() | translate }}</dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.tutor' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">{{ purchase().tutor.displayName }}</dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.lessons' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">
+        {{ 'tutoring.learner.packages.checkout.summary.lessonsValue' | translate: { count: purchase().sessionsTotal, minutes: purchase().durationMinutes } }}
+      </dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.learner' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">{{ purchase().learner.nickname }}</dd>
+    </div>
+    @if (purchase().expiresAtUtc; as expires) {
+      <div class="flex items-baseline justify-between gap-3">
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.validUntil' | translate }}</dt>
+        <dd class="text-right font-medium text-[var(--color-text)]">{{ expires | bangkokDate: 'dateTime' }}</dd>
+      </div>
+    }
+    <div class="flex items-baseline justify-between gap-3 border-t border-[var(--color-border)] pt-3">
+      <dt class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.checkout.summary.total' | translate }}</dt>
+      <dd class="text-right text-xl font-bold text-[var(--color-primary-text)]">{{ purchase().priceSnapshot | currencyThb }}</dd>
+    </div>
+  </dl>
+
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.expiryNote' | translate }}</p>
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.times' | translate }}</p>
+</section>

@@ -1,0 +1,44 @@
+<section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-photo-heading">
+  <h2 id="tutor-photo-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.photo.heading' | translate }}</h2>
+
+  <div class="flex items-center gap-4">
+    <div class="relative size-24 shrink-0 overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]">
+      @if (photoUrl(); as url) {
+        <img [ngSrc]="url | mediaUrl" [alt]="'tutoring.tutor.photo.alt' | translate: { name: displayName() }" width="96" height="96" class="size-24 object-cover" />
+      } @else {
+        <span class="flex size-24 items-center justify-center text-[var(--color-text-muted)]">
+          <ng-icon name="phosphorUser" aria-hidden="true" class="text-4xl" />
+        </span>
+      }
+    </div>
+    <div class="flex min-w-0 flex-col gap-2">
+      <input
+        #fileInput
+        type="file"
+        class="sr-only"
+        tabindex="-1"
+        aria-hidden="true"
+        accept=".jpg,.jpeg,.png,.webp"
+        (change)="onPicked($event)"
+      />
+      <app-button size="sm" variant="secondary" [loading]="busy()" [disabled]="disabled()" (click)="fileInput.click()">
+        <ng-icon leading name="phosphorUploadSimple" aria-hidden="true" />
+        {{ (photoUrl() ? 'tutoring.tutor.photo.replace' : 'tutoring.tutor.photo.upload') | translate }}
+      </app-button>
+      @if (photoUrl()) {
+        <app-button size="sm" variant="ghost" [disabled]="busy() || disabled()" (click)="remove()">
+          <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+          {{ 'tutoring.tutor.photo.remove' | translate }}
+        </app-button>
+      }
+    </div>
+  </div>
+
+  <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.photo.help' | translate }}</p>
+  <p class="tone-gold flex items-start gap-1.5 text-xs text-[var(--color-text)]">
+    <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-sm text-[var(--tone-fg)]" />
+    <span>{{ 'tutoring.tutor.photo.exifWarning' | translate }}</span>
+  </p>
+
+  <app-tutor-problem [message]="problem()" />
+</section>

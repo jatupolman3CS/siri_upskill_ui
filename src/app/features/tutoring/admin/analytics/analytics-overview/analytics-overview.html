@@ -1,0 +1,72 @@
+<app-analytics-report-frame
+  headingKey="tutoring.admin.analytics.overview.heading"
+  [status]="state.status()"
+  [errorText]="state.errorText()"
+  [generatedAtUtc]="state.report()?.generatedAtUtc ?? null"
+  (refresh)="state.reload()"
+>
+  @if (state.report(); as overview) {
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.cashNet' | translate"
+        [value]="(overview.last30Days.cashNetAmount | currencyThb) ?? ''"
+        [hint]="'tutoring.admin.analytics.overview.last30' | translate"
+      />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.commission' | translate"
+        [value]="(overview.last30Days.platformCommissionAmount | currencyThb) ?? ''"
+        [hint]="'tutoring.admin.analytics.overview.last30' | translate"
+      />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.completed' | translate"
+        [value]="(overview.last30Days.completedBookings | number: '1.0-0') ?? ''"
+        [hint]="'tutoring.admin.analytics.overview.last30' | translate"
+      />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.holdConversion' | translate"
+        [value]="rateText(overview.last30Days.holdConversionRate) ?? '-'"
+        [hint]="overview.last30Days.holdConversionRate === null ? ('tutoring.admin.analytics.rate.notEnoughData' | translate) : ('tutoring.admin.analytics.overview.holdConversionHint' | translate)"
+      />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.completionRate' | translate"
+        [value]="rateText(overview.last30Days.completionRate) ?? '-'"
+        [hint]="overview.last30Days.completionRate === null ? ('tutoring.admin.analytics.rate.notEnoughData' | translate) : ('tutoring.admin.analytics.overview.completionRateHint' | translate)"
+      />
+      @if (overview.latestMatureRetention; as retention) {
+        <app-kpi-tile
+          [label]="'tutoring.admin.analytics.overview.retention60' | translate"
+          [value]="rateText(retention.rate60) ?? '-'"
+          [hint]="'tutoring.admin.analytics.overview.retentionCohort' | translate: { month: monthText(retention.cohortMonth) }"
+        />
+      } @else {
+        <app-kpi-tile
+          [label]="'tutoring.admin.analytics.overview.retention60' | translate"
+          value="-"
+          [hint]="'tutoring.admin.analytics.rate.notEnoughData' | translate"
+        />
+      }
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.kycWaiting' | translate"
+        [value]="(overview.kycAwaitingAdmin | number: '1.0-0') ?? ''"
+        [hint]="overview.kycOldestAgeHours === null ? null : ('tutoring.admin.analytics.overview.kycOldest' | translate: { hours: ((overview.kycOldestAgeHours | number: '1.0-1') ?? '') })"
+      />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.overview.disputesOpen' | translate"
+        [value]="(overview.disputes.open | number: '1.0-0') ?? ''"
+        [hint]="'tutoring.admin.analytics.overview.disputesHint' | translate: { overdue: overview.disputes.overdue, high: overview.disputes.highPriority }"
+      />
+    </div>
+
+    <div class="flex flex-wrap items-baseline gap-x-6 gap-y-2 text-sm text-[var(--color-text)]">
+      @if (overview.topSearchedSubject; as subject) {
+        <p>{{ 'tutoring.admin.analytics.overview.topSearched' | translate: { name: subject.nameTh, count: subject.searchCount } }}</p>
+      }
+      <a routerLink="/admin/tutoring/kyc" class="font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]">
+        {{ 'tutoring.admin.analytics.kyc.openQueue' | translate }}
+      </a>
+      <a routerLink="/admin/tutoring/disputes" class="font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]">
+        {{ 'tutoring.admin.analytics.overview.openDisputes' | translate }}
+      </a>
+    </div>
+  }
+</app-analytics-report-frame>

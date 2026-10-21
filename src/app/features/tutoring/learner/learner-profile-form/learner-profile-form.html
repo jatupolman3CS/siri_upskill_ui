@@ -1,0 +1,70 @@
+<form
+  #formRoot
+  [formGroup]="form"
+  (ngSubmit)="save()"
+  novalidate
+  class="flex flex-col gap-5"
+  [attr.aria-label]="(isEdit() ? 'tutoring.learner.form.editHeading' : 'tutoring.learner.form.addHeading') | translate"
+>
+  <app-input
+    formControlName="nickname"
+    autocomplete="off"
+    [label]="'tutoring.learner.form.nickname' | translate"
+    [helperText]="'tutoring.learner.form.nicknameHelp' | translate: { max: nicknameMax }"
+    [errorMessage]="message('nickname')"
+    [required]="true"
+    (focusout)="feedback.touch('nickname')"
+  />
+
+  <app-select
+    formControlName="gradeLevel"
+    [label]="'tutoring.learner.form.grade' | translate"
+    [options]="gradeOptions()"
+    [required]="true"
+  />
+
+  <div class="flex flex-col gap-1">
+    <app-checkbox formControlName="isMinor" [label]="'tutoring.learner.form.isMinor' | translate" />
+    @if (gradeLocksMinor()) {
+      <p class="ps-[3.125rem] text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.form.isMinorLocked' | translate }}</p>
+    }
+  </div>
+
+  @if (needsConsent()) {
+    <fieldset class="flex flex-col gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+      <legend class="px-1 text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.consent.legend' | translate }}</legend>
+      <p class="text-base leading-relaxed text-[var(--color-text)]">{{ 'tutoring.learner.consent.text' | translate }}</p>
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.consent.version' | translate: { version: consentVersion } }}</p>
+      @if (consentSavedAt(); as savedAt) {
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ 'tutoring.learner.consent.previous' | translate: { date: (savedAt | bangkokDate: 'date') } }}
+        </p>
+      }
+      <app-checkbox formControlName="guardianConsent" [label]="'tutoring.learner.consent.label' | translate" [required]="true" (focusout)="feedback.touch('guardianConsent')" />
+      @if (message('guardianConsent'); as consentMessage) {
+        <p #consentError tabindex="-1" role="alert" class="flex items-center gap-1 text-sm text-[var(--color-danger)] focus-visible:outline-none">
+          {{ consentMessage }}
+        </p>
+      }
+    </fieldset>
+  }
+
+  <p class="tone-blue rounded-[var(--radius-md)] bg-[var(--tone-bg)] px-3 py-2 text-sm text-[var(--color-text)]">
+    {{ 'tutoring.learner.form.privacyNote' | translate }}
+  </p>
+
+  <app-tutor-problem [message]="problem()">
+    @if (consentOutdated()) {
+      <app-button size="sm" variant="secondary" (click)="reloadPage()">{{ 'tutoring.learner.form.reload' | translate }}</app-button>
+    }
+  </app-tutor-problem>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <app-button type="submit" [loading]="saving()">
+      {{ (isEdit() ? 'tutoring.learner.form.save' : 'tutoring.learner.form.create') | translate }}
+    </app-button>
+    @if (cancellable()) {
+      <app-button variant="ghost" [disabled]="saving()" (click)="cancelled.emit()">{{ 'tutoring.learner.form.cancel' | translate }}</app-button>
+    }
+  </div>
+</form>

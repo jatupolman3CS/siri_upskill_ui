@@ -1,0 +1,75 @@
+<section class="glass-card flex flex-col gap-5 rounded-2xl p-5" aria-labelledby="kyc-decision-heading">
+  <h2 id="kyc-decision-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.kyc.decision.heading' | translate }}</h2>
+
+  @if (!decidable()) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.decision.notDecidable' | translate }}</p>
+  } @else {
+    @if (detail().status === 'Submitted') {
+      <div class="flex flex-col items-start gap-2">
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.decision.startHelp' | translate }}</p>
+        <app-button size="sm" variant="secondary" [loading]="starting()" [disabled]="starting()" (click)="startReview()">{{ 'tutoring.admin.kyc.decision.start' | translate }}</app-button>
+      </div>
+    }
+
+    @if (detail().tutorStatus !== 'PendingVerification') {
+      <p role="note" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+        {{ 'tutoring.admin.kyc.decision.profileMoved' | translate }}
+      </p>
+    }
+
+    <form (submit)="$event.preventDefault(); review()" novalidate class="flex flex-col gap-5">
+      <fieldset class="flex flex-col gap-3">
+        <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">{{ 'tutoring.admin.kyc.decision.choose' | translate }}</legend>
+        @for (option of options; track option) {
+          <label
+            class="glass-card flex min-h-11 cursor-pointer items-start gap-3 rounded-[var(--radius-md)] p-3 has-[:checked]:border-[var(--color-primary)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-focus-ring)]"
+          >
+            <input type="radio" name="kyc-decision" class="mt-1 h-4 w-4 shrink-0 accent-[var(--color-primary)]" [checked]="decision() === option" (change)="choose(option)" />
+            <span class="min-w-0">
+              <span class="block text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.kyc.decision.option.' + option | translate }}</span>
+              <span class="block text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.decision.effect.' + option | translate }}</span>
+            </span>
+          </label>
+        }
+      </fieldset>
+
+      <app-tutor-textarea
+        [formControl]="note"
+        [label]="'tutoring.admin.kyc.decision.note' | translate"
+        [helperText]="(decision() === 'Approve' ? 'tutoring.admin.kyc.decision.noteHelpOptional' : 'tutoring.admin.kyc.decision.noteHelp') | translate"
+        [errorMessage]="noteError()"
+        [maxLength]="noteMax"
+        [rows]="4"
+        [required]="decision() !== null && decision() !== 'Approve'"
+      />
+      <p class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3 text-sm font-semibold text-[var(--color-text)]">
+        {{ 'tutoring.admin.kyc.decision.applicantSees' | translate }}
+      </p>
+
+      @if (approveBlocked()) {
+        <p role="alert" class="text-sm text-[var(--color-danger)]">{{ 'tutoring.admin.kyc.decision.issue.undecidedDocuments' | translate: { count: undecidedCount() } }}</p>
+      }
+      <app-tutor-problem [message]="confirmOpen() ? null : problem()" />
+
+      <app-button type="submit" [disabled]="decision() === null || busy() || approveBlocked()">{{ 'tutoring.admin.kyc.decision.review' | translate }}</app-button>
+    </form>
+  }
+</section>
+
+<app-admin-confirm-dialog
+  [(open)]="confirmOpen"
+  [titleText]="'tutoring.admin.kyc.decision.confirmTitle' | translate"
+  [confirmLabel]="(decision() ? 'tutoring.admin.kyc.decision.confirm.' + decision() : 'tutoring.admin.kyc.decision.review') | translate"
+  [danger]="decision() === 'Reject'"
+  [busy]="busy()"
+  [problem]="problem()"
+  (confirmed)="send()"
+>
+  @if (decision(); as chosen) {
+    <p class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.kyc.decision.summary.' + chosen | translate: { name: detail().tutorDisplayName } }}</p>
+    <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.admin.kyc.decision.purgeNotice.' + chosen | translate }}</p>
+    @if (chosen !== 'Approve') {
+      <p class="break-words rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">{{ note.value.trim() }}</p>
+    }
+  }
+</app-admin-confirm-dialog>

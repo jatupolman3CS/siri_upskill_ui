@@ -1,0 +1,38 @@
+<app-modal [(open)]="open" [titleText]="'tutoring.admin.kyc.log.title' | translate: { type: (typeLabelKey() | translate) }">
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate">
+      <app-skeleton variant="block" height="8rem" radius="lg" />
+    </div>
+  } @else if (errorKey(); as key) {
+    <div role="alert" class="flex flex-col items-start gap-3">
+      <p class="text-sm text-[var(--color-text)]">{{ key | translate }}</p>
+      <app-button size="sm" variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+    </div>
+  } @else if (items().length === 0) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.log.empty' | translate }}</p>
+  } @else {
+    <ul class="flex flex-col gap-2">
+      @for (entry of items(); track entry.accessedAtUtc + entry.action + $index) {
+        <li class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+          <p class="font-semibold">{{ 'tutoring.admin.kyc.log.action.' + entry.action | translate }} · {{ entry.accessedAtUtc | bangkokDate: 'dateTime' }}</p>
+          <p class="break-words text-xs text-[var(--color-text-muted)]">
+            @if (entry.accessedByUserId) {
+              {{ 'tutoring.admin.kyc.log.by' | translate: { id: shortId(entry.accessedByUserId) } }}
+            } @else {
+              {{ 'tutoring.admin.kyc.log.bySystem' | translate }}
+            }
+            @if (entry.ipAddress) {
+              · {{ entry.ipAddress }}
+            }
+          </p>
+        </li>
+      }
+    </ul>
+    @if (totalPages() > 1) {
+      <app-pagination class="mt-4" [(currentPage)]="page" [totalPages]="totalPages()" />
+    }
+  }
+  <div modalFooter>
+    <app-button variant="secondary" (click)="open.set(false)">{{ 'tutoring.admin.common.close' | translate }}</app-button>
+  </div>
+</app-modal>

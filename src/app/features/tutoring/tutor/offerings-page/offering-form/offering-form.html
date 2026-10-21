@@ -1,0 +1,115 @@
+<form
+  #formRoot
+  [formGroup]="form"
+  (ngSubmit)="save()"
+  novalidate
+  class="flex flex-col gap-5"
+  [attr.aria-label]="(isEdit() ? 'tutoring.tutor.offerings.editHeading' : 'tutoring.tutor.offerings.addHeading') | translate"
+>
+  <div class="grid gap-5 md:grid-cols-3">
+    <app-select
+      class="md:col-span-3"
+      formControlName="subjectId"
+      [label]="'tutoring.tutor.offerings.subject' | translate"
+      [placeholder]="'tutoring.tutor.offerings.subjectPlaceholder' | translate"
+      [options]="subjectOptions()"
+      [errorMessage]="message('subjectId')"
+      [required]="true"
+      (focusout)="feedback.touch('subjectId')"
+    />
+    <app-select formControlName="level" [label]="'tutoring.tutor.offerings.level' | translate" [options]="levelOptions()" [required]="true" />
+    <app-select
+      formControlName="curriculum"
+      [label]="'tutoring.tutor.offerings.curriculum' | translate"
+      [options]="curriculumOptions()"
+      [required]="true"
+    />
+    <app-input
+      formControlName="hourlyRate"
+      type="number"
+      step="0.01"
+      inputMode="decimal"
+      [label]="'tutoring.tutor.offerings.hourlyRate' | translate"
+      [helperText]="'tutoring.tutor.offerings.hourlyRateHelp' | translate"
+      [errorMessage]="message('hourlyRate')"
+      [required]="true"
+      (focusout)="feedback.touch('hourlyRate')"
+    />
+  </div>
+  @if (isEdit()) {
+    <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.offerings.identityLocked' | translate }}</p>
+  }
+
+  <fieldset class="flex flex-col gap-4 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+    <legend class="px-1 text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.offerings.groupLegend' | translate }}</legend>
+    <app-checkbox formControlName="groupEnabled" [label]="'tutoring.tutor.offerings.groupEnable' | translate" />
+    @if (groupEnabled()) {
+      <div class="grid gap-5 md:grid-cols-2">
+        <app-input
+          formControlName="groupRate"
+          type="number"
+          step="0.01"
+          inputMode="decimal"
+          [label]="'tutoring.tutor.offerings.groupRate' | translate"
+          [helperText]="'tutoring.tutor.offerings.groupRateHelp' | translate"
+          [errorMessage]="message('groupRate')"
+          [required]="true"
+          (focusout)="feedback.touch('groupRate')"
+        />
+        <app-input
+          formControlName="groupSeats"
+          type="number"
+          inputMode="numeric"
+          [label]="'tutoring.tutor.offerings.groupSeats' | translate"
+          [helperText]="'tutoring.tutor.offerings.groupSeatsHelp' | translate: { min: seats.min, max: seats.max }"
+          [errorMessage]="message('groupSeats')"
+          [required]="true"
+          (focusout)="feedback.touch('groupSeats')"
+        />
+      </div>
+    }
+  </fieldset>
+
+  <fieldset class="flex flex-col gap-4 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+    <legend class="px-1 text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.offerings.trialLegend' | translate }}</legend>
+    <app-checkbox formControlName="trialEnabled" [label]="'tutoring.tutor.offerings.trialEnable' | translate" />
+    @if (trialEnabled()) {
+      <div class="grid gap-5 md:grid-cols-2">
+        <app-select
+          formControlName="trialMinutes"
+          [label]="'tutoring.tutor.offerings.trialMinutes' | translate"
+          [options]="trialMinuteOptions()"
+          [required]="true"
+        />
+        <app-input
+          formControlName="trialPrice"
+          type="number"
+          step="0.01"
+          inputMode="decimal"
+          [label]="'tutoring.tutor.offerings.trialPrice' | translate"
+          [helperText]="'tutoring.tutor.offerings.trialPriceHelp' | translate"
+          [errorMessage]="message('trialPrice')"
+          [required]="true"
+          (focusout)="feedback.touch('trialPrice')"
+        />
+      </div>
+    }
+  </fieldset>
+
+  @if (isEdit()) {
+    <app-checkbox formControlName="isActive" [label]="'tutoring.tutor.offerings.active' | translate" />
+  }
+
+  <app-tutor-problem [message]="problem()">
+    @if (canReopenDuplicate()) {
+      <app-button size="sm" variant="secondary" (click)="reopenDuplicate()">{{ 'tutoring.tutor.offerings.reopenDuplicate' | translate }}</app-button>
+    }
+  </app-tutor-problem>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <app-button type="submit" [loading]="saving()">
+      {{ (isEdit() ? 'tutoring.tutor.offerings.save' : 'tutoring.tutor.offerings.create') | translate }}
+    </app-button>
+    <app-button variant="ghost" [disabled]="saving()" (click)="cancelled.emit()">{{ 'tutoring.tutor.common.cancel' | translate }}</app-button>
+  </div>
+</form>

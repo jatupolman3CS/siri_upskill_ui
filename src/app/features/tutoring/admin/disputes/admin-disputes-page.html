@@ -1,0 +1,179 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.admin.disputes.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.subheading' | translate }}</p>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  <section aria-labelledby="dispute-summary-heading" class="flex flex-col gap-3">
+    <h2 id="dispute-summary-heading" class="sr-only">{{ 'tutoring.admin.disputes.summary.heading' | translate }}</h2>
+    @if (summary(); as numbers) {
+      <ul class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+        @for (entry of tiles(); track entry.id) {
+          <li>
+            @if (entry.filter) {
+              <button
+                type="button"
+                (click)="applyTile(entry.filter)"
+                class="glass-card flex min-h-11 w-full flex-col items-start rounded-[var(--radius-lg)] p-4 text-start transition-colors hover:bg-[var(--color-surface-muted)]
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+              >
+                <span class="text-2xl font-bold text-[var(--color-text)]">{{ entry.value }}</span>
+                <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.summary.' + entry.id | translate }}</span>
+              </button>
+            } @else {
+              <div class="glass-card flex w-full flex-col items-start rounded-[var(--radius-lg)] p-4">
+                <span class="text-2xl font-bold text-[var(--color-text)]">{{ entry.value }}</span>
+                <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.summary.' + entry.id | translate }}</span>
+              </div>
+            }
+          </li>
+        }
+        <li>
+          <div class="glass-card flex w-full flex-col items-start rounded-[var(--radius-lg)] p-4">
+            <span class="text-2xl font-bold text-[var(--color-text)]">{{ numbers.frozenAmountTotal | currencyThb }}</span>
+            <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.summary.frozenAmountTotal' | translate }}</span>
+          </div>
+        </li>
+        @if (numbers.oldestOpenedAtUtc) {
+          <li>
+            <div class="glass-card flex w-full flex-col items-start rounded-[var(--radius-lg)] p-4">
+              <span class="text-lg font-bold text-[var(--color-text)]">{{ numbers.oldestOpenedAtUtc | bangkokDate: 'dateTime' }}</span>
+              <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.summary.oldest' | translate }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else if (summaryFailed()) {
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.summary.failed' | translate }}</p>
+    } @else {
+      <app-skeleton variant="block" height="5rem" radius="lg" />
+    }
+  </section>
+
+  <form class="glass-card flex flex-col gap-4 rounded-2xl p-5" [formGroup]="form" (submit)="$event.preventDefault(); apply()" role="search">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <app-select formControlName="status" (change)="apply()" [label]="'tutoring.admin.disputes.filter.status' | translate" [options]="statusOptions()" />
+      <app-select formControlName="category" (change)="apply()" [label]="'tutoring.admin.disputes.filter.category' | translate" [options]="categoryOptions()" />
+      <app-select formControlName="flow" (change)="apply()" [label]="'tutoring.admin.disputes.filter.flow' | translate" [options]="flowOptions()" />
+      <app-select formControlName="priority" (change)="apply()" [label]="'tutoring.admin.disputes.filter.priority' | translate" [options]="priorityOptions()" />
+    </div>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
+      <app-select formControlName="sort" (change)="apply()" [label]="'tutoring.admin.disputes.filter.sort' | translate" [options]="sortOptions()" />
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div class="w-full sm:max-w-sm">
+          <app-input
+            formControlName="q"
+            type="search"
+            [label]="'tutoring.admin.disputes.filter.search' | translate"
+            [placeholder]="'tutoring.admin.disputes.filter.searchPlaceholder' | translate"
+          />
+        </div>
+        <app-button type="submit" variant="secondary">{{ 'tutoring.admin.tutors.search' | translate }}</app-button>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-x-6">
+      <app-checkbox formControlName="overdue" (change)="apply()" [label]="'tutoring.admin.disputes.filter.overdue' | translate" />
+      <app-checkbox formControlName="assignedToMe" (change)="apply()" [label]="'tutoring.admin.disputes.filter.mine' | translate" />
+      <app-checkbox formControlName="needsFollowUp" (change)="apply()" [label]="'tutoring.admin.disputes.filter.followUp' | translate" />
+      @if (query().tutorId) {
+        <app-button variant="secondary" size="sm" (click)="clearTutor()">{{ 'tutoring.admin.disputes.filter.oneTutor' | translate }}</app-button>
+      }
+      @if (hasFilters()) {
+        <app-button variant="ghost" size="sm" (click)="clearFilters()">{{ 'tutoring.admin.common.clearFilters' | translate }}</app-button>
+      }
+    </div>
+  </form>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="4rem" radius="lg" />
+      <app-skeleton variant="block" height="4rem" radius="lg" />
+      <app-skeleton variant="block" height="4rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.disputes.loadErrorHeading' | translate" [description]="errorKey() | translate">
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else if (items().length === 0) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state
+        [heading]="(hasFilters() ? 'tutoring.admin.disputes.emptyFilteredHeading' : 'tutoring.admin.disputes.emptyHeading') | translate"
+        [description]="(hasFilters() ? 'tutoring.admin.disputes.emptyFilteredDescription' : 'tutoring.admin.disputes.emptyDescription') | translate"
+      >
+        @if (hasFilters()) {
+          <app-button emptyStateAction variant="secondary" (click)="clearFilters()">{{ 'tutoring.admin.common.clearFilters' | translate }}</app-button>
+        }
+      </app-empty-state>
+    </div>
+  } @else {
+    <div class="glass-card overflow-hidden rounded-2xl">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[64rem] text-start text-sm text-[var(--color-text)]">
+          <caption class="sr-only">{{ 'tutoring.admin.disputes.tableCaption' | translate }}</caption>
+          <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold text-[var(--color-text-muted)]">
+            <tr>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.disputes.col.case' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.disputes.col.status' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.disputes.col.parties' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.disputes.col.amount' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.disputes.col.opened' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.disputes.col.assigned' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            @for (item of items(); track item.disputeId) {
+              <tr class="align-top transition hover:bg-[var(--color-surface-muted)]/30">
+                <td class="max-w-[16rem] px-4 py-3">
+                  <a
+                    [routerLink]="['/admin/tutoring/disputes', item.disputeId]"
+                    class="break-all font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                  >{{ item.disputeNo }}</a>
+                  <p class="break-all text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.bookingNo' | translate: { no: item.bookingNo } }}</p>
+                  <p class="text-xs">{{ 'tutoring.enums.disputeCategory.' + item.category | translate }} · {{ 'tutoring.enums.disputeFlow.' + item.flow | translate }}</p>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex max-w-[16rem] flex-wrap gap-1.5">
+                    <app-admin-chip [view]="statusView(item.status)" />
+                    @for (flag of flags(item); track flag.labelKey) {
+                      <app-admin-chip [view]="flag" />
+                    }
+                  </div>
+                </td>
+                <td class="max-w-[14rem] px-4 py-3">
+                  <p class="break-words font-semibold">{{ item.tutor.displayName }}</p>
+                  <p class="break-words text-xs text-[var(--color-text-muted)]">
+                    {{ 'tutoring.admin.disputes.learner' | translate }}: {{ item.learnerNickname }}@if (item.learnerIsMinor) { ({{ 'tutoring.admin.disputes.minor' | translate }}) }
+                  </p>
+                </td>
+                <td class="whitespace-nowrap px-4 py-3">{{ item.amountAtStake | currencyThb }}</td>
+                <td class="whitespace-nowrap px-4 py-3">
+                  {{ item.openedAtUtc | bangkokDate: 'dateTime' }}
+                  <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.age' | translate: { hours: item.ageHours } }}</p>
+                  <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.slaDue' | translate: { date: (item.slaDueAtUtc | bangkokDate: 'dateTime') } }}</p>
+                </td>
+                <td class="px-4 py-3">
+                  @if (item.assignedToUserId === null) {
+                    <span class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.unassigned' | translate }}</span>
+                  } @else if (item.assignedToUserId === myId()) {
+                    <span class="font-semibold">{{ 'tutoring.admin.disputes.assignedYou' | translate }}</span>
+                  } @else {
+                    {{ 'tutoring.admin.disputes.assignedOther' | translate }}
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    @if (totalPages() > 1) {
+      <app-pagination [currentPage]="page()" (currentPageChange)="goToPage($event)" [totalPages]="totalPages()" />
+    }
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.common.total' | translate: { count: totalCount() } }}</p>
+  }
+</div>

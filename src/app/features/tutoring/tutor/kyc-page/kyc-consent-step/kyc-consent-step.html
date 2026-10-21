@@ -1,0 +1,26 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="kyc-consent-heading">
+  <h2 id="kyc-consent-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+    <ng-icon name="phosphorShieldCheck" aria-hidden="true" class="text-xl" />
+    {{ 'tutoring.kyc.consent.stepHeading' | translate }}
+  </h2>
+
+  @if (textAvailable()) {
+    <article class="flex flex-col gap-4 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4" aria-labelledby="kyc-consent-title">
+      <h3 id="kyc-consent-title" class="text-base font-semibold text-[var(--color-text)]">{{ titleKey() | translate }}</h3>
+      @for (part of parts; track part) {
+        <p class="text-sm leading-relaxed text-[var(--color-text)]">{{ partKey(part) | translate }}</p>
+      }
+      <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.kyc.consent.versionLine' | translate: { version: consentVersion() } }}</p>
+    </article>
+
+    <app-checkbox [formControl]="consent" [label]="'tutoring.kyc.consent.accept' | translate" />
+
+    <app-tutor-problem [message]="problem()" />
+
+    <div>
+      <app-button [disabled]="!accepted()" [loading]="submitting()" (click)="start()">{{ 'tutoring.kyc.consent.start' | translate }}</app-button>
+    </div>
+  } @else {
+    <p role="alert" class="tone-red text-sm text-[var(--tone-fg)]">{{ 'tutoring.kyc.consent.unavailable' | translate }}</p>
+  }
+</section>

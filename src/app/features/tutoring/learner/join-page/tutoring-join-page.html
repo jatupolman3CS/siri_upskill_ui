@@ -1,0 +1,127 @@
+@let s = state();
+
+<div class="page-shell page-shell-narrow">
+  <section
+    class="flex flex-col items-center gap-5 rounded-2xl glass-card p-6 text-center shadow-[var(--shadow-md)] sm:p-8"
+    aria-labelledby="tutoring-join-heading"
+  >
+    <div
+      class="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]"
+      aria-hidden="true"
+    >
+      @if (s.kind === 'checking') {
+        <span
+          class="inline-block h-8 w-8 animate-spin rounded-full border-[3px] border-[var(--color-border)] border-t-[var(--color-primary)] motion-reduce:animate-none"
+        ></span>
+      } @else {
+        <ng-icon [name]="view().icon" size="2rem" [class]="view().tone" />
+      }
+    </div>
+
+    <h1
+      #heading
+      id="tutoring-join-heading"
+      tabindex="-1"
+      class="mx-auto w-fit rounded-[var(--radius-sm)] px-3 py-1 text-xl font-bold text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] sm:text-2xl"
+    >
+      {{ view().heading | translate }}
+    </h1>
+
+    <!-- The single polite announcement for a screen change. Countdowns live outside it on purpose. -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col gap-1 text-base text-[var(--color-text-muted)]">
+      <p>{{ view().body | translate }}</p>
+      @if (s.kind === 'roomNotReady') {
+        <p>
+          {{
+            (s.exhausted ? 'tutoring.join.roomNotReady.gaveUp' : 'tutoring.join.roomNotReady.attempt')
+              | translate: { attempt: s.attempt, max: maxAttempts }
+          }}
+        </p>
+      }
+    </div>
+
+    <div class="flex flex-col items-center gap-3">
+      @if (s.kind === 'notOpen' && s.opensAtUtc) {
+        <p class="text-base text-[var(--color-text)]">
+          {{ 'tutoring.join.notOpen.opensAt' | translate: { dateTime: (s.opensAtUtc | bangkokDate: 'dateTime') } }}
+        </p>
+        <p class="text-2xl font-bold text-[var(--color-text)]">
+          <app-live-countdown [targetUtc]="s.opensAtUtc" [offsetMs]="s.offsetMs" />
+        </p>
+      }
+
+      @if (s.kind === 'ready' && meetUrl(); as url) {
+        <a
+          [href]="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+        >
+          <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="h-5 w-5" />
+          {{ 'tutoring.join.ready.openRoom' | translate }}
+          <span class="sr-only">({{ 'tutoring.join.ready.newTab' | translate }})</span>
+        </a>
+        <p class="max-w-prose text-sm text-[var(--color-text-muted)]">{{ 'tutoring.join.ready.popupNote' | translate }}</p>
+      }
+
+      @if (tutorMustAct()) {
+        <a
+          [routerLink]="tutorClassLink"
+          class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-5 text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        >
+          {{ 'tutoring.join.roomNotReady.manageRoom' | translate }}
+        </a>
+      }
+
+      @if (retryable()) {
+        <app-button (click)="retry()">{{ 'tutoring.join.retry' | translate }}</app-button>
+      }
+
+      @if (s.kind === 'closed') {
+        <p class="max-w-prose text-sm text-[var(--color-text)]">{{ 'tutoring.join.closed.dispute' | translate }}</p>
+      }
+
+      @if (s.kind === 'notFoundOrNoAccess' || s.kind === 'ended' || s.kind === 'cancelled' || s.kind === 'closed') {
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <a
+            routerLink="/my-tutoring"
+            [queryParams]="s.kind === 'notFoundOrNoAccess' ? null : { tab: 'history' }"
+            class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+          >
+            {{ (s.kind === 'notFoundOrNoAccess' ? 'tutoring.join.goMyTutoring' : 'tutoring.join.goHistory') | translate }}
+          </a>
+          @if (s.kind === 'notFoundOrNoAccess') {
+            <a
+              routerLink="/tutors"
+              class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-5 text-base font-medium text-[var(--color-text)] transition-colors duration-200 hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+            >
+              {{ 'tutoring.join.findTutors' | translate }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (s.kind === 'ready') {
+    <div class="flex flex-col gap-4 text-left">
+      @if (s.role === 'Learner') {
+        <p class="flex items-start gap-3 rounded-[var(--radius-md)] glass-card p-3 text-sm text-[var(--color-text)]">
+          <ng-icon name="phosphorShieldWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+          <span>{{ 'tutoring.join.forwardWarning' | translate }}</span>
+        </p>
+        <app-tutor-presence-check [sessionId]="sessionId" [startsAtUtc]="s.startsAtUtc" [offsetMs]="s.offsetMs" />
+      } @else {
+        <p class="flex items-start gap-3 rounded-[var(--radius-md)] glass-card p-3 text-sm text-[var(--color-text)]">
+          <ng-icon name="phosphorShieldWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+          <span>{{ 'tutoring.join.tutorLobbyNote' | translate }}</span>
+        </p>
+      }
+    </div>
+  } @else if (entering()) {
+    <p class="flex items-start gap-3 rounded-[var(--radius-md)] glass-card p-3 text-left text-sm text-[var(--color-text)]">
+      <ng-icon name="phosphorShieldWarning" aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+      <span>{{ 'tutoring.join.forwardWarning' | translate }}</span>
+    </p>
+  }
+</div>

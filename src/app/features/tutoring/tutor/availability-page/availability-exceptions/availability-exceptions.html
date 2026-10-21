@@ -1,0 +1,121 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-exceptions-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-exceptions-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.availability.exceptions.heading' | translate }}</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.exceptions.intro' | translate }}</p>
+  </header>
+
+  <form
+    #formRoot
+    [formGroup]="form"
+    (ngSubmit)="add()"
+    novalidate
+    class="flex flex-col gap-4 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4"
+    [attr.aria-label]="'tutoring.tutor.availability.exceptions.addHeading' | translate"
+  >
+    <h3 class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.availability.exceptions.addHeading' | translate }}</h3>
+    <div class="grid gap-4 md:grid-cols-2">
+      <app-input
+        formControlName="date"
+        type="date"
+        [label]="'tutoring.tutor.availability.exceptions.date' | translate"
+        [errorMessage]="message('date')"
+        [required]="true"
+        (focusout)="feedback.touch('date')"
+      />
+      <app-select
+        formControlName="choice"
+        [label]="'tutoring.tutor.availability.exceptions.type' | translate"
+        [options]="choiceOptions()"
+        [errorMessage]="message('choice')"
+        [required]="true"
+      />
+      @if (showTimes()) {
+        <app-select
+          formControlName="start"
+          [label]="'tutoring.tutor.availability.exceptions.start' | translate"
+          [placeholder]="'tutoring.tutor.availability.exceptions.timePlaceholder' | translate"
+          [options]="timeOptions()"
+          [errorMessage]="message('start')"
+          [required]="true"
+          (focusout)="feedback.touch('start')"
+        />
+        <app-select
+          formControlName="end"
+          [label]="'tutoring.tutor.availability.exceptions.end' | translate"
+          [placeholder]="'tutoring.tutor.availability.exceptions.timePlaceholder' | translate"
+          [options]="endOptions()"
+          [helperText]="'tutoring.tutor.availability.exceptions.sameDayHelp' | translate"
+          [errorMessage]="message('end')"
+          [required]="true"
+          (focusout)="feedback.touch('end')"
+        />
+      }
+      <app-input
+        class="md:col-span-2"
+        formControlName="note"
+        [label]="'tutoring.tutor.availability.exceptions.note' | translate"
+        [helperText]="'tutoring.tutor.availability.exceptions.noteHelp' | translate: { max: noteMax }"
+        [errorMessage]="message('note')"
+        (focusout)="feedback.touch('note')"
+      />
+    </div>
+    <app-tutor-problem [message]="problem()" />
+    <div>
+      <app-button type="submit" [loading]="adding()">{{ 'tutoring.tutor.availability.exceptions.add' | translate }}</app-button>
+    </div>
+  </form>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.availability.exceptions.loading' | translate" class="flex flex-col gap-3">
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.availability.exceptions.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.availability.exceptions.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.availability.exceptions.emptyHeading' | translate"
+      [description]="'tutoring.tutor.availability.exceptions.emptyDescription' | translate"
+    />
+  } @else {
+    <ul class="flex flex-col gap-3">
+      @for (item of items(); track item.exceptionId) {
+        <li class="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+          <div class="min-w-0 flex-1">
+            <p class="font-semibold text-[var(--color-text)]">{{ instantOf(item) | bangkokDate: 'weekdayDate' }}</p>
+            <p class="text-sm text-[var(--color-text)]">
+              @switch (choiceOf(item)) {
+                @case ('closedAllDay') {
+                  {{ 'tutoring.tutor.availability.exceptions.listClosedAllDay' | translate }}
+                }
+                @case ('closedRange') {
+                  {{ 'tutoring.tutor.availability.exceptions.listClosedRange' | translate: { start: item.startLocal ?? '', end: item.endLocal ?? '' } }}
+                }
+                @default {
+                  {{ 'tutoring.tutor.availability.exceptions.listExtraOpen' | translate: { start: item.startLocal ?? '', end: item.endLocal ?? '' } }}
+                }
+              }
+            </p>
+            @if (item.note) {
+              <p class="mt-0.5 break-words text-sm text-[var(--color-text-muted)]">{{ item.note }}</p>
+            }
+          </div>
+          <app-button size="sm" variant="ghost" [loading]="deletingId() === item.exceptionId" [disabled]="deletingId() !== null" (click)="remove(item)">
+            <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+            {{ 'tutoring.tutor.common.delete' | translate }}
+            <span class="sr-only">{{ instantOf(item) | bangkokDate: 'weekdayDate' }}</span>
+          </app-button>
+        </li>
+      }
+    </ul>
+    @if (totalPages() > 1) {
+      <app-pagination [(currentPage)]="page" [totalPages]="totalPages()" />
+    }
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.exceptions.total' | translate: { count: totalCount() } }}</p>
+  }
+</section>

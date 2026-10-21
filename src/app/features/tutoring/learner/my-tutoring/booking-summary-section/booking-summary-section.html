@@ -1,0 +1,44 @@
+<section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="booking-summary-heading">
+  <h2 id="booking-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.my.summary.heading' | translate }}</h2>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.learner.my.summary.loading' | translate">
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <div class="flex flex-wrap items-center gap-3">
+      <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.learner.my.summary.loadError' | translate }}</p>
+      <app-button size="sm" variant="secondary" (click)="reload()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+    </div>
+  } @else if (notWrittenYet()) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.summary.notYet' | translate }}</p>
+  } @else if (summary(); as s) {
+    <dl class="flex flex-col gap-4 text-base text-[var(--color-text)]">
+      <div>
+        <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.summary.topics' | translate }}</dt>
+        <dd class="mt-1 whitespace-pre-line break-words">{{ s.topicsCovered }}</dd>
+      </div>
+      @if (s.feedback) {
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.summary.feedback' | translate }}</dt>
+          <dd class="mt-1 whitespace-pre-line break-words">{{ s.feedback }}</dd>
+        </div>
+      }
+      @if (s.homework) {
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.summary.homework' | translate }}</dt>
+          <dd class="mt-1 whitespace-pre-line break-words">{{ s.homework }}</dd>
+        </div>
+      }
+      @if (s.nextSteps) {
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.summary.nextSteps' | translate }}</dt>
+          <dd class="mt-1 whitespace-pre-line break-words">{{ s.nextSteps }}</dd>
+        </div>
+      }
+    </dl>
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'tutoring.learner.my.summary.writtenOn' | translate: { date: (s.updatedAtUtc ?? s.createdAtUtc | bangkokDate: 'date') } }}
+    </p>
+  }
+</section>

@@ -1,0 +1,32 @@
+<div class="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+  <!-- A QR needs a light quiet zone around it to scan reliably, in dark mode too, so its box is always white. -->
+  <div class="flex shrink-0 flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-white p-3">
+    @if (payment().qrCodeUrl; as qr) {
+      <img [ngSrc]="qr" width="224" height="224" [alt]="'tutoring.checkout.promptpay.qrAlt' | translate" class="h-56 w-56 object-contain" />
+    }
+  </div>
+
+  <div class="flex min-w-0 flex-1 flex-col gap-4">
+    <div class="flex flex-col gap-1">
+      <h3 class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.promptpay.heading' | translate }}</h3>
+      <p class="text-base text-[var(--color-text)]">
+        {{ 'tutoring.checkout.promptpay.amount' | translate }}
+        <strong class="text-xl text-[var(--color-primary-text)]">{{ payment().amount | currencyThb }}</strong>
+      </p>
+      @if (bookingNo(); as reference) {
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.checkout.promptpay.reference' | translate: { bookingNo: reference } }}</p>
+      }
+    </div>
+
+    <ol class="flex list-decimal flex-col gap-1 ps-5 text-base text-[var(--color-text)]">
+      <li>{{ 'tutoring.checkout.promptpay.step1' | translate }}</li>
+      <li>{{ 'tutoring.checkout.promptpay.step2' | translate }}</li>
+      <li>{{ 'tutoring.checkout.promptpay.step3' | translate }}</li>
+    </ol>
+
+    <p class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+      <span aria-hidden="true"><app-spinner size="xs" color="primary" /></span>
+      <span>{{ 'tutoring.checkout.promptpay.waiting' | translate }}</span>
+    </p>
+  </div>
+</div>

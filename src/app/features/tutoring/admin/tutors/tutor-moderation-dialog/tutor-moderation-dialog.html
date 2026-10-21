@@ -1,0 +1,48 @@
+<app-admin-confirm-dialog
+  [(open)]="open"
+  [titleText]="('tutoring.admin.tutors.moderation.' + mode() + '.title') | translate"
+  [confirmLabel]="('tutoring.admin.tutors.moderation.' + mode() + '.confirm') | translate"
+  [danger]="mode() === 'suspend'"
+  [busy]="busy()"
+  [problem]="problem()"
+  (confirmed)="submit()"
+>
+  <p class="text-sm text-[var(--color-text)]">{{ ('tutoring.admin.tutors.moderation.' + mode() + '.effect') | translate: { name: tutor().displayName } }}</p>
+
+  @if (mode() === 'commission') {
+    <dl class="grid gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm">
+      <div class="flex justify-between gap-3">
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.moderation.commission.current' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">{{ tutor().effectiveCommissionPercent }}%</dd>
+      </div>
+      <div class="flex justify-between gap-3">
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.moderation.commission.source' | translate }}</dt>
+        <dd class="text-end font-semibold text-[var(--color-text)]">
+          {{ (tutor().commissionPercentOverride === null ? 'tutoring.admin.tutors.moderation.commission.sourceDefault' : 'tutoring.admin.tutors.moderation.commission.sourceOverride') | translate }}
+        </dd>
+      </div>
+    </dl>
+    <app-checkbox [formControl]="useDefault" [label]="'tutoring.admin.tutors.moderation.commission.useDefault' | translate" />
+    @if (showPercent()) {
+      <app-input
+        [formControl]="percent"
+        type="text"
+        inputMode="decimal"
+        [label]="'tutoring.admin.tutors.moderation.commission.percent' | translate"
+        [helperText]="'tutoring.admin.tutors.moderation.commission.percentHelp' | translate: range"
+        [errorMessage]="percentError()"
+        [required]="true"
+      />
+    }
+  }
+
+  <app-tutor-textarea
+    [formControl]="reason"
+    [label]="('tutoring.admin.tutors.moderation.' + mode() + '.reason') | translate"
+    [helperText]="('tutoring.admin.tutors.moderation.' + mode() + '.reasonHelp') | translate"
+    [errorMessage]="reasonError()"
+    [maxLength]="reasonMax"
+    [rows]="3"
+    [required]="reasonRequired()"
+  />
+</app-admin-confirm-dialog>

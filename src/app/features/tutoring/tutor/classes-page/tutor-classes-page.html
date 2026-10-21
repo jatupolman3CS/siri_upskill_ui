@@ -1,0 +1,63 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.tutor.classes.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.subheading' | translate }}</p>
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  <div role="group" [attr.aria-label]="'tutoring.tutor.classes.scopeLabel' | translate" class="flex flex-wrap gap-2">
+    @for (option of scopes; track option) {
+      <button
+        type="button"
+        [attr.aria-pressed]="scope() === option"
+        (click)="chooseScope(option)"
+        class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="scope() === option ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+      >
+        {{ 'tutoring.tutor.classes.scope.' + option | translate }}
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.classes.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.classes.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.classes.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      [heading]="(scope() === 'upcoming' ? 'tutoring.tutor.classes.emptyUpcomingHeading' : 'tutoring.tutor.classes.emptyHistoryHeading') | translate"
+      [description]="(scope() === 'upcoming' ? 'tutoring.tutor.classes.emptyUpcomingDescription' : 'tutoring.tutor.classes.emptyHistoryDescription') | translate"
+    >
+      @if (scope() === 'upcoming') {
+        <a emptyStateAction routerLink="/instructor/tutoring/availability" class="font-semibold text-[var(--color-primary-text)] underline">
+          {{ 'tutoring.tutor.classes.goAvailability' | translate }}
+        </a>
+      }
+    </app-empty-state>
+  } @else {
+    <ul class="flex flex-col gap-4">
+      @for (item of items(); track item.sessionId) {
+        <li>
+          <app-tutor-class-card [item]="item" (cancelRequested)="askToCancel($event)" (windowReached)="reload()" />
+        </li>
+      }
+    </ul>
+    @if (totalPages() > 1) {
+      <app-pagination [currentPage]="page()" (currentPageChange)="goToPage($event)" [totalPages]="totalPages()" />
+    }
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.total' | translate: { count: totalCount() } }}</p>
+  }
+</div>
+
+<app-class-cancel-dialog [(open)]="cancelOpen" [sessionId]="cancelTarget() ?? ''" (cancelled)="reload()" />

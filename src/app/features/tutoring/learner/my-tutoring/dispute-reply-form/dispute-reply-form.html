@@ -1,0 +1,17 @@
+<form (submit)="$event.preventDefault(); submit()" novalidate class="flex flex-col gap-4" [attr.aria-label]="'tutoring.dispute.reply.heading' | translate">
+  <app-tutor-textarea
+    [formControl]="body"
+    [label]="'tutoring.dispute.reply.label' | translate"
+    [helperText]="'tutoring.dispute.noContact' | translate"
+    [errorMessage]="bodyError()"
+    [maxLength]="limits.message"
+    [rows]="4"
+    [required]="true"
+    (focusout)="feedback.touch('body')"
+  />
+  <app-evidence-links-field [max]="linksLeft()" [showErrors]="showEvidenceErrors()" (rowsChange)="onEvidence($event)" />
+  <app-tutor-problem [message]="problem()" />
+  <div>
+    <app-button type="submit" [loading]="busy()" [disabled]="busy()">{{ 'tutoring.dispute.reply.send' | translate }}</app-button>
+  </div>
+</form>

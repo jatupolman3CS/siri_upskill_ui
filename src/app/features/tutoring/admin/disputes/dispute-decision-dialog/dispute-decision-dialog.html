@@ -1,0 +1,129 @@
+<app-modal
+  [(open)]="open"
+  [titleText]="(step() === 'form' ? 'tutoring.admin.disputes.decide.title' : 'tutoring.admin.disputes.decide.confirmTitle') | translate"
+  [closeOnOverlayClick]="false"
+>
+  @if (step() === 'form') {
+    <form [formGroup]="form" (submit)="$event.preventDefault(); review()" novalidate class="flex max-h-[60vh] flex-col gap-5 overflow-y-auto p-1">
+      <p class="text-sm text-[var(--color-text)]">
+        {{ 'tutoring.enums.disputeFlow.' + flow() | translate }} · {{ 'tutoring.admin.disputes.decide.flowHelp.' + flow() | translate }}
+      </p>
+
+      <fieldset class="flex flex-col gap-3">
+        <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">{{ 'tutoring.admin.disputes.decide.outcome' | translate }}</legend>
+        @for (option of outcomes(); track option) {
+          <label
+            class="glass-card flex min-h-11 cursor-pointer items-start gap-3 rounded-[var(--radius-md)] p-3 has-[:checked]:border-[var(--color-primary)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-focus-ring)]"
+          >
+            <input
+              type="radio"
+              name="dispute-outcome"
+              class="mt-1 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+              [checked]="value().outcome === option"
+              (change)="form.controls.outcome.setValue(option)"
+            />
+            <span class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.decide.option.' + flow() + '.' + option | translate }}</span>
+          </label>
+        }
+        @if (errorOf('outcome'); as message) {
+          <p role="alert" class="text-sm text-[var(--color-danger)]">{{ message }}</p>
+        }
+      </fieldset>
+
+      @if (value().outcome === 'PartialRefund') {
+        <div class="flex flex-col gap-2">
+          <p class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+            {{ 'tutoring.admin.disputes.decide.figures' | translate }}
+            <span class="block font-semibold">{{ detail().priceAmount | currencyThb }} / {{ detail().refundedAmount | currencyThb }}</span>
+            <span class="block text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.decide.figuresNote' | translate }}</span>
+          </p>
+          <app-input
+            formControlName="amount"
+            type="text"
+            inputMode="decimal"
+            [label]="'tutoring.admin.disputes.decide.amount' | translate"
+            [errorMessage]="errorOf('amount')"
+            [required]="true"
+          />
+        </div>
+      }
+
+      @if (isAcceptedAppeal()) {
+        <div class="flex flex-col gap-1">
+          <app-checkbox formControlName="overturned" [label]="'tutoring.admin.disputes.decide.overturned' | translate" />
+          <app-checkbox formControlName="compensation" [label]="'tutoring.admin.disputes.decide.compensation' | translate" />
+        </div>
+      }
+
+      <app-tutor-textarea
+        formControlName="note"
+        [label]="'tutoring.admin.disputes.decide.note' | translate"
+        [helperText]="'tutoring.admin.disputes.decide.noteHelp' | translate"
+        [errorMessage]="errorOf('note')"
+        [maxLength]="noteMax"
+        [rows]="4"
+        [required]="true"
+      />
+      <p class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3 text-sm font-semibold text-[var(--color-text)]">
+        {{ 'tutoring.admin.disputes.decide.bothSeeNote' | translate }}
+      </p>
+
+      @if (canSuspend()) {
+        <div class="flex flex-col gap-2">
+          <app-checkbox formControlName="suspend" [label]="'tutoring.admin.disputes.decide.suspend' | translate" />
+          @if (value().suspend) {
+            <app-tutor-textarea
+              formControlName="suspendReason"
+              [label]="'tutoring.admin.disputes.decide.suspendReason' | translate"
+              [helperText]="'tutoring.admin.disputes.decide.suspendReasonHelp' | translate"
+              [errorMessage]="errorOf('suspendReason')"
+              [maxLength]="suspendMax"
+              [rows]="3"
+              [required]="true"
+            />
+          }
+        </div>
+      }
+
+      @if (lines().length > 0) {
+        <div class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <p class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.decide.willHappen' | translate }}</p>
+          <ul class="mt-2 list-disc ps-5 text-sm text-[var(--color-text)]">
+            @for (line of lines(); track line) {
+              <li>{{ line | translate }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <app-tutor-problem [message]="problem()" />
+      <button type="submit" class="sr-only" tabindex="-1" aria-hidden="true">{{ 'tutoring.admin.disputes.decide.review' | translate }}</button>
+    </form>
+  } @else {
+    <div class="flex max-h-[60vh] flex-col gap-4 overflow-y-auto p-1">
+      <p class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.decide.confirmIntro' | translate: { no: detail().disputeNo } }}</p>
+      <ul class="list-disc ps-5 text-sm text-[var(--color-text)]">
+        @for (line of lines(); track line) {
+          <li>{{ line | translate }}</li>
+        }
+      </ul>
+      @if (value().outcome === 'PartialRefund') {
+        <p class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.decide.confirmAmount' | translate: { amount: amountText() } }}</p>
+      }
+      <p class="break-words rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">{{ value().note.trim() }}</p>
+      <app-tutor-problem [message]="problem()" />
+    </div>
+  }
+
+  <div modalFooter class="flex flex-wrap justify-end gap-3">
+    @if (step() === 'form') {
+      <app-button variant="secondary" (click)="open.set(false)">{{ 'tutoring.admin.common.cancel' | translate }}</app-button>
+      <app-button (click)="review()">{{ 'tutoring.admin.disputes.decide.review' | translate }}</app-button>
+    } @else {
+      <app-button variant="secondary" [disabled]="busy()" (click)="backToForm()">{{ 'tutoring.admin.common.back' | translate }}</app-button>
+      <app-button [variant]="value().outcome === 'Reject' ? 'danger' : 'primary'" [loading]="busy()" [disabled]="busy()" (click)="send()">
+        {{ 'tutoring.admin.disputes.decide.confirm' | translate }}
+      </app-button>
+    }
+  </div>
+</app-modal>

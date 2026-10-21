@@ -1,0 +1,45 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.tutor.availability.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.subheading' | translate }}</p>
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.availability.loading' | translate" class="flex flex-col gap-6">
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+      <app-skeleton variant="block" height="18rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    @if (notVerified()) {
+      <app-empty-state
+        [heading]="'tutoring.tutor.availability.notVerifiedHeading' | translate"
+        [description]="'tutoring.tutor.availability.notVerifiedDescription' | translate"
+      >
+        <a emptyStateAction routerLink="/instructor/tutoring" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.tutor.common.backToHub' | translate }}</a>
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        [heading]="'tutoring.tutor.availability.loadErrorHeading' | translate"
+        [description]="'tutoring.tutor.availability.loadErrorDescription' | translate"
+      >
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    }
+  } @else if (availability(); as current) {
+    <app-availability-settings-form [settings]="current.settings" (saved)="onSettingsSaved($event)" (conflict)="reload()" />
+    <app-weekly-rules-editor [rules]="current.rules" [maxRules]="current.maxRules" (saved)="onRulesSaved($event)" />
+    <app-availability-exceptions (changed)="bumpPreview()" />
+    @if (previewReady() && profile(); as tutor) {
+      <app-availability-preview
+        [slug]="tutor.slug"
+        [listed]="tutor.isListed"
+        [offerings]="activeOfferings()"
+        [refresh]="previewRefresh()"
+        [allowedDurationMinutes]="current.allowedDurationMinutes"
+      />
+    }
+  }
+</div>

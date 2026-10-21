@@ -1,0 +1,92 @@
+<section class="glass-card flex flex-col items-start gap-5 rounded-[var(--radius-lg)] p-6 sm:p-8" aria-labelledby="checkout-state-heading">
+  <div [class]="look().tone + ' flex h-14 w-14 items-center justify-center rounded-full bg-[var(--tone-bg)] text-[var(--tone-fg)]'">
+    <ng-icon [name]="look().icon" aria-hidden="true" class="text-3xl" />
+  </div>
+
+  @switch (kind()) {
+    @case ('confirmed') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.checkout.confirmed.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">
+          {{ (booking().priceAmount === 0 ? 'tutoring.checkout.confirmed.freeBody' : 'tutoring.checkout.confirmed.paidBody') | translate }}
+        </p>
+        <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.checkout.confirmed.emailNote' | translate }}</p>
+        @if (booking().joinOpensAtUtc; as opensAt) {
+          <p class="max-w-prose text-base text-[var(--color-text-muted)]">
+            {{ 'tutoring.checkout.confirmed.joinNote' | translate: { when: (opensAt | bangkokDate: 'weekdayDate') + ' ' + (opensAt | bangkokDate: 'time') } }}
+          </p>
+        }
+      </div>
+    }
+    @case ('ended') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ (isCancelled() ? 'tutoring.checkout.ended.cancelledHeading' : 'tutoring.checkout.ended.heading') | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">
+          {{ (isCancelled() ? 'tutoring.checkout.ended.cancelledBody' : 'tutoring.checkout.ended.body') | translate }}
+        </p>
+        @if (!isCancelled()) {
+          <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.checkout.ended.paidNote' | translate }}</p>
+        }
+      </div>
+    }
+    @case ('finalized') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.checkout.finalized.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">{{ 'tutoring.checkout.finalized.body' | translate: { status: (statusKey() | translate) } }}</p>
+      </div>
+    }
+    @case ('refunded') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.checkout.refunded.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">
+          {{ (refundIsConsentWithdrawn()
+              ? 'tutoring.checkout.refunded.consentWithdrawnBody'
+              : (refundIsDuplicate() ? 'tutoring.checkout.refunded.duplicateBody' : 'tutoring.checkout.refunded.lateBody')) | translate }}
+        </p>
+        @if (paymentState(); as state) {
+          <p class="max-w-prose text-base text-[var(--color-text)]">
+            {{ 'tutoring.checkout.refunded.amount' | translate: { amount: (state.amount | currencyThb) ?? '' } }}
+          </p>
+        }
+        @if (refundIsPromptPay()) {
+          <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.checkout.refunded.promptpayNote' | translate }}</p>
+        }
+      </div>
+    }
+  }
+
+  <div class="flex flex-wrap gap-3">
+    @if (kind() === 'confirmed' && myTutoringAvailable()) {
+      <a
+        routerLink="/my-tutoring"
+        class="inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium
+          text-[var(--color-primary-foreground)] transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >
+        {{ 'tutoring.checkout.actions.myTutoring' | translate }}
+      </a>
+    }
+    <a
+      [routerLink]="['/tutors', booking().tutor.slug]"
+      class="glass-card inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] px-4 text-base font-medium text-[var(--color-text)]
+        transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ (kind() === 'confirmed' ? 'tutoring.checkout.actions.backToTutor' : 'tutoring.checkout.actions.bookAgain') | translate }}
+    </a>
+    <a
+      routerLink="/tutors"
+      class="inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] px-4 text-base font-medium text-[var(--color-primary-text)]
+        transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'tutoring.checkout.actions.findTutors' | translate }}
+    </a>
+  </div>
+</section>

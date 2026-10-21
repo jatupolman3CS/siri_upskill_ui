@@ -1,0 +1,32 @@
+<fieldset class="m-0 flex min-w-0 flex-col gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+  <legend class="px-1 text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.evidence.legend' | translate }}</legend>
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.dispute.evidence.help' | translate: { max: max() } }}</p>
+
+  @for (group of array.controls; track group; let index = $index) {
+    <div class="flex flex-col gap-3 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] p-3" [formGroup]="group">
+      <app-input
+        formControlName="url"
+        type="url"
+        autocomplete="off"
+        inputMode="url"
+        [label]="'tutoring.dispute.evidence.url' | translate: { n: index + 1 }"
+        [errorMessage]="urlError(index)"
+      />
+      <app-input formControlName="label" autocomplete="off" [label]="'tutoring.dispute.evidence.label' | translate: { n: index + 1 }" />
+      <div>
+        <app-button size="sm" variant="ghost" (click)="remove(index)">
+          <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+          {{ 'tutoring.dispute.evidence.remove' | translate }}
+          <span class="sr-only">{{ index + 1 }}</span>
+        </app-button>
+      </div>
+    </div>
+  }
+
+  <div>
+    <app-button size="sm" variant="secondary" [disabled]="!canAdd()" (click)="add()">
+      <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+      {{ 'tutoring.dispute.evidence.add' | translate }}
+    </app-button>
+  </div>
+</fieldset>

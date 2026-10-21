@@ -1,0 +1,68 @@
+<section class="glass-card flex flex-col gap-4 rounded-2xl p-5" aria-labelledby="dispute-outcome-heading">
+  <h2 id="dispute-outcome-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.outcome.heading' | translate }}</h2>
+
+  @if (detail().alreadyDecided) {
+    <p role="status" class="tone-blue rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+      {{ 'tutoring.admin.disputes.outcome.alreadyDecided' | translate }}
+    </p>
+  }
+
+  @if (detail().decision; as decision) {
+    <dl class="grid gap-3 text-sm">
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.resolution' | translate }}</dt>
+        <dd class="mt-1 font-semibold text-[var(--color-text)]">
+          {{ 'tutoring.enums.disputeResolution.' + decision.resolution | translate }}
+          @if (decision.refundAmount !== null) {
+            · {{ decision.refundAmount | currencyThb }}
+          }
+        </dd>
+      </div>
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.decidedAt' | translate }}</dt>
+        <dd class="mt-1 text-[var(--color-text)]">{{ decision.decidedAtUtc | bangkokDate: 'dateTime' }}</dd>
+      </div>
+      @if (decision.attendanceOverturned || decision.penaltyVoided) {
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.attendance' | translate }}</dt>
+          <dd class="mt-1 text-[var(--color-text)]">
+            @if (decision.attendanceOverturned) {
+              {{ 'tutoring.admin.disputes.outcome.overturned' | translate }}
+            }
+            @if (decision.penaltyVoided) {
+              {{ 'tutoring.admin.disputes.outcome.penaltyVoided' | translate }}
+            }
+          </dd>
+        </div>
+      }
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.note' | translate }}</dt>
+        <dd class="mt-1 whitespace-pre-line break-words rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-[var(--color-text)]">{{ decision.note }}</dd>
+        <dd class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.noteSeenBy' | translate }}</dd>
+      </div>
+    </dl>
+    @if (detail().tutorSuspension !== 'NotRequested') {
+      <p
+        [attr.role]="detail().tutorSuspension === 'Failed' ? 'alert' : 'status'"
+        class="rounded-[var(--radius-md)] border p-3 text-sm text-[var(--color-text)]"
+        [class]="detail().tutorSuspension === 'Failed' ? 'tone-red border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]' : 'border-[var(--color-border)]'"
+      >
+        {{ 'tutoring.admin.disputes.outcome.suspension.' + detail().tutorSuspension | translate }}
+      </p>
+    }
+  } @else if (active()) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.undecided' | translate }}</p>
+    <app-button (click)="decide.emit()">{{ 'tutoring.admin.disputes.outcome.decide' | translate }}</app-button>
+  } @else {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.outcome.closed' | translate }}</p>
+  }
+
+  @if (needsFollowUp()) {
+    <div class="tone-gold flex flex-col items-start gap-3 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3">
+      <p class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.outcome.followUp' | translate }}</p>
+      <app-button size="sm" variant="secondary" (click)="settle.emit()">{{ 'tutoring.admin.disputes.outcome.settle' | translate }}</app-button>
+    </div>
+  } @else if (followUpDone()) {
+    <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.admin.disputes.outcome.followUpDone' | translate }}</p>
+  }
+</section>

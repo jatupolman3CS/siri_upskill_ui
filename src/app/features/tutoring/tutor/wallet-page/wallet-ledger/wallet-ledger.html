@@ -1,0 +1,84 @@
+<section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-wallet-ledger-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-wallet-ledger-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.wallet.ledger.heading' | translate }}</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.ledger.intro' | translate }}</p>
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.wallet.ledger.loading' | translate" class="flex flex-col gap-3">
+      <app-skeleton variant="block" height="3rem" radius="md" />
+      <app-skeleton variant="block" height="3rem" radius="md" />
+      <app-skeleton variant="block" height="3rem" radius="md" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.wallet.ledger.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.wallet.ledger.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (rows().length === 0) {
+    <app-empty-state [heading]="'tutoring.tutor.wallet.ledger.emptyHeading' | translate" [description]="'tutoring.tutor.wallet.ledger.emptyDescription' | translate" />
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[56rem] text-left text-sm">
+        <caption class="sr-only">{{ 'tutoring.tutor.wallet.ledger.caption' | translate }}</caption>
+        <thead>
+          <tr class="border-b border-[var(--color-border)] text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
+            <th scope="col" class="px-3 py-2 font-semibold">{{ 'tutoring.tutor.wallet.ledger.colEntry' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.ledger.colGross' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.ledger.colFee' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.ledger.colCommission' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.ledger.colShare' | translate }}</th>
+            <th scope="col" class="px-3 py-2 font-semibold">{{ 'tutoring.tutor.wallet.ledger.colState' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.entryId) {
+            <tr class="border-b border-[var(--color-border)] align-top">
+              <td class="px-3 py-3">
+                <p class="font-semibold text-[var(--color-text)]">
+                  @if (row.bookingNo) {
+                    {{ 'tutoring.tutor.wallet.ledger.booking' | translate: { no: row.bookingNo } }}
+                  } @else {
+                    {{ sourceKey(row.sourceKind) | translate }}
+                  }
+                </p>
+                <p class="text-xs text-[var(--color-text-muted)]">
+                  {{ kindKey(row.kind) | translate }}
+                  @if (row.sessionStartsAtUtc) {
+                    <span aria-hidden="true"> · </span>{{ row.sessionStartsAtUtc | bangkokDate: 'shortDateTime' }}
+                  }
+                </p>
+                <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.ledger.recorded' | translate: { time: (row.createdAtUtc | bangkokDate: 'shortDateTime') } }}</p>
+              </td>
+              <td class="px-3 py-3 text-end text-[var(--color-text)]">{{ row.grossAmount | currencyThb }}</td>
+              <td class="px-3 py-3 text-end text-[var(--color-text)]">{{ row.paymentFeeAmount | currencyThb }}</td>
+              <td class="px-3 py-3 text-end text-[var(--color-text)]">{{ row.platformAmount | currencyThb }}</td>
+              <td class="px-3 py-3 text-end">
+                <span class="font-semibold" [class]="row.tutorAmount < 0 ? 'tone-red text-[var(--tone-fg)]' : 'text-[var(--color-text)]'">{{ row.tutorAmount | currencyThb }}</span>
+                @if (row.tutorAmount < 0) {
+                  <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.ledger.deduction' | translate }}</p>
+                }
+              </td>
+              <td class="px-3 py-3">
+                <span
+                  class="inline-flex items-center rounded-[var(--radius-full)] border px-2.5 py-1 text-xs font-semibold text-[var(--color-text)]"
+                  [class]="stateTone(row.state) ? stateTone(row.state) + ' border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]' : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]'"
+                >
+                  {{ stateKey(row.state) | translate }}
+                </span>
+                @if (row.availableAtUtc) {
+                  <p class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.ledger.availableAt' | translate: { time: (row.availableAtUtc | bangkokDate: 'shortDateTime') } }}</p>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (totalPages() > 1) {
+      <app-pagination [(currentPage)]="page" [totalPages]="totalPages()" />
+    }
+  }
+</section>

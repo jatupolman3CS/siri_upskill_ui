@@ -1,0 +1,50 @@
+<p class="text-sm text-[var(--color-text-muted)]">
+  {{ 'tutoring.learner.packages.book.intro' | translate: { minutes: purchase().durationMinutes } }}
+</p>
+@if (purchase().expiresAtUtc; as expires) {
+  <p class="text-sm font-medium text-[var(--color-text)]">
+    {{ 'tutoring.learner.packages.book.mustStartBefore' | translate: { date: (expires | bangkokDate: 'dateTime') } }}
+  </p>
+}
+
+<app-slot-picker
+  [slots]="slots()"
+  [windowStartDate]="windowStart()"
+  [(selected)]="selectedSlot"
+  [loading]="pickerLoading()"
+  [failed]="pickerFailed()"
+  [errorMessage]="pickerError()"
+  [canGoPrevious]="canGoPrevious()"
+  [canGoNext]="canGoNext()"
+  (previousWeek)="previousWeek()"
+  (nextWeek)="nextWeek()"
+  (retry)="retry()"
+/>
+
+@if (lastBooked(); as done) {
+  <div role="status" class="tone-green flex flex-col items-start gap-2 rounded-[var(--radius-md)] bg-[var(--tone-bg)] p-4 text-[var(--color-text)]">
+    <p class="text-base font-semibold">{{ 'tutoring.learner.packages.book.done' | translate }}</p>
+    <p class="text-sm">
+      {{ 'tutoring.learner.packages.book.doneWhen' | translate: { when: (done.startsAtUtc | bangkokDate: 'weekdayDate') + ' ' + (done.startsAtUtc | bangkokDate: 'time') } }}
+    </p>
+    <a [routerLink]="['/my-tutoring/bookings', done.bookingId]" class="text-sm font-semibold text-[var(--color-primary-text)] underline">
+      {{ 'tutoring.learner.packages.book.viewLesson' | translate }}
+    </a>
+  </div>
+}
+
+<app-tutor-problem [message]="problem()">
+  @if (expiryHint(); as expires) {
+    <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.learner.packages.book.expiresOn' | translate: { date: (expires | bangkokDate: 'dateTime') } }}</p>
+  }
+</app-tutor-problem>
+
+<div class="flex flex-wrap items-center gap-3">
+  <app-button size="lg" [loading]="submitting()" [disabled]="selectedSlot() === null" (click)="book()">
+    {{ 'tutoring.learner.packages.book.confirm' | translate }}
+  </app-button>
+  @if (selectedSlot() === null) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.book.pickHint' | translate }}</p>
+  }
+</div>
+<p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.book.usesOne' | translate }}</p>

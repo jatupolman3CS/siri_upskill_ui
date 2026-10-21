@@ -1,0 +1,43 @@
+<app-modal
+  [(open)]="open"
+  [titleText]="(editing() ? 'tutoring.admin.subjects.editTitle' : 'tutoring.admin.subjects.createTitle') | translate"
+  [closeOnOverlayClick]="false"
+>
+  <form (submit)="$event.preventDefault(); submit()" novalidate class="flex max-h-[60vh] flex-col gap-4 overflow-y-auto p-1">
+    @if (!editing()) {
+      <app-input
+        [formControl]="slug"
+        [label]="'tutoring.admin.subjects.slug' | translate"
+        [helperText]="'tutoring.admin.subjects.slugHelp' | translate"
+        [errorMessage]="errorOf('slug')"
+        [required]="true"
+        autocomplete="off"
+      />
+    }
+    <app-input [formControl]="nameTh" [label]="'tutoring.admin.subjects.nameTh' | translate" [errorMessage]="errorOf('nameTh')" [required]="true" />
+    <app-input [formControl]="nameEn" [label]="'tutoring.admin.subjects.nameEn' | translate" [errorMessage]="errorOf('nameEn')" [required]="true" />
+    <app-select
+      [formControl]="parentId"
+      [label]="'tutoring.admin.subjects.parent' | translate"
+      [options]="parentOptions()"
+      [helperText]="(hasChildren() ? 'tutoring.admin.subjects.parentLocked' : 'tutoring.admin.subjects.parentHelp') | translate"
+    />
+    <app-input
+      [formControl]="sortOrder"
+      type="text"
+      inputMode="numeric"
+      [label]="'tutoring.admin.subjects.sortOrder' | translate"
+      [errorMessage]="errorOf('sortOrder')"
+      [required]="true"
+    />
+    @if (editing()) {
+      <app-checkbox [formControl]="isActive" [label]="'tutoring.admin.subjects.activeLabel' | translate" />
+    }
+    <app-tutor-problem [message]="problem()" />
+    <button type="submit" class="sr-only" tabindex="-1" aria-hidden="true">{{ 'tutoring.admin.common.save' | translate }}</button>
+  </form>
+  <div modalFooter class="flex gap-3">
+    <app-button variant="secondary" [disabled]="busy()" (click)="open.set(false)">{{ 'tutoring.admin.common.cancel' | translate }}</app-button>
+    <app-button [loading]="busy()" [disabled]="busy()" (click)="submit()">{{ 'tutoring.admin.common.save' | translate }}</app-button>
+  </div>
+</app-modal>

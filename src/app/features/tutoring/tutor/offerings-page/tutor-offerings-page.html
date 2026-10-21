@@ -1,0 +1,130 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.tutor.offerings.heading' | translate }}</h1>
+        <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">{{ 'tutoring.tutor.offerings.subheading' | translate }}</p>
+      </div>
+      @if (!isLoading() && !hasError() && !editor()) {
+        <app-button id="tutor-offering-add" (click)="openEditor(null, $event)">
+          <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+          {{ 'tutoring.tutor.offerings.add' | translate }}
+        </app-button>
+      }
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  @if (editor(); as state) {
+    <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-offering-editor">
+      <h2 id="tutor-offering-editor" tabindex="-1" class="text-lg font-semibold text-[var(--color-text)] focus-visible:outline-none">
+        {{ (state.offering ? 'tutoring.tutor.offerings.editHeading' : 'tutoring.tutor.offerings.addHeading') | translate }}
+      </h2>
+      @if (!state.offering && subjectsUnavailable()) {
+        <p role="status" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+          {{ 'tutoring.tutor.offerings.subjectsUnavailable' | translate }}
+        </p>
+      }
+      <app-tutor-offering-form
+        [offering]="state.offering"
+        [subjectChoices]="subjectChoices()"
+        (saved)="onSaved()"
+        (cancelled)="closeEditor()"
+        (reopenRequested)="reopen($event)"
+      />
+    </section>
+  }
+
+  <app-tutor-problem [message]="problem()" />
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.offerings.loading' | translate" class="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
+      <app-skeleton variant="block" height="11rem" radius="lg" />
+      <app-skeleton variant="block" height="11rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.offerings.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.offerings.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (offerings().length === 0) {
+    @if (!editor()) {
+      <app-empty-state
+        [heading]="'tutoring.tutor.offerings.emptyHeading' | translate"
+        [description]="'tutoring.tutor.offerings.emptyDescription' | translate"
+      >
+        <app-button emptyStateAction (click)="openEditor(null, $event)">{{ 'tutoring.tutor.offerings.add' | translate }}</app-button>
+      </app-empty-state>
+    }
+  } @else {
+    <ul class="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
+      @for (offering of offerings(); track offering.offeringId) {
+        <li class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="break-words text-lg font-semibold text-[var(--color-text)]">{{ subjectName(offering) }}</h2>
+              <p class="text-sm text-[var(--color-text-muted)]">
+                {{ levelKey(offering.level) | translate }} · {{ curriculumKey(offering.curriculum) | translate }}
+              </p>
+            </div>
+            <span
+              class="inline-flex shrink-0 items-center rounded-[var(--radius-full)] border px-2.5 py-1 text-xs font-semibold text-[var(--color-text)]"
+              [class]="offering.isActive ? 'tone-green border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]' : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]'"
+            >
+              {{ (offering.isActive ? 'tutoring.tutor.offerings.statusActive' : 'tutoring.tutor.offerings.statusPaused') | translate }}
+            </span>
+          </div>
+
+          <dl class="grid gap-2 text-sm">
+            <div class="flex justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.offerings.cardOneOnOne' | translate }}</dt>
+              <dd class="font-semibold text-[var(--color-text)]">{{ offering.hourlyRateOneOnOne | currencyThb }}</dd>
+            </div>
+            @if (offering.groupHourlyRatePerSeat !== null) {
+              <div class="flex justify-between gap-3">
+                <dt class="text-[var(--color-text-muted)]">
+                  {{ 'tutoring.tutor.offerings.cardGroup' | translate: { seats: offering.groupMaxSeats ?? 0 } }}
+                </dt>
+                <dd class="font-semibold text-[var(--color-text)]">{{ offering.groupHourlyRatePerSeat | currencyThb }}</dd>
+              </div>
+            }
+            @if (offering.trialEnabled) {
+              <div class="flex justify-between gap-3">
+                <dt class="text-[var(--color-text-muted)]">
+                  {{ 'tutoring.tutor.offerings.cardTrial' | translate: { minutes: offering.trialMinutes ?? 0 } }}
+                </dt>
+                <dd class="font-semibold text-[var(--color-text)]">
+                  @if (offering.trialPrice === 0) {
+                    {{ 'tutoring.tutor.offerings.trialFree' | translate }}
+                  } @else {
+                    {{ offering.trialPrice | currencyThb }}
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+
+          <div class="mt-auto flex flex-wrap gap-2">
+            <app-button size="sm" variant="secondary" [disabled]="busyId() !== null" (click)="openEditor(offering, $event)">
+              <ng-icon leading name="phosphorPencilSimple" aria-hidden="true" />
+              {{ 'tutoring.tutor.offerings.edit' | translate }}
+              <span class="sr-only">{{ subjectName(offering) }}</span>
+            </app-button>
+            <app-button
+              size="sm"
+              variant="ghost"
+              [loading]="busyId() === offering.offeringId"
+              [disabled]="busyId() !== null"
+              (click)="toggleActive(offering)"
+            >
+              {{ (offering.isActive ? 'tutoring.tutor.offerings.pause' : 'tutoring.tutor.offerings.resume') | translate }}
+              <span class="sr-only">{{ subjectName(offering) }}</span>
+            </app-button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

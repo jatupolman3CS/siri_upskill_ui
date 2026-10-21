@@ -1,0 +1,67 @@
+<app-analytics-report-frame
+  headingKey="tutoring.admin.analytics.kyc.heading"
+  descriptionKey="tutoring.admin.analytics.kyc.description"
+  [status]="state.status()"
+  [errorText]="state.errorText()"
+  [generatedAtUtc]="state.report()?.generatedAtUtc ?? null"
+  (refresh)="state.reload()"
+>
+  @if (state.report(); as report) {
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <app-kpi-tile [label]="'tutoring.admin.analytics.kyc.awaitingAdmin' | translate" [value]="(report.awaitingAdmin | number: '1.0-0') ?? ''" />
+      <app-kpi-tile [label]="'tutoring.admin.analytics.kyc.awaitingTutor' | translate" [value]="(report.awaitingTutor | number: '1.0-0') ?? ''" [hint]="'tutoring.admin.analytics.kyc.awaitingTutorHint' | translate" />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.kyc.oldest' | translate"
+        [value]="report.oldestAwaitingAdminAgeHours === null ? '-' : ('tutoring.admin.analytics.hours' | translate: { hours: ((report.oldestAwaitingAdminAgeHours | number: '1.0-1') ?? '') })"
+        [hint]="report.oldestAwaitingAdminSubmittedAtUtc ? ('tutoring.admin.analytics.kyc.oldestSince' | translate: { when: (report.oldestAwaitingAdminSubmittedAtUtc | bangkokDate: 'dateTime') }) : null"
+      />
+      <app-kpi-tile
+        [label]="'tutoring.admin.analytics.kyc.decisionTime' | translate"
+        [value]="report.medianHoursToDecision30d === null ? '-' : ('tutoring.admin.analytics.hours' | translate: { hours: ((report.medianHoursToDecision30d | number: '1.0-1') ?? '') })"
+        [hint]="report.p90HoursToDecision30d === null ? ('tutoring.admin.analytics.kyc.noDecisions' | translate) : ('tutoring.admin.analytics.kyc.decisionP90' | translate: { hours: ((report.p90HoursToDecision30d | number: '1.0-1') ?? '') })"
+      />
+    </div>
+
+    @if (report.awaitingAdmin === 0) {
+      <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.kyc.empty' | translate }}</p>
+    } @else {
+      <section class="flex flex-col gap-2" aria-labelledby="kyc-bands-heading">
+        <h3 id="kyc-bands-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.kyc.bandsHeading' | translate }}</h3>
+        <ul class="flex flex-col divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
+          @for (band of bands; track band.key) {
+            <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-3 py-2 text-sm text-[var(--color-text)] sm:grid-cols-[minmax(0,12rem)_4rem_minmax(6rem,1fr)]">
+              <span>{{ 'tutoring.admin.analytics.kyc.band.' + band.key | translate }}</span>
+              <span class="text-end font-semibold">{{ report.ageBuckets[band.key] | number: '1.0-0' }}</span>
+              <app-analytics-bar class="col-span-2 sm:col-span-1" [percent]="percentOf(report.ageBuckets[band.key], report.awaitingAdmin)" [tone]="band.tone" />
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <section class="flex flex-col gap-2" aria-labelledby="kyc-status-heading">
+        <h3 id="kyc-status-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.kyc.statusHeading' | translate }}</h3>
+        <ul class="flex flex-col divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)] text-sm text-[var(--color-text)]">
+          <li class="flex items-baseline justify-between gap-4 px-3 py-2"><span>{{ 'tutoring.admin.analytics.kyc.status.submitted' | translate }}</span><span class="font-semibold">{{ report.byStatus.submitted | number: '1.0-0' }}</span></li>
+          <li class="flex items-baseline justify-between gap-4 px-3 py-2"><span>{{ 'tutoring.admin.analytics.kyc.status.inReview' | translate }}</span><span class="font-semibold">{{ report.byStatus.inReview | number: '1.0-0' }}</span></li>
+          <li class="flex items-baseline justify-between gap-4 px-3 py-2"><span>{{ 'tutoring.admin.analytics.kyc.status.needsInfo' | translate }}</span><span class="font-semibold">{{ report.byStatus.needsInfo | number: '1.0-0' }}</span></li>
+        </ul>
+      </section>
+      <section class="flex flex-col gap-2" aria-labelledby="kyc-decided-heading">
+        <h3 id="kyc-decided-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.kyc.decidedHeading' | translate }}</h3>
+        <ul class="flex flex-col divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)] text-sm text-[var(--color-text)]">
+          <li class="flex items-baseline justify-between gap-4 px-3 py-2"><span>{{ 'tutoring.admin.analytics.kyc.decided.approved' | translate }}</span><span class="font-semibold">{{ report.decided30d.approved | number: '1.0-0' }}</span></li>
+          <li class="flex items-baseline justify-between gap-4 px-3 py-2"><span>{{ 'tutoring.admin.analytics.kyc.decided.rejected' | translate }}</span><span class="font-semibold">{{ report.decided30d.rejected | number: '1.0-0' }}</span></li>
+          <li class="flex items-baseline justify-between gap-4 px-3 py-2"><span>{{ 'tutoring.admin.analytics.kyc.decided.needsInfo' | translate }}</span><span class="font-semibold">{{ report.decided30d.needsInfo | number: '1.0-0' }}</span></li>
+        </ul>
+      </section>
+    </div>
+
+    <p>
+      <a routerLink="/admin/tutoring/kyc" class="font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]">
+        {{ 'tutoring.admin.analytics.kyc.openQueue' | translate }}
+      </a>
+    </p>
+  }
+</app-analytics-report-frame>

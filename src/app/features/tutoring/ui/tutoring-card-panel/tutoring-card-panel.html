@@ -1,0 +1,30 @@
+<div class="flex flex-col gap-4">
+  <h3 class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.card.enterDetails' | translate }}</h3>
+
+  @if (state() === 'loading') {
+    <app-skeleton variant="block" height="12rem" />
+  } @else if (state() === 'loadFailed') {
+    <div role="alert" class="tone-red flex items-start gap-2 rounded-xl border border-[var(--tone-fg)]/30 bg-[var(--tone-bg)] p-4 text-sm text-[var(--tone-fg)]">
+      <ng-icon name="phosphorWarningCircle" aria-hidden="true" class="mt-0.5 flex-none text-lg" />
+      <span>{{ 'tutoring.checkout.card.loadFailed' | translate }}</span>
+    </div>
+  }
+
+  <!-- The Stripe mount target must stay a stable DOM node: it is mounted into exactly once and never re-created. -->
+  <div
+    #cardElementContainer
+    [hidden]="state() === 'loading' || state() === 'loadFailed'"
+    class="min-h-[12rem] rounded-xl border border-[var(--color-border)] p-4"
+  ></div>
+
+  @if (isReady()) {
+    <app-button type="button" variant="primary" size="lg" [fullWidth]="true" [disabled]="isSubmitting()" (click)="submit()">
+      @if (isSubmitting()) {
+        <app-spinner size="sm" color="white" />
+        <span>{{ 'tutoring.checkout.card.processing' | translate }}</span>
+      } @else {
+        <span>{{ 'tutoring.checkout.card.payButton' | translate }}</span>
+      }
+    </app-button>
+  }
+</div>

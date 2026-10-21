@@ -1,0 +1,51 @@
+<app-analytics-report-frame
+  headingKey="tutoring.admin.analytics.funnel.heading"
+  descriptionKey="tutoring.admin.analytics.funnel.description"
+  [status]="state.status()"
+  [errorText]="state.errorText()"
+  [generatedAtUtc]="state.report()?.generatedAtUtc ?? null"
+  (refresh)="state.reload()"
+>
+  @if (state.report(); as report) {
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'tutoring.admin.analytics.period' | translate: { from: (instantOf(report.effectiveFrom) | bangkokDate: 'date'), to: (instantOf(report.effectiveTo) | bangkokDate: 'date') } }}
+    </p>
+
+    @if (report.counts.created === 0) {
+      <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.funnel.empty' | translate }}</p>
+    } @else {
+      <div class="grid grid-cols-1 gap-6 2xl:grid-cols-2">
+        <div class="flex flex-col gap-5">
+          @for (group of groups; track group.id) {
+            <section class="flex flex-col gap-2" [attr.aria-labelledby]="'funnel-group-' + group.id">
+              <h3 [id]="'funnel-group-' + group.id" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.funnel.group.' + group.id | translate }}</h3>
+              <ul class="flex flex-col divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
+                @for (row of group.rows; track row.key) {
+                  <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-3 py-2 text-sm text-[var(--color-text)] sm:grid-cols-[minmax(0,14rem)_5rem_minmax(6rem,1fr)]">
+                    <span class="min-w-0 break-words">{{ 'tutoring.admin.analytics.funnel.counts.' + row.key | translate }}</span>
+                    <span class="text-end font-semibold sm:order-none">{{ report.counts[row.key] | number: '1.0-0' }}</span>
+                    <app-analytics-bar class="col-span-2 sm:col-span-1" [percent]="percentOf(report.counts[row.key], report.counts.created)" [tone]="row.tone" />
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.funnel.barNote' | translate }}</p>
+        </div>
+
+        <section class="flex flex-col gap-2" aria-labelledby="funnel-rates-heading">
+          <h3 id="funnel-rates-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.funnel.ratesHeading' | translate }}</h3>
+          <ul class="flex flex-col divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
+            @for (rate of rates(); track rate.key) {
+              <li class="flex flex-col gap-1 px-3 py-3 text-sm text-[var(--color-text)] sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                <span class="min-w-0 break-words">{{ 'tutoring.admin.analytics.funnel.rates.' + rate.key | translate }}</span>
+                <app-rate-cell class="sm:w-40" [rate]="rate.value" [numerator]="rate.numerator" [denominator]="rate.denominator" />
+              </li>
+            }
+          </ul>
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.funnel.ratesNote' | translate }}</p>
+        </section>
+      </div>
+    }
+  }
+</app-analytics-report-frame>

@@ -1,0 +1,118 @@
+<div class="page-shell page-shell-narrow animate-fade-in">
+  <a
+    routerLink="/my-tutoring"
+    class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary-text)] underline
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    <ng-icon name="phosphorArrowLeft" aria-hidden="true" />
+    {{ 'tutoring.learner.my.detail.back' | translate }}
+  </a>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.learner.my.detail.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+    </div>
+  } @else if (notFound()) {
+    <app-empty-state [heading]="'tutoring.learner.my.detail.notFoundHeading' | translate" [description]="'tutoring.learner.my.detail.notFoundDescription' | translate">
+      <a emptyStateAction routerLink="/my-tutoring" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.learner.my.detail.back' | translate }}</a>
+    </app-empty-state>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.learner.my.detail.errorHeading' | translate" [description]="'tutoring.learner.my.loadErrorDescription' | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (booking(); as b) {
+    <header class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="flex min-w-0 items-start gap-3">
+          <div class="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+            @if (b.tutor.photoUrl; as photo) {
+              <img [ngSrc]="photo | mediaUrl" alt="" fill class="object-cover" />
+            } @else {
+              <span aria-hidden="true" class="flex h-full w-full items-center justify-center text-xl font-semibold text-[var(--color-text)]">{{ initial() }}</span>
+            }
+          </div>
+          <div class="min-w-0">
+            <h1 class="break-words text-2xl font-bold text-[var(--color-text)]">{{ subject() }}</h1>
+            <p class="break-words text-base text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.card.withTutor' | translate: { name: tutorName() } }}</p>
+          </div>
+        </div>
+        @if (statusView(); as view) {
+          <app-status-chip [view]="view" />
+        }
+      </div>
+
+      <dl class="grid gap-x-6 gap-y-3 text-base sm:grid-cols-2">
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.when' | translate }}</dt>
+          <dd class="text-[var(--color-text)]"><app-bangkok-time-range [startsAtUtc]="b.startsAtUtc" [endsAtUtc]="b.endsAtUtc" /></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.learner' | translate }}</dt>
+          <dd class="break-words text-[var(--color-text)]">{{ b.learner.nickname }} · {{ gradeKey(b.learner.gradeLevel) | translate }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.format' | translate }}</dt>
+          <dd class="text-[var(--color-text)]">
+            {{ formatKey(b.format) | translate }} · {{ 'tutoring.learner.my.card.duration' | translate: { minutes: b.durationMinutes } }}
+            @if (b.isTrial) {
+              · {{ 'tutoring.learner.my.card.trial' | translate }}
+            }
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.price' | translate }}</dt>
+          <dd class="text-[var(--color-text)]">
+            @if (b.priceAmount === 0) {
+              {{ 'tutoring.learner.my.card.free' | translate }}
+            } @else {
+              {{ b.priceAmount | currencyThb }}
+            }
+          </dd>
+        </div>
+        @if (b.refundedAmount > 0) {
+          <div>
+            <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.refundedAmount' | translate }}</dt>
+            <dd class="text-[var(--color-text)]">{{ b.refundedAmount | currencyThb }}</dd>
+          </div>
+        }
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.bookingNo' | translate }}</dt>
+          <dd class="break-all text-[var(--color-text)]">{{ b.bookingNo }}</dd>
+        </div>
+        @if (b.packagePurchaseId; as purchaseId) {
+          <div>
+            <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.detail.package' | translate }}</dt>
+            <dd class="text-[var(--color-text)]">
+              {{ 'tutoring.learner.my.detail.packageCredit' | translate }}
+              <a [routerLink]="['/my-tutoring/packages', purchaseId]" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.learner.my.detail.viewPackage' | translate }}</a>
+            </dd>
+          </div>
+        }
+      </dl>
+
+      <app-booking-actions [booking]="b" [offsetMs]="offsetMs()" (changed)="reload()" />
+    </header>
+
+    @if (showRefunds()) {
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="booking-refund-heading">
+        <h2 id="booking-refund-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.my.refund.heading' | translate }}</h2>
+        <app-refund-status [bookingId]="b.bookingId" />
+      </section>
+    }
+
+    @if (showSummary()) {
+      <app-booking-summary-section [bookingId]="b.bookingId" />
+    }
+
+    @if (materialsSessionId(); as sessionId) {
+      <app-booking-materials-section [sessionId]="sessionId" />
+    }
+
+    @if (showReview()) {
+      <app-review-section [bookingId]="b.bookingId" />
+    }
+
+    <app-dispute-section [booking]="b" />
+  }
+</div>

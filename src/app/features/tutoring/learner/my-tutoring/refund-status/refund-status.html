@@ -1,0 +1,33 @@
+@if (isLoading()) {
+  <p role="status" class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.refund.loading' | translate }}</p>
+} @else if (hasError()) {
+  <p class="flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-muted)]">
+    {{ 'tutoring.learner.my.refund.loadError' | translate }}
+    <button
+      type="button"
+      (click)="reload()"
+      class="inline-flex min-h-11 items-center rounded-[var(--radius-md)] px-2 font-semibold text-[var(--color-primary-text)] underline
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'tutoring.learner.my.retry' | translate }}
+    </button>
+  </p>
+} @else if (refunds().length > 0) {
+  <ul class="flex flex-col gap-2" [attr.aria-label]="'tutoring.learner.my.refund.listLabel' | translate">
+    @for (refund of refunds(); track refund.refundId) {
+      <li class="flex flex-col gap-1 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+        <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <ng-icon [name]="iconOf(refund.status)" aria-hidden="true" class="text-lg" [class]="toneOf(refund.status) + ' text-[var(--tone-fg)]'" />
+          <span class="font-semibold">{{ refund.amount | currencyThb }}</span>
+          <span>{{ 'tutoring.learner.my.refund.status.' + refund.status | translate }}</span>
+        </p>
+        @if (needsBankNote(refund)) {
+          <p class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.refund.asyncNote' | translate }}</p>
+        }
+        @if (refund.status === 'Completed' && refund.completedAtUtc) {
+          <p class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.refund.completedOn' | translate: { date: (refund.completedAtUtc | bangkokDate: 'date') } }}</p>
+        }
+      </li>
+    }
+  </ul>
+}

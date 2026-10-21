@@ -1,0 +1,122 @@
+<div class="page-shell animate-fade-in">
+  @if (tutorNotFound()) {
+    <div class="flex flex-col items-center gap-4 py-16 text-center">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.booking.notFoundHeading' | translate }}</h1>
+      <p class="max-w-md text-[var(--color-text-muted)]">{{ 'tutoring.booking.notFoundDescription' | translate }}</p>
+      <app-button routerLink="/tutors">{{ 'tutoring.booking.backToSearch' | translate }}</app-button>
+    </div>
+  } @else if (tutorFailed() || offersFailed()) {
+    <div class="flex flex-col items-center gap-4 py-16 text-center" role="alert">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.errorHeading' | translate }}</h1>
+      <p class="max-w-md text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.errorDescription' | translate }}</p>
+      <app-button (click)="retry()">{{ 'tutoring.booking.retry' | translate }}</app-button>
+    </div>
+  } @else if (tutor(); as tutor) {
+    @if (!offersLoaded()) {
+      <div class="flex flex-col gap-6" aria-busy="true" [attr.aria-label]="'tutoring.learner.packages.purchase.loading' | translate">
+        <app-skeleton variant="text" width="40%" />
+        <app-skeleton variant="block" height="16rem" />
+      </div>
+    } @else {
+      <header class="flex flex-col gap-3">
+        <app-breadcrumb [items]="breadcrumbItems()" />
+        <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+          {{ 'tutoring.learner.packages.purchase.heading' | translate: { name: tutor.displayName } }}
+        </h1>
+        <p class="max-w-prose text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.subheading' | translate }}</p>
+      </header>
+
+      @if (offer(); as pack) {
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+          <div class="flex min-w-0 flex-col gap-8">
+            <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="package-details-heading">
+              <h2 id="package-details-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.detailsHeading' | translate }}</h2>
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <p class="text-base font-semibold text-[var(--color-text)]">{{ localizedName({ nameTh: pack.offering.subjectNameTh, nameEn: pack.offering.subjectNameEn }, translation.locale()) }}</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="tone-blue rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">{{ levelKey(pack.offering.level) | translate }}</span>
+                  <span class="tone-teal rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">{{ curriculumKey(pack.offering.curriculum) | translate }}</span>
+                </div>
+              </div>
+              <ul class="flex flex-col gap-2 text-base text-[var(--color-text)]">
+                <li>{{ 'tutoring.learner.packages.purchase.lessons' | translate: { count: pack.sessionCount, minutes: pack.durationMinutes } }}</li>
+                <li>{{ 'tutoring.learner.packages.purchase.oneOnOne' | translate }}</li>
+                <li>{{ 'tutoring.learner.packages.purchase.validity' | translate: { days: pack.validDays } }}</li>
+              </ul>
+              <p class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+                {{ 'tutoring.learner.packages.purchase.expiryTerms' | translate: { days: pack.validDays } }}
+              </p>
+            </section>
+
+            <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="package-learner-heading">
+              <h2 id="package-learner-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.learnerHeading' | translate }}</h2>
+              <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.learnerHelp' | translate }}</p>
+              <app-learner-profile-picker [(profile)]="learner" />
+            </section>
+          </div>
+
+          <aside class="glass-card flex min-w-0 flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6 lg:sticky lg:top-24" aria-labelledby="package-summary-heading">
+            <h2 id="package-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.summaryHeading' | translate }}</h2>
+            <dl class="flex flex-col gap-3 text-sm" aria-live="polite">
+              <div class="flex items-baseline justify-between gap-3">
+                <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.singlePrice' | translate }}</dt>
+                <dd class="text-right font-medium text-[var(--color-text)]">{{ pack.singleSessionPrice | currencyThb }}</dd>
+              </div>
+              @if (pack.discountPercent > 0) {
+                <div class="flex items-baseline justify-between gap-3">
+                  <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.discount' | translate: { percent: pack.discountPercent } }}</dt>
+                  <dd class="text-right font-medium text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.saves' | translate: { amount: (pack.savingsAmount | currencyThb) ?? '' } }}</dd>
+                </div>
+              }
+              <div class="flex items-baseline justify-between gap-3">
+                <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.perLesson' | translate }}</dt>
+                <dd class="text-right font-medium text-[var(--color-text)]">{{ pack.pricePerSession | currencyThb }}</dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-3">
+                <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.forLearner' | translate }}</dt>
+                <dd class="text-right font-medium text-[var(--color-text)]">
+                  @if (learner(); as chosen) {
+                    {{ chosen.nickname }}
+                  } @else {
+                    <span class="font-normal text-[var(--color-text-muted)]">{{ 'tutoring.booking.noLearnerSelected' | translate }}</span>
+                  }
+                </dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-3 border-t border-[var(--color-border)] pt-3">
+                <dt class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.total' | translate }}</dt>
+                <dd class="text-right text-xl font-bold text-[var(--color-primary-text)]">{{ pack.totalPrice | currencyThb }}</dd>
+              </div>
+            </dl>
+
+            <app-tutor-problem [message]="problem()">
+              @if (tooManyPending()) {
+                <app-button size="sm" variant="secondary" routerLink="/my-tutoring/packages" [queryParams]="{ status: 'PendingPayment' }">
+                  {{ 'tutoring.learner.packages.purchase.finishPending' | translate }}
+                </app-button>
+              }
+            </app-tutor-problem>
+
+            <app-button size="lg" [fullWidth]="true" [loading]="submitting()" [disabled]="!canContinue()" (click)="buy()">
+              {{ 'tutoring.learner.packages.purchase.continue' | translate }}
+            </app-button>
+            @if (!canContinue()) {
+              <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.continueHint' | translate }}</p>
+            }
+            <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.payNote' | translate }}</p>
+          </aside>
+        </div>
+      } @else {
+        <section class="glass-card flex flex-col items-start gap-4 rounded-[var(--radius-lg)] p-6 sm:p-8">
+          <h2 class="text-xl font-bold text-[var(--color-text)]">{{ 'tutoring.learner.packages.purchase.unavailableHeading' | translate }}</h2>
+          <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.purchase.unavailableBody' | translate }}</p>
+          <app-button [routerLink]="['/tutors', tutor.slug]">{{ 'tutoring.learner.packages.purchase.backToTutor' | translate }}</app-button>
+        </section>
+      }
+    }
+  } @else {
+    <div class="flex flex-col gap-6" aria-busy="true" [attr.aria-label]="'tutoring.learner.packages.purchase.loading' | translate">
+      <app-skeleton variant="text" width="40%" />
+      <app-skeleton variant="block" height="16rem" />
+    </div>
+  }
+</div>

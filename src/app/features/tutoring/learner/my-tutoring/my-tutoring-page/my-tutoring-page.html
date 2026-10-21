@@ -1,0 +1,72 @@
+<div class="page-shell page-shell-narrow animate-fade-in">
+  <header class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.learner.my.heading' | translate }}</h1>
+      <p class="mt-1 max-w-prose text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.subheading' | translate }}</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <a
+        routerLink="/my-tutoring/packages"
+        class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-4 text-base font-medium text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.learner.my.myPackages' | translate }}
+      </a>
+      <a
+        routerLink="/tutors"
+        class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-4 text-base font-medium text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.learner.my.findTutors' | translate }}
+      </a>
+    </div>
+  </header>
+
+  <div role="group" [attr.aria-label]="'tutoring.learner.my.tabsLabel' | translate" class="flex flex-wrap gap-2">
+    @for (option of tabs; track option) {
+      <button
+        type="button"
+        [attr.aria-pressed]="tab() === option"
+        (click)="chooseTab(option)"
+        class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="tab() === option ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+      >
+        {{ 'tutoring.learner.my.tab.' + option | translate }}
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.learner.my.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.learner.my.loadErrorHeading' | translate" [description]="'tutoring.learner.my.loadErrorDescription' | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      [heading]="(tab() === 'upcoming' ? 'tutoring.learner.my.emptyUpcomingHeading' : 'tutoring.learner.my.emptyHistoryHeading') | translate"
+      [description]="(tab() === 'upcoming' ? 'tutoring.learner.my.emptyUpcomingDescription' : 'tutoring.learner.my.emptyHistoryDescription') | translate"
+    >
+      @if (tab() === 'upcoming') {
+        <a emptyStateAction routerLink="/tutors" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.learner.my.findTutors' | translate }}</a>
+      }
+    </app-empty-state>
+  } @else {
+    <p role="status" class="sr-only">{{ 'tutoring.learner.my.total' | translate: { count: totalCount() } }}</p>
+    <ul class="flex flex-col gap-4">
+      @for (item of items(); track item.bookingId) {
+        <li>
+          <app-booking-card [booking]="item" [offsetMs]="offsetMs()" (joinWindowReached)="reload()" />
+        </li>
+      }
+    </ul>
+    @if (totalPages() > 1) {
+      <app-pagination [currentPage]="page()" (currentPageChange)="goToPage($event)" [totalPages]="totalPages()" />
+    }
+    <p class="text-sm text-[var(--color-text-muted)]" aria-hidden="true">{{ 'tutoring.learner.my.total' | translate: { count: totalCount() } }}</p>
+  }
+</div>

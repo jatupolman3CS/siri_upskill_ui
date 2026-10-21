@@ -1,0 +1,49 @@
+<section class="glass-card flex flex-col gap-4 rounded-2xl p-5" aria-labelledby="dispute-thread-heading">
+  <h2 id="dispute-thread-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.thread.heading' | translate }}</h2>
+
+  @if (messages().length === 0) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.thread.empty' | translate }}</p>
+  } @else {
+    <ol class="flex flex-col gap-3">
+      @for (message of messages(); track message.messageId) {
+        @if (message.kind === 'System') {
+          <li class="text-center text-xs text-[var(--color-text-muted)]">
+            {{ systemKey(message.body) | translate }} · {{ message.createdAtUtc | bangkokDate: 'dateTime' }}
+          </li>
+        } @else {
+          <li
+            class="flex flex-col gap-2 rounded-[var(--radius-md)] border p-3"
+            [class]="message.visibility === 'Internal' ? 'tone-gold border-[var(--tone-fg)]/50 bg-[var(--tone-bg)]' : 'border-[var(--color-border)]'"
+          >
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span class="font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.role.' + message.authorRole | translate }}</span>
+              <span class="text-[var(--color-text-muted)]">{{ message.createdAtUtc | bangkokDate: 'dateTime' }}</span>
+              @if (message.visibility === 'Internal') {
+                <span class="inline-flex items-center gap-1 font-semibold text-[var(--color-text)]">
+                  <ng-icon name="phosphorLockKey" aria-hidden="true" class="text-sm text-[var(--tone-fg)]" />
+                  {{ 'tutoring.admin.disputes.thread.internal' | translate }}
+                </span>
+              }
+            </div>
+            <p class="whitespace-pre-line break-words text-sm text-[var(--color-text)]">{{ message.body }}</p>
+            @if (message.evidenceLinks.length > 0) {
+              <ul class="flex flex-col gap-1">
+                @for (link of message.evidenceLinks; track link.evidenceId) {
+                  <li class="text-sm">
+                    <a
+                      [href]="link.url"
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      class="break-all font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                    >{{ link.label ?? link.host }}<span class="sr-only"> {{ 'tutoring.admin.disputes.case.newTab' | translate }}</span></a>
+                    <span class="break-all text-xs text-[var(--color-text-muted)]"> · {{ link.host }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </li>
+        }
+      }
+    </ol>
+  }
+</section>

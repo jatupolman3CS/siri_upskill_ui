@@ -1,0 +1,64 @@
+<div class="glass-card flex flex-col gap-5 rounded-3xl p-5">
+  <h2 class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.public.search.filters.heading' | translate }}</h2>
+
+  <app-select
+    [formControl]="form.controls.subject"
+    [label]="'tutoring.public.search.filters.subject' | translate"
+    [options]="subjectOptions()"
+  />
+  <app-select
+    [formControl]="form.controls.level"
+    [label]="'tutoring.public.search.filters.level' | translate"
+    [options]="levelOptions()"
+  />
+  <app-select
+    [formControl]="form.controls.curriculum"
+    [label]="'tutoring.public.search.filters.curriculum' | translate"
+    [options]="curriculumOptions()"
+  />
+  <app-select
+    [formControl]="form.controls.format"
+    [label]="'tutoring.public.search.filters.format' | translate"
+    [options]="formatOptions()"
+  />
+  <app-select
+    [formControl]="form.controls.gender"
+    [label]="'tutoring.public.search.filters.gender' | translate"
+    [options]="genderOptions()"
+  />
+
+  <form (submit)="$event.preventDefault(); applyPrice()" novalidate>
+    <fieldset class="flex min-w-0 flex-col gap-3">
+      <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">{{ 'tutoring.public.search.filters.priceHeading' | translate }}</legend>
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.public.search.filters.priceHelper' | translate }}</p>
+      <div class="grid grid-cols-2 gap-2">
+        <app-input [formControl]="form.controls.priceMin" type="number" inputMode="numeric" [label]="'tutoring.public.search.filters.priceMin' | translate" />
+        <app-input [formControl]="form.controls.priceMax" type="number" inputMode="numeric" [label]="'tutoring.public.search.filters.priceMax' | translate" />
+      </div>
+      @if (priceError(); as message) {
+        <p role="alert" class="text-sm text-[var(--color-danger)]">{{ message }}</p>
+      }
+      <app-button type="submit" size="sm" variant="secondary">{{ 'tutoring.public.search.filters.apply' | translate }}</app-button>
+    </fieldset>
+  </form>
+
+  <form (submit)="$event.preventDefault(); applyTime()" novalidate>
+    <fieldset class="flex min-w-0 flex-col gap-3">
+      <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">{{ 'tutoring.public.search.filters.timeHeading' | translate }}</legend>
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.public.search.filters.timeHelper' | translate }}</p>
+      <app-select [formControl]="form.controls.day" [label]="'tutoring.public.search.filters.day' | translate" [options]="dayOptions()" />
+      <div class="grid grid-cols-2 gap-2">
+        <app-input [formControl]="form.controls.from" type="time" [label]="'tutoring.public.search.filters.timeFrom' | translate" />
+        <app-input [formControl]="form.controls.to" type="time" [label]="'tutoring.public.search.filters.timeTo' | translate" />
+      </div>
+      @if (timeError(); as message) {
+        <p role="alert" class="text-sm text-[var(--color-danger)]">{{ message }}</p>
+      }
+      <app-button type="submit" size="sm" variant="secondary">{{ 'tutoring.public.search.filters.apply' | translate }}</app-button>
+    </fieldset>
+  </form>
+
+  @if (canClear()) {
+    <app-button variant="ghost" size="sm" (click)="clearAll()">{{ 'tutoring.public.search.filters.clearAll' | translate }}</app-button>
+  }
+</div>

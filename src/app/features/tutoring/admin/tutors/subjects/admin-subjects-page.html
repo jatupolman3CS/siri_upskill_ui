@@ -1,0 +1,97 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.admin.subjects.heading' | translate }}</h1>
+        <p class="mt-1 max-w-3xl text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.subjects.subheading' | translate }}</p>
+      </div>
+      <app-button (click)="create()">{{ 'tutoring.admin.subjects.create' | translate }}</app-button>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.subjects.loadErrorHeading' | translate" [description]="errorKey() | translate">
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else if (subjects().length === 0) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.subjects.emptyHeading' | translate" [description]="'tutoring.admin.subjects.emptyDescription' | translate">
+        <app-button emptyStateAction (click)="create()">{{ 'tutoring.admin.subjects.create' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else {
+    <div class="glass-card overflow-hidden rounded-2xl">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[40rem] text-start text-sm text-[var(--color-text)]">
+          <caption class="sr-only">{{ 'tutoring.admin.subjects.tableCaption' | translate }}</caption>
+          <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold text-[var(--color-text-muted)]">
+            <tr>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.subjects.col.name' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.subjects.slug' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.subjects.sortOrder' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.subjects.col.state' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-end"><span class="sr-only">{{ 'tutoring.admin.common.actions' | translate }}</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            @for (subject of subjects(); track subject.subjectId) {
+              <tr>
+                <td class="max-w-[18rem] px-4 py-3" [class.ps-10]="subject.parentId !== null">
+                  <p class="break-words" [class.font-semibold]="subject.parentId === null">{{ nameOf(subject) }}</p>
+                  @if (subject.parentId === null) {
+                    <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.subjects.group' | translate }}</p>
+                  }
+                </td>
+                <td class="break-all px-4 py-3 font-mono text-xs">{{ subject.slug }}</td>
+                <td class="px-4 py-3">{{ subject.sortOrder }}</td>
+                <td class="px-4 py-3">
+                  <app-admin-chip [view]="stateView(subject.isActive)" />
+                </td>
+                <td class="px-4 py-3 text-end">
+                  <div class="flex flex-wrap justify-end gap-2">
+                    <app-button size="sm" variant="secondary" (click)="edit(subject)">
+                      {{ 'tutoring.admin.common.edit' | translate }}<span class="sr-only"> {{ nameOf(subject) }}</span>
+                    </app-button>
+                    <app-button size="sm" variant="ghost" (click)="askToggle(subject)">
+                      {{ (subject.isActive ? 'tutoring.admin.subjects.deactivate' : 'tutoring.admin.subjects.activate') | translate }}<span class="sr-only"> {{ nameOf(subject) }}</span>
+                    </app-button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    @if (totalPages() > 1) {
+      <app-pagination [(currentPage)]="page" [totalPages]="totalPages()" />
+    }
+  }
+</div>
+
+<app-subject-form-dialog [(open)]="formOpen" [subject]="editing()" [subjects]="subjects()" (saved)="reload()" />
+
+<app-admin-confirm-dialog
+  [(open)]="toggleOpen"
+  [titleText]="((toggling()?.isActive ? 'tutoring.admin.subjects.deactivateTitle' : 'tutoring.admin.subjects.activateTitle')) | translate"
+  [confirmLabel]="((toggling()?.isActive ? 'tutoring.admin.subjects.deactivate' : 'tutoring.admin.subjects.activate')) | translate"
+  [danger]="!!toggling()?.isActive"
+  [busy]="toggleBusy()"
+  [problem]="toggleProblem()"
+  (confirmed)="confirmToggle()"
+>
+  @if (toggling(); as target) {
+    <p class="text-sm text-[var(--color-text)]">
+      {{ (target.isActive ? 'tutoring.admin.subjects.deactivateEffect' : 'tutoring.admin.subjects.activateEffect') | translate: { name: nameOf(target) } }}
+    </p>
+  }
+</app-admin-confirm-dialog>

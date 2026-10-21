@@ -1,0 +1,23 @@
+<app-modal [(open)]="open" [titleText]="'tutoring.learner.my.confirm.title' | translate" [closeOnOverlayClick]="false">
+  @if (done()) {
+    <p role="status" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.my.confirm.done' | translate }}</p>
+  } @else {
+    <div class="flex flex-col gap-3 text-base text-[var(--color-text)]">
+      <p>{{ 'tutoring.learner.my.confirm.explain' | translate }}</p>
+      <p class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3">{{ 'tutoring.learner.my.confirm.warning' | translate }}</p>
+      @if (disputeWindowEndsAtUtc(); as until) {
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.my.confirm.stillReport' | translate: { date: (until | bangkokDate: 'dateTime') } }}</p>
+      }
+      <app-tutor-problem [message]="problem()" />
+    </div>
+  }
+
+  <div modalFooter class="flex gap-3">
+    @if (done()) {
+      <app-button (click)="open.set(false)">{{ 'tutoring.learner.my.close' | translate }}</app-button>
+    } @else {
+      <app-button variant="secondary" [disabled]="busy()" (click)="open.set(false)">{{ 'tutoring.learner.my.confirm.notYet' | translate }}</app-button>
+      <app-button [loading]="busy()" [disabled]="busy()" (click)="submit()">{{ 'tutoring.learner.my.confirm.submit' | translate }}</app-button>
+    }
+  </div>
+</app-modal>

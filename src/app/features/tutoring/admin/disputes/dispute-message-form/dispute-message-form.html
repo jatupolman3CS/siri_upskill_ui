@@ -1,0 +1,43 @@
+<form class="glass-card flex flex-col gap-4 rounded-2xl p-5" (submit)="$event.preventDefault(); submit()" novalidate aria-labelledby="dispute-message-heading">
+  <h2 id="dispute-message-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.message.heading' | translate }}</h2>
+
+  <fieldset class="flex flex-col gap-3">
+    <legend class="mb-1 text-sm font-medium text-[var(--color-text)]">{{ 'tutoring.admin.disputes.message.visibility' | translate }}</legend>
+    @for (option of visibilities; track option) {
+      <label
+        class="glass-card flex min-h-11 items-start gap-3 rounded-[var(--radius-md)] p-3 has-[:checked]:border-[var(--color-primary)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-focus-ring)]"
+        [class.cursor-pointer]="option === 'Internal' || canMessageParties()"
+        [class.opacity-60]="option === 'Parties' && !canMessageParties()"
+      >
+        <input
+          type="radio"
+          name="dispute-visibility"
+          class="mt-1 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+          [checked]="effectiveVisibility() === option"
+          [disabled]="option === 'Parties' && !canMessageParties()"
+          (change)="choose(option)"
+        />
+        <span class="min-w-0">
+          <span class="block text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.message.option.' + option | translate }}</span>
+          <span class="block text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.message.effect.' + option | translate }}</span>
+        </span>
+      </label>
+    }
+    @if (!canMessageParties()) {
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.message.closed' | translate }}</p>
+    }
+  </fieldset>
+
+  <app-tutor-textarea
+    [formControl]="body"
+    [label]="'tutoring.admin.disputes.message.body' | translate"
+    [errorMessage]="bodyError()"
+    [maxLength]="max"
+    [rows]="4"
+    [required]="true"
+  />
+  <app-tutor-problem [message]="problem()" />
+  <div>
+    <app-button type="submit" [loading]="busy()" [disabled]="busy()">{{ (effectiveVisibility() === 'Parties' ? 'tutoring.admin.disputes.message.sendParties' : 'tutoring.admin.disputes.message.sendInternal') | translate }}</app-button>
+  </div>
+</form>

@@ -1,0 +1,48 @@
+<form
+  #formRoot
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  novalidate
+  class="flex flex-col gap-5"
+  [attr.aria-label]="(isEdit() ? 'tutoring.review.form.editHeading' : 'tutoring.review.form.heading') | translate"
+>
+  <div class="flex flex-col gap-2">
+    <p class="tone-blue rounded-[var(--radius-md)] bg-[var(--tone-bg)] px-3 py-2 text-sm text-[var(--color-text)]">{{ 'tutoring.review.publicNotice' | translate }}</p>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.review.labelRule' | translate }}</p>
+  </div>
+
+  <app-star-rating-input
+    formControlName="rating"
+    [label]="'tutoring.review.rating.label' | translate"
+    [required]="true"
+    [errorMessage]="message('rating')"
+  />
+
+  <app-tutor-textarea
+    formControlName="comment"
+    [label]="'tutoring.review.comment.label' | translate"
+    [helperText]="'tutoring.review.comment.help' | translate"
+    [errorMessage]="message('comment')"
+    [maxLength]="commentMax"
+    [rows]="4"
+    (focusout)="feedback.touch('comment')"
+  />
+
+  <div class="flex flex-col gap-1">
+    <app-checkbox formControlName="anonymous" [label]="'tutoring.review.anonymous.label' | translate" />
+    @if (anonymous()) {
+      <p class="ps-[3.125rem] text-sm text-[var(--color-text-muted)]">{{ 'tutoring.review.anonymous.warning' | translate }}</p>
+    }
+  </div>
+
+  <app-tutor-problem [message]="problem()" />
+
+  <div class="flex flex-wrap gap-3">
+    <app-button type="submit" [loading]="saving()" [disabled]="saving()">
+      {{ (isEdit() ? 'tutoring.review.form.save' : 'tutoring.review.form.submit') | translate }}
+    </app-button>
+    @if (isEdit()) {
+      <app-button variant="secondary" [disabled]="saving()" (click)="cancelled.emit()">{{ 'tutoring.review.form.cancel' | translate }}</app-button>
+    }
+  </div>
+</form>

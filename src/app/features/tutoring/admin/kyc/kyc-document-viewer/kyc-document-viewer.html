@@ -1,0 +1,57 @@
+<section
+  class="glass-card flex flex-col gap-4 rounded-2xl p-5 focus-visible:outline-none"
+  aria-labelledby="kyc-viewer-heading"
+  tabindex="-1"
+  (keydown.escape)="closed.emit()"
+>
+  <div class="flex items-start justify-between gap-3">
+    <h2 id="kyc-viewer-heading" #heading tabindex="-1" class="text-lg font-semibold text-[var(--color-text)] focus-visible:outline-none">
+      {{ 'tutoring.admin.kyc.viewer.heading' | translate: { type: (typeLabelKey() | translate) } }}
+    </h2>
+    <button
+      type="button"
+      (click)="closed.emit()"
+      class="flex h-11 shrink-0 items-center gap-2 rounded-[var(--radius-md)] px-3 text-sm font-semibold text-[var(--color-text)] transition-colors
+        hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      <ng-icon name="phosphorX" aria-hidden="true" />
+      {{ 'tutoring.admin.kyc.viewer.close' | translate }}
+    </button>
+  </div>
+
+  <p class="tone-gold flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+    <ng-icon name="phosphorLockKey" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
+    <span>{{ 'tutoring.admin.kyc.viewer.logged' | translate }}</span>
+  </p>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.kyc.viewer.loading' | translate">
+      <app-skeleton variant="block" height="24rem" radius="lg" />
+    </div>
+  } @else if (errorKey(); as key) {
+    <div role="alert" class="tone-red flex flex-col items-start gap-3 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-4">
+      <p class="break-words text-sm text-[var(--color-text)]">{{ key | translate }}</p>
+      @if (canRetry()) {
+        <app-button size="sm" variant="secondary" (click)="retry()">{{ 'tutoring.admin.kyc.viewer.retry' | translate }}</app-button>
+      }
+    </div>
+  } @else if (objectUrl(); as url) {
+    @switch (kind()) {
+      @case ('image') {
+        <!-- A plain img on purpose: NgOptimizedImage cannot take a blob: source, and this is an in-memory document, not a site asset. -->
+        <img [src]="url" [alt]="'tutoring.admin.kyc.viewer.imageAlt' | translate" class="mx-auto max-h-[70vh] w-auto max-w-full rounded-[var(--radius-md)] object-contain" />
+      }
+      @case ('pdf') {
+        <iframe
+          [src]="safePdfUrl()"
+          [title]="'tutoring.admin.kyc.viewer.pdfTitle' | translate"
+          referrerpolicy="no-referrer"
+          class="h-[70vh] w-full rounded-[var(--radius-md)] border border-[var(--color-border)]"
+        ></iframe>
+      }
+      @default {
+        <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.admin.kyc.viewer.unsupported' | translate }}</p>
+      }
+    }
+  }
+</section>

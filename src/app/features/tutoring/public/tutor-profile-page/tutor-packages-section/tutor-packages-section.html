@@ -1,0 +1,57 @@
+@if (offers().length > 0) {
+  <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5" aria-labelledby="tutor-packages-heading">
+    <h2 id="tutor-packages-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.packages.heading' | translate }}</h2>
+    <p class="mb-4 mt-1 text-sm text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.packages.intro' | translate }}</p>
+
+    <ul class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      @for (offer of offers(); track offer.packageId) {
+        <li class="flex flex-col gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <h3 class="min-w-0 break-words text-base font-semibold text-[var(--color-text)]">{{ subjectName(offer) }}</h3>
+            @if (offer.discountPercent > 0) {
+              <span class="tone-green rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-semibold text-[var(--tone-fg)]">
+                {{ 'tutoring.public.profile.packages.discount' | translate: { percent: offer.discountPercent } }}
+              </span>
+            }
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tone-blue rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">{{ levelKey(offer.offering.level) | translate }}</span>
+            <span class="tone-teal rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">{{ curriculumKey(offer.offering.curriculum) | translate }}</span>
+          </div>
+
+          <p class="text-base font-semibold text-[var(--color-text)]">
+            {{ 'tutoring.public.profile.packages.lessons' | translate: { count: offer.sessionCount, minutes: offer.durationMinutes } }}
+          </p>
+
+          <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span class="text-2xl font-bold text-[var(--color-primary-text)]">{{ offer.totalPrice | currencyThb }}</span>
+            <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.packages.perLesson' | translate: { price: (offer.pricePerSession | currencyThb) ?? '' } }}</span>
+          </p>
+          @if (offer.savingsAmount > 0) {
+            <p class="text-sm font-medium text-[var(--color-text)]">
+              {{ 'tutoring.public.profile.packages.savings' | translate: { amount: (offer.savingsAmount | currencyThb) ?? '' } }}
+            </p>
+          }
+
+          <ul class="flex flex-col gap-1 text-sm text-[var(--color-text-muted)]">
+            <li>{{ 'tutoring.public.profile.packages.oneOnOne' | translate }}</li>
+            <li>{{ 'tutoring.public.profile.packages.validity' | translate: { days: offer.validDays } }}</li>
+            <li>{{ 'tutoring.public.profile.packages.noRefund' | translate }}</li>
+          </ul>
+
+          <a
+            [routerLink]="['/tutors', slug(), 'packages', offer.packageId]"
+            class="mt-auto inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium
+              text-[var(--color-primary-foreground)] transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+          >
+            {{ 'tutoring.public.profile.packages.buy' | translate }}
+            <span class="sr-only">
+              {{ 'tutoring.public.profile.packages.buyFor' | translate: { count: offer.sessionCount, minutes: offer.durationMinutes, subject: subjectName(offer) } }}
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+}

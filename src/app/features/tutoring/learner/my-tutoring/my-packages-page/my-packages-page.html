@@ -1,0 +1,75 @@
+<div class="page-shell page-shell-narrow animate-fade-in">
+  <header class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.learner.packages.my.heading' | translate }}</h1>
+      <p class="mt-1 max-w-prose text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.subheading' | translate }}</p>
+    </div>
+    <a
+      routerLink="/my-tutoring"
+      class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-4 text-base font-medium text-[var(--color-text)] transition-colors
+        hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'tutoring.learner.packages.my.backToLessons' | translate }}
+    </a>
+  </header>
+
+  <div role="group" [attr.aria-label]="'tutoring.learner.packages.my.filterLabel' | translate" class="flex flex-wrap gap-2">
+    <button
+      type="button"
+      [attr.aria-pressed]="status() === null"
+      (click)="chooseStatus(null)"
+      class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+        hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      [class]="status() === null ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+    >
+      {{ 'tutoring.learner.packages.my.filterAll' | translate }}
+    </button>
+    @for (option of statuses; track option) {
+      <button
+        type="button"
+        [attr.aria-pressed]="status() === option"
+        (click)="chooseStatus(option)"
+        class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="status() === option ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+      >
+        {{ statusKey(option) | translate }}
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.learner.packages.my.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="11rem" radius="lg" />
+      <app-skeleton variant="block" height="11rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.learner.packages.my.loadErrorHeading' | translate" [description]="errorKey() | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      [heading]="(status() === null ? 'tutoring.learner.packages.my.emptyHeading' : 'tutoring.learner.packages.my.emptyFilteredHeading') | translate"
+      [description]="(status() === null ? 'tutoring.learner.packages.my.emptyDescription' : 'tutoring.learner.packages.my.emptyFilteredDescription') | translate"
+    >
+      @if (status() === null) {
+        <a emptyStateAction routerLink="/tutors" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.learner.my.findTutors' | translate }}</a>
+      } @else {
+        <app-button emptyStateAction variant="secondary" (click)="chooseStatus(null)">{{ 'tutoring.learner.packages.my.showAll' | translate }}</app-button>
+      }
+    </app-empty-state>
+  } @else {
+    <p role="status" class="sr-only">{{ 'tutoring.learner.packages.my.total' | translate: { count: totalCount() } }}</p>
+    <ul class="flex flex-col gap-4">
+      @for (item of items(); track item.purchaseId) {
+        <li>
+          <app-package-card [purchase]="item" />
+        </li>
+      }
+    </ul>
+    @if (totalPages() > 1) {
+      <app-pagination [currentPage]="page()" (currentPageChange)="goToPage($event)" [totalPages]="totalPages()" />
+    }
+    <p class="text-sm text-[var(--color-text-muted)]" aria-hidden="true">{{ 'tutoring.learner.packages.my.total' | translate: { count: totalCount() } }}</p>
+  }
+</div>

@@ -1,0 +1,115 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.tutor.wallet.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.subheading' | translate }}</p>
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.wallet.loading' | translate" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+      <app-skeleton variant="block" height="7rem" radius="lg" />
+      <app-skeleton variant="block" height="7rem" radius="lg" />
+      <app-skeleton variant="block" height="7rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.tutor.wallet.loadErrorHeading' | translate" [description]="'tutoring.tutor.wallet.loadErrorDescription' | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (wallet(); as current) {
+    @if (!current.summary.hasVerifiedPayoutAccount) {
+      <section role="status" class="tone-gold flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-4">
+        <p class="flex min-w-0 flex-1 items-start gap-2 text-sm text-[var(--color-text)]">
+          <ng-icon name="phosphorBank" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--tone-fg)]" />
+          {{ 'tutoring.tutor.wallet.noAccount' | translate }}
+        </p>
+        <a [routerLink]="accountRoute" class="inline-flex min-h-11 items-center rounded-[var(--radius-full)] border border-[var(--tone-fg)] px-4 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]">{{ 'tutoring.tutor.wallet.goAccount' | translate }}</a>
+      </section>
+    }
+
+    <section aria-labelledby="tutor-wallet-summary-heading" class="flex flex-col gap-4">
+      <h2 id="tutor-wallet-summary-heading" class="sr-only">{{ 'tutoring.tutor.wallet.summaryHeading' | translate }}</h2>
+      <dl class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+        <div class="glass-card tone-blue flex flex-col gap-1 rounded-[var(--radius-lg)] p-5">
+          <dt class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]"><ng-icon name="phosphorHourglass" aria-hidden="true" class="text-lg text-[var(--tone-fg)]" />{{ 'tutoring.tutor.wallet.held' | translate }}</dt>
+          <dd class="text-2xl font-bold text-[var(--color-text)]">{{ current.summary.heldAmount | currencyThb }}</dd>
+          <dd class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.heldHelp' | translate }}</dd>
+        </div>
+        <div class="glass-card tone-gold flex flex-col gap-1 rounded-[var(--radius-lg)] p-5">
+          <dt class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]"><ng-icon name="phosphorPauseCircle" aria-hidden="true" class="text-lg text-[var(--tone-fg)]" />{{ 'tutoring.tutor.wallet.frozen' | translate }}</dt>
+          <dd class="text-2xl font-bold text-[var(--color-text)]">{{ current.summary.frozenAmount | currencyThb }}</dd>
+          <dd class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.frozenHelp' | translate }}</dd>
+        </div>
+        <div class="glass-card tone-green flex flex-col gap-1 rounded-[var(--radius-lg)] p-5">
+          <dt class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]"><ng-icon name="phosphorWallet" aria-hidden="true" class="text-lg text-[var(--tone-fg)]" />{{ 'tutoring.tutor.wallet.available' | translate }}</dt>
+          <dd class="text-2xl font-bold text-[var(--color-text)]">{{ current.summary.availableAmount | currencyThb }}</dd>
+          <dd class="text-xs text-[var(--color-text-muted)]">
+            {{ (current.summary.availableAmount < 0 ? 'tutoring.tutor.wallet.availableNegativeHelp' : 'tutoring.tutor.wallet.availableHelp') | translate }}
+          </dd>
+        </div>
+        <div class="glass-card tone-blue flex flex-col gap-1 rounded-[var(--radius-lg)] p-5">
+          <dt class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]"><ng-icon name="phosphorArrowsClockwise" aria-hidden="true" class="text-lg text-[var(--tone-fg)]" />{{ 'tutoring.tutor.wallet.processing' | translate }}</dt>
+          <dd class="text-2xl font-bold text-[var(--color-text)]">{{ current.summary.processingAmount | currencyThb }}</dd>
+          <dd class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.processingHelp' | translate }}</dd>
+        </div>
+        <div class="glass-card tone-green flex flex-col gap-1 rounded-[var(--radius-lg)] p-5">
+          <dt class="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-muted)]"><ng-icon name="phosphorCheckCircle" aria-hidden="true" class="text-lg text-[var(--tone-fg)]" />{{ 'tutoring.tutor.wallet.paid' | translate }}</dt>
+          <dd class="text-2xl font-bold text-[var(--color-text)]">{{ current.summary.paidAmount | currencyThb }}</dd>
+          <dd class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.paidHelp' | translate }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <div class="grid gap-6 xl:grid-cols-2">
+      <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-wallet-next-heading">
+        <h2 id="tutor-wallet-next-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.wallet.nextHeading' | translate }}</h2>
+        <dl class="grid gap-2 text-sm">
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.nextPayout' | translate }}</dt>
+            <dd class="text-end font-semibold text-[var(--color-text)]">{{ current.summary.nextPayoutAtUtc | bangkokDate: 'dateTime' }}</dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.minimum' | translate }}</dt>
+            <dd class="text-end font-semibold text-[var(--color-text)]">{{ current.summary.minimumPayoutAmount | currencyThb }}</dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.withholding' | translate }}</dt>
+            <dd class="text-end font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.wallet.percent' | translate: { percent: current.summary.withholdingTaxPercent } }}</dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.estimatedNet' | translate }}</dt>
+            <dd class="text-end font-semibold text-[var(--color-text)]">{{ current.summary.estimatedNetAvailable | currencyThb }}</dd>
+          </div>
+        </dl>
+        <p class="text-sm text-[var(--color-text)]">
+          {{ (current.summary.meetsMinimum ? 'tutoring.tutor.wallet.meetsMinimum' : 'tutoring.tutor.wallet.belowMinimum') | translate }}
+        </p>
+        <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.nextEstimate' | translate }}</p>
+      </section>
+
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-wallet-how-heading">
+        <h2 id="tutor-wallet-how-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.wallet.howHeading' | translate }}</h2>
+        <ul class="list-disc space-y-2 ps-5 text-sm text-[var(--color-text)]">
+          <li>
+            @if (holdHours(); as hours) {
+              {{ 'tutoring.tutor.wallet.noteHold' | translate: { hours: hours } }}
+            } @else {
+              {{ 'tutoring.tutor.wallet.noteHoldGeneric' | translate }}
+            }
+          </li>
+          <li>{{ 'tutoring.tutor.wallet.noteCommission' | translate: { commission: current.commissionPercent, share: current.tutorSharePercent } }}</li>
+          <li>{{ 'tutoring.tutor.wallet.noteWeekly' | translate }}</li>
+          <li>{{ 'tutoring.tutor.wallet.noteRefund' | translate }}</li>
+        </ul>
+        <p class="text-sm">
+          <a [routerLink]="accountRoute" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.tutor.wallet.goAccount' | translate }}</a>
+        </p>
+      </section>
+    </div>
+
+    <app-wallet-ledger />
+    <app-wallet-payouts />
+  }
+</div>

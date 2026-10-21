@@ -1,0 +1,72 @@
+<form
+  #formRoot
+  [formGroup]="form"
+  (ngSubmit)="save()"
+  novalidate
+  class="flex flex-col gap-5"
+  [attr.aria-label]="(isEdit() ? 'tutoring.tutor.packages.editHeading' : 'tutoring.tutor.packages.addHeading') | translate"
+>
+  <div class="grid gap-5 md:grid-cols-3">
+    <app-select
+      class="md:col-span-3"
+      formControlName="offeringId"
+      [label]="'tutoring.tutor.packages.subject' | translate"
+      [helperText]="'tutoring.tutor.packages.subjectHelp' | translate"
+      [options]="offeringOptions()"
+      [errorMessage]="message('offeringId')"
+      [required]="true"
+      (focusout)="feedback.touch('offeringId')"
+    />
+    <app-input
+      formControlName="sessionCount"
+      type="number"
+      inputMode="numeric"
+      [label]="'tutoring.tutor.packages.sessionCount' | translate"
+      [helperText]="'tutoring.tutor.packages.sessionCountHelp' | translate: { min: limits.sessionCount.min, max: limits.sessionCount.max }"
+      [errorMessage]="message('sessionCount')"
+      [required]="true"
+      (focusout)="feedback.touch('sessionCount')"
+    />
+    <app-select
+      formControlName="durationMinutes"
+      [label]="'tutoring.tutor.packages.duration' | translate"
+      [options]="durationOptions()"
+      [errorMessage]="message('durationMinutes')"
+      [required]="true"
+    />
+    <app-input
+      formControlName="discountPercent"
+      type="number"
+      step="0.01"
+      inputMode="decimal"
+      [label]="'tutoring.tutor.packages.discount' | translate"
+      [helperText]="'tutoring.tutor.packages.discountHelp' | translate: { max: limits.discountPercent.max }"
+      [errorMessage]="message('discountPercent')"
+      [required]="true"
+      (focusout)="feedback.touch('discountPercent')"
+    />
+    <app-input
+      formControlName="validDays"
+      type="number"
+      inputMode="numeric"
+      [label]="'tutoring.tutor.packages.validDays' | translate"
+      [helperText]="'tutoring.tutor.packages.validDaysHelp' | translate: { min: limits.validDays.min, max: limits.validDays.max }"
+      [errorMessage]="message('validDays')"
+      [required]="true"
+      (focusout)="feedback.touch('validDays')"
+    />
+  </div>
+  @if (isEdit()) {
+    <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.identityLocked' | translate }}</p>
+  }
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.priceNote' | translate }}</p>
+
+  <app-checkbox formControlName="isActive" [label]="'tutoring.tutor.packages.activeLabel' | translate" />
+
+  <app-tutor-problem [message]="problem()" />
+
+  <div class="flex flex-wrap items-center gap-3">
+    <app-button type="submit" [loading]="saving()">{{ (isEdit() ? 'tutoring.tutor.packages.save' : 'tutoring.tutor.packages.create') | translate }}</app-button>
+    <app-button variant="ghost" [disabled]="saving()" (click)="cancelled.emit()">{{ 'tutoring.tutor.common.cancel' | translate }}</app-button>
+  </div>
+</form>

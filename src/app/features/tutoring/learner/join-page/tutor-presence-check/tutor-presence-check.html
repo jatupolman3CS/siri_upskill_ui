@@ -1,0 +1,26 @@
+<div role="status" aria-live="polite">
+  @switch (step()) {
+    @case ('thanks') {
+      <p class="tone-green rounded-[var(--radius-md)] bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">{{ 'tutoring.join.presence.thanks' | translate }}</p>
+    }
+    @case ('asking') {
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-4 text-left" aria-labelledby="tutor-presence-question">
+        <h2 id="tutor-presence-question" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.join.presence.question' | translate }}</h2>
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.join.presence.explain' | translate }}</p>
+        <app-tutor-problem [message]="problem()" />
+        <div class="flex flex-wrap gap-3">
+          <app-button (click)="confirm()">{{ 'tutoring.join.presence.yes' | translate }}</app-button>
+          <app-button variant="secondary" (click)="dismiss()">{{ 'tutoring.join.presence.notYet' | translate }}</app-button>
+        </div>
+      </section>
+    }
+    @case ('sending') {
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-4 text-left" aria-labelledby="tutor-presence-question" aria-busy="true">
+        <h2 id="tutor-presence-question" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.join.presence.question' | translate }}</h2>
+        <div class="flex flex-wrap gap-3">
+          <app-button [loading]="true">{{ 'tutoring.join.presence.yes' | translate }}</app-button>
+        </div>
+      </section>
+    }
+  }
+</div>

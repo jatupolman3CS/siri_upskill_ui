@@ -1,0 +1,71 @@
+<section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-video-heading">
+  <h2 id="tutor-video-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+    <ng-icon name="phosphorVideoCamera" aria-hidden="true" class="text-xl" />
+    {{ 'tutoring.tutor.video.heading' | translate }}
+  </h2>
+
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.video.help' | translate }}</p>
+
+  @if (hasVideo()) {
+    <p class="tone-green flex items-center gap-1.5 text-sm font-medium text-[var(--tone-fg)]">
+      <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="text-base" />
+      {{ 'tutoring.tutor.video.hasVideo' | translate }}
+    </p>
+  }
+
+  <div class="flex flex-wrap items-center gap-3">
+    <input
+      #fileInput
+      type="file"
+      class="sr-only"
+      tabindex="-1"
+      aria-hidden="true"
+      accept="video/*"
+      (change)="onPicked($event)"
+    />
+    <app-button size="sm" [variant]="hasVideo() ? 'secondary' : 'primary'" [disabled]="busy() || disabled()" (click)="fileInput.click()">
+      <ng-icon leading name="phosphorUploadSimple" aria-hidden="true" />
+      {{ (hasVideo() ? 'tutoring.tutor.video.replace' : 'tutoring.tutor.video.upload') | translate }}
+    </app-button>
+    @if (canRetryLink()) {
+      <app-button size="sm" variant="secondary" (click)="retryLink()">{{ 'tutoring.tutor.video.retryLink' | translate }}</app-button>
+    }
+    @if (hasVideo()) {
+      <app-button size="sm" variant="ghost" [disabled]="busy() || disabled()" (click)="remove()">
+        <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+        {{ 'tutoring.tutor.video.remove' | translate }}
+      </app-button>
+    }
+  </div>
+
+  <div aria-live="polite" class="text-sm text-[var(--color-text)]">
+    @switch (stage()) {
+      @case ('uploading') {
+        <div class="flex flex-col gap-1.5">
+          <span>{{ 'tutoring.tutor.video.uploading' | translate: { percent: percent() } }}</span>
+          <div
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="percent()"
+            [attr.aria-label]="'tutoring.tutor.video.progressLabel' | translate"
+            class="h-2 w-full max-w-sm overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]"
+          >
+            <div
+              class="h-full origin-left rounded-[var(--radius-full)] bg-[var(--color-primary)] transition-transform duration-200 ease-out motion-reduce:transition-none"
+              [style.transform]="'scaleX(' + percent() / 100 + ')'"
+            ></div>
+          </div>
+        </div>
+      }
+      @case ('processing') {
+        <span>{{ 'tutoring.tutor.video.processing' | translate }}</span>
+      }
+      @case ('linking') {
+        <span>{{ 'tutoring.tutor.video.linking' | translate }}</span>
+      }
+    }
+  </div>
+
+  <app-tutor-problem [message]="problem()" />
+</section>

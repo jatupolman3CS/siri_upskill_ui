@@ -1,0 +1,51 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-settings-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-settings-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.availability.settings.heading' | translate }}</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.settings.intro' | translate }}</p>
+  </header>
+
+  <form #formRoot [formGroup]="form" (ngSubmit)="save()" novalidate class="flex flex-col gap-5" [attr.aria-labelledby]="'tutor-settings-heading'">
+    <div class="grid gap-5 md:grid-cols-3">
+      <app-input
+        formControlName="minNoticeHours"
+        type="number"
+        inputMode="numeric"
+        [label]="'tutoring.tutor.availability.settings.minNotice' | translate"
+        [helperText]="'tutoring.tutor.availability.settings.minNoticeHelp' | translate: { min: noticeRange.min, max: noticeRange.max }"
+        [errorMessage]="message('minNoticeHours')"
+        [required]="true"
+        (focusout)="feedback.touch('minNoticeHours')"
+      />
+      <app-select
+        formControlName="bufferMinutes"
+        [label]="'tutoring.tutor.availability.settings.buffer' | translate"
+        [helperText]="'tutoring.tutor.availability.settings.bufferHelp' | translate"
+        [options]="bufferOptions()"
+        [errorMessage]="message('bufferMinutes')"
+        [required]="true"
+        (focusout)="feedback.touch('bufferMinutes')"
+      />
+      <app-input
+        formControlName="maxAdvanceDays"
+        type="number"
+        inputMode="numeric"
+        [label]="'tutoring.tutor.availability.settings.maxAdvance' | translate"
+        [helperText]="'tutoring.tutor.availability.settings.maxAdvanceHelp' | translate: { min: advanceRange.min, max: advanceRange.max }"
+        [errorMessage]="message('maxAdvanceDays')"
+        [required]="true"
+        (focusout)="feedback.touch('maxAdvanceDays')"
+      />
+    </div>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.settings.newBookingsOnly' | translate }}</p>
+
+    <app-tutor-problem [message]="problem()" />
+
+    <div class="flex flex-wrap items-center gap-3">
+      <app-button type="submit" [loading]="saving()" [disabled]="!dirty()">{{ 'tutoring.tutor.availability.settings.save' | translate }}</app-button>
+      <app-button variant="ghost" [disabled]="!dirty() || saving()" (click)="discard()">{{ 'tutoring.tutor.availability.discard' | translate }}</app-button>
+      <p role="status" aria-live="polite" class="text-sm text-[var(--color-text-muted)]">
+        {{ (dirty() ? 'tutoring.tutor.availability.unsaved' : 'tutoring.tutor.availability.allSaved') | translate }}
+      </p>
+    </div>
+  </form>
+</section>

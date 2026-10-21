@@ -1,0 +1,43 @@
+<ol class="flex flex-col gap-3" [attr.aria-label]="'tutoring.tutor.disputes.thread.label' | translate">
+  @for (message of messages(); track message.messageId) {
+    @if (message.kind === 'System') {
+      <li class="text-center text-sm text-[var(--color-text-muted)]">
+        {{ systemKey(message.body) | translate }}
+        <span aria-hidden="true">·</span>
+        <time [attr.datetime]="message.createdAtUtc">{{ message.createdAtUtc | bangkokDate: 'shortDateTime' }}</time>
+      </li>
+    } @else {
+      <li
+        class="flex max-w-[92%] flex-col gap-1.5 rounded-[var(--radius-lg)] border border-[var(--color-border)] p-3 sm:max-w-[80%]"
+        [class]="message.isMine ? 'ms-auto bg-[var(--color-surface-muted)]' : 'glass-card'"
+      >
+        <p class="flex flex-wrap items-baseline gap-x-2 text-sm">
+          <span class="font-semibold text-[var(--color-text)]">{{ authorKey(message) | translate }}</span>
+          <time class="text-[var(--color-text-muted)]" [attr.datetime]="message.createdAtUtc">{{ message.createdAtUtc | bangkokDate: 'shortDateTime' }}</time>
+        </p>
+        <p class="whitespace-pre-line break-words text-base text-[var(--color-text)]">{{ message.body }}</p>
+
+        @if (message.evidenceLinks.length > 0) {
+          <ul class="mt-1 flex flex-col gap-1.5" [attr.aria-label]="'tutoring.tutor.disputes.detail.evidence' | translate">
+            @for (link of message.evidenceLinks; track link.evidenceId) {
+              <li class="flex items-start gap-2 text-sm text-[var(--color-text)]">
+                <ng-icon name="phosphorLinkSimple" aria-hidden="true" class="mt-0.5 shrink-0 text-base" />
+                <span class="min-w-0 break-words">
+                  @if (isSafeLink(link)) {
+                    <a [href]="link.url" target="_blank" rel="noopener noreferrer nofollow" class="font-semibold text-[var(--color-primary-text)] underline">
+                      {{ link.label || link.host }}
+                      <span class="sr-only">({{ 'tutoring.tutor.disputes.detail.externalLink' | translate }})</span>
+                    </a>
+                  } @else {
+                    <span class="font-semibold">{{ link.label || link.host }}</span>
+                  }
+                  <span class="text-[var(--color-text-muted)]"> · {{ link.host }}</span>
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </li>
+    }
+  }
+</ol>

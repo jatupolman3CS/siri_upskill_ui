@@ -1,0 +1,119 @@
+<section class="glass-card flex flex-col gap-5 rounded-2xl p-5" aria-labelledby="dispute-context-heading">
+  <h2 id="dispute-context-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.context.heading' | translate }}</h2>
+
+  <div class="flex flex-col gap-2">
+    <h3 class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.context.attendance' | translate }}</h3>
+    <dl class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      @for (row of [
+        { key: 'tutorJoined', at: detail().attendance.tutorJoinedAtUtc },
+        { key: 'tutorConfirmed', at: detail().attendance.tutorConfirmedAtUtc },
+        { key: 'tutorAttested', at: detail().attendance.tutorPresentAttestedAtUtc },
+        { key: 'learnerJoined', at: detail().attendance.learnerJoinedAtUtc },
+        { key: 'learnerConfirmed', at: detail().attendance.learnerConfirmedAtUtc }
+      ]; track row.key) {
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.context.' + row.key | translate }}</dt>
+          <dd class="text-[var(--color-text)]">{{ row.at ? (row.at | bangkokDate: 'dateTime') : ('tutoring.admin.disputes.context.never' | translate) }}</dd>
+        </div>
+      }
+    </dl>
+    @if (detail().attendance.decision; as decision) {
+      <p class="break-words rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">
+        {{ 'tutoring.admin.disputes.context.decision' | translate: { outcome: decision.outcome, by: decision.decidedBy, date: (decision.decidedAtUtc | bangkokDate: 'dateTime') } }}
+        <span class="block text-xs text-[var(--color-text-muted)]">
+          {{ 'tutoring.admin.disputes.context.evidence' | translate: { tutor: decision.tutorEvidence, learner: decision.learnerEvidence } }}
+        </span>
+      </p>
+    }
+    @if (detail().attendance.joinLogs.length > 0) {
+      <ul class="flex flex-col gap-1 text-sm text-[var(--color-text)]" [attr.aria-label]="'tutoring.admin.disputes.context.joinLogs' | translate">
+        @for (log of detail().attendance.joinLogs; track log.joinedAtUtc + log.role) {
+          <li class="break-words">{{ labelOf('tutoring.admin.disputes.role', log.role) }} · {{ log.joinedAtUtc | bangkokDate: 'dateTime' }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <h3 class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.context.money' | translate }}</h3>
+    <dl class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.context.price' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">{{ detail().priceAmount | currencyThb }}</dd>
+      </div>
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.context.refunded' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">{{ detail().refundedAmount | currencyThb }}</dd>
+      </div>
+      @if (detail().payment; as payment) {
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.context.payment' | translate }}</dt>
+          <dd class="break-words text-[var(--color-text)]">{{ payment.method }} · {{ payment.status }} · {{ payment.amount | currencyThb }}</dd>
+        </div>
+      }
+      @if (detail().isPackageBooking) {
+        <div>
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.context.package' | translate }}</dt>
+          <dd class="text-[var(--color-text)]">{{ 'tutoring.admin.disputes.context.packageNote' | translate }}</dd>
+        </div>
+      }
+    </dl>
+    @if (detail().refunds.length > 0) {
+      <ul class="flex flex-col gap-1 text-sm text-[var(--color-text)]" [attr.aria-label]="'tutoring.admin.disputes.context.refundList' | translate">
+        @for (refund of detail().refunds; track refund.refundId) {
+          <li class="break-words">{{ refund.amount | currencyThb }} · {{ labelOf('tutoring.enums.refundStatus', refund.status) }} · {{ refund.reason }} · {{ refund.requestedAtUtc | bangkokDate: 'dateTime' }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <h3 class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.disputes.context.tutor' | translate }}</h3>
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="break-words font-semibold text-[var(--color-text)]">{{ detail().tutor.displayName }}</span>
+      @if (tutorChip(detail().tutorHistory.status); as chip) {
+        <app-admin-chip [view]="chip" />
+      } @else {
+        <span class="text-sm text-[var(--color-text-muted)]">{{ detail().tutorHistory.status }}</span>
+      }
+      <a
+        [routerLink]="['/admin/tutoring/tutors', detail().tutor.tutorId]"
+        class="inline-flex min-h-11 items-center font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >{{ 'tutoring.admin.disputes.context.tutorLink' | translate }}</a>
+      <a
+        [routerLink]="['/admin/tutoring/disputes']"
+        [queryParams]="{ tutorId: detail().tutor.tutorId, status: 'all' }"
+        class="inline-flex min-h-11 items-center font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >{{ 'tutoring.admin.disputes.context.tutorDisputes' | translate }}</a>
+    </div>
+    <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.col.reliability' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">{{ detail().tutorHistory.reliabilityScore }}</dd>
+      </div>
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.col.rating' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">{{ detail().tutorHistory.ratingCount > 0 ? detail().tutorHistory.ratingAverage.toFixed(1) + ' (' + detail().tutorHistory.ratingCount + ')' : '-' }}</dd>
+      </div>
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.tutors.col.completed' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">{{ detail().tutorHistory.completedSessionsCount }}</dd>
+      </div>
+      <div>
+        <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.admin.disputes.context.disputes90d' | translate }}</dt>
+        <dd class="font-semibold text-[var(--color-text)]">
+          {{ 'tutoring.admin.disputes.context.disputes90dValue' | translate: { total: detail().tutorHistory.disputes90d.total, upheld: detail().tutorHistory.disputes90d.upheld } }}
+        </dd>
+      </div>
+    </dl>
+    @if (detail().tutorHistory.penalties.length > 0) {
+      <ul class="flex flex-col gap-1 text-sm text-[var(--color-text)]" [attr.aria-label]="'tutoring.admin.disputes.context.penalties' | translate">
+        @for (penalty of detail().tutorHistory.penalties; track penalty.createdAtUtc + penalty.reasonCode) {
+          <li class="break-words">
+            {{ labelOf('tutoring.enums.penaltyKind', penalty.kind) }} · {{ penalty.points }} · {{ penalty.createdAtUtc | bangkokDate: 'date' }}@if (penalty.voided) { · {{ 'tutoring.admin.disputes.context.voided' | translate }} }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

@@ -1,0 +1,146 @@
+<div class="page-shell animate-fade-in">
+  <header class="flex flex-col gap-1">
+    <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ keys.heading | translate }}</h1>
+    <p class="max-w-prose text-[var(--color-text-muted)]">{{ keys.subheading | translate }}</p>
+  </header>
+
+  @switch (flow.view()) {
+    @case ('loading') {
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]" aria-busy="true" [attr.aria-label]="keys.loading | translate">
+        <app-skeleton variant="block" height="20rem" radius="lg" />
+        <app-skeleton variant="block" height="20rem" radius="lg" />
+      </div>
+    }
+    @case ('notFound') {
+      <section class="glass-card flex flex-col items-start gap-4 rounded-[var(--radius-lg)] p-6 sm:p-8" aria-labelledby="checkout-state-heading">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ keys.notFoundHeading | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ keys.notFoundBody | translate }}</p>
+        <app-button routerLink="/tutors">{{ 'tutoring.checkout.actions.findTutors' | translate }}</app-button>
+      </section>
+    }
+    @case ('error') {
+      <section class="glass-card flex flex-col items-start gap-4 rounded-[var(--radius-lg)] p-6 sm:p-8" aria-labelledby="checkout-state-heading">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ keys.errorHeading | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ keys.errorBody | translate }}</p>
+        <app-button (click)="flow.reloadSubject()">{{ 'tutoring.checkout.retry' | translate }}</app-button>
+      </section>
+    }
+    @default {
+      @if (flow.subject()) {
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+          @if (outcomeKind(); as outcome) {
+            @if (flow.booking(); as booking) {
+              <app-checkout-outcome [kind]="outcome" [booking]="booking" [paymentState]="flow.paymentState()" [myTutoringAvailable]="myTutoringAvailable" />
+            } @else if (flow.purchase(); as purchase) {
+              <app-package-checkout-outcome [kind]="outcome" [purchase]="purchase" [paymentState]="flow.paymentState()" />
+            }
+          } @else {
+              <section class="glass-card flex min-w-0 flex-col gap-6 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="checkout-state-heading">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  @if (headingKey(); as key) {
+                    <h2 id="checkout-state-heading" tabindex="-1" class="text-xl font-semibold text-[var(--color-text)] focus-visible:outline-none">
+                      {{ key | translate }}
+                    </h2>
+                  }
+                  <app-hold-countdown [remainingMs]="flow.remainingMs()" [kind]="kind" />
+                </div>
+
+                <app-tutor-problem [message]="flow.problem()" />
+
+                @switch (flow.view()) {
+                  @case ('choose') {
+                    @if (flow.configFailed()) {
+                      <div role="alert" class="flex flex-wrap items-center gap-3">
+                        <p class="text-base text-[var(--color-text)]">{{ 'tutoring.checkout.configError' | translate }}</p>
+                        <app-button size="sm" variant="secondary" (click)="flow.reloadConfig()">{{ 'tutoring.checkout.retry' | translate }}</app-button>
+                      </div>
+                    } @else if (!flow.config()) {
+                      <app-skeleton variant="block" height="9rem" />
+                    } @else if (flow.enabledMethods().length === 0) {
+                      <p role="alert" class="text-base text-[var(--color-text)]">{{ 'tutoring.checkout.noMethods' | translate }}</p>
+                    } @else {
+                      <app-payment-method-choice [methods]="flow.enabledMethods()" [(selected)]="flow.method" [disabled]="flow.creating()" />
+                      <app-button size="lg" [fullWidth]="true" [loading]="flow.creating()" (click)="flow.pay()">
+                        {{ 'tutoring.checkout.pay' | translate: { amount: (flow.amount() | currencyThb) ?? '' } }}
+                      </app-button>
+                      <div class="flex flex-col gap-1 text-sm text-[var(--color-text-muted)]">
+                        <p>{{ 'tutoring.checkout.statementDescriptor' | translate }}</p>
+                        <p>{{ 'tutoring.checkout.refundNote' | translate }}</p>
+                      </div>
+                    }
+                  }
+                  @case ('promptpay') {
+                    @if (flow.payment(); as payment) {
+                      <app-promptpay-panel [payment]="payment" [bookingNo]="flow.booking()?.bookingNo ?? null" />
+                      <div>
+                        <app-button variant="secondary" size="sm" (click)="flow.tryAgain()">{{ 'tutoring.checkout.changeMethod' | translate }}</app-button>
+                      </div>
+                    }
+                    @if (flow.pollingGaveUp()) {
+                      <div role="status" class="flex flex-wrap items-center gap-3">
+                        <p class="text-base text-[var(--color-text)]">{{ 'tutoring.checkout.pollGaveUp' | translate }}</p>
+                        <app-button size="sm" variant="secondary" (click)="flow.refresh()">{{ 'tutoring.checkout.refresh' | translate }}</app-button>
+                      </div>
+                    }
+                  }
+                  @case ('card') {
+                    @if (flow.payment(); as payment) {
+                      @defer (on immediate) {
+                        <app-tutoring-card-panel
+                          [clientSecret]="payment.clientSecret ?? ''"
+                          [paymentId]="payment.paymentId"
+                          [publishableKey]="flow.config()?.publishableKey ?? ''"
+                          [returnUrl]="cardReturnUrl()"
+                          (paymentError)="flow.onCardError($event)"
+                          (confirmedInline)="flow.onCardConfirmedInline()"
+                        />
+                      } @loading (minimum 150ms) {
+                        <app-skeleton variant="block" height="14rem" />
+                      } @placeholder {
+                        <app-skeleton variant="block" height="14rem" />
+                      } @error {
+                        <p role="alert" class="text-base text-[var(--color-text)]">{{ 'tutoring.checkout.card.loadFailed' | translate }}</p>
+                      }
+                      <div>
+                        <app-button variant="secondary" size="sm" (click)="flow.tryAgain()">{{ 'tutoring.checkout.changeMethod' | translate }}</app-button>
+                      </div>
+                    }
+                  }
+                  @case ('processing') {
+                    <div role="status" class="flex flex-col items-start gap-4">
+                      <p class="flex items-center gap-3 text-base text-[var(--color-text)]">
+                        <span aria-hidden="true"><app-spinner size="sm" color="primary" /></span>
+                        <span>{{ (flow.paidAwaitingBooking() ? keys.processingPaid : 'tutoring.checkout.processing.checking') | translate }}</span>
+                      </p>
+                      @if (flow.paidAwaitingBooking() || flow.pollingGaveUp()) {
+                        <app-button size="sm" variant="secondary" (click)="flow.refresh()">
+                          <ng-icon leading name="phosphorArrowsClockwise" aria-hidden="true" />
+                          {{ 'tutoring.checkout.refresh' | translate }}
+                        </app-button>
+                      }
+                    </div>
+                  }
+                  @case ('verifying') {
+                    <div role="status" class="flex items-center gap-3 text-base text-[var(--color-text)]">
+                      <span aria-hidden="true"><app-spinner size="sm" color="primary" /></span>
+                      <span>{{ keys.verifying | translate }}</span>
+                    </div>
+                  }
+                }
+              </section>
+          }
+
+          @if (flow.booking(); as booking) {
+            <app-checkout-summary [booking]="booking" />
+          } @else if (flow.purchase(); as purchase) {
+            <app-package-checkout-summary [purchase]="purchase" />
+          }
+        </div>
+      }
+    }
+  }
+</div>

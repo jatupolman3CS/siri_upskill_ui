@@ -1,0 +1,113 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.admin.kyc.heading' | translate }}</h1>
+      <p class="mt-1 max-w-3xl text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.subheading' | translate }}</p>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  @if (!isDisabled()) {
+    <div role="group" [attr.aria-label]="'tutoring.admin.kyc.filterLabel' | translate" class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        [attr.aria-pressed]="status() === null"
+        (click)="chooseStatus(null)"
+        class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="status() === null ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+      >
+        {{ 'tutoring.admin.kyc.filterWaiting' | translate }}
+      </button>
+      @for (option of statusOptions; track option) {
+        <button
+          type="button"
+          [attr.aria-pressed]="status() === option"
+          (click)="chooseStatus(option)"
+          class="glass-pill inline-flex min-h-11 items-center rounded-[var(--radius-full)] px-4 text-sm font-semibold text-[var(--color-text)] transition-colors
+            hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+          [class]="status() === option ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : ''"
+        >
+          {{ 'tutoring.enums.kycCaseStatus.' + option | translate }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+      <app-skeleton variant="block" height="3.5rem" radius="lg" />
+    </div>
+  } @else if (isDisabled()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.kyc.disabledHeading' | translate" [description]="'tutoring.admin.kyc.disabledDescription' | translate" />
+    </div>
+  } @else if (hasError()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.kyc.loadErrorHeading' | translate" [description]="'tutoring.admin.common.loadErrorDescription' | translate">
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else if (items().length === 0) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state
+        [heading]="(status() === null ? 'tutoring.admin.kyc.emptyWaitingHeading' : 'tutoring.admin.kyc.emptyHeading') | translate"
+        [description]="(status() === null ? 'tutoring.admin.kyc.emptyWaitingDescription' : 'tutoring.admin.kyc.emptyDescription') | translate"
+      />
+    </div>
+  } @else {
+    <div class="glass-card overflow-hidden rounded-2xl">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[44rem] text-start text-sm text-[var(--color-text)]">
+          <caption class="sr-only">{{ 'tutoring.admin.kyc.tableCaption' | translate }}</caption>
+          <thead class="bg-[var(--color-surface-muted)]/50 text-xs font-semibold text-[var(--color-text-muted)]">
+            <tr>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.kyc.col.tutor' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.kyc.col.status' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.kyc.col.submitted' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.kyc.col.documents' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-start">{{ 'tutoring.admin.kyc.col.waiting' | translate }}</th>
+              <th scope="col" class="px-4 py-3 text-end"><span class="sr-only">{{ 'tutoring.admin.common.actions' | translate }}</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            @for (item of items(); track item.caseId) {
+              <tr class="transition hover:bg-[var(--color-surface-muted)]/30">
+                <td class="max-w-[16rem] px-4 py-3">
+                  <p class="break-words font-semibold">{{ item.tutorDisplayName }}</p>
+                  <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.attempt' | translate: { n: item.attemptNo } }}</p>
+                </td>
+                <td class="px-4 py-3"><app-admin-chip [view]="statusView(item.status)" /></td>
+                <td class="whitespace-nowrap px-4 py-3">{{ item.submittedAtUtc | bangkokDate: 'dateTime' }}</td>
+                <td class="px-4 py-3">{{ item.documentCount }}</td>
+                <td class="px-4 py-3">
+                  @if (item.submittedAtUtc) {
+                    <app-admin-chip [view]="waitingView(item.waitingHours)" [params]="{ hours: item.waitingHours }" />
+                  } @else {
+                    <span class="text-[var(--color-text-muted)]">-</span>
+                  }
+                </td>
+                <td class="px-4 py-3 text-end">
+                  <a
+                    [routerLink]="['/admin/tutoring/kyc', item.caseId]"
+                    class="inline-flex min-h-11 items-center rounded-[var(--radius-full)] border border-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-primary-text)] transition-colors
+                      hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+                  >
+                    {{ 'tutoring.admin.kyc.open' | translate }}
+                    <span class="sr-only">{{ item.tutorDisplayName }}</span>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    @if (totalPages() > 1) {
+      <app-pagination [currentPage]="page()" (currentPageChange)="goToPage($event)" [totalPages]="totalPages()" />
+    }
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.common.total' | translate: { count: totalCount() } }}</p>
+  }
+</div>

@@ -1,0 +1,61 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="checkout-summary-heading">
+  <h2 id="checkout-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.summary.heading' | translate }}</h2>
+
+  <dl class="flex flex-col gap-3 text-sm">
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.bookingNo' | translate }}</dt>
+      <dd class="break-all text-right font-medium text-[var(--color-text)]">{{ booking().bookingNo }}</dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.status' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">{{ statusKey() | translate }}</dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.tutor' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">{{ booking().tutor.displayName }}</dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.subject' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">
+        {{ subject() }}
+        <span class="block text-sm font-normal text-[var(--color-text-muted)]">{{ levelKey() | translate }} · {{ curriculumKey() | translate }}</span>
+      </dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.lesson' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">
+        {{ formatKey() | translate }}
+        @if (booking().isTrial) {
+          · {{ 'tutoring.checkout.summary.trial' | translate }}
+        }
+        · {{ 'tutoring.checkout.summary.minutes' | translate: { minutes: booking().durationMinutes } }}
+      </dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.time' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">
+        {{ booking().startsAtUtc | bangkokDate: 'weekdayDate' }},
+        {{ booking().startsAtUtc | bangkokDate: 'time' }}-{{ booking().endsAtUtc | bangkokDate: 'time' }}
+      </dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3">
+      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.learner' | translate }}</dt>
+      <dd class="text-right font-medium text-[var(--color-text)]">
+        {{ booking().learner.nickname }}
+        <span class="block text-sm font-normal text-[var(--color-text-muted)]">{{ gradeKey() | translate }}</span>
+      </dd>
+    </div>
+    <div class="flex items-baseline justify-between gap-3 border-t border-[var(--color-border)] pt-3">
+      <dt class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.summary.total' | translate }}</dt>
+      <dd class="text-right text-xl font-bold text-[var(--color-primary-text)]">
+        @if (booking().priceAmount === 0) {
+          {{ 'tutoring.checkout.summary.free' | translate }}
+        } @else {
+          {{ booking().priceAmount | currencyThb }}
+        }
+      </dd>
+    </div>
+  </dl>
+
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.checkout.summary.times' | translate }}</p>
+</section>

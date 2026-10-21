@@ -1,0 +1,24 @@
+@if (booking().disputeId; as caseId) {
+  <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="booking-dispute-heading">
+    <h2 id="booking-dispute-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.section.heading' | translate }}</h2>
+    <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.dispute.section.hasCase' | translate }}</p>
+    <div>
+      <a
+        [routerLink]="['/my-tutoring/disputes', caseId]"
+        class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] glass-card px-4 text-base font-medium text-[var(--color-text)] transition-colors
+          hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.dispute.section.viewCase' | translate }}
+      </a>
+    </div>
+  </section>
+} @else if (booking().disputeWindowEndsAtUtc; as until) {
+  <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="booking-dispute-heading">
+    <h2 id="booking-dispute-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.section.heading' | translate }}</h2>
+    <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.dispute.section.intro' | translate: { date: (until | bangkokDate: 'dateTime') } }}</p>
+    <div>
+      <app-button variant="secondary" (click)="dialogOpen.set(true)">{{ 'tutoring.dispute.section.report' | translate }}</app-button>
+    </div>
+  </section>
+  <app-open-dispute-dialog [(open)]="dialogOpen" [bookingId]="booking().bookingId" />
+}

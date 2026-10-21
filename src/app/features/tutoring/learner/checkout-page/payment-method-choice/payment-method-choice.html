@@ -1,0 +1,33 @@
+<fieldset class="flex flex-col gap-3" [disabled]="disabled()">
+  <legend class="mb-1 text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.methods.legend' | translate }}</legend>
+
+  @for (method of methods(); track method) {
+    <label
+      class="glass-card flex min-h-16 cursor-pointer items-center gap-4 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4 transition-colors
+        hover:bg-[var(--color-surface-muted)] has-[:checked]:border-[var(--color-primary)] has-[:checked]:bg-[var(--color-surface-muted)]
+        has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-focus-ring)] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+    >
+      <input
+        type="radio"
+        class="h-5 w-5 shrink-0 accent-[var(--color-primary)]"
+        [name]="groupName"
+        [value]="method"
+        [checked]="selected() === method"
+        (change)="selected.set(method)"
+      />
+      @if (method === 'PromptPay') {
+        <ng-icon name="phosphorQrCode" aria-hidden="true" class="shrink-0 text-3xl text-[var(--color-primary-text)]" />
+        <span class="flex min-w-0 flex-col">
+          <span class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.methods.promptpay' | translate }}</span>
+          <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.checkout.methods.promptpayHelp' | translate }}</span>
+        </span>
+      } @else {
+        <ng-icon name="phosphorCreditCard" aria-hidden="true" class="shrink-0 text-3xl text-[var(--color-primary-text)]" />
+        <span class="flex min-w-0 flex-col">
+          <span class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.checkout.methods.card' | translate }}</span>
+          <span class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.checkout.methods.cardHelp' | translate }}</span>
+        </span>
+      }
+    </label>
+  }
+</fieldset>

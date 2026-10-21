@@ -1,0 +1,77 @@
+<section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-wallet-payouts-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-wallet-payouts-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.wallet.payouts.heading' | translate }}</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.payouts.intro' | translate }}</p>
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.wallet.payouts.loading' | translate" class="flex flex-col gap-3">
+      <app-skeleton variant="block" height="3rem" radius="md" />
+      <app-skeleton variant="block" height="3rem" radius="md" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.wallet.payouts.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.wallet.payouts.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (rows().length === 0) {
+    <app-empty-state [heading]="'tutoring.tutor.wallet.payouts.emptyHeading' | translate" [description]="'tutoring.tutor.wallet.payouts.emptyDescription' | translate" />
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[48rem] text-left text-sm">
+        <caption class="sr-only">{{ 'tutoring.tutor.wallet.payouts.caption' | translate }}</caption>
+        <thead>
+          <tr class="border-b border-[var(--color-border)] text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
+            <th scope="col" class="px-3 py-2 font-semibold">{{ 'tutoring.tutor.wallet.payouts.colPeriod' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.payouts.colGross' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.payouts.colTax' | translate }}</th>
+            <th scope="col" class="px-3 py-2 text-end font-semibold">{{ 'tutoring.tutor.wallet.payouts.colNet' | translate }}</th>
+            <th scope="col" class="px-3 py-2 font-semibold">{{ 'tutoring.tutor.wallet.payouts.colStatus' | translate }}</th>
+            <th scope="col" class="px-3 py-2 font-semibold"><span class="sr-only">{{ 'tutoring.tutor.wallet.payouts.colCertificate' | translate }}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.batchItemId) {
+            <tr class="border-b border-[var(--color-border)] align-top">
+              <td class="px-3 py-3 font-semibold text-[var(--color-text)]">{{ row.periodKey }}</td>
+              <td class="px-3 py-3 text-end text-[var(--color-text)]">{{ row.grossAmount | currencyThb }}</td>
+              <td class="px-3 py-3 text-end text-[var(--color-text)]">
+                -{{ row.withholdingTaxAmount | currencyThb }}
+                <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.payouts.taxPercent' | translate: { percent: row.withholdingTaxPercent } }}</p>
+              </td>
+              <td class="px-3 py-3 text-end font-semibold text-[var(--color-text)]">{{ row.netAmount | currencyThb }}</td>
+              <td class="px-3 py-3">
+                @let status = badge(row.status);
+                <span class="inline-flex items-center gap-1 rounded-[var(--radius-full)] border px-2.5 py-1 text-xs font-semibold" [class]="status.badgeClass">
+                  <ng-icon [name]="status.icon" aria-hidden="true" />
+                  <span>{{ status.labelKey ? (status.labelKey | translate) : row.status }}</span>
+                </span>
+                @if (row.paidAtUtc) {
+                  <p class="mt-1 text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.wallet.payouts.paidAt' | translate: { time: (row.paidAtUtc | bangkokDate: 'shortDateTime') } }}</p>
+                }
+              </td>
+              <td class="px-3 py-3 text-end">
+                @if (row.status === 'Transferred') {
+                  <app-button size="sm" variant="ghost" (click)="certificateId.set(row.batchItemId)">
+                    <ng-icon leading name="phosphorDownloadSimple" aria-hidden="true" />
+                    {{ 'tutoring.tutor.wallet.payouts.certificate' | translate }}
+                    <span class="sr-only">{{ row.periodKey }}</span>
+                  </app-button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (totalPages() > 1) {
+      <app-pagination [(currentPage)]="page" [totalPages]="totalPages()" />
+    }
+  }
+</section>
+
+@if (certificateId(); as id) {
+  <app-tax-certificate-dialog [batchItemId]="id" (closed)="certificateId.set(null)" />
+}

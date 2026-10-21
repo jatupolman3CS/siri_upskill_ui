@@ -1,0 +1,139 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.tutor.profile.heading' | translate }}</h1>
+        <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">
+          {{ (isCreate() ? 'tutoring.tutor.profile.subheadingCreate' : 'tutoring.tutor.profile.subheading') | translate }}
+        </p>
+      </div>
+      @if (profile(); as p) {
+        <app-tutor-status-badge [status]="p.status" />
+      }
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.profile.loading' | translate" class="grid gap-8 2xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <app-skeleton variant="block" height="28rem" radius="lg" />
+      <app-skeleton variant="block" height="14rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.profile.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.profile.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else {
+    <div class="grid gap-8 2xl:grid-cols-[minmax(0,1fr)_24rem] 2xl:items-start">
+      <form
+        #formRoot
+        [formGroup]="form"
+        (ngSubmit)="save()"
+        novalidate
+        class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6"
+        [attr.aria-label]="'tutoring.tutor.profile.formLabel' | translate"
+      >
+        @if (suspended()) {
+          <p role="status" class="tone-red rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+            {{ 'tutoring.tutor.profile.suspendedNote' | translate }}
+          </p>
+        }
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <app-input
+            class="md:col-span-2"
+            formControlName="displayName"
+            [label]="'tutoring.tutor.profile.displayName' | translate"
+            [helperText]="'tutoring.tutor.profile.displayNameHelp' | translate"
+            [errorMessage]="message('displayName')"
+            [required]="true"
+            autocomplete="nickname"
+            (focusout)="feedback.touch('displayName')"
+          />
+          <app-input
+            class="md:col-span-2"
+            formControlName="headline"
+            [label]="'tutoring.tutor.profile.headline' | translate"
+            [helperText]="'tutoring.tutor.profile.headlineHelp' | translate"
+            [errorMessage]="message('headline')"
+            (focusout)="feedback.touch('headline')"
+          />
+
+          <div class="md:col-span-2">
+            <label for="tutor-bio" class="mb-1.5 block text-sm font-medium text-[var(--color-text)]">
+              {{ 'tutoring.tutor.profile.bio' | translate }}
+            </label>
+            <textarea
+              id="tutor-bio"
+              formControlName="bio"
+              rows="7"
+              [attr.aria-invalid]="message('bio') ? 'true' : null"
+              aria-describedby="tutor-bio-help tutor-bio-error"
+              (focusout)="feedback.touch('bio')"
+              class="block w-full rounded-[var(--radius-md)] border bg-[var(--glass-bg-strong)] px-3.5 py-3 text-base text-[var(--color-text)] transition-colors
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] disabled:cursor-not-allowed disabled:bg-[var(--color-surface-muted)]"
+              [class]="message('bio') ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)] focus-visible:border-[var(--color-primary)]'"
+            ></textarea>
+            <div class="mt-1.5 flex flex-wrap justify-between gap-2 text-sm">
+              <p id="tutor-bio-help" class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.profile.bioHelp' | translate }}</p>
+              <p class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.profile.bioCount' | translate: { count: bioLength(), max: limits.bioMax } }}</p>
+            </div>
+            <p id="tutor-bio-error" role="alert" class="text-sm text-[var(--color-danger)]">{{ message('bio') }}</p>
+          </div>
+
+          <app-select
+            formControlName="gender"
+            [label]="'tutoring.tutor.profile.gender' | translate"
+            [helperText]="'tutoring.tutor.profile.genderHelp' | translate"
+            [options]="genderOptions()"
+            [errorMessage]="message('gender')"
+          />
+          <app-input
+            formControlName="yearsExperience"
+            type="number"
+            inputMode="numeric"
+            [label]="'tutoring.tutor.profile.years' | translate"
+            [errorMessage]="message('yearsExperience')"
+            [required]="true"
+            (focusout)="feedback.touch('yearsExperience')"
+          />
+        </div>
+
+        <app-tutor-problem [message]="problem()">
+          @if (stale()) {
+            <app-button size="sm" variant="secondary" (click)="loadLatest()">{{ 'tutoring.tutor.profile.loadLatest' | translate }}</app-button>
+          }
+        </app-tutor-problem>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <app-button type="submit" [loading]="saving()" [disabled]="suspended() || stale()">
+            {{ (isCreate() ? 'tutoring.tutor.profile.create' : 'tutoring.tutor.profile.save') | translate }}
+          </app-button>
+          @if (!isCreate()) {
+            <a
+              routerLink="/instructor/tutoring/offerings"
+              class="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-primary-text)] underline-offset-2 hover:underline
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              {{ 'tutoring.tutor.profile.nextOfferings' | translate }}
+            </a>
+          }
+        </div>
+      </form>
+
+      <div class="flex flex-col gap-8">
+        @if (profile(); as p) {
+          <app-tutor-photo-panel [photoUrl]="p.photoUrl" [displayName]="p.displayName" [disabled]="suspended()" (changed)="reload()" />
+          <app-tutor-intro-video-panel [hasVideo]="p.introVideoAssetId !== null" [disabled]="suspended()" (changed)="reload()" />
+        } @else {
+          <p class="glass-card rounded-[var(--radius-lg)] p-5 text-sm text-[var(--color-text-muted)]">
+            {{ 'tutoring.tutor.profile.mediaAfterCreate' | translate }}
+          </p>
+        }
+      </div>
+    </div>
+  }
+</div>

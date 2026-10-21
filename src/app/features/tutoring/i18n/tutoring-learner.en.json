@@ -1,0 +1,777 @@
+{
+  "tutoring": {
+    "learner": {
+      "pageTitle": "Learner profiles",
+      "pageDescription": "Manage the learners you book tutoring lessons for.",
+      "heading": "Learner profiles",
+      "subheading": "Add the people you book tutoring lessons for - yourself, or a child. You choose one of them every time you book.",
+      "tutorVisibility": "Tutors see only the nickname and the grade of a learner - never a real name, contact details or anything else.",
+      "add": "Add a learner",
+      "loading": "Loading learner profiles",
+      "loadErrorHeading": "Could not load your learner profiles",
+      "loadErrorDescription": "Check your connection and try again.",
+      "retry": "Try again",
+      "emptyHeading": "No learner profiles yet",
+      "emptyDescription": "Add a learner to book your first tutoring lesson.",
+      "edit": "Edit",
+      "deactivate": "Remove",
+      "minorBadge": "Under 18",
+      "consentRecorded": "Guardian consent recorded on {{date}}",
+      "deactivated": "The learner profile was removed.",
+      "anonymizedBadge": "Data erased",
+      "consentWithdrawnBadge": "Consent withdrawn",
+      "confirmTitle": "Remove this learner?",
+      "confirmBody": "{{nickname}} will no longer be offered when you book. Lessons already booked are not affected. A profile with a booking waiting or confirmed cannot be removed.",
+      "confirmCancel": "Keep",
+      "confirmDeactivate": "Remove learner",
+      "profile": {
+        "consentWithdraw": {
+          "button": "Withdraw guardian consent",
+          "title": "Withdraw guardian consent",
+          "body": "Withdrawing consent will prevent {{nickname}} from being used for new lesson bookings. Reviews, disputes, and lesson feedback associated with this profile will be redacted or anonymized, while booking and payment records will be retained in accordance with applicable law.",
+          "downloadHint": "If you wish to retain a copy of this profile's tutoring history, please",
+          "downloadFirst": "download your data first",
+          "confirmLabel": "Type WITHDRAW to confirm",
+          "cancel": "Cancel",
+          "confirm": "Confirm withdrawal",
+          "success": "Guardian consent has been successfully withdrawn.",
+          "blockedHeading": "Cannot withdraw consent while obligations are open",
+          "blockers": {
+            "bookings": "There are pending payment or confirmed bookings for this profile.",
+            "packages": "There are active lesson packages for this profile.",
+            "disputes": "There are open disputes regarding this profile's bookings."
+          }
+        }
+      },
+      "privacy": {
+        "erasureBlockedHeading": "You have open obligations in Tutoring. You cannot delete your account until they are settled.",
+        "viewAction": "Manage",
+        "blockers": {
+          "generic": "There are pending items in tutoring that need resolution.",
+          "learner_bookings": "You have active or pending tutoring bookings.",
+          "learner_refunds": "You have refunds currently processing.",
+          "learner_packages": "You have active tutoring packages with remaining credits.",
+          "learner_disputes": "You have open tutoring disputes.",
+          "tutor_sessions": "You have scheduled classes as a tutor.",
+          "tutor_bookings": "You have pending bookings for your classes.",
+          "tutor_disputes": "You have open disputes that require response or decision.",
+          "tutor_packages": "Students still hold unused credits for your packages.",
+          "tutor_payout_balance": "You have pending, held, or unsettled wallet balance."
+        }
+      },
+      "form": {
+        "addHeading": "Add a learner",
+        "editHeading": "Edit learner",
+        "nickname": "Nickname",
+        "nicknameHelp": "A nickname only, up to {{max}} characters. Do not use a real name, e-mail address or phone number.",
+        "grade": "Grade",
+        "isMinor": "This learner is under 18",
+        "isMinorLocked": "Primary and secondary school learners are always under 18.",
+        "privacyNote": "Tutors only ever see the nickname and the grade. We do not collect a birth date, school, phone number or e-mail for a learner.",
+        "create": "Add learner",
+        "save": "Save changes",
+        "cancel": "Cancel",
+        "created": "Learner added.",
+        "updated": "Learner saved.",
+        "reload": "Reload the page",
+        "consentOutdated": "The guardian consent text has been updated. Reload the page to read the current text, then agree again."
+      },
+      "consent": {
+        "legend": "Guardian consent",
+        "text": "I am the parent or legal guardian of this learner. I agree that the learner takes online tutoring lessons through SIRI UpSkill, and that SIRI UpSkill stores only the nickname and grade entered above. Tutors see only these two details and never receive the learner's real name, contact details or other personal data.",
+        "version": "Consent text version {{version}}",
+        "previous": "Consent was recorded on {{date}}. Please confirm it again to save changes.",
+        "label": "I am the parent or guardian and I agree to the text above"
+      },
+      "validation": {
+        "nicknameRequired": "Enter a nickname.",
+        "nicknameTooLong": "Use at most {{max}} characters.",
+        "nicknameMarkup": "Remove angle brackets and HTML tags.",
+        "nicknamePersonal": "Use a nickname only - no e-mail address or phone number.",
+        "consentRequired": "A parent or guardian must agree before a learner under 18 can be saved."
+      },
+      "my": {
+        "pageTitle": "My tutoring",
+        "pageDescription": "Your tutoring lessons: what is coming up, and what you have already had.",
+        "heading": "My tutoring",
+        "subheading": "Your booked lessons. Join a class, see what you paid or were refunded, and read what your tutor wrote after the lesson.",
+        "findTutors": "Find a tutor",
+        "tabsLabel": "Show lessons",
+        "tab": {
+          "upcoming": "Upcoming",
+          "history": "History"
+        },
+        "loading": "Loading your lessons",
+        "loadErrorHeading": "We could not load your lessons",
+        "loadErrorDescription": "Check your connection and try again.",
+        "retry": "Try again",
+        "close": "Close",
+        "emptyUpcomingHeading": "No upcoming lessons",
+        "emptyUpcomingDescription": "When you book a lesson with a tutor, it shows up here.",
+        "emptyHistoryHeading": "No past lessons yet",
+        "emptyHistoryDescription": "Lessons that are finished or cancelled will be listed here.",
+        "total": "{{count}} lessons",
+        "deletedTutor": "Deleted tutor",
+        "card": {
+          "withTutor": "with {{name}}",
+          "forLearner": "For {{name}}",
+          "duration": "{{minutes}} min",
+          "trial": "Trial lesson",
+          "free": "Free",
+          "pendingPayment": "This time is held for you until you pay. If you do not, it is released.",
+          "pay": "Pay now",
+          "join": "Join class",
+          "joinOpensIn": "You can join in",
+          "details": "View details",
+          "packageCredit": "Package credit"
+        },
+        "detail": {
+          "pageTitle": "Lesson details",
+          "pageDescription": "One tutoring lesson in full.",
+          "back": "Back to my tutoring",
+          "loading": "Loading the lesson",
+          "notFoundHeading": "We could not find this lesson",
+          "notFoundDescription": "It may not exist, or it may belong to another account.",
+          "errorHeading": "We could not load this lesson",
+          "when": "When",
+          "learner": "Learner",
+          "format": "Format",
+          "price": "Price",
+          "bookingNo": "Booking number",
+          "refundedAmount": "Refunded or being refunded",
+          "package": "Package",
+          "packageCredit": "Booked with a package credit.",
+          "viewPackage": "View the package"
+        },
+        "cancel": {
+          "open": "Cancel lesson",
+          "openPending": "Cancel booking",
+          "title": "Cancel this lesson",
+          "loadingQuote": "Checking what cancelling means",
+          "quoteError": "We could not check the cancellation terms. Try again.",
+          "intro": "The lesson starts {{time}}. Here is what happens if you cancel now.",
+          "rule": {
+            "full": "You are cancelling early enough for a full refund.",
+            "late": "You are cancelling close to the start, so {{percent}}% of what you paid is refunded. The rest compensates the tutor for the time reserved for you.",
+            "abandon": "This lesson is not paid for yet. Cancelling releases the time slot and nothing is charged.",
+            "other": "This is what cancelling does right now."
+          },
+          "policy": "Our policy: cancel at least {{hours}} hours before the lesson for a full refund; after that {{percent}}% is refunded.",
+          "paid": "You paid",
+          "refund": "Refund to you",
+          "retained": "Kept for the tutor's time",
+          "creditWillRestore": "One credit of your lesson package will be restored.",
+          "reason": "Reason (optional)",
+          "reasonHelp": "Tell us why, if you like. Plain text only.",
+          "keep": "Keep the lesson",
+          "confirm": "Cancel the lesson",
+          "confirmAgain": "Confirm with the new amount",
+          "quoteChanged": "The refund changed because the free-cancellation time has just passed. Check the new amounts and confirm again.",
+          "done": "The lesson was cancelled.",
+          "alreadyDone": "This lesson was already cancelled.",
+          "creditRestored": "Your package credit was restored. There is nothing else to do.",
+          "nothingToRefund": "Nothing was charged, so there is nothing to refund.",
+          "creditWillBeUsed": "This lesson used a package credit. Cancelling this late uses the credit up: it will not be returned.",
+          "creditNotRestored": "The package credit for this lesson has been used up and will not be returned."
+        },
+        "refund": {
+          "heading": "Refunds",
+          "listLabel": "Refunds for this lesson",
+          "loading": "Checking refund status",
+          "loadError": "We could not load the refund status.",
+          "status": {
+            "Requested": "Refund in progress",
+            "Processing": "Refund in progress",
+            "Completed": "Refunded",
+            "Failed": "Our team is looking into this refund. There is nothing you need to do."
+          },
+          "asyncNote": "Refunds paid with PromptPay: Stripe will contact you by e-mail to ask for your bank account details. This can take several days.",
+          "completedOn": "Refunded on {{date}}"
+        },
+        "confirm": {
+          "open": "The class went well",
+          "title": "Confirm the class went well",
+          "explain": "Confirming tells us the lesson took place properly. The payment is then released to the tutor now, instead of after the waiting period.",
+          "warning": "Do not confirm if something went wrong - report the problem instead. Confirming cannot be undone.",
+          "stillReport": "You can still report a problem until {{date}}, but money that has already been released is settled by our team.",
+          "notYet": "Not yet",
+          "submit": "Yes, confirm",
+          "done": "Thank you. The payment is being released to the tutor."
+        },
+        "summary": {
+          "heading": "From your tutor",
+          "loading": "Loading the lesson summary",
+          "loadError": "We could not load the lesson summary.",
+          "notYet": "Your tutor has not written a summary yet. It appears here when they do.",
+          "topics": "What was covered",
+          "feedback": "Feedback for the learner",
+          "homework": "Homework",
+          "nextSteps": "Next steps",
+          "writtenOn": "Written on {{date}}"
+        },
+        "materials": {
+          "heading": "Class materials",
+          "intro": "Links, homework and files your tutor shared for this class.",
+          "loading": "Loading the materials",
+          "loadError": "We could not load the materials.",
+          "empty": "Your tutor has not shared any materials yet.",
+          "download": "Download",
+          "externalLink": "opens another website in a new tab",
+          "externalNote": "This link leaves the platform. Open it only if you trust it.",
+          "fileSize": "{{size}} MB"
+        },
+        "myPackages": "My packages"
+      },
+      "packages": {
+        "purchase": {
+          "pageTitle": "Buy a package from {{name}}",
+          "pageDescription": "Choose who the lessons are for and continue to payment.",
+          "breadcrumb": "Buy a package",
+          "heading": "Buy a lesson package from {{name}}",
+          "subheading": "Pay once, then book your lessons one at a time.",
+          "loading": "Loading the package",
+          "errorHeading": "Could not load the package",
+          "errorDescription": "Check your connection and try again.",
+          "detailsHeading": "The package",
+          "lessons": "{{count}} lessons of {{minutes}} minutes",
+          "oneOnOne": "One-on-one lessons",
+          "validity": "Valid for {{days}} days after you pay",
+          "expiryTerms": "Your lessons expire {{days}} days after payment. Lessons you have not used by then are not refunded, and each lesson must start before the expiry date.",
+          "learnerHeading": "Who is this for?",
+          "learnerHelp": "The lessons of this package can only be booked for this learner.",
+          "summaryHeading": "Summary",
+          "singlePrice": "Price of one lesson",
+          "discount": "Package discount ({{percent}}%)",
+          "saves": "saves {{amount}}",
+          "perLesson": "Per lesson in this package",
+          "forLearner": "Learner",
+          "total": "Total",
+          "finishPending": "See my unpaid packages",
+          "continue": "Continue to payment",
+          "continueHint": "Choose who the lessons are for to continue.",
+          "payNote": "You pay on the next step. The price is fixed when you continue.",
+          "unavailableHeading": "This package is not available",
+          "unavailableBody": "It may have been taken off sale or changed. Open the tutor's profile to see the packages that are on sale.",
+          "backToTutor": "See the tutor's packages"
+        },
+        "checkout": {
+          "pageTitle": "Complete your package purchase",
+          "pageDescription": "Pay to get your lesson package.",
+          "heading": "Complete your purchase",
+          "subheading": "Pay before the time runs out to get your lessons.",
+          "loading": "Loading your purchase",
+          "attemptFailed": "The payment was not successful. You can try again while your purchase is still open.",
+          "attemptExpired": "That payment expired. You can start a new one while your purchase is still open.",
+          "processingPaid": "Payment received. Activating your package...",
+          "verifying": "The payment window is over. We are checking whether a payment you just made came through - this takes a few seconds.",
+          "countdown": {
+            "plenty": "Complete the payment before the countdown ends."
+          },
+          "notFound": {
+            "heading": "Package purchase not found",
+            "body": "This purchase does not exist or belongs to another account."
+          },
+          "error": {
+            "heading": "Could not load your purchase",
+            "body": "Check your connection and try again."
+          },
+          "summary": {
+            "heading": "Your package",
+            "status": "Status",
+            "tutor": "Tutor",
+            "lessons": "Lessons",
+            "lessonsValue": "{{count}} lessons of {{minutes}} minutes",
+            "learner": "Learner",
+            "validUntil": "Valid until",
+            "total": "Total",
+            "expiryNote": "Lessons not used by the expiry date are not refunded. The expiry date appears here once you have paid.",
+            "times": "All times are Thailand time (Asia/Bangkok, UTC+7)."
+          },
+          "confirmed": {
+            "heading": "Your package is ready",
+            "body": "You can now book your {{count}} lessons of {{minutes}} minutes, one at a time.",
+            "validUntil": "Use them before {{date}}.",
+            "expiryNote": "Lessons not used by the expiry date are not refunded."
+          },
+          "ended": {
+            "heading": "This purchase was not completed",
+            "body": "The payment window ended or the purchase was cancelled, so nothing is charged for it.",
+            "paidNote": "If you completed a payment just before it ended, we will either activate the package or refund the full amount - you do not need to do anything."
+          },
+          "finalized": {
+            "heading": "This package has expired",
+            "body": "Its lessons can no longer be booked."
+          },
+          "refunded": {
+            "heading": "Your payment is being refunded",
+            "lateBody": "Your payment arrived after this purchase was closed, so the full amount is being returned to you.",
+            "duplicateBody": "This package had already been paid for, so the extra payment is being returned to you in full.",
+            "consentWithdrawnBody": "Paid but refunded in full because learner profile's guardian consent was withdrawn."
+          },
+          "actions": {
+            "bookLesson": "Book a lesson",
+            "myPackages": "My packages",
+            "backToTutor": "Back to the tutor"
+          }
+        },
+        "my": {
+          "pageTitle": "My packages",
+          "pageDescription": "Your lesson packages and the lessons left in them.",
+          "heading": "My packages",
+          "subheading": "The lesson packages you bought and how many lessons are left in each.",
+          "backToLessons": "My lessons",
+          "filterLabel": "Show packages by status",
+          "filterAll": "All",
+          "loading": "Loading your packages",
+          "loadErrorHeading": "Could not load your packages",
+          "emptyHeading": "No packages yet",
+          "emptyDescription": "Buy a package from a tutor's profile to pay less per lesson.",
+          "emptyFilteredHeading": "No packages with this status",
+          "emptyFilteredDescription": "Try another status, or show all of your packages.",
+          "showAll": "Show all",
+          "total": "{{count}} packages",
+          "card": {
+            "title": "{{count}} lessons of {{minutes}} minutes",
+            "withTutor": "With {{name}}, for {{learner}}",
+            "creditsLeft": "{{left}} of {{total}} lessons left",
+            "perLesson": "{{minutes}} minutes per lesson",
+            "payBy": "Pay before {{date}}",
+            "validUntil": "Valid until {{date}}",
+            "expiredOn": "Ran out on {{date}}",
+            "awaitingReview": "These lessons ran out of time and are being reviewed by our team.",
+            "noRefund": "Lessons not used by the expiry date are not refunded.",
+            "pay": "Pay now",
+            "book": "Book a lesson",
+            "details": "Details"
+          },
+          "credits": {
+            "lesson": "Lesson {{number}}",
+            "viewLesson": "View lesson"
+          },
+          "detail": {
+            "pageTitle": "Package details",
+            "pageDescription": "The lessons left in a package, and how to book them.",
+            "back": "My packages",
+            "loading": "Loading the package",
+            "notFoundHeading": "Package not found",
+            "notFoundDescription": "This package does not exist or belongs to another account.",
+            "loadErrorHeading": "Could not load the package",
+            "loadErrorDescription": "Check your connection and try again.",
+            "heading": "{{count}} lessons of {{minutes}} minutes",
+            "summaryHeading": "Summary",
+            "creditsLeft": "Lessons left",
+            "creditsValue": "{{left}} of {{total}}",
+            "lessonLength": "Length of a lesson",
+            "expires": "Valid until",
+            "payBy": "Pay before",
+            "price": "Price paid",
+            "expiryTerms": "Lessons you have not used by the expiry date are not refunded, and a lesson must start before that date.",
+            "unpaid": "This package is not paid for yet.",
+            "cancel": "Cancel this purchase",
+            "cancelConfirm": "Cancel this unpaid purchase?",
+            "cancelYes": "Yes, cancel it",
+            "cancelKeep": "Keep it",
+            "creditsHeading": "Your lessons"
+          }
+        },
+        "book": {
+          "heading": "Book a lesson with a credit",
+          "intro": "Choose a time for a {{minutes}}-minute lesson. It uses one lesson from your package and is confirmed straight away.",
+          "mustStartBefore": "The lesson must start before {{date}}.",
+          "confirm": "Book with 1 credit",
+          "pickHint": "Pick a time first.",
+          "usesOne": "Booking uses one lesson of this package. You can cancel from the lesson page; whether the lesson is given back depends on how close it is to the start.",
+          "done": "Your lesson is booked.",
+          "doneWhen": "It takes place {{when}}.",
+          "viewLesson": "View the lesson",
+          "expiresOn": "Your package expires on {{date}}.",
+          "offeringUnknown": "We cannot show times for this package right now. Your lessons are safe - try again in a moment."
+        }
+      }
+    },
+    "booking": {
+      "pageTitle": "Book a lesson with {{name}}",
+      "pageDescription": "Choose a time, say who the lesson is for, and hold the slot.",
+      "breadcrumb": "Book",
+      "heading": "Book a lesson with {{name}}",
+      "subheading": "Choose the lesson and a time, then tell us who is learning. We hold the time for you while you pay.",
+      "notFoundHeading": "This tutor is not available",
+      "notFoundDescription": "The tutor may have paused bookings or the link is out of date.",
+      "backToSearch": "Find a tutor",
+      "errorHeading": "Could not load this page",
+      "errorDescription": "Check your connection and try again.",
+      "retry": "Try again",
+      "loading": "Loading the booking page",
+      "lessonHeading": "Choose your lesson",
+      "offering": "Subject and level",
+      "format": "Lesson format",
+      "groupSeatsInfo": "Groups of up to {{count}} students. Price is per seat.",
+      "trialLabel": "Trial lesson, {{minutes}} minutes ({{price}})",
+      "free": "Free",
+      "duration": "Lesson length",
+      "durationOption": "{{minutes}} minutes",
+      "preselectionGone": "The time you chose earlier is no longer available. Please pick another time.",
+      "learnerHeading": "Who is learning?",
+      "learnerHelp": "The tutor sees only the nickname and grade of the learner you choose.",
+      "learner": "Learner",
+      "learnerPlaceholder": "Choose a learner",
+      "learnerLoadError": "Could not load your learner profiles.",
+      "addLearner": "Add a new learner",
+      "newLearnerHeading": "Add a learner",
+      "summaryHeading": "Booking summary",
+      "summaryTutor": "Tutor",
+      "summarySubject": "Subject",
+      "summaryLesson": "Lesson",
+      "summaryTime": "Time",
+      "summaryLearner": "Learner",
+      "summaryPrice": "Price",
+      "noTimeSelected": "None yet",
+      "noLearnerSelected": "None yet",
+      "perSeat": "per seat",
+      "minutes": "{{minutes}} minutes",
+      "trialShort": "trial",
+      "reserve": "Reserve this time",
+      "reserveFree": "Book free trial",
+      "reserveHint": "Choose a time and a learner to continue.",
+      "holdNote": "Reserving holds this time for a short while so you can pay. The exact deadline is shown on the next page.",
+      "policyNote": "Cancel at least {{hours}} hours before the lesson for {{fullPercent}}% back; later cancellations get {{latePercent}}% back.",
+      "goToHeldBooking": "Continue to payment"
+    },
+    "checkout": {
+      "pageTitle": "Complete your booking",
+      "pageDescription": "Pay to confirm your tutoring lesson.",
+      "heading": "Complete your booking",
+      "subheading": "Your time is held for you while you pay.",
+      "loading": "Loading your booking",
+      "retry": "Try again",
+      "refresh": "Check again",
+      "pay": "Pay {{amount}}",
+      "changeMethod": "Choose a different payment method",
+      "createFailed": "We could not start the payment. Please try again.",
+      "configError": "Could not load the payment methods.",
+      "noMethods": "No payment method is available right now. Please try again later.",
+      "statementDescriptor": "Your card statement / banking app will show the payee as STRIPE PAYMENTS (THAILAND) LTD",
+      "refundNote": "If a refund is due, PromptPay refunds are handled by Stripe and can take several days; Stripe may email you to ask for your bank account details.",
+      "attemptFailed": "The payment was not successful. You can try again while your time is still held.",
+      "attemptExpired": "That payment expired. You can start a new one while your time is still held.",
+      "pollGaveUp": "We could not check the payment status just now. If you have paid, it will still be confirmed - check again in a moment.",
+      "verifying": "Your time is up. We are checking whether a payment you just made came through - this takes a few seconds.",
+      "headings": {
+        "choose": "Choose how to pay",
+        "promptpay": "Scan to pay",
+        "card": "Pay by card",
+        "processing": "Confirming",
+        "verifying": "Checking your payment"
+      },
+      "countdown": {
+        "remaining": "Time left: {{time}}",
+        "plenty": "Your time is held. Complete the payment before the countdown ends.",
+        "fiveMinutes": "Five minutes left to pay.",
+        "oneMinute": "One minute left to pay.",
+        "over": "The time to pay has ended."
+      },
+      "methods": {
+        "legend": "Payment method",
+        "promptpay": "PromptPay QR",
+        "promptpayHelp": "Scan with any mobile banking app",
+        "card": "Credit or debit card",
+        "cardHelp": "Visa or Mastercard"
+      },
+      "promptpay": {
+        "heading": "Pay with PromptPay",
+        "amount": "Amount to pay",
+        "reference": "Booking {{bookingNo}}",
+        "step1": "Open your mobile banking app and choose to scan a QR code.",
+        "step2": "Scan the code and check that the amount matches.",
+        "step3": "Confirm the payment. This page updates by itself.",
+        "waiting": "Waiting for your payment...",
+        "qrAlt": "PromptPay QR code for this payment"
+      },
+      "card": {
+        "enterDetails": "Enter your card details",
+        "payButton": "Pay with card",
+        "processing": "Confirming your payment...",
+        "loadFailed": "Could not load the card form. Check your connection or turn off any ad blocker, then try again."
+      },
+      "processing": {
+        "checking": "Checking your payment...",
+        "paid": "Payment received. Confirming your booking..."
+      },
+      "summary": {
+        "heading": "Your lesson",
+        "bookingNo": "Booking number",
+        "status": "Status",
+        "tutor": "Tutor",
+        "subject": "Subject",
+        "lesson": "Lesson",
+        "trial": "trial",
+        "minutes": "{{minutes}} minutes",
+        "time": "Time",
+        "learner": "Learner",
+        "total": "Total",
+        "free": "Free",
+        "times": "All times are Thailand time (Asia/Bangkok, UTC+7)."
+      },
+      "confirmed": {
+        "heading": "Your lesson is booked",
+        "freeBody": "Your free trial lesson is confirmed.",
+        "paidBody": "Payment received - your lesson is confirmed.",
+        "emailNote": "We have sent a confirmation to your e-mail.",
+        "joinNote": "You can join from {{when}}."
+      },
+      "ended": {
+        "heading": "The time you held has been released",
+        "body": "The payment window ended, so the time is open for other learners again. Nothing is charged for a booking that was not paid.",
+        "paidNote": "If you completed a payment just before the window ended, we will either confirm the booking or refund the full amount - you do not need to do anything.",
+        "cancelledHeading": "This booking was cancelled",
+        "cancelledBody": "This booking is no longer active."
+      },
+      "finalized": {
+        "heading": "This lesson has already taken place",
+        "body": "Status: {{status}}. There is nothing left to pay."
+      },
+      "refunded": {
+        "heading": "Your payment is being refunded",
+        "lateBody": "Your payment arrived after the time was released and that time is no longer free, so the full amount is being returned to you.",
+        "duplicateBody": "This booking had already been paid, so the extra payment is being returned to you in full.",
+        "consentWithdrawnBody": "Paid but refunded in full because learner profile's guardian consent was withdrawn.",
+        "amount": "Amount returned: {{amount}}.",
+        "promptpayNote": "PromptPay refunds are handled by Stripe and can take several days. Stripe may email you to ask for your bank account details."
+      },
+      "notFound": {
+        "heading": "Booking not found",
+        "body": "This booking does not exist or belongs to another account."
+      },
+      "error": {
+        "heading": "Could not load your booking",
+        "body": "Check your connection and try again."
+      },
+      "actions": {
+        "myTutoring": "My lessons",
+        "backToTutor": "Back to the tutor",
+        "bookAgain": "Book this tutor again",
+        "findTutors": "Find tutors"
+      }
+    },
+    "join": {
+      "pageTitle": "Join class",
+      "pageDescription": "Enter the online classroom of your tutoring lesson.",
+      "checking": {
+        "heading": "Checking your access...",
+        "body": "One moment while we prepare your link to the classroom."
+      },
+      "ready": {
+        "heading": "Your classroom is ready",
+        "body": "Use the button to open the classroom in a new tab. You can keep this page open.",
+        "openRoom": "Open the classroom",
+        "newTab": "opens in a new tab",
+        "popupNote": "We also try to open it for you. If nothing opened, your browser may have blocked the pop-up - use the button."
+      },
+      "notOpen": {
+        "heading": "It is not time to join yet",
+        "body": "The classroom opens a little before the lesson starts. Keep this page open and we will try again when it does.",
+        "opensAt": "The classroom opens at {{dateTime}}"
+      },
+      "ended": {
+        "heading": "This class has ended",
+        "body": "The classroom is closed."
+      },
+      "cancelled": {
+        "heading": "This class was cancelled",
+        "body": "This lesson will not take place. See your lessons for the refund details."
+      },
+      "closed": {
+        "heading": "This class is closed",
+        "body": "The result of this class has already been recorded, so the classroom can no longer be opened.",
+        "dispute": "If you do not agree with the result, you can report a problem from the lesson in your history, within the time allowed."
+      },
+      "roomNotReady": {
+        "heading": "The classroom is not ready yet",
+        "body": "The room is still being prepared. We retry automatically every 30 seconds.",
+        "attempt": "Attempt {{attempt}} of {{max}}",
+        "gaveUp": "The room was still not ready after {{max}} attempts. Please try again in a moment.",
+        "manageRoom": "Manage the room"
+      },
+      "notFound": {
+        "heading": "Class not found, or you do not have access",
+        "body": "Check that you are signed in with the account that booked this lesson, and that the booking is confirmed."
+      },
+      "rateLimited": {
+        "heading": "Too many attempts",
+        "body": "Please wait a moment and try again."
+      },
+      "error": {
+        "heading": "Could not open the classroom",
+        "body": "Something went wrong. Please try again."
+      },
+      "retry": "Try again",
+      "goMyTutoring": "Go to my tutoring",
+      "goHistory": "See my lesson history",
+      "findTutors": "Find a tutor",
+      "forwardWarning": "Do not share the classroom link with anyone. Every entry is recorded against your account.",
+      "tutorLobbyNote": "You are the tutor of this class. Learners may wait in the lobby - admit them when you are ready to start.",
+      "presence": {
+        "question": "Has your tutor joined the classroom?",
+        "explain": "Tell us if the tutor is there. It helps us record that the lesson took place.",
+        "yes": "Yes, they are here",
+        "notYet": "Not yet",
+        "thanks": "Thank you. We have noted that your tutor is present."
+      }
+    },
+    "review": {
+      "heading": "Your review",
+      "loading": "Loading your review",
+      "loadError": "We could not load your review.",
+      "intro": "How was the lesson? Your review helps other learners choose.",
+      "reviewableUntil": "You can write a review until {{date}}.",
+      "publicNotice": "Reviews are public. Do not include a real name, phone number or e-mail address.",
+      "labelRule": "How you appear: for a child's profile your review is shown as the guardian of a student at that school level - never the child's nickname. For an adult profile it shows the nickname. Tick the box below to appear as anonymous instead.",
+      "rating": {
+        "label": "Your rating",
+        "option": "{{count}} of {{max}} stars"
+      },
+      "comment": {
+        "label": "Comment (optional)",
+        "help": "Plain text, up to 1000 characters."
+      },
+      "anonymous": {
+        "label": "Show my review as anonymous",
+        "warning": "It will be anonymous to the public. The tutor may still guess it is yours from when it was sent."
+      },
+      "form": {
+        "heading": "Write a review",
+        "editHeading": "Edit your review",
+        "submit": "Send review",
+        "save": "Save changes",
+        "cancel": "Cancel"
+      },
+      "created": "Thank you for your review.",
+      "updated": "Your review was updated.",
+      "validation": {
+        "ratingRequired": "Choose a rating from 1 to 5 stars."
+      },
+      "shownAnonymous": "Shown to the public as anonymous",
+      "shownLabelled": "Shown to the public with your reviewer label",
+      "writtenOn": "written on {{date}}",
+      "hidden": "Your review is hidden and is not shown to the public.",
+      "edit": "Edit review",
+      "editableUntil": "You can edit it until {{date}}.",
+      "closedOn": "The review period ended on {{date}}.",
+      "reason": {
+        "booking_not_completed": "A review can be written once the lesson is completed.",
+        "refunded": "This lesson was refunded in full, so it cannot be reviewed.",
+        "window_closed": "The time to review this lesson has passed.",
+        "exists": "You have already reviewed this lesson.",
+        "disabled": "Reviews are not available right now."
+      }
+    },
+    "dispute": {
+      "fundsNotice": "While we look into this, the payment for this class is held. It is neither paid to the tutor nor refunded until a decision is made.",
+      "noContact": "Please do not include phone numbers, e-mail addresses or other ways to contact someone. The conversation stays on the platform.",
+      "section": {
+        "heading": "Something went wrong?",
+        "intro": "If the class did not go as it should, you can report a problem until {{date}}.",
+        "report": "Report a problem",
+        "hasCase": "A problem report already exists for this lesson.",
+        "viewCase": "View the report"
+      },
+      "open": {
+        "title": "Report a problem",
+        "loading": "Checking whether you can report a problem",
+        "loadError": "We could not check this. Try again.",
+        "intro": "Tell us what happened. Our team reviews it and both sides can answer.",
+        "windowUntil": "You can report a problem until {{date}}.",
+        "category": "What happened?",
+        "categoryPlaceholder": "Choose a category",
+        "description": "Describe the problem",
+        "descriptionHelp": "At least {{min}} characters. Say what happened and when.",
+        "submit": "Send report",
+        "cancel": "Close",
+        "done": "Your report was sent.",
+        "viewCase": "View report {{no}}",
+        "viewExisting": "View the existing report"
+      },
+      "reason": {
+        "status_not_eligible": "A problem cannot be reported for this lesson in its current state.",
+        "window_closed": "The time to report a problem with this lesson has passed.",
+        "already_open": "A report for this lesson is already open.",
+        "already_decided": "A report for this lesson has already been decided.",
+        "role_not_allowed": "You cannot report a problem for this lesson.",
+        "feature_disabled": "Problem reports are not available right now.",
+        "limit_reached": "You have too many open reports. Wait for some to be decided first.",
+        "reopen_not_allowed": "A report for this lesson was withdrawn and cannot be opened again."
+      },
+      "evidence": {
+        "legend": "Evidence links (optional)",
+        "help": "Evidence is a link only - for example a shared screenshot or recording. Only secure (https) links are accepted. You can add up to {{max}} links, and others see the website name before opening one.",
+        "url": "Link {{n}}",
+        "label": "Label for link {{n}} (optional)",
+        "add": "Add a link",
+        "remove": "Remove link",
+        "listLabel": "Evidence links",
+        "external": "opens another website in a new tab"
+      },
+      "validation": {
+        "categoryRequired": "Choose what happened.",
+        "linkRequired": "Enter the link, or remove this row.",
+        "linkInvalid": "Enter a valid public link.",
+        "linkNotHttps": "Only secure links starting with https:// are accepted."
+      },
+      "page": {
+        "pageTitle": "Problem report",
+        "pageDescription": "Follow a problem report about one of your lessons.",
+        "back": "Back to my lessons",
+        "loading": "Loading the report",
+        "notFoundHeading": "We could not find this report",
+        "notFoundDescription": "It may not exist, or it may belong to another account.",
+        "errorHeading": "We could not load this report",
+        "heading": "Report {{no}}",
+        "lesson": "Lesson",
+        "when": "When",
+        "tutor": "Tutor",
+        "opened": "Opened",
+        "expectedBy": "We aim to decide by {{date}}.",
+        "withdrawnOn": "You withdrew this report on {{date}}.",
+        "description": "What was reported"
+      },
+      "thread": {
+        "heading": "Conversation",
+        "label": "Messages in this report",
+        "empty": "No messages yet.",
+        "newMessage": "A new message was added to the conversation.",
+        "you": "You",
+        "Learner": "Learner",
+        "Tutor": "Tutor",
+        "Admin": "Support team",
+        "System": "System"
+      },
+      "reply": {
+        "heading": "Reply",
+        "label": "Your message",
+        "send": "Send message",
+        "sent": "Your message was sent."
+      },
+      "decision": {
+        "heading": "Decision",
+        "refund": "Refund: {{amount}}",
+        "decidedOn": "Decided on {{date}}"
+      },
+      "withdraw": {
+        "heading": "Withdraw this report",
+        "intro": "If the problem is solved, you can withdraw the report.",
+        "open": "Withdraw report",
+        "title": "Withdraw this report?",
+        "explain": "Withdrawing closes the report and the payment goes back to normal handling. Depending on the rules, you may not be able to report this lesson again.",
+        "keep": "Keep the report open",
+        "confirm": "Withdraw",
+        "done": "The report was withdrawn.",
+        "blocked": {
+          "not_opener": "Only the person who opened this report can withdraw it.",
+          "other_party_posted": "The other side has already answered, so this report can no longer be withdrawn.",
+          "behavior": "Reports about behaviour cannot be withdrawn.",
+          "admin_decided": "This report can no longer be withdrawn."
+        }
+      }
+    }
+  }
+}

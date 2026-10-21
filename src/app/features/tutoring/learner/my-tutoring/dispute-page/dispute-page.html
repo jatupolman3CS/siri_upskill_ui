@@ -1,0 +1,130 @@
+<div class="page-shell page-shell-narrow animate-fade-in">
+  <a
+    routerLink="/my-tutoring"
+    [queryParams]="{ tab: 'history' }"
+    class="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary-text)] underline
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    <ng-icon name="phosphorArrowLeft" aria-hidden="true" />
+    {{ 'tutoring.dispute.page.back' | translate }}
+  </a>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.dispute.page.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="10rem" radius="lg" />
+      <app-skeleton variant="block" height="8rem" radius="lg" />
+    </div>
+  } @else if (notFound()) {
+    <app-empty-state [heading]="'tutoring.dispute.page.notFoundHeading' | translate" [description]="'tutoring.dispute.page.notFoundDescription' | translate">
+      <a emptyStateAction routerLink="/my-tutoring" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.dispute.page.back' | translate }}</a>
+    </app-empty-state>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.dispute.page.errorHeading' | translate" [description]="'tutoring.learner.my.loadErrorDescription' | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (dispute(); as d) {
+    <header class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="break-words text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.dispute.page.heading' | translate: { no: d.disputeNo } }}</h1>
+          <p class="break-words text-base text-[var(--color-text-muted)]">{{ categoryKey(d.category) | translate }}</p>
+        </div>
+        @if (statusView(); as view) {
+          <app-status-chip [view]="view" />
+        }
+      </div>
+
+      <dl class="grid gap-x-6 gap-y-3 text-base sm:grid-cols-2">
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.dispute.page.lesson' | translate }}</dt>
+          <dd class="break-words text-[var(--color-text)]">
+            {{ subject() }} ·
+            <a [routerLink]="['/my-tutoring/bookings', d.bookingId]" class="font-semibold text-[var(--color-primary-text)] underline">{{ d.bookingNo }}</a>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.dispute.page.when' | translate }}</dt>
+          <dd class="text-[var(--color-text)]"><app-bangkok-time-range [startsAtUtc]="d.session.startsAtUtc" [endsAtUtc]="d.session.endsAtUtc" /></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.dispute.page.tutor' | translate }}</dt>
+          <dd class="break-words text-[var(--color-text)]">{{ d.counterparty.displayName }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-[var(--color-text-muted)]">{{ 'tutoring.dispute.page.opened' | translate }}</dt>
+          <dd class="text-[var(--color-text)]">{{ d.openedAtUtc | bangkokDate: 'dateTime' }}</dd>
+        </div>
+      </dl>
+
+      @if (d.fundsOnHold) {
+        <p class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-base text-[var(--color-text)]">
+          {{ 'tutoring.dispute.fundsNotice' | translate }}
+        </p>
+      }
+      @if (isOpenCase()) {
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.dispute.page.expectedBy' | translate: { date: (d.expectedResolutionByUtc | bangkokDate: 'dateTime') } }}</p>
+      }
+      @if (d.status === 'Withdrawn' && d.withdrawnAtUtc; as withdrawnAt) {
+        <p class="text-base text-[var(--color-text)]">{{ 'tutoring.dispute.page.withdrawnOn' | translate: { date: (withdrawnAt | bangkokDate: 'dateTime') } }}</p>
+      }
+    </header>
+
+    @if (d.decision; as decision) {
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="dispute-decision-heading">
+        <h2 id="dispute-decision-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.decision.heading' | translate }}</h2>
+        <p class="text-base font-semibold text-[var(--color-text)]">{{ resolutionKey(decision.resolution) | translate }}</p>
+        @if (decision.refundAmount !== null && decision.refundAmount > 0) {
+          <p class="text-base text-[var(--color-text)]">{{ 'tutoring.dispute.decision.refund' | translate: { amount: (decision.refundAmount | currencyThb) ?? '' } }}</p>
+        }
+        <p class="whitespace-pre-line break-words text-base text-[var(--color-text)]">{{ decision.note }}</p>
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.dispute.decision.decidedOn' | translate: { date: (decision.decidedAtUtc | bangkokDate: 'dateTime') } }}</p>
+      </section>
+    }
+
+    <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="dispute-description-heading">
+      <h2 id="dispute-description-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.page.description' | translate }}</h2>
+      <p class="whitespace-pre-line break-words text-base text-[var(--color-text)]">{{ d.description }}</p>
+      <app-evidence-link-list [links]="d.evidenceLinks" />
+    </section>
+
+    <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="dispute-thread-heading">
+      <h2 id="dispute-thread-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.thread.heading' | translate }}</h2>
+      <p role="status" class="sr-only">{{ announcement() }}</p>
+      @if (d.messages.length === 0) {
+        <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.dispute.thread.empty' | translate }}</p>
+      } @else {
+        <app-dispute-thread [messages]="d.messages" />
+      }
+      @if (d.canPostMessage) {
+        <app-dispute-reply-form [disputeId]="d.disputeId" [linksLeft]="linksLeft()" (posted)="reload()" />
+      }
+    </section>
+
+    @if (isOpenCase()) {
+      <section class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="dispute-withdraw-heading">
+        <h2 id="dispute-withdraw-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.dispute.withdraw.heading' | translate }}</h2>
+        @if (d.canWithdraw) {
+          <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.dispute.withdraw.intro' | translate }}</p>
+          <div>
+            <app-button variant="secondary" (click)="withdrawOpen.set(true)">{{ 'tutoring.dispute.withdraw.open' | translate }}</app-button>
+          </div>
+        } @else {
+          <p class="text-base text-[var(--color-text-muted)]">
+            {{ 'tutoring.dispute.withdraw.blocked.' + (d.withdrawBlockedReason ?? 'admin_decided') | translate }}
+          </p>
+        }
+      </section>
+    }
+
+    <app-modal [(open)]="withdrawOpen" [titleText]="'tutoring.dispute.withdraw.title' | translate" [closeOnOverlayClick]="false">
+      <div class="flex flex-col gap-3 text-base text-[var(--color-text)]">
+        <p>{{ 'tutoring.dispute.withdraw.explain' | translate }}</p>
+        <app-tutor-problem [message]="withdrawProblem()" />
+      </div>
+      <div modalFooter class="flex gap-3">
+        <app-button variant="secondary" [disabled]="withdrawing()" (click)="withdrawOpen.set(false)">{{ 'tutoring.dispute.withdraw.keep' | translate }}</app-button>
+        <app-button variant="danger" [loading]="withdrawing()" [disabled]="withdrawing()" (click)="withdraw()">{{ 'tutoring.dispute.withdraw.confirm' | translate }}</app-button>
+      </div>
+    </app-modal>
+  }
+</div>

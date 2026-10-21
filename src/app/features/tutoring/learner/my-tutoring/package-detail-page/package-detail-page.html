@@ -1,0 +1,116 @@
+<div class="page-shell page-shell-narrow animate-fade-in">
+  <a
+    routerLink="/my-tutoring/packages"
+    class="inline-flex min-h-11 items-center gap-1.5 self-start rounded-[var(--radius-md)] text-sm font-semibold text-[var(--color-primary-text)] underline
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+  >
+    <ng-icon name="phosphorArrowLeft" aria-hidden="true" />
+    {{ 'tutoring.learner.packages.my.detail.back' | translate }}
+  </a>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.learner.packages.my.detail.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="10rem" radius="lg" />
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+    </div>
+  } @else if (notFound()) {
+    <app-empty-state [heading]="'tutoring.learner.packages.my.detail.notFoundHeading' | translate" [description]="'tutoring.learner.packages.my.detail.notFoundDescription' | translate">
+      <a emptyStateAction routerLink="/my-tutoring/packages" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.learner.packages.my.detail.back' | translate }}</a>
+    </app-empty-state>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.learner.packages.my.detail.loadErrorHeading' | translate" [description]="'tutoring.learner.packages.my.detail.loadErrorDescription' | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (purchase(); as pack) {
+    <header class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="break-words text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+          {{ 'tutoring.learner.packages.my.detail.heading' | translate: { count: pack.sessionsTotal, minutes: pack.durationMinutes } }}
+        </h1>
+        <p class="mt-1 break-words text-[var(--color-text-muted)]">
+          {{ 'tutoring.learner.packages.my.card.withTutor' | translate: { name: pack.tutor.displayName, learner: pack.learner.nickname } }}
+        </p>
+      </div>
+      @if (statusView(); as view) {
+        <app-status-chip [view]="view" />
+      }
+    </header>
+
+    <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="package-summary-heading">
+      <h2 id="package-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.detail.summaryHeading' | translate }}</h2>
+      <dl class="grid grid-cols-1 gap-3 text-base sm:grid-cols-2">
+        <div class="flex items-baseline justify-between gap-3">
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.detail.creditsLeft' | translate }}</dt>
+          <dd class="font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.detail.creditsValue' | translate: { left: pack.creditsRemaining, total: pack.sessionsTotal } }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-3">
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.detail.lessonLength' | translate }}</dt>
+          <dd class="font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.card.perLesson' | translate: { minutes: pack.durationMinutes } }}</dd>
+        </div>
+        @if (pack.expiresAtUtc; as expires) {
+          <div class="flex items-baseline justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.detail.expires' | translate }}</dt>
+            <dd class="font-semibold text-[var(--color-text)]">{{ expires | bangkokDate: 'dateTime' }}</dd>
+          </div>
+        }
+        @if (pack.pendingExpiresAtUtc; as payBy) {
+          <div class="flex items-baseline justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.detail.payBy' | translate }}</dt>
+            <dd class="font-semibold text-[var(--color-text)]">{{ payBy | bangkokDate: 'dateTime' }}</dd>
+          </div>
+        }
+        <div class="flex items-baseline justify-between gap-3">
+          <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.detail.price' | translate }}</dt>
+          <dd class="font-semibold text-[var(--color-text)]">{{ pack.priceSnapshot | currencyThb }}</dd>
+        </div>
+      </dl>
+      @if (pack.expiredPendingSettlement) {
+        <p class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.card.awaitingReview' | translate }}</p>
+      }
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.detail.expiryTerms' | translate }}</p>
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.summary.times' | translate }}</p>
+
+      @if (canPay()) {
+        <div class="flex flex-col gap-3 border-t border-[var(--color-border)] pt-4">
+          <p class="text-base text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.detail.unpaid' | translate }}</p>
+          <app-tutor-problem [message]="problem()" />
+          <div class="flex flex-wrap items-center gap-3">
+            <app-button [routerLink]="checkoutLink()">{{ 'tutoring.learner.packages.my.card.pay' | translate }}</app-button>
+            @if (confirmingCancel()) {
+              <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.detail.cancelConfirm' | translate }}</p>
+              <app-button variant="danger" size="sm" [loading]="cancelling()" [disabled]="cancelling()" (click)="cancelPurchase()">
+                {{ 'tutoring.learner.packages.my.detail.cancelYes' | translate }}
+              </app-button>
+              <app-button variant="secondary" size="sm" [disabled]="cancelling()" (click)="keepPurchase()">{{ 'tutoring.learner.packages.my.detail.cancelKeep' | translate }}</app-button>
+            } @else {
+              <app-button variant="secondary" (click)="askCancel()">{{ 'tutoring.learner.packages.my.detail.cancel' | translate }}</app-button>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    @if (canBook()) {
+      <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="package-book-heading">
+        <h2 id="package-book-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.book.heading' | translate }}</h2>
+        @if (offeringId(); as offering) {
+          <app-package-credit-booking [purchase]="pack" [offeringId]="offering" (booked)="reload()" (purchaseChanged)="reload()" />
+        } @else if (offeringLoading()) {
+          <app-skeleton variant="block" height="14rem" radius="lg" />
+        } @else if (offeringMissing()) {
+          <div class="flex flex-wrap items-center gap-3" role="status">
+            <p class="text-base text-[var(--color-text)]">{{ 'tutoring.learner.packages.book.offeringUnknown' | translate }}</p>
+            <app-button size="sm" variant="secondary" (click)="retryOffers()">{{ 'tutoring.learner.my.retry' | translate }}</app-button>
+          </div>
+        }
+      </section>
+    }
+
+    @if (pack.credits.length > 0) {
+      <section class="glass-card flex flex-col gap-2 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="package-credits-heading">
+        <h2 id="package-credits-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.learner.packages.my.detail.creditsHeading' | translate }}</h2>
+        <app-package-credit-list [credits]="pack.credits" />
+      </section>
+    }
+  }
+</div>

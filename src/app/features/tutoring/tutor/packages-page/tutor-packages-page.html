@@ -1,0 +1,128 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.tutor.packages.heading' | translate }}</h1>
+        <p class="mt-1 max-w-3xl text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.subheading' | translate }}</p>
+      </div>
+      @if (!isLoading() && !hasError() && !editor() && !noOffering()) {
+        <app-button id="tutor-package-add" (click)="openEditor(null, $event)">
+          <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+          {{ 'tutoring.tutor.packages.add' | translate }}
+        </app-button>
+      }
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  @if (noOffering()) {
+    <p role="status" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+      {{ 'tutoring.tutor.packages.noOffering' | translate }}
+      <a routerLink="/instructor/tutoring/offerings" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.tutor.packages.goOfferings' | translate }}</a>
+    </p>
+  }
+
+  @if (editor(); as state) {
+    <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-package-editor">
+      <h2 id="tutor-package-editor" tabindex="-1" class="text-lg font-semibold text-[var(--color-text)] focus-visible:outline-none">
+        {{ (state.tutorPackage ? 'tutoring.tutor.packages.editHeading' : 'tutoring.tutor.packages.addHeading') | translate }}
+      </h2>
+      <app-tutor-package-form
+        [tutorPackage]="state.tutorPackage"
+        [offeringChoices]="offeringChoices()"
+        [allowedDurationMinutes]="allowedDurationMinutes() ?? [30, 60, 90, 120]"
+        (saved)="onSaved()"
+        (cancelled)="closeEditor()"
+      />
+    </section>
+  }
+
+  <app-tutor-problem [message]="problem()" />
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.packages.loading' | translate" class="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.packages.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.packages.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (packages().length === 0) {
+    @if (!editor() && !noOffering()) {
+      <app-empty-state
+        [heading]="'tutoring.tutor.packages.emptyHeading' | translate"
+        [description]="'tutoring.tutor.packages.emptyDescription' | translate"
+      >
+        <app-button emptyStateAction (click)="openEditor(null, $event)">{{ 'tutoring.tutor.packages.add' | translate }}</app-button>
+      </app-empty-state>
+    }
+  } @else {
+    <ul class="grid gap-6 md:grid-cols-2 2xl:grid-cols-3">
+      @for (item of packages(); track item.packageId) {
+        <li class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="break-words text-lg font-semibold text-[var(--color-text)]">
+                {{ 'tutoring.tutor.packages.bundle' | translate: { count: item.sessionCount, minutes: item.durationMinutes } }}
+              </h2>
+              <p class="break-words text-sm text-[var(--color-text-muted)]">
+                {{ subjectName(item) }} · {{ levelKey(item.offering.level) | translate }} · {{ curriculumKey(item.offering.curriculum) | translate }}
+              </p>
+            </div>
+            <span
+              class="inline-flex shrink-0 items-center rounded-[var(--radius-full)] border px-2.5 py-1 text-xs font-semibold text-[var(--color-text)]"
+              [class]="item.isActive ? 'tone-green border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]' : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]'"
+            >
+              {{ (item.isActive ? 'tutoring.tutor.packages.statusActive' : 'tutoring.tutor.packages.statusInactive') | translate }}
+            </span>
+          </div>
+
+          <dl class="grid gap-2 text-sm">
+            <div class="flex justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.totalPrice' | translate }}</dt>
+              <dd class="font-semibold text-[var(--color-text)]">{{ item.totalPrice | currencyThb }}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.perSession' | translate }}</dt>
+              <dd class="font-semibold text-[var(--color-text)]">{{ item.pricePerSession | currencyThb }}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.discountLabel' | translate }}</dt>
+              <dd class="font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.packages.discountValue' | translate: { percent: item.discountPercent, savings: ((item.savingsAmount | currencyThb) ?? '') } }}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.validity' | translate }}</dt>
+              <dd class="font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.packages.validityValue' | translate: { days: item.validDays } }}</dd>
+            </div>
+          </dl>
+
+          <div class="mt-auto flex flex-wrap gap-2">
+            <app-button size="sm" variant="secondary" [disabled]="busyId() !== null" (click)="openEditor(item, $event)">
+              <ng-icon leading name="phosphorPencilSimple" aria-hidden="true" />
+              {{ 'tutoring.tutor.packages.edit' | translate }}
+              <span class="sr-only">{{ 'tutoring.tutor.packages.bundle' | translate: { count: item.sessionCount, minutes: item.durationMinutes } }}</span>
+            </app-button>
+            @if (item.isActive) {
+              <app-button size="sm" variant="ghost" [loading]="busyId() === item.packageId" [disabled]="busyId() !== null" (click)="deactivate(item)">
+                {{ 'tutoring.tutor.packages.deactivate' | translate }}
+                <span class="sr-only">{{ 'tutoring.tutor.packages.bundle' | translate: { count: item.sessionCount, minutes: item.durationMinutes } }}</span>
+              </app-button>
+            } @else {
+              <app-button size="sm" variant="ghost" [loading]="busyId() === item.packageId" [disabled]="busyId() !== null" (click)="activate(item)">
+                {{ 'tutoring.tutor.packages.activate' | translate }}
+                <span class="sr-only">{{ 'tutoring.tutor.packages.bundle' | translate: { count: item.sessionCount, minutes: item.durationMinutes } }}</span>
+              </app-button>
+            }
+          </div>
+          @if (item.isActive) {
+            <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.tutor.packages.deactivateNote' | translate }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

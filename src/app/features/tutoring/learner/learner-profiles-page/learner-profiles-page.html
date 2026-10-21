@@ -1,0 +1,172 @@
+<div class="page-shell page-shell-narrow animate-fade-in">
+  <header class="flex flex-col gap-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.learner.heading' | translate }}</h1>
+        <p class="mt-1 max-w-prose text-[var(--color-text-muted)]">{{ 'tutoring.learner.subheading' | translate }}</p>
+      </div>
+      @if (!isLoading() && !hasError() && !editor()) {
+        <app-button id="learner-profile-add" (click)="openEditor(null, $event)">
+          <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+          {{ 'tutoring.learner.add' | translate }}
+        </app-button>
+      }
+    </div>
+    <p class="tone-blue rounded-[var(--radius-md)] bg-[var(--tone-bg)] px-3 py-2 text-sm text-[var(--color-text)]">
+      {{ 'tutoring.learner.tutorVisibility' | translate }}
+    </p>
+  </header>
+
+  @if (editor(); as state) {
+    <section class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="learner-profile-editor">
+      <h2 id="learner-profile-editor" tabindex="-1" class="text-lg font-semibold text-[var(--color-text)] focus-visible:outline-none">
+        {{ (state.profile ? 'tutoring.learner.form.editHeading' : 'tutoring.learner.form.addHeading') | translate }}
+      </h2>
+      <app-learner-profile-form [profile]="state.profile" (saved)="onSaved()" (cancelled)="closeEditor()" />
+    </section>
+  }
+
+  <app-tutor-problem [message]="problem()" />
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.learner.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state [heading]="'tutoring.learner.loadErrorHeading' | translate" [description]="'tutoring.learner.loadErrorDescription' | translate">
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.learner.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (profiles().length === 0) {
+    @if (!editor()) {
+      <app-empty-state [heading]="'tutoring.learner.emptyHeading' | translate" [description]="'tutoring.learner.emptyDescription' | translate">
+        <app-button emptyStateAction (click)="openEditor(null, $event)">{{ 'tutoring.learner.add' | translate }}</app-button>
+      </app-empty-state>
+    }
+  } @else {
+    <ul class="flex flex-col gap-4">
+      @for (profile of profiles(); track profile.learnerProfileId) {
+        <li class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 items-start gap-3">
+            <ng-icon name="phosphorUserCircle" aria-hidden="true" class="mt-0.5 shrink-0 text-3xl text-[var(--hue-violet-fg)]" />
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h2 class="break-words text-lg font-semibold text-[var(--color-text)]">{{ profile.nickname }}</h2>
+                @if (profile.anonymizedAtUtc) {
+                  <span class="rounded-full px-2 py-0.5 text-xs font-semibold bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+                    {{ 'tutoring.learner.anonymizedBadge' | translate }}
+                  </span>
+                }
+                @if (profile.guardianConsentWithdrawnAtUtc) {
+                  <span class="tone-gold rounded-full px-2 py-0.5 text-xs font-semibold bg-[var(--tone-bg)] text-[var(--tone-fg)]">
+                    {{ 'tutoring.learner.consentWithdrawnBadge' | translate }}
+                  </span>
+                }
+              </div>
+              <p class="text-sm text-[var(--color-text-muted)]">
+                {{ gradeKey(profile.gradeLevel) | translate }}
+                @if (profile.isMinor) {
+                  · {{ 'tutoring.learner.minorBadge' | translate }}
+                }
+              </p>
+              @if (profile.isMinor && profile.guardianConsentAtUtc; as consentAt) {
+                <p class="text-sm text-[var(--color-text-muted)]">
+                  {{ 'tutoring.learner.consentRecorded' | translate: { date: (consentAt | bangkokDate: 'date') } }}
+                </p>
+              }
+            </div>
+          </div>
+          <div class="flex shrink-0 flex-wrap items-center gap-2">
+            @if (!isAnonymized(profile)) {
+              @if (profile.isMinor && profile.isActive && !profile.guardianConsentWithdrawnAtUtc) {
+                <app-button size="sm" variant="ghost" [disabled]="deactivating() || withdrawing()" (click)="askWithdrawConsent(profile)">
+                  {{ 'tutoring.learner.profile.consentWithdraw.button' | translate }}
+                  <span class="sr-only">{{ profile.nickname }}</span>
+                </app-button>
+              }
+              <app-button size="sm" variant="secondary" [disabled]="deactivating() || withdrawing()" (click)="openEditor(profile, $event)">
+                <ng-icon leading name="phosphorPencilSimple" aria-hidden="true" />
+                {{ 'tutoring.learner.edit' | translate }}
+                <span class="sr-only">{{ profile.nickname }}</span>
+              </app-button>
+              <app-button size="sm" variant="ghost" [disabled]="deactivating() || withdrawing()" (click)="askDeactivate(profile)">
+                <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+                {{ 'tutoring.learner.deactivate' | translate }}
+                <span class="sr-only">{{ profile.nickname }}</span>
+              </app-button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+<app-modal [(open)]="confirmOpen" [titleText]="'tutoring.learner.confirmTitle' | translate" [closeOnOverlayClick]="false">
+  @if (pendingDeactivation(); as pending) {
+    <p>{{ 'tutoring.learner.confirmBody' | translate: { nickname: pending.nickname } }}</p>
+  }
+  <div modalFooter class="flex gap-3">
+    <app-button variant="secondary" [disabled]="deactivating()" (click)="confirmOpen.set(false)">{{ 'tutoring.learner.confirmCancel' | translate }}</app-button>
+    <app-button variant="danger" [loading]="deactivating()" (click)="confirmDeactivate()">{{ 'tutoring.learner.confirmDeactivate' | translate }}</app-button>
+  </div>
+</app-modal>
+
+<app-modal [(open)]="withdrawModalOpen" [titleText]="'tutoring.learner.profile.consentWithdraw.title' | translate" [closeOnOverlayClick]="false">
+  @if (pendingWithdrawal(); as pending) {
+    <div class="flex flex-col gap-4 text-xs text-[var(--color-text)]">
+      <div class="tone-gold p-3 rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/30 text-[var(--tone-fg)] text-xs">
+        <p>{{ 'tutoring.learner.profile.consentWithdraw.body' | translate: { nickname: pending.nickname } }}</p>
+      </div>
+
+      <p class="text-xs text-[var(--color-text-muted)]">
+        <span>{{ 'tutoring.learner.profile.consentWithdraw.downloadHint' | translate }}</span>
+        <a routerLink="/account/privacy" (click)="closeWithdrawModal()" class="ml-1 underline font-semibold text-[var(--color-primary)] hover:opacity-80">
+          {{ 'tutoring.learner.profile.consentWithdraw.downloadFirst' | translate }}
+        </a>
+      </p>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="withdraw-consent-confirm" class="font-semibold text-xs text-[var(--color-text)]">
+          {{ 'tutoring.learner.profile.consentWithdraw.confirmLabel' | translate }}
+        </label>
+        <input
+          type="text"
+          id="withdraw-consent-confirm"
+          [(ngModel)]="withdrawConfirmation"
+          placeholder="WITHDRAW"
+          class="w-full px-3 py-2 text-xs rounded-xl glass-card focus:ring-2 focus:ring-[var(--color-focus-ring)] uppercase"
+        />
+      </div>
+
+      @if (withdrawBlockers().length > 0) {
+        <div class="tone-red p-3 rounded-xl bg-[var(--tone-bg)] border border-[var(--tone-fg)]/40 flex flex-col gap-1 text-xs text-[var(--tone-fg)]">
+          <p class="font-semibold">{{ 'tutoring.learner.profile.consentWithdraw.blockedHeading' | translate }}</p>
+          <ul class="list-disc list-inside">
+            @for (b of withdrawBlockers(); track b) {
+              <li>{{ ('tutoring.learner.profile.consentWithdraw.blockers.' + b) | translate }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (withdrawProblem()) {
+        <p class="text-[var(--hue-red-fg)] text-xs font-semibold">{{ withdrawProblem() }}</p>
+      }
+
+      <div class="flex justify-end gap-2 pt-2">
+        <app-button variant="secondary" [disabled]="withdrawing()" (click)="closeWithdrawModal()">
+          {{ 'tutoring.learner.profile.consentWithdraw.cancel' | translate }}
+        </app-button>
+        <app-button
+          variant="danger"
+          [loading]="withdrawing()"
+          [disabled]="withdrawing() || withdrawConfirmation.trim().toUpperCase() !== 'WITHDRAW'"
+          (click)="confirmWithdrawConsent()"
+        >
+          {{ 'tutoring.learner.profile.consentWithdraw.confirm' | translate }}
+        </app-button>
+      </div>
+    </div>
+  }
+</app-modal>

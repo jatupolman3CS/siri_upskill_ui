@@ -1,0 +1,83 @@
+<app-modal [(open)]="open" [titleText]="'tutoring.tutor.disputes.open.title' | translate" [closeOnOverlayClick]="false">
+  @if (stateLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.disputes.open.loading' | translate">
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+    </div>
+  } @else if (stateFailed()) {
+    <div class="flex flex-col items-start gap-3">
+      <p class="text-base text-[var(--color-text)]">{{ 'tutoring.tutor.disputes.open.loadError' | translate }}</p>
+      <app-button size="sm" variant="secondary" (click)="reloadState()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </div>
+  } @else if (state(); as current) {
+    @if (!current.canOpen) {
+      <div class="flex flex-col gap-3">
+        <p class="text-base text-[var(--color-text)]">
+          {{ current.reasonCode ? ('tutoring.tutor.disputes.reason.' + current.reasonCode | translate) : ('tutoring.tutor.disputes.open.loadError' | translate) }}
+        </p>
+        @if (current.dispute; as existing) {
+          <a
+            [routerLink]="['/instructor/tutoring/disputes', existing.disputeId]"
+            (click)="open.set(false)"
+            class="font-semibold text-[var(--color-primary-text)] underline"
+          >
+            {{ 'tutoring.tutor.disputes.open.viewExisting' | translate }} ({{ existing.disputeNo }})
+          </a>
+        }
+      </div>
+    } @else {
+      <form (submit)="$event.preventDefault(); submit()" novalidate class="flex flex-col gap-4">
+        @if (current.fundsWillBeHeld) {
+          <p class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-base text-[var(--color-text)]">
+            {{ 'tutoring.tutor.disputes.open.fundsNotice' | translate }}
+          </p>
+        }
+
+        <app-select
+          [formControl]="form.controls.category"
+          [label]="'tutoring.tutor.disputes.open.category' | translate"
+          [options]="categoryOptions()"
+          [required]="true"
+          [errorMessage]="categoryError()"
+        />
+
+        <app-tutor-textarea
+          [formControl]="form.controls.description"
+          [label]="'tutoring.tutor.disputes.open.description' | translate"
+          [helperText]="'tutoring.tutor.disputes.open.descriptionHelp' | translate"
+          [errorMessage]="descriptionError()"
+          [maxLength]="limits.description"
+          [rows]="5"
+          [required]="true"
+          (focusout)="feedback.touch('description')"
+        />
+
+        <app-tutor-evidence-links-field [showErrors]="showEvidenceErrors()" (rowsChange)="onEvidence($event)" />
+
+        @if (submitProblem(); as problem) {
+          <app-tutor-problem [message]="problem" />
+        }
+
+        @if (conflictDisputeId(); as conflictId) {
+          <a
+            [routerLink]="['/instructor/tutoring/disputes', conflictId]"
+            (click)="open.set(false)"
+            class="font-semibold text-[var(--color-primary-text)] underline"
+          >
+            {{ 'tutoring.tutor.disputes.open.viewExisting' | translate }}
+          </a>
+        }
+      </form>
+    }
+  }
+
+  <div modalFooter class="flex gap-3">
+    <app-button variant="secondary" [disabled]="submitting()" (click)="open.set(false)">
+      {{ 'tutoring.tutor.disputes.open.cancel' | translate }}
+    </app-button>
+    @if (state()?.canOpen) {
+      <app-button [loading]="submitting()" [disabled]="submitting()" (click)="submit()">
+        {{ 'tutoring.tutor.disputes.open.submit' | translate }}
+      </app-button>
+    }
+  </div>
+</app-modal>

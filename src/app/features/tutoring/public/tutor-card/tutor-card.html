@@ -1,0 +1,90 @@
+<article
+  class="card-hover glow-border group relative flex h-full flex-col gap-3 rounded-2xl glass-card p-4
+    has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-[var(--color-focus-ring)]"
+>
+  <div class="flex items-start gap-3">
+    <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+      @if (tutor().photoUrl; as photo) {
+        <!-- fill: the box is square and fixed (h-16 w-16); alt is empty because the name sits right beside it. -->
+        <img [ngSrc]="photo | mediaUrl" alt="" fill class="object-cover" />
+      } @else {
+        <span aria-hidden="true" class="flex h-full w-full items-center justify-center text-xl font-semibold text-[var(--color-text)]">
+          {{ initial() }}
+        </span>
+      }
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <h2 class="text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary-text)]">
+        <a
+          [routerLink]="['/tutors', tutor().slug]"
+          class="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+        >
+          {{ tutor().displayName }}
+        </a>
+      </h2>
+      @if (tutor().headline) {
+        <p class="line-clamp-2 text-sm text-[var(--color-text-muted)]">{{ tutor().headline }}</p>
+      }
+    </div>
+  </div>
+
+  <ul class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--color-text-muted)]">
+    @if (tutor().ratingCount > 0) {
+      <li class="inline-flex items-center gap-1 text-[var(--color-text)]">
+        <ng-icon name="phosphorStar" aria-hidden="true" class="text-[var(--color-accent)]" />
+        {{ 'tutoring.public.search.card.rating' | translate: { rating: rating(), count: tutor().ratingCount } }}
+      </li>
+    }
+    @if (tutor().yearsExperience > 0) {
+      <li>{{ 'tutoring.public.search.card.experience' | translate: { years: tutor().yearsExperience } }}</li>
+    }
+    @if (tutor().completedSessionsCount > 0) {
+      <li>{{ 'tutoring.public.search.card.sessions' | translate: { count: tutor().completedSessionsCount } }}</li>
+    }
+  </ul>
+
+  <ul class="flex flex-wrap gap-1.5" [attr.aria-label]="'tutoring.public.search.card.subjectsLabel' | translate">
+    @for (subject of visibleSubjects(); track subject.slug) {
+      <li class="tone-blue rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">
+        {{ subjectName(subject) }}
+      </li>
+    }
+    @if (hiddenSubjectCount() > 0) {
+      <li class="rounded-full bg-[var(--color-surface-muted)] px-2.5 py-1 text-sm font-medium text-[var(--color-text-muted)]">
+        {{ 'tutoring.public.search.card.moreSubjects' | translate: { count: hiddenSubjectCount() } }}
+      </li>
+    }
+  </ul>
+
+  @if (tutor().hasFreeTrial || tutor().hasGroup) {
+    <ul class="flex flex-wrap gap-1.5">
+      @if (tutor().hasFreeTrial) {
+        <li class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-semibold text-[var(--tone-fg)]">
+          <ng-icon name="phosphorGift" aria-hidden="true" />
+          {{ 'tutoring.public.search.card.freeTrial' | translate }}
+        </li>
+      }
+      @if (tutor().hasGroup) {
+        <li class="tone-violet inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-semibold text-[var(--tone-fg)]">
+          <ng-icon name="phosphorUsers" aria-hidden="true" />
+          {{ 'tutoring.public.search.card.groupClasses' | translate }}
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="mt-auto flex flex-col gap-1">
+    @if (tutor().nextAvailableAtUtc; as next) {
+      <p class="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+        <ng-icon name="phosphorClock" aria-hidden="true" class="text-[var(--hue-teal-fg)]" />
+        {{ 'tutoring.public.search.card.nextAvailable' | translate: { when: (next | bangkokDate: 'shortDateTime') } }}
+      </p>
+    }
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'tutoring.public.search.card.fromPrice' | translate }}
+      <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ tutor().fromHourlyRate | currencyThb }}</span>
+      {{ 'tutoring.public.search.card.perHour' | translate }}
+    </p>
+  </div>
+</article>

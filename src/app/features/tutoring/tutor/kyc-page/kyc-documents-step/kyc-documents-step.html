@@ -1,0 +1,130 @@
+<section class="flex flex-col gap-6" aria-labelledby="kyc-docs-heading">
+  <div class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:p-6">
+    <h2 id="kyc-docs-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+      <ng-icon name="phosphorLockKey" aria-hidden="true" class="text-xl" />
+      {{ 'tutoring.kyc.documents.heading' | translate }}
+    </h2>
+    <p class="text-[var(--color-text)]">
+      {{ (editable() ? 'tutoring.kyc.documents.intro' : 'tutoring.kyc.documents.readOnlyIntro') | translate }}
+    </p>
+    <p class="tone-gold flex items-start gap-2 rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+      <ng-icon name="phosphorLockKey" aria-hidden="true" class="mt-0.5 shrink-0 text-base text-[var(--tone-fg)]" />
+      <span>{{ 'tutoring.kyc.documents.privacy' | translate }}</span>
+    </p>
+  </div>
+
+  <ul class="grid gap-6 2xl:grid-cols-2">
+    @for (type of requiredTypes(); track type) {
+      <li class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5">
+        <div class="flex items-start justify-between gap-3">
+          <h3 class="text-base font-semibold text-[var(--color-text)]">{{ typeLabelKey(type) | translate }}</h3>
+          <span class="shrink-0 rounded-[var(--radius-full)] border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-2.5 py-1 text-xs font-semibold text-[var(--color-text)]">
+            {{ 'tutoring.kyc.documents.required' | translate }}
+          </span>
+        </div>
+        <ng-container *ngTemplateOutlet="slot; context: { type: type }" />
+      </li>
+    }
+    @for (type of optionalTypes(); track type) {
+      @if (editable() || documentsOf(type).length > 0) {
+        <li class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="text-base font-semibold text-[var(--color-text)]">{{ typeLabelKey(type) | translate }}</h3>
+            <span class="shrink-0 text-xs text-[var(--color-text-muted)]">{{ 'tutoring.kyc.documents.optional' | translate }}</span>
+          </div>
+          <ng-container *ngTemplateOutlet="slot; context: { type: type }" />
+        </li>
+      }
+    }
+  </ul>
+
+  @if (editable()) {
+    <div class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5 sm:p-6">
+      @if (missingTypes().length > 0) {
+        <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.kyc.documents.stillMissing' | translate }}</p>
+        <ul class="list-disc pl-5 text-sm text-[var(--color-text)]">
+          @for (type of missingTypes(); track type) {
+            <li>{{ typeLabelKey(type) | translate }}</li>
+          }
+        </ul>
+      }
+      <app-tutor-problem [message]="problem()">
+        @if (problemDetails().length > 0) {
+          <ul class="w-full list-disc pl-5 text-sm text-[var(--color-text)]">
+            @for (detail of problemDetails(); track detail) {
+              <li>{{ detail }}</li>
+            }
+          </ul>
+        }
+      </app-tutor-problem>
+      <div>
+        <app-button [disabled]="!canSubmit()" [loading]="submitting()" (click)="submit()">{{ 'tutoring.kyc.documents.submit' | translate }}</app-button>
+      </div>
+      <p class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.kyc.documents.submitHelp' | translate }}</p>
+    </div>
+  }
+
+  <app-modal
+    [open]="toDelete() !== null"
+    (openChange)="toDelete.set(null)"
+    [titleText]="'tutoring.kyc.documents.removeTitle' | translate"
+    [closeOnOverlayClick]="false"
+  >
+    <p>{{ 'tutoring.kyc.documents.removeBody' | translate }}</p>
+    <div modalFooter class="flex items-center gap-3">
+      <app-button variant="ghost" [disabled]="deleting()" (click)="toDelete.set(null)">{{ 'tutoring.tutor.common.cancel' | translate }}</app-button>
+      <app-button variant="danger" [loading]="deleting()" (click)="confirmRemove()">{{ 'tutoring.tutor.common.delete' | translate }}</app-button>
+    </div>
+  </app-modal>
+</section>
+
+<!-- One document slot: what has been sent (status only - never a name or a link) and, while editable, the uploader. -->
+<ng-template #slot let-type="type">
+  @if (documentsOf(type).length > 0) {
+    <ul class="flex flex-col gap-2">
+      @for (doc of documentsOf(type); track doc.documentId) {
+        <li class="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-3">
+          <div class="flex min-w-0 flex-col gap-1">
+            <span class="flex items-center gap-1.5 text-sm text-[var(--color-text)]">
+              <ng-icon name="phosphorFileText" aria-hidden="true" class="text-base" />
+              {{ 'tutoring.kyc.documents.sentOn' | translate: { date: (doc.uploadedAtUtc | bangkokDate: 'date') } }}
+            </span>
+            @if (doc.expiresAtUtc) {
+              <span class="text-xs text-[var(--color-text-muted)]">
+                {{ 'tutoring.kyc.documents.expiresOn' | translate: { date: (doc.expiresAtUtc | bangkokDate: 'date') } }}
+              </span>
+            }
+            @if (doc.purged) {
+              <span class="text-xs text-[var(--color-text-muted)]">{{ 'tutoring.kyc.documents.purged' | translate }}</span>
+            }
+          </div>
+          <div class="flex items-center gap-2">
+            <span
+              class="inline-flex items-center rounded-[var(--radius-full)] border px-2.5 py-1 text-xs font-semibold text-[var(--color-text)] border-[var(--tone-fg)]/40 bg-[var(--tone-bg)]"
+              [class]="statusTone(doc.status)"
+            >
+              {{ statusLabelKey(doc.status) | translate }}
+            </span>
+            @if (canRemove(doc)) {
+              <app-button size="sm" variant="ghost" (click)="toDelete.set(doc)">
+                <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+                {{ 'tutoring.tutor.common.delete' | translate }}
+                <span class="sr-only">{{ typeLabelKey(type) | translate }}</span>
+              </app-button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+  @if (editable()) {
+    <app-secure-file-uploader
+      [title]="typeLabelKey(type) | translate"
+      [upload]="uploaderFor(type)"
+      [allowedExtensions]="status().allowedExtensions"
+      [maxBytes]="status().maxFileBytes"
+      [withExpiry]="withExpiry(type)"
+      (uploaded)="changed.emit()"
+    />
+  }
+</ng-template>

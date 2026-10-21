@@ -1,0 +1,37 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-preview-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-preview-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.availability.preview.heading' | translate }}</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.preview.intro' | translate }}</p>
+  </header>
+
+  @if (offerings().length === 0) {
+    <p role="status" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+      {{ 'tutoring.tutor.availability.preview.noOffering' | translate }}
+      <a routerLink="/instructor/tutoring/offerings" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.tutor.availability.preview.goOfferings' | translate }}</a>
+    </p>
+  } @else if (!listed()) {
+    <p role="status" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-3 text-sm text-[var(--color-text)]">
+      {{ 'tutoring.tutor.availability.preview.notListed' | translate }}
+      <a routerLink="/instructor/tutoring/profile" class="font-semibold text-[var(--color-primary-text)] underline">{{ 'tutoring.tutor.availability.preview.goProfile' | translate }}</a>
+    </p>
+  } @else {
+    <div class="grid gap-4 md:grid-cols-2">
+      <app-select [formControl]="offeringControl" [label]="'tutoring.tutor.availability.preview.subject' | translate" [options]="offeringOptions()" />
+      <app-select [formControl]="durationControl" [label]="'tutoring.tutor.availability.preview.duration' | translate" [options]="durationOptions()" />
+    </div>
+    <app-slot-picker
+      [slots]="slots()"
+      [windowStartDate]="windowStart()"
+      [(selected)]="selected"
+      [loading]="loading()"
+      [failed]="failed()"
+      [errorMessage]="errorMessage()"
+      [canGoPrevious]="canGoPrevious()"
+      [canGoNext]="canGoNext()"
+      (previousWeek)="previousWeek()"
+      (nextWeek)="nextWeek()"
+      (retry)="retry()"
+    />
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.availability.preview.previewOnly' | translate }}</p>
+  }
+</section>

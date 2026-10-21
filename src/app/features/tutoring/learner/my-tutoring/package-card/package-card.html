@@ -1,0 +1,81 @@
+<article class="glass-card flex flex-col gap-4 rounded-[var(--radius-lg)] p-5" [attr.aria-labelledby]="titleId()">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="flex min-w-0 items-start gap-3">
+      <div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+        @if (purchase().tutor.photoUrl; as photo) {
+          <img [ngSrc]="photo | mediaUrl" alt="" fill class="object-cover" />
+        } @else {
+          <span aria-hidden="true" class="flex h-full w-full items-center justify-center text-lg font-semibold text-[var(--color-text)]">{{ initial() }}</span>
+        }
+      </div>
+      <div class="min-w-0">
+        <h2 [id]="titleId()" class="break-words text-lg font-semibold text-[var(--color-text)]">
+          {{ 'tutoring.learner.packages.my.card.title' | translate: { count: purchase().sessionsTotal, minutes: purchase().durationMinutes } }}
+        </h2>
+        <p class="break-words text-sm text-[var(--color-text-muted)]">
+          {{ 'tutoring.learner.packages.my.card.withTutor' | translate: { name: purchase().tutor.displayName, learner: purchase().learner.nickname } }}
+        </p>
+      </div>
+    </div>
+    <app-status-chip [view]="statusView()" />
+  </div>
+
+  @if (purchase().status !== 'PendingPayment' && purchase().status !== 'Cancelled') {
+    <div class="flex flex-col gap-2">
+      <p class="text-base font-semibold text-[var(--color-text)]">
+        {{ 'tutoring.learner.packages.my.card.creditsLeft' | translate: { left: purchase().creditsRemaining, total: purchase().sessionsTotal } }}
+      </p>
+      <div class="h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]" aria-hidden="true">
+        <div class="h-full rounded-full bg-[var(--color-primary)]" [style.width.%]="usedPercent()"></div>
+      </div>
+    </div>
+  }
+
+  <ul class="flex flex-wrap gap-2 text-xs font-semibold text-[var(--color-text)]">
+    <li class="rounded-[var(--radius-full)] border border-[var(--color-border)] px-2.5 py-1">
+      {{ 'tutoring.learner.packages.my.card.perLesson' | translate: { minutes: purchase().durationMinutes } }}
+    </li>
+    <li class="rounded-[var(--radius-full)] border border-[var(--color-border)] px-2.5 py-1">{{ purchase().priceSnapshot | currencyThb }}</li>
+  </ul>
+
+  @if (dateLine(); as line) {
+    <p class="text-sm text-[var(--color-text)]">{{ line.key | translate: { date: (line.date | bangkokDate: 'dateTime') } }}</p>
+  }
+  @if (purchase().expiredPendingSettlement) {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.card.awaitingReview' | translate }}</p>
+  }
+  @if (purchase().status === 'Active') {
+    <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.my.card.noRefund' | translate }}</p>
+  }
+
+  <div class="flex flex-wrap items-center gap-3">
+    @if (canPay()) {
+      <a
+        [routerLink]="checkoutLink()"
+        class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium text-[var(--color-primary-foreground)]
+          transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.learner.packages.my.card.pay' | translate }}
+        <span class="sr-only">{{ 'tutoring.learner.packages.my.card.title' | translate: { count: purchase().sessionsTotal, minutes: purchase().durationMinutes } }}</span>
+      </a>
+    }
+    @if (canBook()) {
+      <a
+        [routerLink]="detailsLink()"
+        class="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium text-[var(--color-primary-foreground)]
+          transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >
+        {{ 'tutoring.learner.packages.my.card.book' | translate }}
+        <span class="sr-only">{{ 'tutoring.learner.packages.my.card.title' | translate: { count: purchase().sessionsTotal, minutes: purchase().durationMinutes } }}</span>
+      </a>
+    }
+    <a
+      [routerLink]="detailsLink()"
+      class="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-md)] px-3 text-sm font-semibold text-[var(--color-primary-text)] underline
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'tutoring.learner.packages.my.card.details' | translate }}
+      <span class="sr-only">{{ 'tutoring.learner.packages.my.card.title' | translate: { count: purchase().sessionsTotal, minutes: purchase().durationMinutes } }}</span>
+    </a>
+  </div>
+</article>

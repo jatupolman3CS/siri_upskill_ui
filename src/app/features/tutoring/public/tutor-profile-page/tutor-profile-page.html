@@ -1,0 +1,223 @@
+<div class="mx-auto max-w-6xl px-4 py-8">
+  @if (profileResource.isLoading() && !profile()) {
+    <div class="flex flex-col gap-6" aria-busy="true" [attr.aria-label]="'tutoring.public.profile.loading' | translate">
+      <app-skeleton variant="text" width="40%" />
+      <div class="flex items-center gap-4">
+        <app-skeleton variant="block" width="7rem" height="7rem" radius="full" />
+        <div class="flex-1"><app-skeleton variant="text" [lines]="3" /></div>
+      </div>
+      <app-skeleton variant="block" height="14rem" />
+    </div>
+  } @else if (isNotFound()) {
+    <div class="flex flex-col items-center gap-4 py-16 text-center">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.public.profile.notFoundHeading' | translate }}</h1>
+      <p class="max-w-md text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.notFoundDescription' | translate }}</p>
+      <a
+        routerLink="/tutors"
+        class="inline-flex h-12 select-none items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4
+          text-base font-medium text-[var(--color-primary-foreground)] transition-colors duration-200 ease-out
+          hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >
+        {{ 'tutoring.public.profile.backToSearch' | translate }}
+      </a>
+    </div>
+  } @else if (hasOtherError()) {
+    <div class="flex flex-col items-center gap-4 py-16 text-center">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.public.profile.errorHeading' | translate }}</h1>
+      <p class="max-w-md text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.errorDescription' | translate }}</p>
+      <app-button (click)="retry()">{{ 'tutoring.public.profile.retry' | translate }}</app-button>
+    </div>
+  } @else if (profile(); as tutor) {
+    <app-breadcrumb [items]="breadcrumbItems()" class="animate-fade-in mb-4 block" />
+
+    <header class="animate-fade-in-down glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:flex-row sm:items-center sm:p-6">
+      <div class="relative h-28 w-28 shrink-0 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+        @if (tutor.photoUrl; as photo) {
+          <img [ngSrc]="photo | mediaUrl" [alt]="tutor.displayName" fill priority class="object-cover" />
+        } @else {
+          <span aria-hidden="true" class="flex h-full w-full items-center justify-center text-4xl font-semibold text-[var(--color-text)]">
+            {{ initial(tutor.displayName) }}
+          </span>
+        }
+      </div>
+
+      <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ tutor.displayName }}</h1>
+          @if (tutor.verified) {
+            <span class="tone-green inline-flex items-center gap-1 rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-semibold text-[var(--tone-fg)]">
+              <ng-icon name="phosphorShieldCheck" aria-hidden="true" />
+              {{ 'tutoring.public.profile.verified' | translate }}
+            </span>
+          }
+        </div>
+        @if (tutor.headline) {
+          <p class="text-lg text-[var(--color-text-muted)]">{{ tutor.headline }}</p>
+        }
+
+        <ul class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-[var(--color-text-muted)]">
+          @if (tutor.ratingCount > 0) {
+            <li class="inline-flex items-center gap-1 text-[var(--color-text)]">
+              <ng-icon name="phosphorStar" aria-hidden="true" class="text-[var(--color-accent)]" />
+              {{ 'tutoring.public.profile.rating' | translate: { rating: rating(), count: tutor.ratingCount } }}
+            </li>
+          }
+          @if (tutor.yearsExperience > 0) {
+            <li class="inline-flex items-center gap-1">
+              <ng-icon name="phosphorGraduationCap" aria-hidden="true" class="text-[var(--hue-violet-fg)]" />
+              {{ 'tutoring.public.profile.experience' | translate: { years: tutor.yearsExperience } }}
+            </li>
+          }
+          @if (tutor.completedSessionsCount > 0) {
+            <li class="inline-flex items-center gap-1">
+              <ng-icon name="phosphorUsers" aria-hidden="true" class="text-[var(--hue-blue-fg)]" />
+              {{ 'tutoring.public.profile.sessions' | translate: { count: tutor.completedSessionsCount } }}
+            </li>
+          }
+          @if (tutor.nextAvailableAtUtc; as next) {
+            <li class="inline-flex items-center gap-1">
+              <ng-icon name="phosphorClock" aria-hidden="true" class="text-[var(--hue-teal-fg)]" />
+              {{ 'tutoring.public.profile.nextAvailable' | translate: { when: (next | bangkokDate: 'shortDateTime') } }}
+            </li>
+          }
+        </ul>
+
+        <div class="mt-1 lg:hidden">
+          <app-button (click)="scrollToBooking()">
+            <ng-icon leading name="phosphorCalendarBlank" aria-hidden="true" />
+            {{ 'tutoring.public.profile.jumpToBooking' | translate }}
+          </app-button>
+        </div>
+      </div>
+    </header>
+
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-8">
+      <div class="flex min-w-0 flex-col gap-6">
+        @if (tutor.bio) {
+          <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5">
+            <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.aboutHeading' | translate }}</h2>
+            <p class="whitespace-pre-line text-base leading-relaxed text-[var(--color-text)]">{{ tutor.bio }}</p>
+          </section>
+        }
+
+        @if (tutor.introVideo; as intro) {
+          @if (!introVideoHidden()) {
+            <section class="animate-fade-in-up">
+              <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.videoHeading' | translate }}</h2>
+              @defer (on viewport) {
+                <app-tutor-intro-video
+                  [slug]="tutor.slug"
+                  [displayName]="tutor.displayName"
+                  [durationSeconds]="intro.durationSeconds"
+                  (unavailable)="hideIntroVideo()"
+                />
+              } @placeholder {
+                <!-- Same 16:9 box as the player, so the layout does not move when the block loads in. -->
+                <div class="glass-card aspect-video w-full rounded-[var(--radius-lg)]" aria-hidden="true"></div>
+              }
+            </section>
+          }
+        }
+
+        <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5">
+          <h2 class="mb-4 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.offeringsHeading' | translate }}</h2>
+          <ul class="flex flex-col gap-4">
+            @for (offering of tutor.offerings; track offering.offeringId) {
+              <li class="flex flex-col gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <h3 class="text-base font-semibold text-[var(--color-text)]">{{ localizedName(offering.subject, translation.locale()) }}</h3>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="tone-blue rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">{{ levelKey(offering.level) | translate }}</span>
+                    <span class="tone-teal rounded-full bg-[var(--tone-bg)] px-2.5 py-1 text-sm font-medium text-[var(--tone-fg)]">{{ curriculumKey(offering.curriculum) | translate }}</span>
+                  </div>
+                </div>
+                <dl class="flex flex-col gap-1.5 text-sm">
+                  <div class="flex items-baseline justify-between gap-3">
+                    <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.priceOneOnOne' | translate }}</dt>
+                    <dd class="font-semibold text-[var(--color-text)]">{{ offering.hourlyRateOneOnOne | currencyThb }} {{ 'tutoring.public.profile.perHour' | translate }}</dd>
+                  </div>
+                  @if (offering.groupHourlyRatePerSeat !== null) {
+                    <div class="flex items-baseline justify-between gap-3">
+                      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.priceGroup' | translate }}</dt>
+                      <dd class="font-semibold text-[var(--color-text)]">
+                        {{ offering.groupHourlyRatePerSeat | currencyThb }} {{ 'tutoring.public.profile.perHourPerSeat' | translate }}
+                        @if (offering.groupMaxSeats) {
+                          <span class="font-normal text-[var(--color-text-muted)]">({{ 'tutoring.public.profile.maxSeats' | translate: { count: offering.groupMaxSeats } }})</span>
+                        }
+                      </dd>
+                    </div>
+                  }
+                  @if (offering.trial; as trial) {
+                    <div class="flex items-baseline justify-between gap-3">
+                      <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.public.profile.trial' | translate }}</dt>
+                      <dd class="font-semibold text-[var(--color-text)]">
+                        {{ 'tutoring.public.profile.trialMinutes' | translate: { minutes: trial.minutes } }},
+                        @if (trial.isFree) {
+                          {{ 'tutoring.public.profile.free' | translate }}
+                        } @else {
+                          {{ trial.price | currencyThb }}
+                        }
+                      </dd>
+                    </div>
+                  }
+                </dl>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <app-tutor-packages-section [slug]="tutor.slug" />
+
+        @if (tutor.educations.length > 0) {
+          <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5">
+            <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.educationHeading' | translate }}</h2>
+            <ul class="flex flex-col gap-3">
+              @for (education of tutor.educations; track $index) {
+                <li class="flex flex-col text-sm">
+                  <span class="font-semibold text-[var(--color-text)]">{{ education.degree }}@if (education.field) {, {{ education.field }}}</span>
+                  <span class="text-[var(--color-text-muted)]">{{ education.institution }}</span>
+                  <span class="text-[var(--color-text-muted)]">
+                    @if (education.yearTo !== null) {
+                      {{ 'tutoring.public.profile.yearRange' | translate: { from: education.yearFrom, to: education.yearTo } }}
+                    } @else {
+                      {{ 'tutoring.public.profile.yearSince' | translate: { from: education.yearFrom } }}
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (tutor.certificates.length > 0) {
+          <section class="animate-fade-in-up glass-card rounded-[var(--radius-lg)] p-5">
+            <h2 class="mb-3 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.public.profile.certificatesHeading' | translate }}</h2>
+            <ul class="flex flex-col gap-3">
+              @for (certificate of tutor.certificates; track $index) {
+                <li class="flex items-start gap-2 text-sm">
+                  <ng-icon name="phosphorCertificate" aria-hidden="true" class="mt-0.5 shrink-0 text-[var(--hue-gold-fg)]" />
+                  <span class="flex flex-col">
+                    <span class="font-semibold text-[var(--color-text)]">{{ certificate.title }}</span>
+                    <span class="text-[var(--color-text-muted)]">
+                      @if (certificate.issuer) {
+                        {{ certificate.issuer }},
+                      }
+                      {{ certificate.year }}
+                    </span>
+                  </span>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        <app-tutor-reviews-section [slug]="tutor.slug" />
+      </div>
+
+      <div id="tutor-booking" tabindex="-1" class="animate-fade-in-up focus-visible:outline-none">
+        <app-tutor-booking-panel [tutor]="tutor" />
+      </div>
+    </div>
+  }
+</div>

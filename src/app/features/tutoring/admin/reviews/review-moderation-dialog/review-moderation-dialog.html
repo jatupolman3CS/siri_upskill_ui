@@ -1,0 +1,23 @@
+<app-admin-confirm-dialog
+  [(open)]="open"
+  [titleText]="titleKey() | translate"
+  [confirmLabel]="confirmKey() | translate"
+  [danger]="mode() === 'hide'"
+  [busy]="busy()"
+  [problem]="problem()"
+  (confirmed)="confirm()"
+>
+  <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">
+    {{ descriptionKey() | translate }}
+  </p>
+
+  <div class="mt-2 flex flex-col gap-1">
+    <app-tutor-textarea
+      [formControl]="reasonControl"
+      [label]="labelKey() | translate"
+      [helperText]="mode() === 'hide' ? ('tutoring.admin.reviews.hideDialog.reasonPlaceholder' | translate) : undefined"
+      [required]="mode() === 'hide'"
+      [maxLength]="500"
+    />
+  </div>
+</app-admin-confirm-dialog>

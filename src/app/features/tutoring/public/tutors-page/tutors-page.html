@@ -1,0 +1,106 @@
+<div class="animate-fade-in mx-auto max-w-6xl px-4 py-8">
+  <header class="flex flex-col gap-2">
+    <h1 class="animate-fade-in-down text-2xl font-bold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.public.search.heading' | translate }}</h1>
+    <p class="max-w-2xl text-base text-[var(--color-text-muted)]">{{ 'tutoring.public.search.subheading' | translate }}</p>
+  </header>
+
+  <form class="animate-fade-in-up stagger-1 mt-5 flex max-w-xl items-end gap-2" role="search" (submit)="$event.preventDefault(); submitSearch()">
+    <div class="min-w-0 flex-1">
+      <app-input
+        [formControl]="searchControl"
+        type="search"
+        autocomplete="off"
+        [label]="'tutoring.public.search.searchLabel' | translate"
+        [placeholder]="'tutoring.public.search.searchPlaceholder' | translate"
+      />
+    </div>
+    <app-button type="submit">{{ 'tutoring.public.search.searchButton' | translate }}</app-button>
+  </form>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[18rem_1fr] lg:gap-8">
+    <aside class="animate-fade-in-up stagger-2 self-start" [attr.aria-label]="'tutoring.public.search.filters.heading' | translate">
+      <button
+        type="button"
+        (click)="toggleFilters()"
+        [attr.aria-expanded]="filtersOpen()"
+        aria-controls="tutor-filters-panel"
+        class="glass-card flex min-h-11 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] px-4 text-left text-base font-medium
+          text-[var(--color-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] lg:hidden"
+      >
+        <span class="inline-flex items-center gap-2">
+          <ng-icon name="phosphorFunnelSimple" aria-hidden="true" />
+          {{ 'tutoring.public.search.filters.toggle' | translate }}
+        </span>
+        @if (activeFilterCount() > 0) {
+          <span class="rounded-full bg-[var(--color-primary)] px-2.5 py-0.5 text-sm font-semibold text-[var(--color-primary-foreground)]">
+            {{ 'tutoring.public.search.filters.activeCount' | translate: { count: activeFilterCount() } }}
+          </span>
+        }
+      </button>
+
+      <div id="tutor-filters-panel" class="mt-3 lg:mt-0 lg:block" [class]="filtersOpen() ? 'block' : 'hidden'">
+        <app-tutor-search-filters
+          [query]="query()"
+          [facets]="facets()"
+          [subjects]="subjects()"
+          [canClear]="hasFilters()"
+          (filtersChange)="applyFilters($event)"
+          (cleared)="clearAll()"
+        />
+      </div>
+    </aside>
+
+    <section class="animate-fade-in-up stagger-3 min-w-0" [attr.aria-label]="'tutoring.public.search.resultsLabel' | translate">
+      <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <p class="text-sm text-[var(--color-text-muted)]" aria-live="polite">
+          @if (!searchResource.isLoading() && !searchResource.error()) {
+            {{ 'tutoring.public.search.resultCount' | translate: { count: results().totalCount } }}
+          }
+        </p>
+        <div class="w-full sm:w-56">
+          <app-select [formControl]="sortControl" [label]="'tutoring.public.search.sort' | translate" [options]="sortOptions()" />
+        </div>
+      </div>
+
+      @if (searchResource.isLoading()) {
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true" [attr.aria-label]="'tutoring.public.search.loading' | translate">
+          @for (placeholder of skeletonCards; track placeholder) {
+            <div class="flex flex-col gap-3 rounded-2xl glass-card p-4">
+              <div class="flex items-center gap-3">
+                <app-skeleton variant="block" width="4rem" height="4rem" radius="full" />
+                <div class="flex-1"><app-skeleton variant="text" [lines]="2" /></div>
+              </div>
+              <app-skeleton variant="text" width="60%" />
+              <app-skeleton variant="text" width="40%" />
+            </div>
+          }
+        </div>
+      } @else if (searchResource.error()) {
+        <app-empty-state [heading]="'tutoring.public.search.errorHeading' | translate" [description]="searchErrorKey() | translate">
+          <div emptyStateAction class="flex flex-wrap justify-center gap-2">
+            <app-button (click)="retry()">{{ 'tutoring.public.search.retry' | translate }}</app-button>
+            @if (hasFilters()) {
+              <app-button variant="secondary" (click)="clearAll()">{{ 'tutoring.public.search.filters.clearAll' | translate }}</app-button>
+            }
+          </div>
+        </app-empty-state>
+      } @else if (results().items.length === 0) {
+        <app-empty-state [heading]="'tutoring.public.search.emptyHeading' | translate" [description]="'tutoring.public.search.emptyDescription' | translate">
+          @if (hasFilters()) {
+            <app-button emptyStateAction (click)="clearAll()">{{ 'tutoring.public.search.filters.clearAll' | translate }}</app-button>
+          }
+        </app-empty-state>
+      } @else {
+        <ul class="reveal grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          @for (tutor of results().items; track tutor.slug) {
+            <li><app-tutor-card [tutor]="tutor" /></li>
+          }
+        </ul>
+
+        <div class="mt-8">
+          <app-pagination [currentPage]="page()" [totalPages]="results().totalPages" (currentPageChange)="goToPage($event)" />
+        </div>
+      }
+    </section>
+  </div>
+</div>

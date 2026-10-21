@@ -1,0 +1,115 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+          {{ 'tutoring.tutor.disputes.list.heading' | translate }}
+        </h1>
+        <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+          {{ 'tutoring.tutor.disputes.list.subheading' | translate }}
+        </p>
+      </div>
+    </div>
+    <app-tutor-portal-nav />
+  </header>
+
+  <!-- Status filter chips -->
+  <nav class="flex flex-wrap gap-2" [attr.aria-label]="'tutoring.tutor.disputes.list.heading' | translate">
+    @for (filter of filters; track filter.id) {
+      <button
+        type="button"
+        (click)="setStatusFilter(filter.id)"
+        class="glass-pill inline-flex min-h-10 items-center rounded-[var(--radius-full)] px-3 text-sm font-semibold transition-colors
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+        [class]="currentStatus() === filter.id ? 'bg-[var(--color-primary)]! text-[var(--color-primary-foreground)]! font-bold' : 'text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'"
+      >
+        {{ filter.labelKey | translate }}
+      </button>
+    }
+  </nav>
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.disputes.list.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+      <app-skeleton variant="block" height="6rem" radius="lg" />
+    </div>
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.disputes.list.loadError' | translate"
+      [description]="'tutoring.tutor.common.retry' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      [heading]="(currentStatus() ? 'tutoring.tutor.disputes.list.noDisputesFiltered' : 'tutoring.tutor.disputes.list.noDisputes') | translate"
+      [description]="'tutoring.tutor.disputes.list.subheading' | translate"
+    />
+  } @else {
+    <div class="flex flex-col gap-4">
+      @for (item of items(); track item.disputeId) {
+        <article class="glass-card flex flex-col gap-3 rounded-[var(--radius-lg)] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 flex-col gap-1.5">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-[var(--color-text)]">{{ item.disputeNo }}</span>
+              <app-status-chip [view]="statusView(item.status)" />
+              <span class="rounded-[var(--radius-full)] border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-text-muted)]">
+                {{ categoryKey(item.category) | translate }}
+              </span>
+              <span class="rounded-[var(--radius-full)] border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-text-muted)]">
+                {{ flowKey(item.flow) | translate }}
+              </span>
+            </div>
+            <p class="text-sm font-semibold text-[var(--color-text)]">{{ subjectName(item) }}</p>
+            <p class="text-xs text-[var(--color-text-muted)]">
+              {{ 'tutoring.tutor.disputes.list.bookingNo' | translate }}: {{ item.bookingNo }} ·
+              {{ 'tutoring.tutor.disputes.list.classTime' | translate }}: {{ item.startsAtUtc | bangkokDate: 'shortDateTime' }}
+            </p>
+            <p class="text-xs text-[var(--color-text-muted)]">
+              {{ 'tutoring.tutor.disputes.list.openedAt' | translate }}: {{ item.openedAtUtc | bangkokDate: 'shortDateTime' }} ·
+              {{ 'tutoring.tutor.disputes.list.lastActivity' | translate }}: {{ item.lastActivityAtUtc | bangkokDate: 'shortDateTime' }}
+            </p>
+          </div>
+
+          <div class="shrink-0">
+            <a
+              [routerLink]="['/instructor/tutoring/disputes', item.disputeId]"
+              class="inline-flex min-h-11 items-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-primary-foreground)] transition-colors
+                hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            >
+              {{ 'tutoring.tutor.disputes.list.viewDetail' | translate }}
+            </a>
+          </div>
+        </article>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <nav class="flex items-center justify-between gap-4 pt-4" [attr.aria-label]="'tutoring.tutor.disputes.list.pageIndicator' | translate: { current: currentPage(), total: totalPages() }">
+        <app-button
+          variant="secondary"
+          [disabled]="currentPage() <= 1"
+          (click)="setPage(currentPage() - 1)"
+        >
+          <ng-icon leading name="phosphorArrowLeft" aria-hidden="true" />
+          {{ 'tutoring.tutor.disputes.list.prevPage' | translate }}
+        </app-button>
+
+        <span class="text-sm text-[var(--color-text)]">
+          {{ 'tutoring.tutor.disputes.list.pageIndicator' | translate: { current: currentPage(), total: totalPages() } }}
+        </span>
+
+        <app-button
+          variant="secondary"
+          [disabled]="currentPage() >= totalPages()"
+          (click)="setPage(currentPage() + 1)"
+        >
+          {{ 'tutoring.tutor.disputes.list.nextPage' | translate }}
+          <ng-icon trailing name="phosphorArrowRight" aria-hidden="true" />
+        </app-button>
+      </nav>
+    }
+  }
+</div>

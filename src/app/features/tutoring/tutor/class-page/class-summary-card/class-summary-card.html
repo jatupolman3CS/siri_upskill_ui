@@ -1,0 +1,103 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-class-summary-heading">
+  <header class="flex flex-col gap-1">
+    <h2 id="tutor-class-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">
+      {{ (mode() === 'complete' ? 'tutoring.tutor.classes.summary.completeHeading' : 'tutoring.tutor.classes.summary.editHeading') | translate }}
+    </h2>
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ (mode() === 'complete' ? 'tutoring.tutor.classes.summary.completeIntro' : 'tutoring.tutor.classes.summary.editIntro') | translate }}
+    </p>
+  </header>
+
+  @if (loadingSummary()) {
+    <div role="status" [attr.aria-label]="'tutoring.tutor.classes.summary.loading' | translate">
+      <app-skeleton variant="block" height="10rem" radius="lg" />
+    </div>
+  } @else if (summaryFailed()) {
+    <div class="flex flex-wrap items-center gap-3">
+      <p class="text-sm text-[var(--color-text)]">{{ 'tutoring.tutor.classes.summary.loadError' | translate }}</p>
+      <app-button size="sm" variant="secondary" (click)="retryLoad()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </div>
+  } @else {
+    @if (result(); as done) {
+      <div role="status" class="tone-green rounded-[var(--radius-md)] border border-[var(--tone-fg)]/40 bg-[var(--tone-bg)] p-4 text-sm text-[var(--color-text)]">
+        <p class="font-semibold">{{ (done.alreadyCompleted ? 'tutoring.tutor.classes.summary.resultAlready' : 'tutoring.tutor.classes.summary.resultHeading') | translate }}</p>
+        <ul class="mt-2 list-disc ps-5">
+          <li>{{ 'tutoring.tutor.classes.summary.resultCompleted' | translate: { count: done.completedBookings } }}</li>
+          <li>{{ 'tutoring.tutor.classes.summary.resultNoShow' | translate: { count: done.noShowLearnerBookings } }}</li>
+          @if (done.pendingBookings > 0) {
+            <li>{{ 'tutoring.tutor.classes.summary.resultPending' | translate: { count: done.pendingBookings } }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    <form #formRoot [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-5" [attr.aria-labelledby]="'tutor-class-summary-heading'">
+      <app-tutor-textarea
+        formControlName="topicsCovered"
+        [label]="'tutoring.tutor.classes.summary.topics' | translate"
+        [helperText]="'tutoring.tutor.classes.summary.topicsHelp' | translate"
+        [errorMessage]="message('topicsCovered')"
+        [maxLength]="limits.topics"
+        [rows]="4"
+        [required]="true"
+        (focusout)="feedback.touch('topicsCovered')"
+      />
+      <div class="grid gap-5 md:grid-cols-2">
+        <app-tutor-textarea
+          formControlName="homework"
+          [label]="'tutoring.tutor.classes.summary.homework' | translate"
+          [errorMessage]="message('homework')"
+          [maxLength]="limits.homework"
+          [rows]="3"
+          (focusout)="feedback.touch('homework')"
+        />
+        <app-tutor-textarea
+          formControlName="nextSteps"
+          [label]="'tutoring.tutor.classes.summary.nextSteps' | translate"
+          [errorMessage]="message('nextSteps')"
+          [maxLength]="limits.nextSteps"
+          [rows]="3"
+          (focusout)="feedback.touch('nextSteps')"
+        />
+      </div>
+
+      @if (learners().length > 0) {
+        <fieldset class="flex flex-col gap-4 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4" formGroupName="feedback">
+          <legend class="px-1 text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.classes.summary.feedbackLegend' | translate }}</legend>
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.classes.summary.feedbackHelp' | translate: { max: limits.maxFeedbackLearners } }}</p>
+          @for (learner of learners(); track learner.bookingId) {
+            <app-tutor-textarea
+              [formControlName]="learner.bookingId"
+              [label]="'tutoring.tutor.classes.summary.feedbackFor' | translate: { name: learner.nickname }"
+              [helperText]="learner.gradeLevel ? (gradeKey(learner.gradeLevel) | translate) : undefined"
+              [errorMessage]="message('feedback:' + learner.bookingId)"
+              [maxLength]="limits.feedback"
+              [rows]="3"
+              (focusout)="feedback.touch('feedback:' + learner.bookingId)"
+            />
+          }
+        </fieldset>
+      }
+
+      <app-tutor-problem [message]="problem()">
+        @if (opensAtUtc(); as opensAt) {
+          <span class="text-sm font-semibold text-[var(--color-text)]">{{ 'tutoring.tutor.classes.summary.opensAt' | translate: { time: (opensAt | bangkokDate: 'shortDateTime') } }}</span>
+        }
+      </app-tutor-problem>
+
+      <div>
+        <app-button type="submit" [loading]="saving()">
+          {{ (mode() === 'complete' ? 'tutoring.tutor.classes.summary.completeButton' : 'tutoring.tutor.classes.summary.saveButton') | translate }}
+        </app-button>
+      </div>
+    </form>
+  }
+</section>
+
+<app-modal [(open)]="confirmOpen" [titleText]="'tutoring.tutor.classes.summary.confirmTitle' | translate" [closeOnOverlayClick]="false">
+  <p class="text-sm">{{ 'tutoring.tutor.classes.summary.confirmBody' | translate }}</p>
+  <div modalFooter class="flex gap-3">
+    <app-button variant="secondary" (click)="confirmOpen.set(false)">{{ 'tutoring.tutor.classes.summary.confirmBack' | translate }}</app-button>
+    <app-button [loading]="saving()" (click)="confirm()">{{ 'tutoring.tutor.classes.summary.confirmGo' | translate }}</app-button>
+  </div>
+</app-modal>

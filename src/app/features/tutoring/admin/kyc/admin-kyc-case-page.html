@@ -1,0 +1,69 @@
+<div class="animate-fade-in flex flex-col gap-8">
+  <header class="flex flex-col gap-4">
+    <div class="min-w-0">
+      <a
+        routerLink="/admin/tutoring/kyc"
+        class="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-primary-text)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+      >{{ 'tutoring.admin.kyc.backToQueue' | translate }}</a>
+      <h1 class="text-2xl font-extrabold text-[var(--color-text)] sm:text-3xl">{{ 'tutoring.admin.kyc.caseHeading' | translate }}</h1>
+    </div>
+    <app-admin-tutoring-nav />
+  </header>
+
+  @if (staleNotice(); as notice) {
+    <p role="alert" class="tone-gold rounded-[var(--radius-md)] border border-[var(--tone-fg)]/45 bg-[var(--tone-bg)] p-3 text-sm font-semibold text-[var(--color-text)]">
+      {{ notice }} {{ 'tutoring.admin.kyc.staleReloaded' | translate }}
+    </p>
+  }
+
+  @if (isLoading()) {
+    <div role="status" [attr.aria-label]="'tutoring.admin.common.loading' | translate" class="flex flex-col gap-4">
+      <app-skeleton variant="block" height="9rem" radius="lg" />
+      <app-skeleton variant="block" height="12rem" radius="lg" />
+    </div>
+  } @else if (isDisabled()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.kyc.disabledHeading' | translate" [description]="'tutoring.admin.kyc.disabledDescription' | translate" />
+    </div>
+  } @else if (isMissing()) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.kyc.notFoundHeading' | translate" [description]="'tutoring.admin.kyc.notFoundDescription' | translate" />
+    </div>
+  } @else if (hasError() && detail() === null) {
+    <div class="glass-card rounded-2xl">
+      <app-empty-state [heading]="'tutoring.admin.kyc.loadErrorHeading' | translate" [description]="errorKey() | translate">
+        <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.admin.common.retry' | translate }}</app-button>
+      </app-empty-state>
+    </div>
+  } @else if (detail(); as current) {
+    <app-kyc-case-summary [detail]="current" />
+
+    <div class="grid grid-cols-1 gap-8 2xl:grid-cols-[minmax(0,1fr)_26rem] 2xl:items-start">
+      <div class="flex min-w-0 flex-col gap-6">
+        <section class="glass-card overflow-hidden rounded-2xl" aria-labelledby="kyc-docs-heading">
+          <h2 id="kyc-docs-heading" class="px-5 pt-5 text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.kyc.docs.heading' | translate }}</h2>
+          <p class="px-5 pb-3 text-sm text-[var(--color-text-muted)]">{{ 'tutoring.admin.kyc.docs.help' | translate }}</p>
+          <app-kyc-document-table
+            [documents]="current.documents"
+            [decidable]="decidable()"
+            [verdicts]="verdicts()"
+            [viewingId]="viewing()?.documentId ?? null"
+            (viewDocument)="openDocument($event)"
+            (showLogs)="openLogs($event)"
+            (verdictChange)="setVerdict($event)"
+          />
+        </section>
+
+        @if (viewing(); as shown) {
+          <app-kyc-document-viewer [documentId]="shown.documentId" [typeLabelKey]="'tutoring.enums.kycDocumentType.' + shown.type" (closed)="closeViewer()" />
+        }
+      </div>
+
+      <app-kyc-decision-panel [detail]="current" [verdicts]="verdicts()" (updated)="apply($event)" (stale)="reloadStale($event)" />
+    </div>
+
+    @if (logsFor(); as target) {
+      <app-kyc-access-log-dialog [(open)]="logsOpen" [documentId]="target.documentId" [typeLabelKey]="'tutoring.enums.kycDocumentType.' + target.type" />
+    }
+  }
+</div>

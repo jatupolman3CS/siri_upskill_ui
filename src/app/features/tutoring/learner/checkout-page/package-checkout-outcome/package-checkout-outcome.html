@@ -1,0 +1,89 @@
+<section class="glass-card flex flex-col items-start gap-5 rounded-[var(--radius-lg)] p-6 sm:p-8" aria-labelledby="checkout-state-heading">
+  <div [class]="look().tone + ' flex h-14 w-14 items-center justify-center rounded-full bg-[var(--tone-bg)] text-[var(--tone-fg)]'">
+    <ng-icon [name]="look().icon" aria-hidden="true" class="text-3xl" />
+  </div>
+
+  @switch (kind()) {
+    @case ('confirmed') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.learner.packages.checkout.confirmed.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">
+          {{ 'tutoring.learner.packages.checkout.confirmed.body' | translate: { count: purchase().sessionsTotal, minutes: purchase().durationMinutes } }}
+        </p>
+        @if (purchase().expiresAtUtc; as expires) {
+          <p class="max-w-prose text-base text-[var(--color-text)]">
+            {{ 'tutoring.learner.packages.checkout.confirmed.validUntil' | translate: { date: (expires | bangkokDate: 'dateTime') } }}
+          </p>
+        }
+        <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.confirmed.expiryNote' | translate }}</p>
+        <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.checkout.confirmed.emailNote' | translate }}</p>
+      </div>
+    }
+    @case ('ended') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.learner.packages.checkout.ended.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">{{ 'tutoring.learner.packages.checkout.ended.body' | translate }}</p>
+        <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.learner.packages.checkout.ended.paidNote' | translate }}</p>
+      </div>
+    }
+    @case ('finalized') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.learner.packages.checkout.finalized.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">{{ 'tutoring.learner.packages.checkout.finalized.body' | translate }}</p>
+      </div>
+    }
+    @case ('refunded') {
+      <div class="flex flex-col gap-2">
+        <h2 id="checkout-state-heading" tabindex="-1" class="text-2xl font-bold text-[var(--color-text)] focus-visible:outline-none">
+          {{ 'tutoring.learner.packages.checkout.refunded.heading' | translate }}
+        </h2>
+        <p class="max-w-prose text-base text-[var(--color-text)]">
+          {{ (refundIsConsentWithdrawn()
+              ? 'tutoring.learner.packages.checkout.refunded.consentWithdrawnBody'
+              : (refundIsDuplicate() ? 'tutoring.learner.packages.checkout.refunded.duplicateBody' : 'tutoring.learner.packages.checkout.refunded.lateBody')) | translate }}
+        </p>
+        @if (paymentState(); as state) {
+          <p class="max-w-prose text-base text-[var(--color-text)]">
+            {{ 'tutoring.checkout.refunded.amount' | translate: { amount: (state.amount | currencyThb) ?? '' } }}
+          </p>
+        }
+        @if (refundIsPromptPay()) {
+          <p class="max-w-prose text-base text-[var(--color-text-muted)]">{{ 'tutoring.checkout.refunded.promptpayNote' | translate }}</p>
+        }
+      </div>
+    }
+  }
+
+  <div class="flex flex-wrap gap-3">
+    @if (kind() === 'confirmed') {
+      <a
+        [routerLink]="purchaseLink()"
+        class="inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-base font-medium
+          text-[var(--color-primary-foreground)] transition-colors hover:bg-[var(--color-primary-pressed)] focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >
+        {{ 'tutoring.learner.packages.checkout.actions.bookLesson' | translate }}
+      </a>
+    }
+    <a
+      routerLink="/my-tutoring/packages"
+      class="glass-card inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] px-4 text-base font-medium text-[var(--color-text)]
+        transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'tutoring.learner.packages.checkout.actions.myPackages' | translate }}
+    </a>
+    <a
+      [routerLink]="['/tutors', purchase().tutor.slug]"
+      class="inline-flex h-12 select-none items-center justify-center rounded-[var(--radius-md)] px-4 text-base font-medium text-[var(--color-primary-text)]
+        transition-colors hover:bg-[var(--color-surface-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+    >
+      {{ 'tutoring.learner.packages.checkout.actions.backToTutor' | translate }}
+    </a>
+  </div>
+</section>

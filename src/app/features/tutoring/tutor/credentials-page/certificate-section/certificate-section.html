@@ -1,0 +1,111 @@
+<section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="tutor-certificates-heading">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 id="tutor-certificates-heading" class="flex items-center gap-2 text-lg font-semibold text-[var(--color-text)]">
+      <ng-icon name="phosphorCertificate" aria-hidden="true" class="text-xl" />
+      {{ 'tutoring.tutor.certificates.heading' | translate }}
+    </h2>
+    @if (!isLoading() && !hasError() && !editor()) {
+      <app-button size="sm" variant="secondary" (click)="open(null)">
+        <ng-icon leading name="phosphorPlus" aria-hidden="true" />
+        {{ 'tutoring.tutor.certificates.add' | translate }}
+      </app-button>
+    }
+  </div>
+  <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.certificates.help' | translate }}</p>
+
+  @if (editor(); as state) {
+    <form
+      #formRoot
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      novalidate
+      class="flex flex-col gap-5 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4"
+      aria-labelledby="tutor-certificate-editor"
+    >
+      <h3 id="tutor-certificate-editor" tabindex="-1" class="text-base font-semibold text-[var(--color-text)] focus-visible:outline-none">
+        {{ (state.item ? 'tutoring.tutor.certificates.editHeading' : 'tutoring.tutor.certificates.addHeading') | translate }}
+      </h3>
+      <div class="grid gap-5 md:grid-cols-2">
+        <app-input
+          class="md:col-span-2"
+          formControlName="title"
+          [label]="'tutoring.tutor.certificates.title' | translate"
+          [errorMessage]="message('title')"
+          [required]="true"
+          (focusout)="feedback.touch('title')"
+        />
+        <app-input
+          formControlName="issuer"
+          [label]="'tutoring.tutor.certificates.issuer' | translate"
+          [errorMessage]="message('issuer')"
+          (focusout)="feedback.touch('issuer')"
+        />
+        <app-input
+          formControlName="year"
+          type="number"
+          inputMode="numeric"
+          [label]="'tutoring.tutor.certificates.year' | translate"
+          [errorMessage]="message('year')"
+          [required]="true"
+          (focusout)="feedback.touch('year')"
+        />
+      </div>
+      <app-tutor-problem [message]="problem()" />
+      <div class="flex flex-wrap items-center gap-3">
+        <app-button type="submit" [loading]="saving()">{{ 'tutoring.tutor.common.save' | translate }}</app-button>
+        <app-button variant="ghost" [disabled]="saving()" (click)="close()">{{ 'tutoring.tutor.common.cancel' | translate }}</app-button>
+      </div>
+    </form>
+  }
+
+  @if (isLoading()) {
+    <app-skeleton variant="block" height="6rem" radius="lg" />
+  } @else if (hasError()) {
+    <app-empty-state
+      [heading]="'tutoring.tutor.certificates.loadErrorHeading' | translate"
+      [description]="'tutoring.tutor.certificates.loadErrorDescription' | translate"
+    >
+      <app-button emptyStateAction variant="secondary" (click)="reload()">{{ 'tutoring.tutor.common.retry' | translate }}</app-button>
+    </app-empty-state>
+  } @else if (items().length === 0) {
+    @if (!editor()) {
+      <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.tutor.certificates.empty' | translate }}</p>
+    }
+  } @else {
+    <ul class="flex flex-col gap-3">
+      @for (item of items(); track item.certificateId) {
+        <li class="flex flex-wrap items-start justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+          <div class="min-w-0">
+            <p class="break-words font-semibold text-[var(--color-text)]">{{ item.title }}</p>
+            <p class="break-words text-sm text-[var(--color-text-muted)]">{{ item.issuer ? item.issuer + ' · ' : '' }}{{ item.year }}</p>
+          </div>
+          <div class="flex gap-2">
+            <app-button size="sm" variant="secondary" (click)="open(item)">
+              <ng-icon leading name="phosphorPencilSimple" aria-hidden="true" />
+              {{ 'tutoring.tutor.common.edit' | translate }}
+              <span class="sr-only">{{ item.title }}</span>
+            </app-button>
+            <app-button size="sm" variant="ghost" (click)="toDelete.set(item)">
+              <ng-icon leading name="phosphorTrash" aria-hidden="true" />
+              {{ 'tutoring.tutor.common.delete' | translate }}
+              <span class="sr-only">{{ item.title }}</span>
+            </app-button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <app-modal
+    [open]="toDelete() !== null"
+    (openChange)="toDelete.set(null)"
+    [titleText]="'tutoring.tutor.certificates.deleteTitle' | translate"
+    [closeOnOverlayClick]="false"
+  >
+    <p>{{ 'tutoring.tutor.certificates.deleteBody' | translate }}</p>
+    <div modalFooter class="flex items-center gap-3">
+      <app-button variant="ghost" [disabled]="deleting()" (click)="toDelete.set(null)">{{ 'tutoring.tutor.common.cancel' | translate }}</app-button>
+      <app-button variant="danger" [loading]="deleting()" (click)="confirmDelete()">{{ 'tutoring.tutor.common.delete' | translate }}</app-button>
+    </div>
+  </app-modal>
+</section>

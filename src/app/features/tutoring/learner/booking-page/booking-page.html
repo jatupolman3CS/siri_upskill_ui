@@ -1,0 +1,155 @@
+<div class="page-shell animate-fade-in">
+  @if (tutorNotFound()) {
+    <div class="flex flex-col items-center gap-4 py-16 text-center">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.booking.notFoundHeading' | translate }}</h1>
+      <p class="max-w-md text-[var(--color-text-muted)]">{{ 'tutoring.booking.notFoundDescription' | translate }}</p>
+      <app-button routerLink="/tutors">{{ 'tutoring.booking.backToSearch' | translate }}</app-button>
+    </div>
+  } @else if (tutorFailed()) {
+    <div class="flex flex-col items-center gap-4 py-16 text-center">
+      <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ 'tutoring.booking.errorHeading' | translate }}</h1>
+      <p class="max-w-md text-[var(--color-text-muted)]">{{ 'tutoring.booking.errorDescription' | translate }}</p>
+      <app-button (click)="retryTutor()">{{ 'tutoring.booking.retry' | translate }}</app-button>
+    </div>
+  } @else if (tutor(); as tutor) {
+    <header class="flex flex-col gap-3">
+      <app-breadcrumb [items]="breadcrumbItems()" />
+      <h1 class="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+        {{ 'tutoring.booking.heading' | translate: { name: tutor.displayName } }}
+      </h1>
+      <p class="max-w-prose text-[var(--color-text-muted)]">{{ 'tutoring.booking.subheading' | translate }}</p>
+    </header>
+
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+      <div class="flex min-w-0 flex-col gap-8">
+        <section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="booking-lesson-heading">
+          <h2 id="booking-lesson-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.booking.lessonHeading' | translate }}</h2>
+          <app-lesson-picker [tutor]="tutor" [preselection]="preselection" (selectionChange)="lesson.set($event)" />
+        </section>
+
+        <section class="glass-card flex flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6" aria-labelledby="booking-learner-heading">
+          <h2 id="booking-learner-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.booking.learnerHeading' | translate }}</h2>
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.booking.learnerHelp' | translate }}</p>
+          <app-learner-profile-picker [(profile)]="learner" />
+        </section>
+      </div>
+
+      <aside class="glass-card flex min-w-0 flex-col gap-5 rounded-[var(--radius-lg)] p-5 sm:p-6 lg:sticky lg:top-24" aria-labelledby="booking-summary-heading">
+        <h2 id="booking-summary-heading" class="text-lg font-semibold text-[var(--color-text)]">{{ 'tutoring.booking.summaryHeading' | translate }}</h2>
+
+        <dl class="flex flex-col gap-3 text-sm" aria-live="polite">
+          <div class="flex items-baseline justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summaryTutor' | translate }}</dt>
+            <dd class="text-right font-medium text-[var(--color-text)]">{{ tutor.displayName }}</dd>
+          </div>
+          @if (selectedOffering(); as offering) {
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summarySubject' | translate }}</dt>
+              <dd class="text-right font-medium text-[var(--color-text)]">
+                {{ localizedName(offering.subject, translation.locale()) }}
+                <span class="block text-sm font-normal text-[var(--color-text-muted)]">
+                  {{ levelKey(offering.level) | translate }} · {{ curriculumKey(offering.curriculum) | translate }}
+                </span>
+              </dd>
+            </div>
+          }
+          @if (lesson(); as chosen) {
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summaryLesson' | translate }}</dt>
+              <dd class="text-right font-medium text-[var(--color-text)]">
+                {{ formatKey(chosen.format) | translate }}
+                @if (chosen.isTrial) {
+                  · {{ 'tutoring.booking.trialShort' | translate }}
+                }
+                · {{ 'tutoring.booking.minutes' | translate: { minutes: chosen.durationMinutes } }}
+              </dd>
+            </div>
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summaryTime' | translate }}</dt>
+              <dd class="text-right font-medium text-[var(--color-text)]">
+                {{ chosen.slot.startsAtUtc | bangkokDate: 'weekdayDate' }},
+                {{ chosen.slot.startsAtUtc | bangkokDate: 'time' }}-{{ chosen.slot.endsAtUtc | bangkokDate: 'time' }}
+              </dd>
+            </div>
+          } @else {
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summaryTime' | translate }}</dt>
+              <dd class="text-right text-[var(--color-text-muted)]">{{ 'tutoring.booking.noTimeSelected' | translate }}</dd>
+            </div>
+          }
+          <div class="flex items-baseline justify-between gap-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summaryLearner' | translate }}</dt>
+            <dd class="text-right font-medium text-[var(--color-text)]">
+              @if (learner(); as chosenLearner) {
+                {{ chosenLearner.nickname }}
+              } @else {
+                <span class="font-normal text-[var(--color-text-muted)]">{{ 'tutoring.booking.noLearnerSelected' | translate }}</span>
+              }
+            </dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-3 border-t border-[var(--color-border)] pt-3">
+            <dt class="text-[var(--color-text-muted)]">{{ 'tutoring.booking.summaryPrice' | translate }}</dt>
+            <dd class="text-right">
+              @if (lesson(); as chosen) {
+                @if (chosen.quote.isFree) {
+                  <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ 'tutoring.booking.free' | translate }}</span>
+                } @else {
+                  <span class="text-lg font-bold text-[var(--color-primary-text)]">{{ chosen.quote.amount | currencyThb }}</span>
+                  @if (chosen.format === 'Group') {
+                    <span class="text-[var(--color-text-muted)]"> {{ 'tutoring.booking.perSeat' | translate }}</span>
+                  }
+                }
+              } @else {
+                <span class="text-[var(--color-text-muted)]">-</span>
+              }
+            </dd>
+          </div>
+        </dl>
+
+        <app-tutor-problem [message]="problem()">
+          @if (heldBookingId(); as heldId) {
+            <app-button size="sm" variant="secondary" [routerLink]="['/tutoring/checkout', heldId]">{{ 'tutoring.booking.goToHeldBooking' | translate }}</app-button>
+          }
+        </app-tutor-problem>
+
+        <app-button size="lg" [fullWidth]="true" [loading]="submitting()" [disabled]="!canReserve()" (click)="reserve()">
+          {{ (lesson()?.quote?.isFree ? 'tutoring.booking.reserveFree' : 'tutoring.booking.reserve') | translate }}
+        </app-button>
+        @if (!canReserve()) {
+          <p class="text-sm text-[var(--color-text-muted)]">{{ 'tutoring.booking.reserveHint' | translate }}</p>
+        }
+
+        <ul class="flex flex-col gap-2 text-sm text-[var(--color-text-muted)]">
+          <li class="flex items-start gap-2">
+            <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--hue-blue-fg)]" />
+            <span>{{ 'tutoring.booking.holdNote' | translate }}</span>
+          </li>
+          @if (policy(); as cancellation) {
+            <li class="flex items-start gap-2">
+              <ng-icon name="phosphorInfo" aria-hidden="true" class="mt-0.5 shrink-0 text-lg text-[var(--hue-blue-fg)]" />
+              <span>
+                {{
+                  'tutoring.booking.policyNote'
+                    | translate
+                      : {
+                          hours: cancellation.fullRefundHours,
+                          fullPercent: cancellation.fullRefundPercent,
+                          latePercent: cancellation.lateRefundPercent
+                        }
+                }}
+              </span>
+            </li>
+          }
+        </ul>
+      </aside>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-6" aria-busy="true" [attr.aria-label]="'tutoring.booking.loading' | translate">
+      <app-skeleton variant="text" width="40%" />
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
+        <app-skeleton variant="block" height="24rem" />
+        <app-skeleton variant="block" height="20rem" />
+      </div>
+    </div>
+  }
+</div>

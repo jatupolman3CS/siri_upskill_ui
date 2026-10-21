@@ -1,0 +1,76 @@
+<app-analytics-report-frame
+  headingKey="tutoring.admin.analytics.search.heading"
+  descriptionKey="tutoring.admin.analytics.search.description"
+  [status]="state.status()"
+  [errorText]="state.errorText()"
+  [generatedAtUtc]="state.report()?.generatedAtUtc ?? null"
+  (refresh)="state.reload()"
+>
+  @if (state.report(); as report) {
+    <p class="text-sm text-[var(--color-text-muted)]">
+      {{ 'tutoring.admin.analytics.period' | translate: { from: (instantOf(report.effectiveFrom) | bangkokDate: 'date'), to: (instantOf(report.effectiveTo) | bangkokDate: 'date') } }}
+    </p>
+    @if (startMoved()) {
+      <p role="status" class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-3 text-sm text-[var(--color-text)]">{{ 'tutoring.admin.analytics.search.startMoved' | translate }}</p>
+    }
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <app-kpi-tile [label]="'tutoring.admin.analytics.search.total' | translate" [value]="(report.totalSearches | number: '1.0-0') ?? ''" />
+      <app-kpi-tile [label]="'tutoring.admin.analytics.search.zeroResult' | translate" [value]="(report.totalZeroResult | number: '1.0-0') ?? ''" [hint]="'tutoring.admin.analytics.search.zeroResultHint' | translate" />
+      <app-kpi-tile [label]="'tutoring.admin.analytics.search.hidden' | translate" [value]="(report.suppressedSearchCount | number: '1.0-0') ?? ''" [hint]="'tutoring.admin.analytics.search.hiddenHint' | translate: { min: report.minGroupCount }" />
+    </div>
+
+    @if (allHidden()) {
+      <p role="status" class="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4 text-base text-[var(--color-text)]">
+        {{ 'tutoring.admin.analytics.search.allHidden' | translate: { min: report.minGroupCount } }}
+      </p>
+    } @else if (report.topSubjects.length === 0) {
+      <p class="text-base text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.search.empty' | translate }}</p>
+    } @else {
+      <div class="overflow-x-auto rounded-[var(--radius-md)] border border-[var(--color-border)]">
+        <table class="w-full min-w-[40rem] text-start text-sm text-[var(--color-text)]">
+          <caption class="sr-only">{{ 'tutoring.admin.analytics.search.subjectsCaption' | translate }}</caption>
+          <thead class="bg-[var(--color-surface-muted)] text-xs font-semibold text-[var(--color-text-muted)]">
+            <tr>
+              <th scope="col" class="px-3 py-2 text-start">{{ 'tutoring.admin.analytics.search.col.subject' | translate }}</th>
+              <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.search.col.searches' | translate }}</th>
+              <th scope="col" class="px-3 py-2 text-start"><span class="sr-only">{{ 'tutoring.admin.analytics.search.col.searchesBar' | translate }}</span></th>
+              <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.search.col.zero' | translate }}</th>
+              <th scope="col" class="px-3 py-2 text-end">{{ 'tutoring.admin.analytics.search.col.zeroRate' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            @for (subject of report.topSubjects; track subject.subjectId) {
+              <tr>
+                <th scope="row" class="max-w-[16rem] break-words px-3 py-2 text-start font-medium">
+                  {{ nameOf(subject) }}
+                  @if (subject.isGroup) {
+                    <span class="block text-xs font-normal text-[var(--color-text-muted)]">{{ 'tutoring.admin.analytics.search.group' | translate }}</span>
+                  }
+                </th>
+                <td class="px-3 py-2 text-end font-semibold">{{ subject.searchCount | number: '1.0-0' }}</td>
+                <td class="w-40 px-3 py-2"><app-analytics-bar [percent]="percentOf(subject.searchCount, searchScale())" /></td>
+                <td class="px-3 py-2 text-end">{{ subject.zeroResultCount | number: '1.0-0' }}</td>
+                <td class="px-3 py-2 text-end">{{ rateText(subject.zeroResultRate) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (report.topQueries.length > 0) {
+      <section class="flex flex-col gap-2" aria-labelledby="search-queries-heading">
+        <h3 id="search-queries-heading" class="text-base font-semibold text-[var(--color-text)]">{{ 'tutoring.admin.analytics.search.queriesHeading' | translate }}</h3>
+        <ul class="flex flex-col divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
+          @for (query of report.topQueries; track query.queryText) {
+            <li class="flex items-baseline justify-between gap-4 px-3 py-2 text-sm text-[var(--color-text)]">
+              <span class="min-w-0 break-words">{{ query.queryText }}</span>
+              <span class="shrink-0 font-semibold">{{ query.searchCount | number: '1.0-0' }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</app-analytics-report-frame>

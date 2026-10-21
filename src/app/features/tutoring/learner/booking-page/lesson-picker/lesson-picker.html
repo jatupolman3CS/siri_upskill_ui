@@ -1,0 +1,84 @@
+@if (offering(); as selectedOffering) {
+  <app-select
+    [formControl]="offeringControl"
+    [label]="'tutoring.booking.offering' | translate"
+    [options]="offeringOptions()"
+  />
+
+  @if (canGroup()) {
+    <div role="group" aria-labelledby="booking-format-label" class="flex flex-col gap-1.5">
+      <span id="booking-format-label" class="text-sm font-medium text-[var(--color-text)]">{{ 'tutoring.booking.format' | translate }}</span>
+      <div class="grid grid-cols-2 gap-2">
+        @for (option of formats; track option) {
+          <button
+            type="button"
+            (click)="chooseFormat(option)"
+            [attr.aria-pressed]="isFormatActive(option)"
+            class="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] border px-3 text-base font-medium transition-colors
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]"
+            [class]="
+              isFormatActive(option)
+                ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                : 'glass-card text-[var(--color-text)] hover:bg-[var(--color-surface-muted)]'
+            "
+          >
+            {{ formatKey(option) | translate }}
+          </button>
+        }
+      </div>
+      @if (format() === 'Group' && selectedOffering.groupMaxSeats) {
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ 'tutoring.booking.groupSeatsInfo' | translate: { count: selectedOffering.groupMaxSeats } }}
+        </p>
+      }
+    </div>
+  }
+
+  @if (trialOffer(); as trialInfo) {
+    <app-checkbox
+      [formControl]="trialControl"
+      [label]="
+        'tutoring.booking.trialLabel'
+          | translate
+            : {
+                minutes: trialInfo.minutes,
+                price: trialInfo.isFree ? ('tutoring.booking.free' | translate) : ((trialInfo.price | currencyThb) ?? ''),
+              }
+      "
+    />
+  }
+
+  @if (!trial()) {
+    <app-select [formControl]="durationControl" [label]="'tutoring.booking.duration' | translate" [options]="durationOptions()" />
+  }
+
+  @if (preselectionGone()) {
+    <p role="status" class="tone-orange rounded-[var(--radius-md)] bg-[var(--tone-bg)] px-3 py-2 text-sm font-medium text-[var(--tone-fg)]">
+      {{ 'tutoring.booking.preselectionGone' | translate }}
+    </p>
+  }
+
+  @if (today() === '') {
+    <!-- Server render / before hydration: reserve the picker's footprint so nothing jumps when slots arrive. -->
+    <div class="flex flex-col gap-3" aria-busy="true" [attr.aria-label]="'tutoring.slots.loading' | translate">
+      <app-skeleton variant="block" height="2.75rem" />
+      <app-skeleton variant="block" height="4rem" />
+      <app-skeleton variant="block" height="8rem" />
+    </div>
+  } @else {
+    <app-slot-picker
+      [slots]="slots()"
+      [windowStartDate]="windowStart()"
+      [selected]="selectedSlot()"
+      (selectedChange)="onSlotChosen($event)"
+      [loading]="pickerLoading()"
+      [failed]="pickerFailed()"
+      [errorMessage]="pickerFailed() ? (pickerErrorKey() | translate) : null"
+      [canGoPrevious]="canGoPrevious()"
+      [canGoNext]="canGoNext()"
+      (previousWeek)="previousWeek()"
+      (nextWeek)="nextWeek()"
+      (retry)="retry()"
+    />
+  }
+}

@@ -1,0 +1,65 @@
+<div class="flex flex-col gap-3">
+  @if (withExpiry()) {
+    <app-input
+      type="date"
+      [formControl]="expiry"
+      [label]="'tutoring.kyc.upload.expiryLabel' | translate"
+      [helperText]="'tutoring.kyc.upload.expiryHelp' | translate"
+    />
+  }
+
+  <input
+    #fileInput
+    type="file"
+    class="sr-only"
+    tabindex="-1"
+    aria-hidden="true"
+    [accept]="accept()"
+    (change)="onFilePicked($event)"
+  />
+
+  <div class="flex flex-wrap items-center gap-3">
+    <app-button size="sm" variant="secondary" [disabled]="busy() || disabled()" (click)="fileInput.click()">
+      <ng-icon leading name="phosphorUploadSimple" aria-hidden="true" />
+      {{ 'tutoring.kyc.upload.chooseFor' | translate: { type: title() } }}
+    </app-button>
+  </div>
+
+  <p class="flex items-start gap-1.5 text-xs text-[var(--color-text-muted)]">
+    <ng-icon name="phosphorLockKey" aria-hidden="true" class="mt-0.5 shrink-0 text-sm" />
+    <span>{{ 'tutoring.kyc.upload.noViewBack' | translate }}</span>
+  </p>
+
+  <div aria-live="polite" class="text-sm text-[var(--color-text)]">
+    @switch (stage()) {
+      @case ('uploading') {
+        <div class="flex flex-col gap-1.5">
+          <span>{{ 'tutoring.kyc.upload.uploading' | translate: { percent: percent() } }}</span>
+          <div
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="percent()"
+            [attr.aria-label]="'tutoring.kyc.upload.progressLabel' | translate: { type: title() }"
+            class="h-2 w-full max-w-sm overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-surface-muted)]"
+          >
+            <div
+              class="h-full origin-left rounded-[var(--radius-full)] bg-[var(--color-primary)] transition-transform duration-200 ease-out motion-reduce:transition-none"
+              [style.transform]="'scaleX(' + percent() / 100 + ')'"
+            ></div>
+          </div>
+        </div>
+      }
+      @case ('done') {
+        <p class="tone-green flex items-center gap-1.5 text-[var(--tone-fg)]">
+          <ng-icon name="phosphorCheckCircle" aria-hidden="true" class="text-base" />
+          {{ 'tutoring.kyc.upload.done' | translate }}
+        </p>
+      }
+    }
+  </div>
+
+  @if (errorText(); as text) {
+    <p role="alert" class="tone-red text-sm text-[var(--tone-fg)]">{{ text }}</p>
+  }
+</div>
