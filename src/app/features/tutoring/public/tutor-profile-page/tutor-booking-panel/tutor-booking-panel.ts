@@ -167,8 +167,10 @@ export class TutorBookingPanel implements OnInit {
     // Inputs are set before ngOnInit. The page destroys this panel while another tutor loads (its resource has no value
     // then), so a different tutor always arrives as a fresh instance and this initial choice is all that is ever needed.
     const duration = initialDurationOf(this.allowedDurations());
-    this.durationControl.setValue(String(duration), { emitEvent: false });
-    this.durationMinutes.set(duration);
+    this.durationControl.setValue(duration === null ? '' : String(duration), { emitEvent: false });
+    if (duration !== null) {
+      this.durationMinutes.set(duration);
+    }
     this.offeringControl.setValue(this.tutor().offerings.at(0)?.offeringId ?? '');
   }
 

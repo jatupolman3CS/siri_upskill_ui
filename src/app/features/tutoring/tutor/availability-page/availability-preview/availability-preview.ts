@@ -123,7 +123,7 @@ export class AvailabilityPreview {
       const durations = this.allowedDurationMinutes();
       untracked(() => {
         if (!durations.map(String).includes(this.durationControl.value)) {
-          this.durationControl.setValue(durations.length > 0 ? String(initialDurationOf(durations)) : '');
+          this.durationControl.setValue(String(initialDurationOf(durations) ?? ''));
         }
       });
     });

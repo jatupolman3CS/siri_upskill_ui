@@ -66,8 +66,8 @@ describe('TutorClassesPage', () => {
           seatsTaken: 2,
           capacity: 4,
           learners: [
-            { bookingId: 'b-2', nickname: 'Ploy', gradeLevel: 'Primary6', isMinor: true, status: 'Completed' },
-            { bookingId: 'b-3', nickname: 'Beam', gradeLevel: null, isMinor: false, status: 'Completed' },
+            { bookingId: 'b-2', nickname: 'Ploy', gradeLevel: 'Primary6', isMinor: true, status: 'Completed', disputeId: null },
+            { bookingId: 'b-3', nickname: 'Beam', gradeLevel: null, isMinor: false, status: 'Completed', disputeId: null },
           ],
         }),
       ]),

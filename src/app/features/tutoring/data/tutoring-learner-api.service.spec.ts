@@ -61,6 +61,9 @@ const BOOKING: Booking = {
   packagePurchaseId: null,
   joinOpensAtUtc: null,
   canJoin: false,
+  attendance: null,
+  disputeId: null,
+  disputeWindowEndsAtUtc: null,
 };
 
 describe('TutoringLearnerApiService', () => {

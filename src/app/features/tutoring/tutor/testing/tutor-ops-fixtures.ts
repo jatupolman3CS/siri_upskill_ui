@@ -44,6 +44,7 @@ export function classLearner(overrides: Partial<TutorAttendanceLearner> = {}): T
     joinedAtUtc: null,
     attestedTutorPresentAtUtc: null,
     confirmedAtUtc: null,
+    disputeId: null,
     ...overrides,
   };
 }
@@ -71,7 +72,7 @@ export function classListItem(overrides: Partial<TutorClassListItem> = {}): Tuto
     format: 'OneOnOne',
     isTrial: false,
     offering: { offeringId: 'off-1', subjectNameTh: 'Physics (TH)', subjectNameEn: 'Physics', level: 'UpperSecondary', curriculum: 'Thai' },
-    learners: [{ bookingId: 'b-1', nickname: 'Nok', gradeLevel: 'Secondary4', isMinor: true, status: 'Confirmed' }],
+    learners: [{ bookingId: 'b-1', nickname: 'Nok', gradeLevel: 'Secondary4', isMinor: true, status: 'Confirmed', disputeId: null }],
     seatsTaken: null,
     capacity: null,
     startOpensAtUtc: '2026-10-20T01:45:00Z',

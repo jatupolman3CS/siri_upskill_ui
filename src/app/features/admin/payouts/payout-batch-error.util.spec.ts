@@ -51,8 +51,10 @@ describe('payoutReasonOf / payoutReasonKey', () => {
 });
 
 describe('serverMessageOr', () => {
-  it('uses the message the server gave', () => {
-    expect(serverMessageOr(new ApiError(409, 'รอบนี้ถูกยืนยันจ่ายไปแล้ว'), 'fallback')).toBe('รอบนี้ถูกยืนยันจ่ายไปแล้ว');
+  it('never shows the server text (not translated); appends the reason, else the errorCode, to the line of the caller', () => {
+    expect(serverMessageOr(new ApiError(409, 'รอบนี้ถูกยืนยันจ่ายไปแล้ว'), 'fallback')).toBe('fallback');
+    expect(serverMessageOr(new ApiError(409, 'x', 'conflict', { title: 'x', reason: 'payout.batch_exists', errorCode: 'conflict' }), 'fallback')).toBe('fallback (payout.batch_exists)');
+    expect(serverMessageOr(new ApiError(409, 'x', 'conflict', { title: 'x', errorCode: 'conflict' }), 'fallback')).toBe('fallback (conflict)');
   });
 
   it('uses the caller\'s line when there is no message, or only the interceptor\'s placeholder, or not an ApiError at all', () => {

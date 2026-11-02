@@ -166,8 +166,10 @@ export class LessonPicker implements OnInit {
     this.offeringControl.setValue(offering?.offeringId ?? '', { emitEvent: false });
     this.offeringId.set(offering?.offeringId ?? '');
     this.format.set(format);
-    this.durationControl.setValue(String(duration), { emitEvent: false });
-    this.durationMinutes.set(duration);
+    this.durationControl.setValue(duration === null ? '' : String(duration), { emitEvent: false });
+    if (duration !== null) {
+      this.durationMinutes.set(duration);
+    }
     this.trialControl.setValue(trial, { emitEvent: false });
     this.trial.set(trial);
     this.pendingStartsAt.set(pre.startsAtUtc);

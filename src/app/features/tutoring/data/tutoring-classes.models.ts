@@ -28,7 +28,7 @@ export interface TutorVisibleLearner {
 export interface TutorClassLearner extends TutorVisibleLearner {
   readonly bookingId: Guid;
   readonly status: BookingStatus;
-  readonly disputeId?: Guid | null;
+  readonly disputeId: Guid | null;
 }
 
 /** What the tutor may know of the room from the list: its state and what, if anything, the tutor has to do. No URL, no id. */
@@ -158,7 +158,7 @@ export interface TutorAttendanceLearner extends TutorVisibleLearner {
   readonly joinedAtUtc: IsoUtc | null;
   readonly attestedTutorPresentAtUtc: IsoUtc | null;
   readonly confirmedAtUtc: IsoUtc | null;
-  readonly disputeId?: Guid | null;
+  readonly disputeId: Guid | null;
 }
 
 export interface TutorAttendanceResponse {

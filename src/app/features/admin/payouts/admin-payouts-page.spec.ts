@@ -494,7 +494,7 @@ describe('AdminPayoutsPage', () => {
       expect(text()).toContain('มีรอบจ่ายเงินของงวดนี้อยู่แล้ว');
     });
 
-    it('shows the server message of a failure it has no reason for, taken from the ProblemDetails title', async () => {
+    it('shows the translated line plus the error code (never the untranslated server title) for a failure it has no reason for', async () => {
       await openDialog();
       await submit();
 
@@ -504,7 +504,8 @@ describe('AdminPayoutsPage', () => {
       );
       await settle();
 
-      expect(text()).toContain('ยังไม่ได้ตั้งค่าบัญชีผู้จ่ายเงิน');
+      expect(text()).toContain('เกิดข้อผิดพลาดในการสร้างรอบจ่ายเงิน (payout.payer_not_configured)');
+      expect(text()).not.toContain('ยังไม่ได้ตั้งค่าบัญชีผู้จ่ายเงิน');
     });
 
     it('falls back to the generic line when the server sends no readable body at all', async () => {
@@ -518,7 +519,7 @@ describe('AdminPayoutsPage', () => {
     });
   });
 
-  it('shows the server message when executing a round fails (ApiError, not a raw HttpErrorResponse)', async () => {
+  it('shows the translated line with the error code when executing a round fails (ApiError, not a raw HttpErrorResponse)', async () => {
     await navigate();
     flushInitialRequests();
     await settle();
@@ -533,7 +534,8 @@ describe('AdminPayoutsPage', () => {
     );
     await settle();
 
-    expect(harness.routeNativeElement?.textContent).toContain('รอบนี้ถูกยืนยันจ่ายไปแล้ว');
+    expect(harness.routeNativeElement?.textContent).toContain('เกิดข้อผิดพลาดในการประมวลผลการจ่ายเงิน (conflict)');
+    expect(harness.routeNativeElement?.textContent).not.toContain('รอบนี้ถูกยืนยันจ่ายไปแล้ว');
   });
 
   it('renders heldBack badge in batches table for batch with heldBack tutors', async () => {

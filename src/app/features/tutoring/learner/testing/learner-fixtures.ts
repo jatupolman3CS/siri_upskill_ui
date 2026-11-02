@@ -53,6 +53,9 @@ export function booking(overrides: Partial<Booking> = {}): Booking {
     packagePurchaseId: null,
     joinOpensAtUtc: null,
     canJoin: false,
+    attendance: null,
+    disputeId: null,
+    disputeWindowEndsAtUtc: null,
     ...overrides,
   };
 }

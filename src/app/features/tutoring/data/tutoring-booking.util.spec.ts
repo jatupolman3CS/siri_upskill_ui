@@ -137,6 +137,6 @@ describe('allowedDurationsOf / initialDurationOf', () => {
     expect(initialDurationOf([30, 60, 90])).toBe(60);
     expect(initialDurationOf([45, 90], 60)).toBe(45);
     expect(initialDurationOf([45, 90])).toBe(45);
-    expect(initialDurationOf([])).toBe(60);
+    expect(initialDurationOf([])).toBeNull();
   });
 });

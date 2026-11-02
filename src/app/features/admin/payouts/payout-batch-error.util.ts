@@ -11,9 +11,6 @@ import { ApiError } from '../../../core/http/error.interceptor';
 /** `TutoringPayoutBatchService.NothingToPayReason`. */
 export const NOTHING_TO_PAY_REASON = 'payout.nothing_to_pay';
 
-/** The `message` an `ApiError` carries when the body had no `detail`/`title` - an i18n-shaped placeholder, not display text. */
-const NO_SERVER_MESSAGE = 'common.error';
-
 /** Stable `reason` of a payout failure -> i18n key. The reasons `POST admin/batches` can answer, from `PayoutBatchService` and `TutoringPayoutBatchService`. */
 const REASON_KEYS: Readonly<Record<string, string>> = {
   'payout.invalid_period_key': 'admin.payouts.errors.reasons.invalidPeriodKey',
@@ -44,11 +41,14 @@ export function payoutReasonKey(error: unknown): string | null {
 }
 
 /**
- * The text the server gave for a failed call (ProblemDetails `detail`, else `title`) when there is one; otherwise `fallback`, the
- * caller's already-translated generic line. Never an empty string and never the interceptor's placeholder.
+ * The message for a failed call whose `reason` the page does not map: `fallback` (the caller's already-translated line) followed by
+ * the server's `reason` (else `errorCode`) when it sent one, so an administrator can report it. The server's own `title`/`detail` is never shown:
+ * it is not translated (user-facing text lives in the i18n files).
  */
 export function serverMessageOr(error: unknown, fallback: string): string {
-  return error instanceof ApiError && error.message.trim() !== '' && error.message !== NO_SERVER_MESSAGE ? error.message : fallback;
+  const problem = problemOf(error);
+  const code = [problem?.['reason'], problem?.['errorCode']].find((value): value is string => typeof value === 'string' && value.trim() !== '');
+  return code !== undefined ? `${fallback} (${code})` : fallback;
 }
 
 /** What a weekly round left out for standing, as the 409 `payout.nothing_to_pay` answer states it. */

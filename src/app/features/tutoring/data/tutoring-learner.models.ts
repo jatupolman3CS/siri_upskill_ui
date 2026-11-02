@@ -153,9 +153,9 @@ export interface Booking {
    * Added by later contracts as optional, additive fields (P13-README sections 6 and 8.3): `attendance` by P13-10 (only on
    * `GET bookings/my` and `GET bookings/{id}`), `disputeId` / `disputeWindowEndsAtUtc` by P13-14.
    */
-  readonly attendance?: BookingAttendance | null;
-  readonly disputeId?: Guid | null;
-  readonly disputeWindowEndsAtUtc?: IsoUtc | null;
+  readonly attendance: BookingAttendance | null;
+  readonly disputeId: Guid | null;
+  readonly disputeWindowEndsAtUtc: IsoUtc | null;
 }
 
 /** `Booking.attendance` (P13-10 appendix): display hints only - the rights are decided by the POST endpoints. */

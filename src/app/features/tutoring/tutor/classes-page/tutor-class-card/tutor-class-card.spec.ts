@@ -44,8 +44,8 @@ describe('TutorClassCard', () => {
     const { root } = await render(
       classListItem({
         learners: [
-          { bookingId: 'b-1', nickname: 'Nok', gradeLevel: 'Secondary4', isMinor: true, status: 'Confirmed' },
-          { bookingId: 'b-2', nickname: 'Beam', gradeLevel: null, isMinor: false, status: 'Completed' },
+          { bookingId: 'b-1', nickname: 'Nok', gradeLevel: 'Secondary4', isMinor: true, status: 'Confirmed', disputeId: null },
+          { bookingId: 'b-2', nickname: 'Beam', gradeLevel: null, isMinor: false, status: 'Completed', disputeId: null },
         ],
       }),
     );

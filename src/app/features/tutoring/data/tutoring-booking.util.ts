@@ -46,12 +46,12 @@ export function allowedDurationsOf(profile: { readonly allowedDurationMinutes: r
   return [...new Set(profile.allowedDurationMinutes.filter((minutes) => Number.isInteger(minutes) && minutes > 0))].sort((a, b) => a - b);
 }
 
-/** The length to start on: the requested one when allowed, else 60 when allowed, else the shortest allowed. */
-export function initialDurationOf(allowed: readonly number[], requested?: number): number {
+/** The length to start on: the requested one when allowed, else 60 when allowed, else the shortest allowed; `null` when the server allows none. */
+export function initialDurationOf(allowed: readonly number[], requested?: number): number | null {
   if (requested !== undefined && allowed.includes(requested)) {
     return requested;
   }
-  return allowed.includes(PREFERRED_DURATION_MINUTES) ? PREFERRED_DURATION_MINUTES : (allowed.at(0) ?? PREFERRED_DURATION_MINUTES);
+  return allowed.includes(PREFERRED_DURATION_MINUTES) ? PREFERRED_DURATION_MINUTES : (allowed.at(0) ?? null);
 }
 
 /** The slot of `slots` that starts at the instant `startsAtUtc` (compared as instants, so `.000Z` vs `Z` does not matter). */
