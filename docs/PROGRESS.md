@@ -4,6 +4,11 @@
 > **แหล่งความจริงเรื่อง "task ไหนเสร็จแล้ว" ยังคงเป็นคอลัมน์ `Status` ใน `docs/TASKS.md` เท่านั้น**
 
 
+> ### 🧹 2026-11-02 — ปิด follow-up ของ gate P13 รอบ 3 (Claude) — UI commit `12cbe54` · ไม่แตะ backend code
+> - Booking.attendance/disputeId/disputeWindowEndsAtUtc + TutorClassLearner/TutorAttendanceLearner.disputeId เป็น required ตาม C# (nullable) · `initialDurationOf([])` คืน `null` ไม่เดา 60 · error รอบจ่ายที่ไม่รู้ reason แสดงข้อความ i18n + `(reason/errorCode)` ไม่แสดง title ดิบจากเซิร์ฟเวอร์ · ลิงก์ breadcrumb `min-w-11` (กว้างครบ 44px)
+> - รันจริง: lint สะอาด · `ng test` ทั้ง repo 340 ไฟล์ / 3,808 ผ่าน · build initial 215.09 kB transfer · Playwright tutoring 22/22 · tsc app/spec/e2e สะอาด · X-45 แถว TASKS แก้เป็น `BUILT` (โค้ดเข้าไปตั้งแต่ 2026-10-21; unit Webhook* 168/168)
+> - ยังไม่ทำ (nit ไม่บล็อก): mock `isMinor` ตายตัวใน e2e, screenshot `docs/audit/p13-43/kyc-case-375-dark.png` เกือบว่าง
+>
 > ### 🏁 2026-10-21 — P13 integrator-qa gate รอบ 3 (ตรวจงานแก้ P-18 โดย Claude agents; ยังไม่ commit) — `P13-31/38/42/43/46/48` ปิดเป็น `DONE` (mock/เทสต์-verified ไม่ใช่ live) · แก้เองเฉพาะเอกสาร 1 จุด
 > - **รันจริง:** FE lint สะอาด · `ng test` ทั้ง repo **340 ไฟล์/3,808 ผ่าน** · build initial **962.24 kB raw/215.20 kB transfer** · `tsc -p e2e` 0 error · Playwright tutoring (`E2E_PORT=4310`) **22/22 ×2** · BE build Release 0/0 · `dotnet ef migrations list` (อ่านอย่างเดียว) ไม่มี Pending · รายละเอียดรายแถว + หลักฐาน: `TASKS.md` บล็อก "gate P13 รอบ 3"
 > - **พิสูจน์ว่าเทสต์แดงได้ (mutation, คืนไฟล์ทุกครั้งแล้ว sha256 ตรง):** `E2E_MUTATE=bookings` ⇒ Flow A+B แดง · `join` ⇒ Flow A · `approve` ⇒ Flow C · `rules` ⇒ Flow B · สำเนา spec/mock ของผม: ลบคลิกภาษา ⇒ สลับภาษาแดง, body ผิด ⇒ Flow A แดง, `facets` รูปผิดแบบรอบ 2 ⇒ test ค้นหาแดงด้วย `TypeError` · คืน `[30,60,90,120]` ใน `tutor-packages-page.ts` ⇒ 2 spec แดง · ให้ `problemOf` อ่าน `details.extensions` ⇒ 6 test แดง
